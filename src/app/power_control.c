@@ -92,7 +92,7 @@ void power_control_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
@@ -173,8 +173,6 @@ void power_control_enable_regulator(void)
         ;
     while(!(GPIO_ReadInputDataBit(PG_1V5_PIN_PORT, PG_1V5_PIN)))
         ;
-
-
 
     GPIO_SetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
     GPIO_SetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
