@@ -152,11 +152,36 @@ static void led_driver_io_config(void)
 /*******************************************************************************
   * @function   led_driver_timer_config
   * @brief      Timer config for led driver serial register - send data regulary.
+  *             Timing: 40 Hz
   * @param      None.
   * @retval     None.
   *****************************************************************************/
 static void led_driver_timer_config(void)
 {
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    // Clock enable
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
+
+    /* Time base configuration */
+    TIM_TimeBaseStructure.TIM_Period = 200 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(LED_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(LED_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    TIM_Cmd(LED_TIMER, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM17_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 /*******************************************************************************

@@ -12,6 +12,8 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
+#define LED_TIMER                 TIM17
+
 /*******************************************************************************
   * @function   led_driver_config
   * @brief      Configure LED driver.
