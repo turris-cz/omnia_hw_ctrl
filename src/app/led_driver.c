@@ -243,7 +243,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].red >= current_colour_level)
+                if (leds[idx].red > current_colour_level)
                 {
                     data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
                 }
@@ -254,7 +254,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].green >= current_colour_level)
+                if (leds[idx].green > current_colour_level)
                 {
                     data |= 1 << (2 + idx);
                 }
@@ -265,7 +265,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].blue >= current_colour_level)
+                if (leds[idx].blue > current_colour_level)
                 {
                     data |= 1 << (2 + idx);
                 }
@@ -293,13 +293,13 @@ void led_driver_send_frame(void)
     for(; level < COLOUR_LEVELS; )
     {
         data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(data);
+        led_driver_send_data16b(~data);
 
         data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(data);
+        led_driver_send_data16b(~data);
 
         data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(data);
+        led_driver_send_data16b(~data);
 
         //latch enable pulse
         LATCH_HIGH;
