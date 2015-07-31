@@ -13,19 +13,22 @@
 
 /* Private define ------------------------------------------------------------*/
 #define LED_SPI						SPI1
-#define LED_SPI_CLOCK
 
 #define LED_SPI_MOSI_PIN			GPIO_Pin_7
 #define LED_SPI_MOSI_PIN_PORT		GPIOA
-#define LED_SPI_MOSI_PIN_CLOCK
+#define LED_SPI_MOSI_PIN_CLOCK      RCC_AHBPeriph_GPIOA
+#define LED_SPI_MOSI_AF             GPIO_AF_0
+#define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
 
 #define LED_SPI_SCK_PIN				GPIO_Pin_5
-#define LED_SPI_MOSI_PIN_PORT		GPIOA
-#define LED_SPI_SCK_PIN_CLOCK
+#define LED_SPI_SCK_PIN_PORT		GPIOA
+#define LED_SPI_SCK_PIN_CLOCK       RCC_AHBPeriph_GPIOA
+#define LED_SPI_SCK_AF              GPIO_AF_0
+#define LED_SPI_SCK_SOURCE          GPIO_PinSource5
 
 #define LED_SPI_SS_PIN				GPIO_Pin_4
-#define LED_SPI_MOSI_PIN_PORT		GPIOA
-#define LED_SPI_SS_PIN_CLOCK
+#define LED_SPI_SS_PIN_PORT 		GPIOA
+#define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
 #define LED_COUNT 					12
 #define COLOUR_LEVELS				16
@@ -56,8 +59,8 @@
 #define PWM_TIMER                   TIM15
 
 /* Private macro -------------------------------------------------------------*/
-#define LATCH_HIGH                  GPIO_SetBits(LED_SPI_MOSI_PIN_PORT, LED_SPI_SS_PIN)
-#define LATCH_LOW					GPIO_ResetBits(LED_SPI_MOSI_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_HIGH                  GPIO_SetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_LOW					GPIO_ResetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum rgb_colour {
@@ -84,7 +87,25 @@ static struct led_rgb leds[LED_COUNT];
   * @retval     None.
   *****************************************************************************/
 static void led_driver_spi_config(void)
-{}
+{
+    SPI_InitTypeDef  SPI_InitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+
+    SPI_I2S_DeInit(LED_SPI);
+    SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
+    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+    SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
+    SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    SPI_Init(LED_SPI, &SPI_InitStructure);
+
+    /* Enable the SPI peripheral */
+    SPI_Cmd(LED_SPI, ENABLE);
+}
 
 /*******************************************************************************
   * @function   led_driver_io_config
@@ -94,8 +115,37 @@ static void led_driver_spi_config(void)
   *****************************************************************************/
 static void led_driver_io_config(void)
 {
+    GPIO_InitTypeDef GPIO_InitStructure;
 
+    /* Enable SCK, MOSI, and NSS GPIO clocks */
+    RCC_AHBPeriphClockCmd(LED_SPI_SCK_PIN_CLOCK | LED_SPI_MOSI_PIN_CLOCK |
+                           LED_SPI_SS_PIN_CLOCK, ENABLE);
 
+    GPIO_PinAFConfig(LED_SPI_SCK_PIN_PORT, LED_SPI_SCK_SOURCE, LED_SPI_SCK_AF);
+    GPIO_PinAFConfig(LED_SPI_MOSI_PIN_PORT, LED_SPI_MOSI_SOURCE, LED_SPI_MOSI_AF);
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
+
+    /* SPI SCK pin configuration */
+    GPIO_InitStructure.GPIO_Pin = LED_SPI_SCK_PIN;
+    GPIO_Init(LED_SPI_SCK_PIN_PORT, &GPIO_InitStructure);
+
+    /* SPI MOSI pin configuration */
+    GPIO_InitStructure.GPIO_Pin =  LED_SPI_MOSI_PIN;
+    GPIO_Init(LED_SPI_MOSI_PIN_PORT, &GPIO_InitStructure);
+
+    /* NSS pin configuration */
+    GPIO_InitStructure.GPIO_Pin = LED_SPI_SS_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
+    GPIO_Init(LED_SPI_SS_PIN_PORT, &GPIO_InitStructure);
+
+    /* init state - latch holds previous data */
     LATCH_LOW;
 }
 
