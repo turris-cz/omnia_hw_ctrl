@@ -1,0 +1,7 @@
+*.[oa]
+*~
+*.map
+*.bin
+*.elf
+*.hex
+*.list
