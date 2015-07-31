@@ -191,3 +191,23 @@ void power_control_enable_regulator(void)
     while(!(GPIO_ReadInputDataBit(PG_1V2_PIN_PORT, PG_1V2_PIN)))
         ;
 }
+
+/*******************************************************************************
+  * @function   power_control_usb
+  * @brief      Enable / disable power supply for USB.
+  * @param      usb_state: USB_ON or USB_OFF.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb(usb_state_t usb_state)
+{
+    if (usb_state == USB_ON)
+    {
+        GPIO_SetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
+        GPIO_SetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
+    }
+    else
+    {
+        GPIO_ResetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
+        GPIO_ResetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
+    }
+}
