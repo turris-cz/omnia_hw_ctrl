@@ -155,6 +155,20 @@ void TIM16_IRQHandler(void)
 }
 
 /**
+  * @brief  This function handles TIM17 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM17_IRQHandler(void)
+{
+    if (TIM_GetITStatus(LED_TIMER, TIM_IT_Update) != RESET)
+    {
+        led_driver_send_frame();
+        TIM_ClearITPendingBit(LED_TIMER, TIM_IT_Update);
+    }
+}
+
+/**
   * @}
   */
 
