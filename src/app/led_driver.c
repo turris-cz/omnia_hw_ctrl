@@ -290,30 +290,26 @@ void led_driver_send_frame(void)
     static uint8_t level;
     uint16_t data;
 
-    for(; level < COLOUR_LEVELS; )
-    {
-        data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(~data);
 
-        data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(~data);
+    data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
+    led_driver_send_data16b(~data);
 
-        data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
-        led_driver_send_data16b(~data);
+    data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
+    led_driver_send_data16b(~data);
 
-        //latch enable pulse
-        LATCH_HIGH;
-        //delay(1); //TODO: some longer delay necessary?
-        __NOP(); // or NO OPERATION is sufficient?
-        LATCH_LOW;
+    data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
+    led_driver_send_data16b(~data);
 
-        level++;
-        //wait for the next timer interrupt call to obtain next frame for led driver
-        return;
-    }
+    //latch enable pulse
+    LATCH_HIGH;
+    //delay(1); //TODO: some longer delay necessary?
+    __NOP(); // or NO OPERATION is sufficient?
+    LATCH_LOW;
 
-    //restart cycle - all levels were sent to driver
-    level = 0;
+    level++;
+
+    if (level >= COLOUR_LEVELS)//restart cycle - all levels were sent to driver
+        level = 0;
 }
 
 /*******************************************************************************
@@ -398,11 +394,13 @@ void led_driver_config(void)
 {
     led_driver_io_config();
     led_driver_spi_config();
+
+    led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
+    led_driver_save_colour(0, 0); // except of the first led - it doesnt shine
+    led_driver_pwm_set_brightness(100);//100% brightness after reset
+
     led_driver_timer_config();
     led_driver_pwm_config();
-
-    led_driver_save_colour(0xFFFFFF, LED_COUNT); //LED colour set to white
-    led_driver_pwm_set_brightness(100);//100% brightness after reset
 }
 
 /*******************************************************************************
