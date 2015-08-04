@@ -281,7 +281,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
 
 /*******************************************************************************
   * @function   led_driver_send_frame
-  * @brief      Send frame to LED driver. It is called in timer interrupt.
+  * @brief      Send frame to LED driver. It is called in LED_TIMER interrupt.
   * @param      None.
   * @retval     None.
   *****************************************************************************/

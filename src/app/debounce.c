@@ -98,28 +98,28 @@ static void debounce_timer_config(void)
   *****************************************************************************/
 static uint16_t debounce_man_res(const uint16_t input)
 {
-    static uint16_t integrator;
+    static uint16_t counter;
     uint16_t output = 0;
 
     if (input) //signal released
     {
-        if (integrator > 0)
-            integrator--;
+        if (counter > 0)
+            counter--;
     }
     else //signal falls to low
     {
-        if (integrator < MAX_STATES_MANRES)
-            integrator++;
+        if (counter < MAX_STATES_MANRES)
+            counter++;
     }
 
-    if (integrator == 0)
+    if (counter == 0)
         output = 0;
     else
     {
-        if(integrator >= MAX_STATES_MANRES)
+        if(counter >= MAX_STATES_MANRES)
         {
             output = 1;
-            integrator = MAX_STATES_MANRES;
+            counter = MAX_STATES_MANRES;
         }
     }
     return output;
@@ -133,28 +133,28 @@ static uint16_t debounce_man_res(const uint16_t input)
   *****************************************************************************/
 static uint16_t debounce_sysres_out(const uint16_t input)
 {
-    static uint16_t integrator;
+    static uint16_t counter;
     uint16_t output = 0;
 
     if (input) //signal released
     {
-        if (integrator > 0)
-            integrator--;
+        if (counter > 0)
+            counter--;
     }
     else //signal falls to low
     {
-        if (integrator < MAX_STATES_SYSRES_OUT)
-            integrator++;
+        if (counter < MAX_STATES_SYSRES_OUT)
+            counter++;
     }
 
-    if (integrator == 0)
+    if (counter == 0)
         output = 0;
     else
     {
-        if(integrator >= MAX_STATES_SYSRES_OUT)
+        if(counter >= MAX_STATES_SYSRES_OUT)
         {
             output = 1;
-            integrator = MAX_STATES_SYSRES_OUT;
+            counter = MAX_STATES_SYSRES_OUT;
         }
     }
     return output;
