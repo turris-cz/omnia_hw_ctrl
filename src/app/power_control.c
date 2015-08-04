@@ -152,25 +152,33 @@ void power_control_enable_regulator(void)
     /*
      * power-up sequence:
      * 1) 5V regulator
-     *    3.3V regulator
-     * 2) 1.8V regulator
-     *    1.5V regulator
-     * 3) 1.35V regulator
+     * 2) 4.5V regulator - if used
+     * 3) 3.3V regulator
+     * 4) 1.8V regulator
+     * 5) 1.5V regulator
+     * 6) 1.35V regulator
      *    VTT regulator
-     * 4) 4.5V regulator - if used
-     * 5) 1.2V regulator
+     * 7) 1.2V regulator
      */
     GPIO_SetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
-    GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
     while(!(GPIO_ReadInputDataBit(PG_5V_PIN_PORT, PG_5V_PIN)))
         ;
+
+#ifdef USE_4V5_POWER
+    GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+    while(!(GPIO_ReadInputDataBit(PG_4V5_PIN_PORT, PG_4V5_PIN)))
+        ;
+#endif
+
+    GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
     while(!(GPIO_ReadInputDataBit(PG_3V3_PIN_PORT, PG_3V3_PIN)))
         ;
 
     GPIO_SetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
-    GPIO_SetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
     while(!(GPIO_ReadInputDataBit(PG_1V8_PIN_PORT, PG_1V8_PIN)))
         ;
+
+    GPIO_SetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
     while(!(GPIO_ReadInputDataBit(PG_1V5_PIN_PORT, PG_1V5_PIN)))
         ;
 
@@ -180,12 +188,6 @@ void power_control_enable_regulator(void)
         ;
     while(!(GPIO_ReadInputDataBit(PG_VTT_PIN_PORT, PG_VTT_PIN)))
         ;
-
-#ifdef USE_4V5_POWER
-    GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_4V5_PIN_PORT, PG_4V5_PIN)))
-        ;
-#endif
 
     GPIO_SetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
     while(!(GPIO_ReadInputDataBit(PG_1V2_PIN_PORT, PG_1V2_PIN)))
