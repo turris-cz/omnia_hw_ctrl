@@ -50,4 +50,12 @@ void debounce_config(void);
   *****************************************************************************/
 void debounce_input_timer_handler(void);
 
+/*******************************************************************************
+  * @function   debounce_check_inputs
+  * @brief      Check input signal.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void debounce_check_inputs(void);
+
 #endif // __DEBOUNCE_H

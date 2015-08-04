@@ -11,26 +11,6 @@
 #include "debounce.h"
 #include "stm32f0xx_conf.h"
 
-/* max count of input states to be checked */
-enum max_input_states {
-    MAX_STATES_MANRES               = 8,
-    MAX_STATES_SYSRES_OUT           = 3,
-    MAX_STATES_DBG                  = 3,
-    MAX_STATES_MRES                 = 3,
-    MAX_STATES_PG_5V                = 3,
-    MAX_STATES_PG_3V3               = 3,
-    MAX_STATES_PG_1V35              = 3,
-    MAX_STATES_PG_4V5               = 3,
-    MAX_STATES_PG_1V8               = 3,
-    MAX_STATES_PG_1V5               = 3,
-    MAX_STATES_PG_1V2               = 3,
-    MAX_STATES_PG_VTT               = 3,
-    MAX_STATES_USB30_OVC            = 3,
-    MAX_STATES_USB31_OVC            = 3,
-    MAX_STATES_RTC_ALARM            = 3,
-    MAX_STATES_LED_BRT              = 10
-};
-
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
     SYSRES_OUT_MASK                 = 0x0002,
@@ -51,6 +31,10 @@ enum input_mask {
 };
 
 struct input_sig debounce_input_signal;
+
+#define MAX_INPUT_STATES            3
+static uint16_t debounced_state;
+static uint16_t port_state[MAX_INPUT_STATES];
 
 
 #define  DEBOUNCE_TIM_PERIODE       (200 - 1)//200 = 5ms
@@ -91,76 +75,6 @@ static void debounce_timer_config(void)
 }
 
 /*******************************************************************************
-  * @function   debounce_man_res
-  * @brief      Debounce of MANRES input.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static uint16_t debounce_man_res(const uint16_t input)
-{
-    static uint16_t counter;
-    uint16_t output = 0;
-
-    if (input) //signal released
-    {
-        if (counter > 0)
-            counter--;
-    }
-    else //signal falls to low
-    {
-        if (counter < MAX_STATES_MANRES)
-            counter++;
-    }
-
-    if (counter == 0)
-        output = 0;
-    else
-    {
-        if(counter >= MAX_STATES_MANRES)
-        {
-            output = 1;
-            counter = MAX_STATES_MANRES;
-        }
-    }
-    return output;
-}
-
-/*******************************************************************************
-  * @function   debounce_sysres_out
-  * @brief      Debounce of SYSRES_OUT input.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static uint16_t debounce_sysres_out(const uint16_t input)
-{
-    static uint16_t counter;
-    uint16_t output = 0;
-
-    if (input) //signal released
-    {
-        if (counter > 0)
-            counter--;
-    }
-    else //signal falls to low
-    {
-        if (counter < MAX_STATES_SYSRES_OUT)
-            counter++;
-    }
-
-    if (counter == 0)
-        output = 0;
-    else
-    {
-        if(counter >= MAX_STATES_SYSRES_OUT)
-        {
-            output = 1;
-            counter = MAX_STATES_SYSRES_OUT;
-        }
-    }
-    return output;
-}
-
-/*******************************************************************************
   * @function   debounce_input_timer_handler
   * @brief      Main debounce function. Called in timer interrupt handler.
   * @param      None.
@@ -168,17 +82,85 @@ static uint16_t debounce_sysres_out(const uint16_t input)
   *****************************************************************************/
 void debounce_input_timer_handler(void)
 {
-    uint16_t port_state;
-    struct input_sig *input_state = &debounce_input_signal;
+    static uint16_t idx;
 
-    port_state = GPIO_ReadInputData(GPIOB); //read whole port
+    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); //read whole port
+    idx++;
 
-    if (debounce_man_res(port_state & MAN_RES_MASK))
-        input_state->man_res = 1;
-    if (debounce_sysres_out((port_state & SYSRES_OUT_MASK) >> 1))
-        input_state->sysres_out = 1;
-    //TODO - continue or rewrite it to save space ?
+    if (idx >= MAX_INPUT_STATES)
+        idx = 0;
+}
 
+/*******************************************************************************
+  * @function   debounce_check_inputs
+  * @brief      Check input signal.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void debounce_check_inputs(void)
+{
+    uint16_t i, port_changed;
+    static uint16_t last_debounce_state;
+    struct input_sig *input_signal_state = &debounce_input_signal;
+
+    last_debounce_state = debounced_state;
+
+    debounced_state = 0xFFFF; //init for calculation - include of all 16 inputs
+
+    for (i = 0; i < MAX_INPUT_STATES; i++)
+    {
+        debounced_state = debounced_state & port_state[i];
+    }
+
+    port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
+
+    if (port_changed & MAN_RES_MASK)
+        input_signal_state->man_res = 1;
+
+    if (port_changed & SYSRES_OUT_MASK)
+        input_signal_state->sysres_out = 1;
+
+    if (port_changed & DBG_RES_MASK)
+        input_signal_state->dbg_res = 1;
+
+    if (port_changed & MRES_MASK)
+        input_signal_state->m_res = 1;
+
+    if (port_changed & PG_5V_MASK)
+        input_signal_state->pg_5v = 1;
+
+    if (port_changed & PG_3V3_MASK)
+        input_signal_state->pg_3v3 = 1;
+
+    if (port_changed & PG_1V35_MASK)
+        input_signal_state->pg_1v35 = 1;
+
+    if (port_changed & PG_4V5_MASK)
+        input_signal_state->pg_4v5 = 1;
+
+    if (port_changed & PG_1V8_MASK)
+        input_signal_state->pg_1v8 = 1;
+
+    if (port_changed & PG_1V5_MASK)
+        input_signal_state->pg_1v5 = 1;
+
+    if (port_changed & PG_1V2_MASK)
+        input_signal_state->pg_1v2 = 1;
+
+    if (port_changed & PG_VTT_MASK)
+        input_signal_state->pg_vtt = 1;
+
+    if (port_changed & USB30_OVC_MASK)
+        input_signal_state->usb30_ovc = 1;
+
+    if (port_changed & USB31_OVC_MASK)
+        input_signal_state->usb31_ovc = 1;
+
+    if (port_changed & RTC_ALARM_MASK)
+        input_signal_state->rtc_alarm = 1;
+
+    if (port_changed & LED_BRT_MASK)
+        input_signal_state->led_brt = 1;
 }
 
 /*******************************************************************************
