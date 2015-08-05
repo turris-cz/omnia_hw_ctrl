@@ -199,20 +199,25 @@ void power_control_enable_regulator(void)
 /*******************************************************************************
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @param      usb_state: USB_ON or USB_OFF.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_state_t usb_state)
+void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
 {
-    if (usb_state == USB_ON)
+    if (usb_port == USB3_PORT0)
     {
-        GPIO_ResetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
-        GPIO_ResetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
+        if (usb_state == USB_ON)
+            GPIO_ResetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
+        else
+            GPIO_SetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
     }
-    else
+    else //USB3_PORT1
     {
-        GPIO_SetBits(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN);
-        GPIO_SetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
+        if (usb_state == USB_ON)
+            GPIO_ResetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
+        else
+            GPIO_SetBits(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN);
     }
 }
 
@@ -292,14 +297,14 @@ void power_control_rst_pwr_rtc_signal_manager(void)
 
     if (input_signal_state->usb30_ovc)
     {
-        power_control_usb(USB_OFF);
+        power_control_usb(USB3_PORT0, USB_OFF);
         input_signal_state->usb30_ovc = 0;
         //TODO - when USB_ON again?
     }
 
     if (input_signal_state->usb31_ovc)
     {
-        power_control_usb(USB_OFF);
+        power_control_usb(USB3_PORT1, USB_OFF);
         input_signal_state->usb31_ovc = 0;
         //TODO - when USB_ON again?
     }

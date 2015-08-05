@@ -125,6 +125,11 @@ typedef enum usb_states {
     USB_ON  = 1
 }usb_state_t;
 
+typedef enum usb_ports {
+    USB3_PORT0 = 0,
+    USB3_PORT1 = 1
+}usb_ports_t;
+
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB control signals.
@@ -144,10 +149,11 @@ void power_control_enable_regulator(void);
 /*******************************************************************************
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @param      usb_state: USB_ON or USB_OFF.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_state_t usb_state);
+void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
 
 #endif // POWER_CONTROL_H
 
