@@ -47,4 +47,12 @@ void led_driver_send_frame(void);
   *****************************************************************************/
 void led_driver_pwm_set_brightness(const uint16_t procent_val);
 
+/*******************************************************************************
+  * @function   led_driver_step_brightness
+  * @brief      Decrease LED brightness by 10% each step (each function call).
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_step_brightness(void);
+
 #endif /*__LED_DRIVER_H */

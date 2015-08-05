@@ -33,6 +33,7 @@
 #define LED_COUNT 					12
 #define COLOUR_LEVELS				16
 #define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
+#define MAX_LED_BRIGHT_STEP         10
 
 /*******************************************************************************
 // PWM Settings (Frequency und range)
@@ -419,4 +420,21 @@ void led_driver_pwm_set_brightness(const uint16_t procent_val)
         counter_val = PWM_TIM_PERIODE;
 
     PWM_TIMER->CCR2 = counter_val;
+}
+
+/*******************************************************************************
+  * @function   led_driver_step_brightness
+  * @brief      Decrease LED brightness by 10% each step (each function call).
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_step_brightness(void)
+{
+    static uint16_t led_brightness_step = 1;
+
+    if (led_brightness_step > MAX_LED_BRIGHT_STEP)
+        led_brightness_step = 0;
+
+    led_driver_pwm_set_brightness(100 - (led_brightness_step * 10));
+    led_brightness_step++;
 }

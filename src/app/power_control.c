@@ -12,6 +12,7 @@
 #include "power_control.h"
 #include "delay.h"
 #include "debounce.h"
+#include "led_driver.h"
 
 /* Private define ------------------------------------------------------------*/
 //#define USE_4V5_POWER
@@ -317,7 +318,7 @@ void power_control_rst_pwr_rtc_signal_manager(void)
 
     if (input_signal_state->led_brt)
     {
-        //TODO - set LED brightness
+        led_driver_step_brightness();
         input_signal_state->led_brt = 0;
     }
 }
