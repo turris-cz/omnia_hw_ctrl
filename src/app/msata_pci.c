@@ -32,6 +32,8 @@
 #define MSATAIND_PIN_EXTIPINSOURCE          EXTI_PinSource14
 #define MSATAIND_PIN_EXTILINE               EXTI_Line14
 
+struct msata_pci_ind msata_pci_status;
+
 /*******************************************************************************
   * @function   msata_pci_io_config
   * @brief      GPIO configuration for mSATA and PCIe indication signals.
@@ -111,4 +113,5 @@ void msata_pci_indication_config(void)
 {
     msata_pci_io_config();
     msata_pci_exti_config();
+    //TODO - read status of already inserted cards after the reset
 }
