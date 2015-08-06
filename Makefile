@@ -87,6 +87,7 @@ SRCS  += debounce.c
 SRCS  += led_driver.c
 SRCS  += delay.c
 SRCS  += power_control.c
+SRCS  += msata_pci.c
 
 ################# STM LIB ##########################
 SRCS  += stm32f0xx_rcc.c
