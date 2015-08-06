@@ -10,5 +10,13 @@
 #ifndef MSATA_PCI_H
 #define MSATA_PCI_H
 
+/*******************************************************************************
+  * @function   msata_pci_indication_config
+  * @brief      Main configuration function for mSATA and PCIe indication.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void msata_pci_indication_config(void);
+
 #endif // MSATA_PCI_H
 

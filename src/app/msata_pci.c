@@ -33,6 +33,33 @@
 #define MSATAIND_PIN_EXTILINE               EXTI_Line14
 
 /*******************************************************************************
+  * @function   msata_pci_io_config
+  * @brief      GPIO configuration for mSATA and PCIe indication signals.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void msata_pci_io_config(void)
+{
+    GPIO_InitTypeDef  GPIO_InitStructure;
+
+    /* GPIO Periph clock enable */
+    RCC_AHBPeriphClockCmd(CARD_DET_PIN_PERIPH_CLOCK | MSATALED_PIN_PERIPH_CLOCK
+                          | MSATAIND_PIN_PERIPH_CLOCK, ENABLE);
+
+    /* Output signals */
+    GPIO_InitStructure.GPIO_Pin = CARD_DET_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(CARD_DET_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = MSATALED_PIN;
+    GPIO_Init(MSATALED_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = MSATAIND_PIN;
+    GPIO_Init(MSATAIND_PIN_PORT, &GPIO_InitStructure);
+}
+
+/*******************************************************************************
   * @function   msata_pci_exti_config
   * @brief      EXTI configuration for PCIe and mSATA indication signals.
   * @param      None.
@@ -72,4 +99,16 @@ static void msata_pci_exti_config(void)
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   msata_pci_indication_config
+  * @brief      Main configuration function for mSATA and PCIe indication.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void msata_pci_indication_config(void)
+{
+    msata_pci_io_config();
+    msata_pci_exti_config();
 }
