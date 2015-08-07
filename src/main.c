@@ -15,6 +15,7 @@
 #include "delay.h"
 #include "led_driver.h"
 #include "power_control.h"
+#include "msata_pci.h"
 
 /*******************************************************************************
  * @brief  Main program.

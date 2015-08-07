@@ -26,6 +26,7 @@
 #include "stm32f0xx_conf.h"
 #include "debounce.h"
 #include "delay.h"
+#include "msata_pci.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -168,6 +169,15 @@ void TIM17_IRQHandler(void)
     }
 }
 
+void EXTI4_15_IRQHandler(void)
+{
+    if(EXTI_GetITStatus(MSATALED_PIN_EXTILINE) != RESET)
+    {
+        msata_pci_activity_handler();
+        /* Clear the EXTI line pending bit */
+        EXTI_ClearITPendingBit(MSATALED_PIN_EXTILINE);
+    }
+}
 /**
   * @}
   */
