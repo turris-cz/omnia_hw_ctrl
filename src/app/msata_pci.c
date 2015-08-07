@@ -27,7 +27,7 @@ static void msata_pci_io_config(void)
     RCC_AHBPeriphClockCmd(CARD_DET_PIN_PERIPH_CLOCK | MSATALED_PIN_PERIPH_CLOCK
                           | MSATAIND_PIN_PERIPH_CLOCK, ENABLE);
 
-    /* Output signals */
+    /* Input signals */
     GPIO_InitStructure.GPIO_Pin = CARD_DET_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
@@ -67,10 +67,6 @@ static void msata_pci_exti_config(void)
     EXTI_InitStructure.EXTI_Line = MSATALED_PIN_EXTILINE;
     EXTI_Init(&EXTI_InitStructure);
 
-    SYSCFG_EXTILineConfig(MSATAIND_PIN_EXTIPORT, MSATAIND_PIN_EXTIPINSOURCE);
-    EXTI_InitStructure.EXTI_Line = MSATAIND_PIN_EXTILINE;
-    EXTI_Init(&EXTI_InitStructure);
-
     /* Enable and set EXTI Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = EXTI4_15_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
@@ -88,7 +84,7 @@ void msata_pci_indication_config(void)
 {
     msata_pci_io_config();
     msata_pci_exti_config();
-    //TODO - read status of already inserted cards after the reset
+    msata_pci_card_detection();//read status of already inserted card after the reset
 }
 
 /*******************************************************************************
@@ -111,5 +107,36 @@ void msata_pci_activity_handler(void)
     else
     {
         //TODO: LED activity on
+    }
+}
+
+/*******************************************************************************
+  * @function   msata_pci_card_detection
+  * @brief      Detect inserted card - PCIe or mSATA card.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void msata_pci_card_detection(void)
+{
+    struct msata_pci_ind *msata_pci_detect = &msata_pci_status;
+
+    msata_pci_detect->card_det = GPIO_ReadInputDataBit(CARD_DET_PIN_PORT, CARD_DET_PIN);
+    msata_pci_detect->msata_ind = GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
+
+    if (msata_pci_detect->card_det == 0) //a card is inserted
+    {
+        if (msata_pci_detect->msata_ind)
+        {
+            //TODO: do some action -> PCIe card detected
+        }
+        else
+        {
+            //TODO: do some action -> mSATA card detected
+        }
+    }
+    else
+    {
+        //TODO: do some action - no card inserted
     }
 }

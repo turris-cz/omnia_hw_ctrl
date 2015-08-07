@@ -34,7 +34,6 @@
 struct msata_pci_ind {
     uint8_t card_det:   1; /* 0: some card detected, 1: no card inserted */
     uint8_t msata_ind:  1; /* 0: msata card inserted, 1: pcie card inserted */
-    uint8_t msata_led:  1; /* card activity */
 };
 
 extern struct msata_pci_ind msata_pci_status;
@@ -55,6 +54,15 @@ void msata_pci_indication_config(void);
   * @retval     None.
   *****************************************************************************/
 void msata_pci_activity_handler(void);
+
+/*******************************************************************************
+  * @function   msata_pci_card_detection
+  * @brief      Detect inserted card - PCIe or mSATA card.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void msata_pci_card_detection(void);
 
 #endif // MSATA_PCI_H
 
