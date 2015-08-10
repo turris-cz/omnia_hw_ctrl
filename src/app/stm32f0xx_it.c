@@ -27,6 +27,7 @@
 #include "debounce.h"
 #include "delay.h"
 #include "msata_pci.h"
+#include "wan_lan_pci_status.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -187,6 +188,12 @@ void EXTI4_15_IRQHandler(void)
     {
         msata_pci_card_detection();
         EXTI_ClearITPendingBit(CARD_DET_PIN_EXTILINE);
+    }
+
+    if ((EXTI_GetITStatus(SFP_DET_PIN_EXTILINE) != RESET))
+    {
+        wan_sfp_detection();
+        EXTI_ClearITPendingBit(SFP_DET_PIN_EXTILINE);
     }
 }
 /**

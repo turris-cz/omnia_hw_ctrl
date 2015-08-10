@@ -96,4 +96,13 @@
   *****************************************************************************/
 void wan_lan_pci_config(void);
 
+/*******************************************************************************
+  * @function   wan_sfp_detection
+  * @brief      Detect inserted SFP+ connector.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_detection(void);
+
 #endif // WAN_LAN_PCI_STATUS_H

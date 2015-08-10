@@ -76,7 +76,6 @@ static void wan_lan_pci_io_config(void)
     GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
 
     /* LAN LED input pins */
-
     GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
     GPIO_Init(R0_P0_LED_PIN_PORT, &GPIO_InitStructure);
 
@@ -147,5 +146,28 @@ void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
     wan_lan_pci_exti_config();
-    //TODO: read status of signals after the reset
+    wan_sfp_detection(); //read status of signals after the reset
+}
+
+/*******************************************************************************
+  * @function   wan_sfp_detection
+  * @brief      Detect inserted SFP+ connector.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_detection(void)
+{
+    uint8_t sfp_detected;
+
+    sfp_detected = GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN);
+
+    if (sfp_detected)
+    {
+        //TODO: log. 1 means SFP connector unconnected ?
+    }
+    else
+    {
+        //TODO: log. 0 means SFP connector connected ?
+    }
 }
