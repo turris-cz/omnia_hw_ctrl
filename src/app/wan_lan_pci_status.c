@@ -146,17 +146,20 @@ void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
     wan_lan_pci_exti_config();
-    wan_sfp_detection(); //read status of signals after the reset
+    /* read status of signals after the reset */
+    wan_sfp_connector_detection();
+    wan_sfp_fault_detection();
+    wan_sfp_lost_detection();
 }
 
 /*******************************************************************************
-  * @function   wan_sfp_detection
+  * @function   wan_sfp_connector_detection
   * @brief      Detect inserted SFP+ connector.
   *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void wan_sfp_detection(void)
+void wan_sfp_connector_detection(void)
 {
     uint8_t sfp_detected;
 
@@ -171,3 +174,50 @@ void wan_sfp_detection(void)
         //TODO: log. 0 means SFP connector connected ?
     }
 }
+
+/*******************************************************************************
+  * @function   wan_sfp_fault_detection
+  * @brief      Detect a SFP fault.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_fault_detection(void)
+{
+    uint8_t sfp_fault_detected;
+
+    sfp_fault_detected = GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN);
+
+    if (sfp_fault_detected)
+    {
+        //TODO: do some action - no fault
+    }
+    else
+    {
+        //TODO: do some action - fault occures
+    }
+}
+
+/*******************************************************************************
+  * @function   wan_sfp_lost_detection
+  * @brief      Detect a lost communication.
+  *             Called in EXTI interrupt handler and during the initialization.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_lost_detection(void)
+{
+    uint8_t sfp_lost_detected;
+
+    sfp_lost_detected = GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN);
+
+    if (sfp_lost_detected)
+    {
+        //TODO: do some action - no lost detected
+    }
+    else
+    {
+        //TODO: do some action - lost detected
+    }
+}
+

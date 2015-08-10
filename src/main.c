@@ -16,6 +16,7 @@
 #include "led_driver.h"
 #include "power_control.h"
 #include "msata_pci.h"
+#include "wan_lan_pci_status.h"
 
 /*******************************************************************************
  * @brief  Main program.
