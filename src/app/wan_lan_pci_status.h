@@ -87,5 +87,13 @@
 #define C3_P5_LED_PIN_PORT                  GPIOA
 #define C3_P5_LED_PIN                       GPIO_Pin_12
 
-#endif // WAN_LAN_PCI_STATUS_H
 
+/*******************************************************************************
+  * @function   wan_lan_pci_config
+  * @brief      Main configuration function for WAN, LAN and PCIe status indication.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_lan_pci_config(void);
+
+#endif // WAN_LAN_PCI_STATUS_H
