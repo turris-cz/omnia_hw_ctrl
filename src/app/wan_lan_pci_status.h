@@ -10,6 +10,8 @@
 #ifndef WAN_LAN_PCI_STATUS_H
 #define WAN_LAN_PCI_STATUS_H
 
+#include "stm32f0xx_conf.h"
+
 #define CFG_CTRL_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
 #define CFG_CTRL_PIN_PORT                   GPIOC
 #define CFG_CTRL_PIN                        GPIO_Pin_15
@@ -122,5 +124,13 @@ void wan_sfp_fault_detection(void);
   * @retval     None.
   *****************************************************************************/
 void wan_sfp_lost_detection(void);
+
+/******************************************************************************
+  * @function   wan_sfp_set_tx_status
+  * @brief      Enable/Disable SFP transmitting.
+  * @param      sfp_status: ENABLE or DISABLE.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_set_tx_status(FunctionalState sfp_status);
 
 #endif // WAN_LAN_PCI_STATUS_H

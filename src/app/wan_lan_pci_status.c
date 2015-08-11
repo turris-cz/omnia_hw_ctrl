@@ -7,7 +7,6 @@
  ******************************************************************************
  ******************************************************************************
  **/
-#include "stm32f0xx_conf.h"
 #include "wan_lan_pci_status.h"
 
 /*******************************************************************************
@@ -146,6 +145,7 @@ void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
     wan_lan_pci_exti_config();
+    wan_sfp_set_tx_status(ENABLE);
     /* read status of signals after the reset */
     wan_sfp_connector_detection();
     wan_sfp_fault_detection();
@@ -218,6 +218,24 @@ void wan_sfp_lost_detection(void)
     else
     {
         //TODO: do some action - lost detected
+    }
+}
+
+/*******************************************************************************
+  * @function   wan_sfp_set_tx_status
+  * @brief      Enable/Disable SFP transmitting.
+  * @param      sfp_status: ENABLE or DISABLE.
+  * @retval     None.
+  *****************************************************************************/
+void wan_sfp_set_tx_status(FunctionalState sfp_status)
+{
+    if (sfp_status == ENABLE)
+    {
+        GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+    }
+    else
+    {
+        GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
     }
 }
 
