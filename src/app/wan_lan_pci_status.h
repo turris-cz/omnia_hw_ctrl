@@ -133,4 +133,12 @@ void wan_sfp_lost_detection(void);
   *****************************************************************************/
 void wan_sfp_set_tx_status(FunctionalState sfp_status);
 
+/*******************************************************************************
+  * @function   wan_led_activity
+  * @brief      Toggle WAN LED according to the WAN activity.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_led_activity(void);
+
 #endif // WAN_LAN_PCI_STATUS_H

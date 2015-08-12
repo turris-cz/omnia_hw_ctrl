@@ -254,22 +254,22 @@ void wan_led_activity(void)
     led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
     led1_status = GPIO_ReadInputDataBit(WAN_LED1_PIN_PORT, WAN_LED1_PIN);
 
-    if (led0_status == 0) //TODO: check LED real polarity
+    if (led0_status == 0) //TODO: check real LED polarity
     {
-        //TODO: assign LED indexes to real meanings
-        rgb_leds[0].led_status = LED_ON;
+        //TODO: assign LED indexes (as a pointer) to real meanings
+        rgb_leds[0].led_status = LED_ENABLE;
     }
     else
     {
-        led0_status = rgb_leds[0].led_status = LED_OFF;
+        led0_status = rgb_leds[0].led_status = LED_DISABLE;
     }
 
     if (led1_status == 0)
     {
-        rgb_leds[1].led_status = LED_ON;
+        rgb_leds[1].led_status = LED_ENABLE;
     }
     else
     {
-        rgb_leds[1].led_status = LED_OFF;
+        rgb_leds[1].led_status = LED_DISABLE;
     }
 }

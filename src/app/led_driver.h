@@ -14,11 +14,11 @@
 
 #define LED_TIMER                 TIM17
 
-#define LED_COUNT 					12
+#define LED_COUNT                 12
 
 typedef enum led_sts {
-    LED_OFF = 0,
-    LED_ON = 1,
+    LED_DISABLE = 0,
+    LED_ENABLE = 1,
 }led_sts_t;
 
 struct led_rgb_def {

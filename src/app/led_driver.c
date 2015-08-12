@@ -188,21 +188,23 @@ static void led_driver_timer_config(void)
 void led_driver_save_colour(const uint32_t colour, const uint8_t led_index)
 {
     uint8_t idx;
+    struct led_rgb *rgb_leds = leds;
 
     if (led_index >= LED_COUNT)
     {
-        for (idx = 0; idx < LED_COUNT; idx++)
+        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            leds[idx].led_rgb_st.red = colour >> 16;
-            leds[idx].led_rgb_st.green = (colour >> 8) & 0xFF;
-            leds[idx].led_rgb_st.blue = colour & 0xFF;
+            rgb_leds->led_rgb_st.red = colour >> 16;
+            rgb_leds->led_rgb_st.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_st.blue = colour & 0xFF;
         }
     }
     else
     {
-        leds[led_index].led_rgb_st.red = colour >> 16;
-        leds[led_index].led_rgb_st.green = (colour >> 8) & 0xFF;
-        leds[led_index].led_rgb_st.blue = colour & 0xFF;
+        rgb_leds += led_index;
+        rgb_leds->led_rgb_st.red = colour >> 16;
+        rgb_leds->led_rgb_st.green = (colour >> 8) & 0xFF;
+        rgb_leds->led_rgb_st.blue = colour & 0xFF;
     }
 }
 
@@ -230,38 +232,48 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
 {
     uint16_t data = 0;
     uint8_t idx;
+    struct led_rgb *rgb_leds = leds;
 
     switch (colour)
     {
         case RED:
         {
-            for (idx = 0; idx < LED_COUNT; idx++)
+            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (leds[idx].led_rgb_st.red > current_colour_level)
+                if (rgb_leds->led_status == LED_ENABLE)
                 {
-                    data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
+                    if (rgb_leds->led_rgb_st.red > current_colour_level)
+                    {
+                        data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
+                    }
                 }
             }
         } break;
 
         case GREEN:
         {
-            for (idx = 0; idx < LED_COUNT; idx++)
+            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (leds[idx].led_rgb_st.green > current_colour_level)
+                if (rgb_leds->led_status == LED_ENABLE)
                 {
-                    data |= 1 << (2 + idx);
+                    if (rgb_leds->led_rgb_st.green > current_colour_level)
+                    {
+                        data |= 1 << (2 + idx);
+                    }
                 }
             }
         } break;
 
         case BLUE:
         {
-            for (idx = 0; idx < LED_COUNT; idx++)
+            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (leds[idx].led_rgb_st.blue > current_colour_level)
+                if (rgb_leds->led_status == LED_ENABLE)
                 {
-                    data |= 1 << (2 + idx);
+                    if (rgb_leds->led_rgb_st.blue > current_colour_level)
+                    {
+                        data |= 1 << (2 + idx);
+                    }
                 }
             }
         } break;
@@ -283,7 +295,6 @@ void led_driver_send_frame(void)
 {
     static uint8_t level;
     uint16_t data;
-
 
     data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
     led_driver_send_data16b(~data);
@@ -367,7 +378,7 @@ static void led_driver_pwm_timer_config(void)
 }
 
 /*******************************************************************************
-  * @function   pwm_config
+  * @function   led_driver_pwm_config
   * @brief      Configuration of PWM functionality.
   * @param      None.
   * @retval     None.
@@ -376,6 +387,23 @@ static void led_driver_pwm_config(void)
 {
     led_driver_pwm_io_config();
     led_driver_pwm_timer_config();
+}
+
+/*******************************************************************************
+  * @function   led_driver_init_led
+  * @brief      Enable all LED.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void led_driver_init_led(void)
+{
+    uint8_t idx;
+    struct led_rgb *rgb_leds = leds;
+
+    for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
+    {
+        rgb_leds->led_status = LED_ENABLE;
+    }
 }
 
 /*******************************************************************************
@@ -392,6 +420,7 @@ void led_driver_config(void)
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
     led_driver_save_colour(0, 0); // except of the first led - it doesnt shine
     led_driver_pwm_set_brightness(100);//100% brightness after reset
+    led_driver_init_led();
 
     led_driver_timer_config();
     led_driver_pwm_config();
