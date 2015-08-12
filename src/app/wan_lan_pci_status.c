@@ -8,6 +8,7 @@
  ******************************************************************************
  **/
 #include "wan_lan_pci_status.h"
+#include "led_driver.h"
 
 /*******************************************************************************
   * @function   wan_lan_pci_io_config
@@ -239,3 +240,36 @@ void wan_sfp_set_tx_status(FunctionalState sfp_status)
     }
 }
 
+/*******************************************************************************
+  * @function   wan_led_activity
+  * @brief      Toggle WAN LED according to the WAN activity.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void wan_led_activity(void)
+{
+    uint8_t led0_status, led1_status;
+    struct led_rgb *rgb_leds = leds;
+
+    led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+    led1_status = GPIO_ReadInputDataBit(WAN_LED1_PIN_PORT, WAN_LED1_PIN);
+
+    if (led0_status == 0) //TODO: check LED real polarity
+    {
+        //TODO: assign LED indexes to real meanings
+        rgb_leds[0].led_status = LED_ON;
+    }
+    else
+    {
+        led0_status = rgb_leds[0].led_status = LED_OFF;
+    }
+
+    if (led1_status == 0)
+    {
+        rgb_leds[1].led_status = LED_ON;
+    }
+    else
+    {
+        rgb_leds[1].led_status = LED_OFF;
+    }
+}

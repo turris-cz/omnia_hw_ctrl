@@ -30,7 +30,6 @@
 #define LED_SPI_SS_PIN_PORT 		GPIOA
 #define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
-#define LED_COUNT 					12
 #define COLOUR_LEVELS				16
 #define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
 #define MAX_LED_BRIGHT_STEP         10
@@ -70,14 +69,8 @@ typedef enum rgb_colour {
     BLUE    = 2
 }rgb_colour_t;
 
-/* Private variables ---------------------------------------------------------*/
-struct led_rgb {
-    uint8_t blue; //[0..255]
-    uint8_t green;
-    uint8_t red;
-};
 
-static struct led_rgb leds[LED_COUNT];
+struct led_rgb leds[LED_COUNT];
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -200,16 +193,16 @@ void led_driver_save_colour(const uint32_t colour, const uint8_t led_index)
     {
         for (idx = 0; idx < LED_COUNT; idx++)
         {
-            leds[idx].red = colour >> 16;
-            leds[idx].green = (colour >> 8) & 0xFF;
-            leds[idx].blue = colour & 0xFF;
+            leds[idx].led_rgb_st.red = colour >> 16;
+            leds[idx].led_rgb_st.green = (colour >> 8) & 0xFF;
+            leds[idx].led_rgb_st.blue = colour & 0xFF;
         }
     }
     else
     {
-        leds[led_index].red = colour >> 16;
-        leds[led_index].green = (colour >> 8) & 0xFF;
-        leds[led_index].blue = colour & 0xFF;
+        leds[led_index].led_rgb_st.red = colour >> 16;
+        leds[led_index].led_rgb_st.green = (colour >> 8) & 0xFF;
+        leds[led_index].led_rgb_st.blue = colour & 0xFF;
     }
 }
 
@@ -244,7 +237,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].red > current_colour_level)
+                if (leds[idx].led_rgb_st.red > current_colour_level)
                 {
                     data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
                 }
@@ -255,7 +248,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].green > current_colour_level)
+                if (leds[idx].led_rgb_st.green > current_colour_level)
                 {
                     data |= 1 << (2 + idx);
                 }
@@ -266,7 +259,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++)
             {
-                if (leds[idx].blue > current_colour_level)
+                if (leds[idx].led_rgb_st.blue > current_colour_level)
                 {
                     data |= 1 << (2 + idx);
                 }

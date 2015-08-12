@@ -14,6 +14,26 @@
 
 #define LED_TIMER                 TIM17
 
+#define LED_COUNT 					12
+
+typedef enum led_sts {
+    LED_OFF = 0,
+    LED_ON = 1,
+}led_sts_t;
+
+struct led_rgb_def {
+    uint8_t blue; //[0..255]
+    uint8_t green;
+    uint8_t red;
+};
+
+struct led_rgb {
+    struct led_rgb_def led_rgb_st;
+    led_sts_t led_status;
+};
+
+extern struct led_rgb leds[LED_COUNT];
+
 /*******************************************************************************
   * @function   led_driver_config
   * @brief      Configure LED driver.
