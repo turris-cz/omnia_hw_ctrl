@@ -141,4 +141,12 @@ void wan_sfp_set_tx_status(FunctionalState sfp_status);
   *****************************************************************************/
 void wan_led_activity(void);
 
+/*******************************************************************************
+  * @function   pci_led_activity
+  * @brief      Toggle PCIe LED according to the PCIe activity.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void pci_led_activity(void);
+
 #endif // WAN_LAN_PCI_STATUS_H

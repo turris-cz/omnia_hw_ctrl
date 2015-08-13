@@ -273,3 +273,38 @@ void wan_led_activity(void)
         rgb_leds[1].led_status = LED_DISABLE;
     }
 }
+
+/*******************************************************************************
+  * @function   pci_led_activity
+  * @brief      Toggle PCIe LED according to the PCIe activity.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void pci_led_activity(void)
+{
+    uint8_t pcie_led0, pcie_led1;
+    struct led_rgb *rgb_leds = leds;
+
+    pcie_led0 = GPIO_ReadInputDataBit(PCI_LED0_PIN_PORT, PCI_LED0_PIN);
+    pcie_led1 = GPIO_ReadInputDataBit(PCI_LED1_PIN_PORT, PCI_LED1_PIN);
+
+    //TODO: assign LED indexes to real meanings
+    if(pcie_led0 == 0)
+    {
+        //TODO: change to dynamic access
+        rgb_leds[2].led_status = LED_ENABLE;
+    }
+    else
+    {
+        rgb_leds[2].led_status = LED_DISABLE;
+    }
+
+    if (pcie_led1 == 0)
+    {
+        rgb_leds[3].led_status = LED_ENABLE;
+    }
+    else
+    {
+        rgb_leds[3].led_status = LED_DISABLE;
+    }
+}
