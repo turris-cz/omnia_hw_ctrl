@@ -10,6 +10,17 @@
 #include "wan_lan_pci_status.h"
 #include "led_driver.h"
 
+enum lan_led_masks {
+    LAN_LED_MASK        = 0x1947,
+    LAN_R0_MASK         = 0x0001,
+    LAN_R1_MASK         = 0x0002,
+    LAN_R2_MASK         = 0x0004,
+    LAN_C0_MASK         = 0x0040,
+    LAN_C1_MASK         = 0x0100,
+    LAN_C2_MASK         = 0x0800,
+    LAN_C3_MASK         = 0x1000,
+};
+
 /*******************************************************************************
   * @function   wan_lan_pci_io_config
   * @brief      GPIO configuration for WAN, LAN and PCIe indication signals.
@@ -306,5 +317,81 @@ void pci_led_activity(void)
     else
     {
         rgb_leds[3].led_status = LED_DISABLE;
+    }
+}
+
+/*******************************************************************************
+  * @function   pci_led_activity
+  * @brief      Toggle LAN LEDs according to the LAN status.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void lan_led_activity(void)
+{
+    uint16_t lan_led;
+    struct led_rgb *rgb_leds = leds;
+
+    lan_led = GPIO_ReadInputData(LAN_LED_PORT) & LAN_LED_MASK;
+
+    if((lan_led & LAN_R0_MASK) == 0)
+    {
+        //TODO: change to dynamic access
+        //TODO: assign LED indexes to real meanings
+        /* PORT 0 */
+        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
+            rgb_leds[4].led_status = LED_ENABLE;
+        else
+            rgb_leds[4].led_status = LED_DISABLE;
+
+         /* PORT 1 */
+        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
+            rgb_leds[5].led_status = LED_ENABLE;
+        else
+            rgb_leds[5].led_status = LED_DISABLE;
+    }
+    else
+    {
+        rgb_leds[4].led_status = LED_DISABLE;
+        rgb_leds[5].led_status = LED_DISABLE;
+    }
+
+    if ((lan_led & LAN_R1_MASK) == 0)
+    {
+        /* PORT 2 */
+        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
+            rgb_leds[6].led_status = LED_ENABLE;
+        else
+            rgb_leds[6].led_status = LED_DISABLE;
+
+        /* PORT 3 */
+        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
+            rgb_leds[7].led_status = LED_ENABLE;
+        else
+            rgb_leds[7].led_status = LED_DISABLE;
+    }
+    else
+    {
+        rgb_leds[6].led_status = LED_DISABLE;
+        rgb_leds[7].led_status = LED_DISABLE;
+    }
+
+    if ((lan_led & LAN_R2_MASK) == 0)
+    {
+        /* PORT 4 */
+        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
+            rgb_leds[8].led_status = LED_ENABLE;
+        else
+            rgb_leds[8].led_status = LED_DISABLE;
+
+        /* PORT 5 */
+        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
+            rgb_leds[9].led_status = LED_ENABLE;
+        else
+            rgb_leds[9].led_status = LED_DISABLE;
+    }
+    else
+    {
+        rgb_leds[8].led_status = LED_DISABLE;
+        rgb_leds[9].led_status = LED_DISABLE;
     }
 }

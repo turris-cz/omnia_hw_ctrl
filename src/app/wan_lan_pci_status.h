@@ -61,6 +61,7 @@
 #define SFP_DET_PIN_EXTILINE                EXTI_Line10
 
 /* LAN LED */
+#define LAN_LED_PORT                        GPIOA
 #define R0_P0_LED_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOA
 #define R0_P0_LED_PIN_PORT                  GPIOA
 #define R0_P0_LED_PIN                       GPIO_Pin_0
