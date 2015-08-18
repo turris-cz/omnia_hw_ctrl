@@ -14,7 +14,7 @@
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
 
-#define I2C2_ALTERNATE_FUNCTION         GPIO_AF_1
+#define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
 #define I2C_TIMING                      0x1045061D
 
 #define I2C_GPIO_CLOCK                  RCC_AHBPeriph_GPIOF
@@ -44,10 +44,10 @@ static void slave_i2c_config(void)
     RCC_AHBPeriphClockCmd(I2C_GPIO_CLOCK, ENABLE);
 
     /* Connect PXx to I2C_SCL */
-    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SCL_SOURCE, I2C2_ALTERNATE_FUNCTION);
+    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SCL_SOURCE, I2C_ALTERNATE_FUNCTION);
 
     /* Connect PXx to I2C_SDA */
-    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SDA_SOURCE, I2C2_ALTERNATE_FUNCTION);
+    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SDA_SOURCE, I2C_ALTERNATE_FUNCTION);
 
     /* Configure I2C pins: SCL */
     GPIO_InitStructure.GPIO_Pin = I2C_CLK_PIN;
@@ -73,14 +73,49 @@ static void slave_i2c_config(void)
     /* Apply I2C configuration after enabling it */
     I2C_Init(I2C_PERIPH_NAME, &I2C_InitStructure);
 
-    /* Address match interrupt */
+    /* Address match and receive interrupt */
     I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI, ENABLE);
 
     /* I2C Peripheral Enable */
     I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = I2C2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x02;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_wait_for_flag
+  * @brief      Wait for given flag during ic2 communication.
+  * @param      flag: possible flags can be found in stm32f0xx_i2c.h
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_wait_for_flag(uint32_t flag)
+{
+    uint32_t i2c_timeout = 2000000u;
+    struct st_i2c_status *i2c_status = &i2c_state;
+
+    if(flag == I2C_FLAG_BUSY)
+    {
+        while(I2C_GetFlagStatus(I2C_PERIPH_NAME, flag) != RESET)
+        {
+            if(i2c_timeout-- == 0)
+            {
+                i2c_status->timeout = 1;
+                return;
+            }
+        }
+    }
+    else
+    {
+        while(I2C_GetFlagStatus(I2C_PERIPH_NAME, flag) == RESET)
+        {
+            if(i2c_timeout-- == 0)
+            {
+                i2c_status->timeout = 1;
+                return;
+            }
+        }
+    }
 }
