@@ -28,6 +28,7 @@
 #include "delay.h"
 #include "msata_pci.h"
 #include "wan_lan_pci_status.h"
+#include "slave_i2c_device.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -207,6 +208,16 @@ void EXTI4_15_IRQHandler(void)
         wan_sfp_fault_detection();
         EXTI_ClearITPendingBit(SFP_FLT_PIN_EXTILINE);
     }
+}
+
+/**
+  * @brief  This function handles I2C global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void I2C2_IRQHandler(void)
+{
+    slave_i2c_handler();
 }
 /**
   * @}

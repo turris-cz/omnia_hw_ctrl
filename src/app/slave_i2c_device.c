@@ -10,6 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_conf.h"
 #include "slave_i2c_device.h"
+#include "debug_serial.h"
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -51,7 +52,7 @@ static struct st_i2c_status i2c_status;
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_config(void)
+void slave_i2c_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
     I2C_InitTypeDef  I2C_InitStructure;
@@ -157,10 +158,12 @@ void slave_i2c_handler(void)
             /* at the moment the command from master is stored in rx_buf[0]
             and the master is waiting for data */
             i2c_state->address_match_slave_tx = 1u;
+            DBG("slave tx adddress match\r\n");
         }
         else
         {
             i2c_state->address_match_slave_rx = 1u;
+            DBG("slave rx adddress match\r\n");
         }
 
         /* Clear IT pending bit */
@@ -186,6 +189,9 @@ void slave_i2c_handler(void)
 
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
+        DBG((const char*)i2c_state->rx_buf);
+        DBG(" data received\r\n");
+
         // reception phase complete
         i2c_state->data_rx_complete = 1;
         i2c_state->address_match_slave_rx = 0;
@@ -199,6 +205,8 @@ void slave_i2c_handler(void)
 
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
+        DBG((const char*)i2c_state->tx_buf);
+        DBG(" data transmitted\r\n");
         // transmit phase complete
         i2c_state->address_match_slave_tx = 0;
         i2c_state->data_tx_complete = 1;
@@ -249,8 +257,8 @@ void slave_i2c_process_data(void)
         // clear buffers
         for (i = 0; i < MAX_BUFFER_SIZE; i++)
         {
-            rx_buf[i] = 0;
-            tx_buf[i] = 0;
+            i2c_state->rx_buf[i] = 0;
+            i2c_state->tx_buf[i] = 0;
         }
 
         i2c_state->data_ctr = 0;
