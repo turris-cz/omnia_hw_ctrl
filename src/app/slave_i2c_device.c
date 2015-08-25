@@ -24,7 +24,21 @@
 #define I2C_CLK_PIN                     GPIO_Pin_6 // I2C2_SCL - GPIOF
 #define I2C_GPIO_PORT                   GPIOF
 
-struct st_i2c_status i2c_state;
+#define I2C_SLAVE_ADDRESS               0x55
+#define MAX_BUFFER_SIZE                 10
+
+struct st_i2c_status {
+    uint8_t address_match_slave_rx   : 1;
+    uint8_t address_match_slave_tx   : 1;
+    uint8_t data_rx_complete         : 1; // stop flag detected - all data received
+    uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
+    uint8_t timeout                  : 1;
+    uint8_t data_ctr;                     // data counter
+    uint8_t rx_buf[MAX_BUFFER_SIZE];      // RX buffer
+    uint8_t tx_buf[MAX_BUFFER_SIZE];      // TX buffer
+};
+
+static struct st_i2c_status i2c_state;
 
 /*******************************************************************************
   * @function   slave_i2c_config
@@ -65,7 +79,7 @@ static void slave_i2c_config(void)
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
     I2C_InitStructure.I2C_AnalogFilter = I2C_AnalogFilter_Enable;
     I2C_InitStructure.I2C_DigitalFilter = 0x00;
-    I2C_InitStructure.I2C_OwnAddress1 = 0x55;   //own address of STM32 - slave mode
+    I2C_InitStructure.I2C_OwnAddress1 = I2C_SLAVE_ADDRESS;
     I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
     I2C_InitStructure.I2C_Timing = I2C_TIMING; //TODO: check i2c speed !
@@ -74,13 +88,13 @@ static void slave_i2c_config(void)
     I2C_Init(I2C_PERIPH_NAME, &I2C_InitStructure);
 
     /* Address match and receive interrupt */
-    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI, ENABLE);
+    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
 
     /* I2C Peripheral Enable */
     I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = I2C2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x02;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01; //TODO: set and check the highest priority
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
