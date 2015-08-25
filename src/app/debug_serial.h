@@ -10,5 +10,29 @@
 #ifndef DEBUG_SERIAL_H
 #define DEBUG_SERIAL_H
 
+#define DBG_ENABLE      1
+
+#if DBG_ENABLE
+#define DBG(buf)        debug_print(buf);
+#else
+#define DBG(...)
+#endif
+
+/*******************************************************************************
+  * @function   debug_serial_config
+  * @brief      Configuration of UART peripheral.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void debug_serial_config(void);
+
+/*******************************************************************************
+  * @function   debug_print
+  * @brief      Send buffer over the serial port.
+  * @param      buffer: pointer to data buffer.
+  * @retval     None.
+  *****************************************************************************/
+void debug_print(const char *buffer);
+
 #endif // DEBUG_SERIAL_H
 
