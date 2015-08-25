@@ -90,6 +90,7 @@ SRCS  += power_control.c
 SRCS  += msata_pci.c
 SRCS  += wan_lan_pci_status.c
 SRCS  += slave_i2c_device.c
+SRCS  += debug_serial.c
 
 ################# STM LIB ##########################
 SRCS  += stm32f0xx_rcc.c
