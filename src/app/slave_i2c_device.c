@@ -186,8 +186,6 @@ void slave_i2c_handler(void)
 
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        //TODO: reset data_ctr in data processing
-
         // reception phase complete
         i2c_state->data_rx_complete = 1;
         i2c_state->address_match_slave_rx = 0;
