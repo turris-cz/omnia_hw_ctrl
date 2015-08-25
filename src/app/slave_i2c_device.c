@@ -199,15 +199,65 @@ void slave_i2c_handler(void)
     {
         i2c_state->rx_buf[i2c_state->data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME); //read dummy byte
 
-        //TODO: reset data_ctr in data processing
-
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
         // transmit phase complete
         i2c_state->address_match_slave_tx = 0;
         i2c_state->data_tx_complete = 1;
 
-        //disable interrupt in order to clear all buffers in data processing
+        // disable interrupt in order to clear all buffers in data processing
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+    }
+}
+
+void slave_i2c_process_data(void)
+{
+    struct st_i2c_status *i2c_state = &i2c_status;
+    uint16_t i;
+
+    if (i2c_state->data_rx_complete)
+    {
+        // clear flag
+        i2c_state->data_rx_complete = 0;
+
+        switch(i2c_state->rx_buf[0])
+        {
+            case CMD_SLAVE_TX: // slave TX (master expects data)
+            {
+                //TODO: prepare data to be sent to master
+
+                I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI , ENABLE);
+
+            } break;
+
+            case CMD_SLAVE_RX: // slave RX
+            {
+                //TODO: process RX data
+
+                i2c_state->data_ctr = 0;
+                I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
+            } break;
+
+            default:
+                break;
+        }
+    }
+
+    if (i2c_state->data_tx_complete)
+    {
+        // clear flag - all data were sent
+        i2c_state->data_tx_complete = 0;
+
+        // clear buffers
+        for (i = 0; i < MAX_BUFFER_SIZE; i++)
+        {
+            rx_buf[i] = 0;
+            tx_buf[i] = 0;
+        }
+
+        i2c_state->data_ctr = 0;
+
+        // enable interrupt again
+        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
     }
 }
