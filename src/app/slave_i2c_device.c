@@ -38,7 +38,12 @@ struct st_i2c_status {
     uint8_t tx_buf[MAX_BUFFER_SIZE];      // TX buffer
 };
 
-static struct st_i2c_status i2c_state;
+enum i2c_commands {
+    CMD_SLAVE_RX = 0x01,
+    CMD_SLAVE_TX = 0x02,
+};
+
+static struct st_i2c_status i2c_status;
 
 /*******************************************************************************
   * @function   slave_i2c_config
@@ -108,7 +113,7 @@ static void slave_i2c_config(void)
 static void slave_i2c_wait_for_flag(uint32_t flag)
 {
     uint32_t i2c_timeout = 2000000u;
-    struct st_i2c_status *i2c_status = &i2c_state;
+    struct st_i2c_status *i2c_state = &i2c_status;
 
     if(flag == I2C_FLAG_BUSY)
     {
@@ -116,7 +121,7 @@ static void slave_i2c_wait_for_flag(uint32_t flag)
         {
             if(i2c_timeout-- == 0)
             {
-                i2c_status->timeout = 1;
+                i2c_state->timeout = 1;
                 return;
             }
         }
@@ -127,9 +132,82 @@ static void slave_i2c_wait_for_flag(uint32_t flag)
         {
             if(i2c_timeout-- == 0)
             {
-                i2c_status->timeout = 1;
+                i2c_state->timeout = 1;
                 return;
             }
         }
+    }
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_handler
+  * @brief      Interrupt handler for I2C communication.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void slave_i2c_handler(void)
+{
+    struct st_i2c_status *i2c_state = &i2c_status;
+
+    /* Test on I2C Address match interrupt */
+    if((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET ))
+    {
+        if (i2c_state->rx_buf[0] == CMD_SLAVE_TX)
+        {
+            /* at the moment the command from master is stored in rx_buf[0]
+            and the master is waiting for data */
+            i2c_state->address_match_slave_tx = 1u;
+        }
+        else
+        {
+            i2c_state->address_match_slave_rx = 1u;
+        }
+
+        /* Clear IT pending bit */
+        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
+    }
+
+    // transmit data
+    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET) && (i2c_state->address_match_slave_tx == 1u))
+    {
+        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->data_ctr++]);
+    }
+
+    // receive data
+    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET) && (i2c_state->address_match_slave_rx == 1u))
+    {
+        i2c_state->rx_buf[i2c_state->data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+    }
+
+    // stop detection after data from master are received
+    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET) && (i2c_state->address_match_slave_rx == 1u))
+    {
+        i2c_state->rx_buf[i2c_state->data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+
+        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
+
+        //TODO: reset data_ctr in data processing
+
+        // reception phase complete
+        i2c_state->data_rx_complete = 1;
+        i2c_state->address_match_slave_rx = 0;
+        // disable interrupt in order to process incoming data
+        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+    }
+
+    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET) && (i2c_state->address_match_slave_tx == 1u))
+    {
+        i2c_state->rx_buf[i2c_state->data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME); //read dummy byte
+
+        //TODO: reset data_ctr in data processing
+
+        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
+
+        // transmit phase complete
+        i2c_state->address_match_slave_tx = 0;
+        i2c_state->data_tx_complete = 1;
+
+        //disable interrupt in order to clear all buffers in data processing
+        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
     }
 }
