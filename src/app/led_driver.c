@@ -38,14 +38,14 @@
 // PWM Settings (Frequency und range)
 //------------------------------------------------------------------------------
 // period      = range (max = 0xFFFF => 16bit)
-// Basic freq. = (APB2=8MHz) => TIM_CLK=8MHz
+// Basic freq. = (APB2=48MHz) => TIM_CLK=48MHz
 // period      : 0 to 0xFFFF
 // prescaler   : 0 to 0xFFFF
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
 #define PWM_TIM_PERIODE             0xFF // period   (0xFF => 8bit)
-#define PWM_TIM_PRESCALE            0xFF // prescaler (256 => 122Hz)
+#define PWM_TIM_PRESCALE            0xFF // prescaler
 
 //--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -145,8 +145,7 @@ static void led_driver_io_config(void)
 
 /*******************************************************************************
   * @function   led_driver_timer_config
-  * @brief      Timer config for led driver serial register - send data regulary.
-  *             Timing: 40 Hz
+  * @brief      Timer config for led driver serial register - send data regularly.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
@@ -160,7 +159,7 @@ static void led_driver_timer_config(void)
 
     /* Time base configuration */
     TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 10 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
@@ -418,7 +417,7 @@ void led_driver_config(void)
     led_driver_spi_config();
 
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
-    led_driver_save_colour(0, 0); // except of the first led - it doesnt shine
+    led_driver_save_colour(0xFF0000, 0); // except of the first led - red
     led_driver_pwm_set_brightness(100);//100% brightness after reset
     led_driver_init_led();
 
