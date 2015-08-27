@@ -16,7 +16,7 @@
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
 
 #define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
-#define I2C_TIMING                      0x1045061D
+#define I2C_TIMING                      0x10800000 //100kHz for 48MHz system clock
 
 #define I2C_GPIO_CLOCK                  RCC_AHBPeriph_GPIOF
 #define I2C_PERIPH_NAME                 I2C2
