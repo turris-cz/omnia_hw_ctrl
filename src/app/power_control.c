@@ -11,7 +11,6 @@
 #include "stm32f0xx_conf.h"
 #include "power_control.h"
 #include "delay.h"
-#include "debounce.h"
 #include "led_driver.h"
 
 /* Private define ------------------------------------------------------------*/
@@ -243,91 +242,6 @@ void power_control_disable_regulator(void)
     GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN)
 #endif
     GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
-}
-
-/*******************************************************************************
-  * @function   power_control_rst_pwr_rtc_signal_manager
-  * @brief      Handle reaction for resets, power goods, rtc alarm and LED brightness
-  *             signals.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_rst_pwr_rtc_signal_manager(void)
-{
-    struct input_sig *input_signal_state = &debounce_input_signal;
-
-    if (input_signal_state->man_res)
-    {
-        //TODO
-        input_signal_state->man_res = 0; //clear flag
-    }
-    if (input_signal_state->sysres_out)
-    {
-        //TODO
-        input_signal_state->sysres_out = 0;
-    }
-
-    if (input_signal_state->dbg_res)
-    {
-        //TODO - SYSRES_OUT set to 0 ?
-        //GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
-        /* SYSRES_OUT connected externally to SYSRST_IN
-         * low level of SYSRST_IN must be active for at least 20ms
-         * defined in Marvell HW specification, pg. 98 (global system reset) */
-        //delay(20);
-        //GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
-        input_signal_state->dbg_res = 0;
-    }
-
-    if (input_signal_state->m_res)
-    {
-        GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
-        //TODO - what else?
-        input_signal_state->m_res = 0;
-    }
-    else
-    {
-        GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
-    }
-
-    if (input_signal_state->pg_5v || input_signal_state->pg_3v3 ||
-            input_signal_state->pg_1v35 || input_signal_state->pg_4v5 ||
-            input_signal_state->pg_1v8 || input_signal_state->pg_1v5 ||
-            input_signal_state->pg_1v2 || input_signal_state->pg_vtt)
-    {
-        power_control_disable_regulator();
-        /* 100ms delay between the first and last voltage power-down
-         * defined in Marvell HW specification, pg.97 (power-down sequence) */
-        delay(100);
-        //TODO - call power_control_enable_regulator() or NVIC_SystemReset() ?
-        //TODO - clear all PG flag in case of call power_control_enable_regulator()
-    }
-
-    if (input_signal_state->usb30_ovc)
-    {
-        power_control_usb(USB3_PORT0, USB_OFF);
-        input_signal_state->usb30_ovc = 0;
-        //TODO - when USB_ON again?
-    }
-
-    if (input_signal_state->usb31_ovc)
-    {
-        power_control_usb(USB3_PORT1, USB_OFF);
-        input_signal_state->usb31_ovc = 0;
-        //TODO - when USB_ON again?
-    }
-
-    if (input_signal_state->rtc_alarm)
-    {
-        //TODO
-        input_signal_state->rtc_alarm = 0;
-    }
-
-    if (input_signal_state->led_brt)
-    {
-        led_driver_step_brightness();
-        input_signal_state->led_brt = 0;
-    }
 }
 
 /*******************************************************************************

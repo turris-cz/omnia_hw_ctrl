@@ -151,6 +151,14 @@ void power_control_io_config(void);
 void power_control_enable_regulator(void);
 
 /*******************************************************************************
+  * @function   power_control_disable_regulator
+  * @brief      Shutdown DC/DC regulators.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_disable_regulator(void);
+
+/*******************************************************************************
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
@@ -158,8 +166,6 @@ void power_control_enable_regulator(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
-
-void power_control_rst_pwr_rtc_signal_manager();
 
 /*******************************************************************************
   * @function   sysres_out_startup

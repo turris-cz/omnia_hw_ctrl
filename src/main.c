@@ -43,6 +43,6 @@ int main(void)
 
     while(1)
     {
-        power_control_rst_pwr_rtc_signal_manager();
+        debounce_check_inputs();
     }
 }

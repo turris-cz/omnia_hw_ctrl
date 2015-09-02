@@ -10,6 +10,9 @@
 #include "stm32f0xx.h"
 #include "debounce.h"
 #include "stm32f0xx_conf.h"
+#include "power_control.h"
+#include "delay.h"
+#include "led_driver.h"
 
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
@@ -29,8 +32,6 @@ enum input_mask {
     RTC_ALARM_MASK                  = 0x4000,
     LED_BRT_MASK                    = 0x8000,
 };
-
-struct input_sig debounce_input_signal;
 
 #define MAX_INPUT_STATES            3
 static uint16_t debounced_state;
@@ -101,7 +102,6 @@ void debounce_check_inputs(void)
 {
     uint16_t i, port_changed;
     static uint16_t last_debounce_state;
-    struct input_sig *input_signal_state = &debounce_input_signal;
 
     last_debounce_state = debounced_state;
 
@@ -115,52 +115,66 @@ void debounce_check_inputs(void)
     port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
 
     if (port_changed & MAN_RES_MASK)
-        input_signal_state->man_res = 1;
+    {
+        //no reaction necessary
+    }
 
     if (port_changed & SYSRES_OUT_MASK)
-        input_signal_state->sysres_out = 1;
+    {
+        //no reaction necessary
+    }
 
     if (port_changed & DBG_RES_MASK)
-        input_signal_state->dbg_res = 1;
+    {
+        //no reaction necessary
+    }
 
+    // reaction: follow MRES signal
     if (port_changed & MRES_MASK)
-        input_signal_state->m_res = 1;
+    {
+        GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+    }
+    else
+    {
+         GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+    }
 
-    if (port_changed & PG_5V_MASK)
-        input_signal_state->pg_5v = 1;
-
-    if (port_changed & PG_3V3_MASK)
-        input_signal_state->pg_3v3 = 1;
-
-    if (port_changed & PG_1V35_MASK)
-        input_signal_state->pg_1v35 = 1;
-
-    if (port_changed & PG_4V5_MASK)
-        input_signal_state->pg_4v5 = 1;
-
-    if (port_changed & PG_1V8_MASK)
-        input_signal_state->pg_1v8 = 1;
-
-    if (port_changed & PG_1V5_MASK)
-        input_signal_state->pg_1v5 = 1;
-
-    if (port_changed & PG_1V2_MASK)
-        input_signal_state->pg_1v2 = 1;
-
-    if (port_changed & PG_VTT_MASK)
-        input_signal_state->pg_vtt = 1;
+    if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
+         (port_changed & PG_1V35_MASK) || (port_changed & PG_4V5_MASK) ||
+         (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
+         (port_changed & PG_1V2_MASK) || (port_changed & PG_VTT_MASK))
+    {
+        power_control_disable_regulator();
+        /* 100ms delay between the first and last voltage power-down
+         * defined in Marvell HW specification, pg.97 (power-down sequence) */
+        delay(100);
+        NVIC_SystemReset(); // SW reset
+    }
 
     if (port_changed & USB30_OVC_MASK)
-        input_signal_state->usb30_ovc = 1;
+    {
+        power_control_usb(USB3_PORT0, USB_OFF);
+        //TODO - when USB_ON again?
+    }
+
 
     if (port_changed & USB31_OVC_MASK)
-        input_signal_state->usb31_ovc = 1;
+    {
+        power_control_usb(USB3_PORT1, USB_OFF);
+        //TODO - when USB_ON again?
+    }
+
 
     if (port_changed & RTC_ALARM_MASK)
-        input_signal_state->rtc_alarm = 1;
+    {
+        //TODO - probably no reaction needed
+    }
 
     if (port_changed & LED_BRT_MASK)
-        input_signal_state->led_brt = 1;
+    {
+        led_driver_step_brightness();
+    }
+
 }
 
 /*******************************************************************************
