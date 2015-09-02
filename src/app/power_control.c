@@ -72,11 +72,13 @@ void power_control_io_config(void)
     GPIO_Init(USB30_PWRON_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = USB31_PWRON_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(USB31_PWRON_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
+    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = CFG_CTRL_PIN;
+    GPIO_Init(CFG_CTRL_PIN_PORT, &GPIO_InitStructure);
 
 
     /* Input signals */
@@ -92,20 +94,18 @@ void power_control_io_config(void)
                           RTC_ALARM_PIN_PERIPH_CLOCK | LED_BRT_PIN_PERIPH_CLOCK,
                           ENABLE);
 
+    GPIO_InitStructure.GPIO_Pin = MRES_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(MRES_PIN_PORT, &GPIO_InitStructure);
+
     GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
-
-    //TODO - SYSRES_OUT as output ?
-    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
-    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = DGBRES_PIN;
     GPIO_Init(DGBRES_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = MRES_PIN;
-    GPIO_Init(MRES_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PG_5V_PIN;
     GPIO_Init(PG_5V_PIN_PORT, &GPIO_InitStructure);
@@ -142,6 +142,9 @@ void power_control_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = LED_BRT_PIN;
     GPIO_Init(LED_BRT_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 }
 
 /*******************************************************************************
@@ -267,12 +270,12 @@ void power_control_rst_pwr_rtc_signal_manager(void)
     if (input_signal_state->dbg_res)
     {
         //TODO - SYSRES_OUT set to 0 ?
-        GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+        //GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
         /* SYSRES_OUT connected externally to SYSRST_IN
          * low level of SYSRST_IN must be active for at least 20ms
          * defined in Marvell HW specification, pg. 98 (global system reset) */
-        delay(20);
-        GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+        //delay(20);
+        //GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
         input_signal_state->dbg_res = 0;
     }
 
@@ -281,6 +284,10 @@ void power_control_rst_pwr_rtc_signal_manager(void)
         GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
         //TODO - what else?
         input_signal_state->m_res = 0;
+    }
+    else
+    {
+        GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
     }
 
     if (input_signal_state->pg_5v || input_signal_state->pg_3v3 ||
@@ -321,4 +328,18 @@ void power_control_rst_pwr_rtc_signal_manager(void)
         led_driver_step_brightness();
         input_signal_state->led_brt = 0;
     }
+}
+
+void sysresout(void)
+{
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
+    while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
+        ;
+
+    delay(5); // 5ms delay after releasing of reset signal
+
+    GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
 }

@@ -30,9 +30,11 @@ int main(void)
     RCC_ClocksTypeDef RCC_Clocks;
 
     SystemInit();
+    SystemCoreClockUpdate();
     delay_systimer_config();
     power_control_io_config();
     power_control_enable_regulator();
+    sysresout();
 
     debounce_config();
     led_driver_config();
@@ -41,5 +43,6 @@ int main(void)
 
     while(1)
     {
+        power_control_rst_pwr_rtc_signal_manager();
     }
 }

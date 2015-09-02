@@ -45,7 +45,7 @@
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
 #define PWM_TIM_PERIODE             0xFF // period   (0xFF => 8bit)
-#define PWM_TIM_PRESCALE            0xFF // prescaler
+#define PWM_TIM_PRESCALE            10 // prescaler
 
 //--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -158,7 +158,7 @@ static void led_driver_timer_config(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
 
     /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 200 - 1;
+    TIM_TimeBaseStructure.TIM_Period = 0xFF - 1;
     TIM_TimeBaseStructure.TIM_Prescaler = 10 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -308,6 +308,7 @@ void led_driver_send_frame(void)
     LATCH_HIGH;
     //delay(1); //TODO: some longer delay necessary?
     __NOP(); // or NO OPERATION is sufficient?
+    __NOP();
     LATCH_LOW;
 
     level++;
@@ -335,7 +336,6 @@ static void led_driver_pwm_io_config(void)
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
 
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_0);
 }
@@ -418,7 +418,7 @@ void led_driver_config(void)
 
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
     led_driver_save_colour(0xFF0000, 0); // except of the first led - red
-    led_driver_pwm_set_brightness(100);//100% brightness after reset
+    led_driver_pwm_set_brightness(50);//100% brightness after reset
     led_driver_init_led();
 
     led_driver_timer_config();
