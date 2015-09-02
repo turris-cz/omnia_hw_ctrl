@@ -22,11 +22,11 @@ static volatile uint32_t timingdelay;
 void delay_systimer_config(void)
 {
     if (SysTick_Config(SystemCoreClock / 1000u))
-     {
-       /* Capture error */
-       while (1);
-     }
-    //TODO - set interrupt priority
+    {
+        /* Capture error */
+        while (1);
+    }
+    NVIC_SetPriority(SysTick_IRQn, 2);
 }
 
 /******************************************************************************
@@ -37,9 +37,9 @@ void delay_systimer_config(void)
   *****************************************************************************/
 void delay(volatile uint32_t nTime)
 {
-  timingdelay = nTime;
+    timingdelay = nTime;
 
-  while(timingdelay != 0u);
+    while(timingdelay != 0u);
 }
 
 /******************************************************************************
@@ -50,8 +50,8 @@ void delay(volatile uint32_t nTime)
   *****************************************************************************/
 void delay_timing_decrement(void)
 {
-  if (timingdelay != 0x00)
-  {
-    timingdelay--;
-  }
+    if (timingdelay != 0x00)
+    {
+        timingdelay--;
+    }
 }
