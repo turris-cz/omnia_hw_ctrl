@@ -330,16 +330,22 @@ void power_control_rst_pwr_rtc_signal_manager(void)
     }
 }
 
-void sysresout(void)
+/*******************************************************************************
+  * @function   sysres_out_startup
+  * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void sysres_out_startup(void)
 {
     GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
+    // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
         ;
 
     delay(5); // 5ms delay after releasing of reset signal
 
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-
 }

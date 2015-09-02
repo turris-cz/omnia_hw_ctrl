@@ -55,9 +55,9 @@
 #define USB31_PWRON_PIN_PORT                GPIOC
 #define USB31_PWRON_PIN                     GPIO_Pin_13
 
-#define CFG_CTRL_PIN_PERIPH_CLOCK        RCC_AHBPeriph_GPIOC
-#define CFG_CTRL_PIN_PORT                GPIOC
-#define CFG_CTRL_PIN                     GPIO_Pin_15
+#define CFG_CTRL_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
+#define CFG_CTRL_PIN_PORT                   GPIOC
+#define CFG_CTRL_PIN                        GPIO_Pin_15
 
 //Inputs
 #define MANRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
@@ -160,7 +160,14 @@ void power_control_enable_regulator(void);
 void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
 
 void power_control_rst_pwr_rtc_signal_manager();
-void sysresout(void);
+
+/*******************************************************************************
+  * @function   sysres_out_startup
+  * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void sysres_out_startup(void);
 
 #endif // POWER_CONTROL_H
 

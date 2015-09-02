@@ -34,7 +34,7 @@ int main(void)
     delay_systimer_config();
     power_control_io_config();
     power_control_enable_regulator();
-    sysresout();
+    sysres_out_startup();
 
     debounce_config();
     led_driver_config();
