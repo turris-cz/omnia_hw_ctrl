@@ -45,7 +45,7 @@
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
 #define PWM_TIM_PERIODE             0xFF // period   (0xFF => 8bit)
-#define PWM_TIM_PRESCALE            10 // prescaler
+#define PWM_TIM_PRESCALE            0xFF // prescaler
 
 //--------------------------------------------------------------
 // PWM Setting (Polarity)

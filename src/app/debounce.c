@@ -38,8 +38,8 @@ static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
 
-#define  DEBOUNCE_TIM_PERIODE       (200 - 1)//200 = 5ms
-#define  DEBOUNCE_TIM_PRESCALER     (200 - 1)
+#define  DEBOUNCE_TIM_PERIODE       (300 - 1)//300 -> 5ms; 600 -> 10ms
+#define  DEBOUNCE_TIM_PRESCALER     (800 - 1)
 
 /*******************************************************************************
   * @function   debounce_timer_config
