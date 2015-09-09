@@ -14,7 +14,7 @@
 #include "led_driver.h"
 
 /* Private define ------------------------------------------------------------*/
-//#define USE_4V5_POWER
+#define USE_4V5_POWER
 /* Private functions ---------------------------------------------------------*/
 
 /*******************************************************************************
@@ -239,7 +239,7 @@ void power_control_disable_regulator(void)
     GPIO_ResetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
     GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
 #ifdef USE_4V5_POWER
-    GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN)
+    GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
 #endif
     GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
 }
@@ -252,8 +252,8 @@ void power_control_disable_regulator(void)
   *****************************************************************************/
 void sysres_out_startup(void)
 {
-    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
 
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
