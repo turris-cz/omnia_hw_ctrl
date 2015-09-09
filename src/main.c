@@ -29,13 +29,15 @@ int main(void)
 {
     RCC_ClocksTypeDef RCC_Clocks;
 
-    SystemInit();
-    SystemCoreClockUpdate();
+    SystemCoreClockUpdate(); // set HSI and PLL
     delay_systimer_config();
     power_control_io_config();
+
+    /* board startup */
     power_control_enable_regulator();
     sysres_out_startup();
 
+    /* initialization for other peripherals */
     debounce_config();
     led_driver_config();
 

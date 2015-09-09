@@ -102,6 +102,7 @@ void debounce_check_inputs(void)
 {
     uint16_t i, port_changed;
     static uint16_t last_debounce_state;
+    static uint8_t man_reset;
 
     last_debounce_state = debounced_state;
 
@@ -116,7 +117,17 @@ void debounce_check_inputs(void)
 
     if (port_changed & MAN_RES_MASK)
     {
-        //no reaction necessary
+        //manual reset occured: set init state - disconnect switches
+        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        man_reset = 1;
+    }
+    else
+    {
+        if (man_reset) //manual reset ocurred last cycle
+        {
+            sysres_out_startup();
+            man_reset = 0;
+        }
     }
 
     if (port_changed & SYSRES_OUT_MASK)
@@ -136,7 +147,7 @@ void debounce_check_inputs(void)
     }
     else
     {
-         GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+        GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
     }
 
     if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
