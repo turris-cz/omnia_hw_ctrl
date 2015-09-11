@@ -158,11 +158,11 @@ void TIM16_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles TIM17 global interrupt request.
+  * @brief  This function handles TIM3 global interrupt request.
   * @param  None
   * @retval None
   */
-void TIM17_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
     if (TIM_GetITStatus(LED_TIMER, TIM_IT_Update) != RESET)
     {

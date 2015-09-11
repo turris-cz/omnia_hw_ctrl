@@ -93,7 +93,7 @@ static void led_driver_spi_config(void)
     SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
     SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
     SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_128;
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_Init(LED_SPI, &SPI_InitStructure);
 
@@ -155,11 +155,11 @@ static void led_driver_timer_config(void)
     NVIC_InitTypeDef NVIC_InitStructure;
 
     // Clock enable
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
     /* Time base configuration */
     TIM_TimeBaseStructure.TIM_Period = 0xFF - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 10 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 0xFF - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
@@ -171,7 +171,7 @@ static void led_driver_timer_config(void)
     /* TIM enable counter */
     TIM_Cmd(LED_TIMER, ENABLE);
 
-    NVIC_InitStructure.NVIC_IRQChannel = TIM17_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -418,11 +418,12 @@ void led_driver_config(void)
 
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
     led_driver_save_colour(0xFF0000, 0); // except of the first led - red
-    led_driver_pwm_set_brightness(50);//100% brightness after reset
+
     led_driver_init_led();
 
-    led_driver_timer_config();
     led_driver_pwm_config();
+    led_driver_pwm_set_brightness(90);//90% brightness after reset
+    led_driver_timer_config();
 }
 
 /*******************************************************************************

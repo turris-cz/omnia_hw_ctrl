@@ -12,7 +12,7 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
-#define LED_TIMER                 TIM17
+#define LED_TIMER                 TIM3
 
 #define LED_COUNT                 12
 
