@@ -113,7 +113,9 @@ void debounce_check_inputs(void)
         debounced_state = debounced_state & port_state[i];
     }
 
-    port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
+    //TODO: reaction on level or edge (falling) ?
+    //port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
+    port_changed = debounced_state;
 
     if (port_changed & MAN_RES_MASK)
     {
@@ -166,6 +168,7 @@ void debounce_check_inputs(void)
     {
         power_control_usb(USB3_PORT0, USB_OFF);
         //TODO - when USB_ON again?
+        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
 
@@ -173,6 +176,7 @@ void debounce_check_inputs(void)
     {
         power_control_usb(USB3_PORT1, USB_OFF);
         //TODO - when USB_ON again?
+        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
 

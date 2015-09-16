@@ -29,6 +29,7 @@
 #include "msata_pci.h"
 #include "wan_lan_pci_status.h"
 #include "slave_i2c_device.h"
+#include "power_control.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -168,6 +169,27 @@ void TIM3_IRQHandler(void)
     {
         led_driver_send_frame();
         TIM_ClearITPendingBit(LED_TIMER, TIM_IT_Update);
+    }
+}
+
+
+/**
+  * @brief  This function handles TIM14 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM14_IRQHandler(void)
+{
+    if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
+    {
+        power_control_usb(USB3_PORT0, USB_ON);
+        power_control_usb(USB3_PORT1, USB_ON);
+
+        //disable timer and set initial condition
+        TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);
+        USB_TIMEOUT_TIMER->CNT = 0;
+
+        TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
     }
 }
 

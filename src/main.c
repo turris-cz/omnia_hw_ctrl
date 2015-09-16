@@ -41,6 +41,7 @@ int main(void)
     debounce_config();
     led_driver_config();
 
+    power_control_usb_timeout_config();
     RCC_GetClocksFreq(&RCC_Clocks); //just for debugging - check frequency value
 
     while(1)

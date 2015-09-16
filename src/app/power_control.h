@@ -10,6 +10,8 @@
 #ifndef POWER_CONTROL_H
 #define POWER_CONTROL_H
 
+#define USB_TIMEOUT_TIMER                   TIM14
+
 //Outputs
 #define RES_RAM_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
 #define RES_RAM_PIN_PORT                    GPIOC
@@ -174,6 +176,14 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
   * @retval     None.
   *****************************************************************************/
 void sysres_out_startup(void);
+
+/*******************************************************************************
+  * @function   debounce_usb_timeout_timer_config
+  * @brief      Timer configuration for USB recovery timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb_timeout_config(void);
 
 #endif // POWER_CONTROL_H
 

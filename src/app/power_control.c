@@ -144,6 +144,8 @@ void power_control_io_config(void)
 
     GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+    power_control_usb(USB3_PORT0, USB_ON);
+    power_control_usb(USB3_PORT1, USB_ON);
 }
 
 /*******************************************************************************
@@ -200,6 +202,26 @@ void power_control_enable_regulator(void)
 }
 
 /*******************************************************************************
+  * @function   power_control_disable_regulator
+  * @brief      Shutdown DC/DC regulators.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_disable_regulator(void)
+{
+    GPIO_ResetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
+    GPIO_ResetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
+    GPIO_ResetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
+    GPIO_ResetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
+    GPIO_ResetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
+    GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
+#ifdef USE_4V5_POWER
+    GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+#endif
+    GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
+}
+
+/*******************************************************************************
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
@@ -225,25 +247,39 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
 }
 
 /*******************************************************************************
-  * @function   power_control_disable_regulator
-  * @brief      Shutdown DC/DC regulators.
+  * @function   debounce_usb_timeout_timer_config
+  * @brief      Timer configuration for USB recovery timeout.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_disable_regulator(void)
+void power_control_usb_timeout_config(void)
 {
-    GPIO_ResetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
-    GPIO_ResetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
-    GPIO_ResetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
-    GPIO_ResetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
-    GPIO_ResetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
-    GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
-#ifdef USE_4V5_POWER
-    GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-#endif
-    GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
-}
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
+    // Clock enable
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
+
+    /* Time base configuration - 1sec interrupt */
+    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(USB_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(USB_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM14_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+}
 /*******************************************************************************
   * @function   sysres_out_startup
   * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
