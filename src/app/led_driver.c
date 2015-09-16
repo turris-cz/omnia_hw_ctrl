@@ -239,7 +239,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_status == LED_ENABLE)
+                if (rgb_leds->led_status == LED_ON)
                 {
                     if (rgb_leds->led_rgb_st.red > current_colour_level)
                     {
@@ -253,7 +253,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_status == LED_ENABLE)
+                if (rgb_leds->led_status == LED_ON)
                 {
                     if (rgb_leds->led_rgb_st.green > current_colour_level)
                     {
@@ -267,7 +267,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_status == LED_ENABLE)
+                if (rgb_leds->led_status == LED_ON)
                 {
                     if (rgb_leds->led_rgb_st.blue > current_colour_level)
                     {
@@ -401,7 +401,8 @@ static void led_driver_init_led(void)
 
     for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
     {
-        rgb_leds->led_status = LED_ENABLE;
+        rgb_leds->led_status = LED_ON;
+        rgb_leds->user_led_status = LED_ENABLE;
     }
 }
 

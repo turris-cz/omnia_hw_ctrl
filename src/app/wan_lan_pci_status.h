@@ -12,10 +12,6 @@
 
 #include "stm32f0xx_conf.h"
 
-#define CFG_CTRL_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
-#define CFG_CTRL_PIN_PORT                   GPIOC
-#define CFG_CTRL_PIN                        GPIO_Pin_15
-
 /* PCIe status LED */
 #define PCI_LED0_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
 #define PCI_LED0_PIN_PORT                   GPIOC
