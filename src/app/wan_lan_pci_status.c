@@ -32,7 +32,7 @@ static void wan_lan_pci_io_config(void)
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     /* GPIO Periph clock enable */
-    RCC_AHBPeriphClockCmd(CFG_CTRL_PIN_PERIPH_CLOCK | PCI_LED0_PIN_PERIPH_CLOCK
+    RCC_AHBPeriphClockCmd(PCI_LED0_PIN_PERIPH_CLOCK
                           | PCI_LED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
                           | WAN_LED1_PIN_PERIPH_CLOCK | SFP_DIS_PIN_PERIPH_CLOCK
                           | SFP_LOS_PIN_PERIPH_CLOCK | SFP_FLT_PIN_PERIPH_CLOCK
