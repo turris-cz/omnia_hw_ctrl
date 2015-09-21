@@ -114,8 +114,8 @@ void debounce_check_inputs(void)
     }
 
     //TODO: reaction on level or edge (falling) ?
-    //port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
-    port_changed = debounced_state;
+    port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
+    //port_changed = debounced_state;
 
     if (port_changed & MAN_RES_MASK)
     {
@@ -128,6 +128,7 @@ void debounce_check_inputs(void)
         if (man_reset) //manual reset ocurred last cycle
         {
             sysres_out_startup();
+            reset();
             man_reset = 0;
         }
     }

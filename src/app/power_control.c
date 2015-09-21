@@ -33,7 +33,8 @@ void power_control_io_config(void)
        ENABLE_4V5_PIN_PERIPH_CLOCK | ENABLE_1V8_PIN_PERIPH_CLOCK |
        ENABLE_1V5_PIN_PERIPH_CLOCK | ENABLE_1V2_PIN_PERIPH_CLOCK |
        ENABLE_VTT_PIN_PERIPH_CLOCK | USB30_PWRON_PIN_PERIPH_CLOCK |
-       USB31_PWRON_PIN_PERIPH_CLOCK, ENABLE);
+       USB31_PWRON_PIN_PERIPH_CLOCK | SYSRES_OUT_PIN_PERIPH_CLOCK |
+                          MANRES_PIN_PERIPH_CLOCK , ENABLE);
 
     /* Output signals */
     GPIO_InitStructure.GPIO_Pin = RES_RAM_PIN;
@@ -73,18 +74,28 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_Pin = USB31_PWRON_PIN;
     GPIO_Init(USB31_PWRON_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
-    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
-
     GPIO_InitStructure.GPIO_Pin = CFG_CTRL_PIN;
     GPIO_Init(CFG_CTRL_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
 
 
     /* Input signals */
 
     /* GPIO Periph clock enable */
-    RCC_AHBPeriphClockCmd(MANRES_PIN_PERIPH_CLOCK | SYSRES_OUT_PIN_PERIPH_CLOCK |
-                          DGBRES_PIN_PERIPH_CLOCK | MRES_PIN_PERIPH_CLOCK |
+    RCC_AHBPeriphClockCmd(DGBRES_PIN_PERIPH_CLOCK | MRES_PIN_PERIPH_CLOCK |
                           PG_5V_PIN_PERIPH_CLOCK | PG_3V3_PIN_PERIPH_CLOCK |
                           PG_1V35_PIN_PERIPH_CLOCK | PG_4V5_PIN_PERIPH_CLOCK |
                           PG_1V8_PIN_PERIPH_CLOCK | PG_1V5_PIN_PERIPH_CLOCK |
@@ -98,13 +109,14 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(MRES_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = DGBRES_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(DGBRES_PIN_PORT, &GPIO_InitStructure);
+
+    //GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
+    //GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PG_5V_PIN;
     GPIO_Init(PG_5V_PIN_PORT, &GPIO_InitStructure);
@@ -142,10 +154,13 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_Pin = LED_BRT_PIN;
     GPIO_Init(LED_BRT_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_ResetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     power_control_usb(USB3_PORT0, USB_ON);
     power_control_usb(USB3_PORT1, USB_ON);
+    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+
+
 }
 
 /*******************************************************************************
@@ -288,14 +303,32 @@ void power_control_usb_timeout_config(void)
   *****************************************************************************/
 void sysres_out_startup(void)
 {
-    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+    delay(200);
+   // GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+
+
+    GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
         ;
+    //while (!GPIO_ReadInputDataBit(MANRES_PIN_PORT, MANRES_PIN))
+    //    ;
 
     delay(5); // 5ms delay after releasing of reset signal
 
+    GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+}
+
+void reset(void)
+{
+    delay(100);
+    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+    delay(200);
+    GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
+    while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
+        ;
+    delay(5);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 }

@@ -185,5 +185,7 @@ void sysres_out_startup(void);
   *****************************************************************************/
 void power_control_usb_timeout_config(void);
 
+void reset(void);
+
 #endif // POWER_CONTROL_H
 

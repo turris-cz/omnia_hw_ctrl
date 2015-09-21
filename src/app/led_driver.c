@@ -296,13 +296,13 @@ void led_driver_send_frame(void)
     uint16_t data;
 
     data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(~data);
+    led_driver_send_data16b(data);
 
     data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(~data);
+    led_driver_send_data16b(data);
 
     data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(~data);
+    led_driver_send_data16b(data);
 
     //latch enable pulse
     LATCH_HIGH;
@@ -418,7 +418,7 @@ void led_driver_config(void)
     led_driver_spi_config();
 
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
-    led_driver_save_colour(0xFF0000, 0); // except of the first led - red
+   // led_driver_save_colour(0xFF0000, 0); // except of the first led - red
 
     led_driver_init_led();
 
