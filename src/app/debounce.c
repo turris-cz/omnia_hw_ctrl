@@ -128,7 +128,7 @@ void debounce_check_inputs(void)
         if (man_reset) //manual reset ocurred last cycle
         {
             sysres_out_startup();
-            reset();
+            second_reset();
             man_reset = 0;
         }
     }

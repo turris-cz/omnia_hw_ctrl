@@ -185,7 +185,14 @@ void sysres_out_startup(void);
   *****************************************************************************/
 void power_control_usb_timeout_config(void);
 
-void reset(void);
+
+/*******************************************************************************
+  * @function   second_reset
+  * @brief      Second reset due to wrong startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void second_reset(void);
 
 #endif // POWER_CONTROL_H
 

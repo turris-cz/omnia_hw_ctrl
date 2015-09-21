@@ -295,6 +295,7 @@ void power_control_usb_timeout_config(void)
     NVIC_Init(&NVIC_InitStructure);
 
 }
+
 /*******************************************************************************
   * @function   sysres_out_startup
   * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
@@ -304,23 +305,24 @@ void power_control_usb_timeout_config(void)
 void sysres_out_startup(void)
 {
     delay(200);
-   // GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
-
-
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
         ;
-    //while (!GPIO_ReadInputDataBit(MANRES_PIN_PORT, MANRES_PIN))
-    //    ;
 
     delay(5); // 5ms delay after releasing of reset signal
 
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 }
 
-void reset(void)
+/*******************************************************************************
+  * @function   second_reset
+  * @brief      Second reset due to wrong startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void second_reset(void)
 {
     delay(100);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);

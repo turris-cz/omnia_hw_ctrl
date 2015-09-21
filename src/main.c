@@ -37,7 +37,7 @@ int main(void)
     power_control_enable_regulator();
 
     sysres_out_startup();
-    reset();
+    second_reset();
     /* initialization for other peripherals */
     debounce_config();
     led_driver_config();
