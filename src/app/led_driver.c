@@ -32,7 +32,9 @@
 
 #define COLOUR_LEVELS				16
 #define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
-#define MAX_LED_BRIGHT_STEP         10
+#define MAX_LED_BRIGHTNESS          100
+#define MIN_LED_BRIGHTNESS          0
+#define LED_BRIGHTNESS_STEP         10
 
 /*******************************************************************************
 // PWM Settings (Frequency und range)
@@ -404,6 +406,9 @@ static void led_driver_init_led(void)
         rgb_leds->led_status = LED_ON;
         rgb_leds->user_led_status = LED_ENABLE;
     }
+
+    rgb_leds->brightness = 100; //100% brightness after reset
+    led_driver_pwm_set_brightness(rgb_leds->brightness);
 }
 
 /*******************************************************************************
@@ -420,10 +425,8 @@ void led_driver_config(void)
     led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
    // led_driver_save_colour(0xFF0000, 0); // except of the first led - red
 
-    led_driver_init_led();
-
     led_driver_pwm_config();
-    led_driver_pwm_set_brightness(90);//90% brightness after reset
+    led_driver_init_led();
     led_driver_timer_config();
 }
 
@@ -453,11 +456,11 @@ void led_driver_pwm_set_brightness(const uint16_t procent_val)
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
-    static uint16_t led_brightness_step = 1;
+    struct led_rgb *rgb_leds = leds;
 
-    if (led_brightness_step > MAX_LED_BRIGHT_STEP)
-        led_brightness_step = 0;
+    if (rgb_leds->brightness <= MIN_LED_BRIGHTNESS)
+        rgb_leds->brightness = MAX_LED_BRIGHTNESS;
 
-    led_driver_pwm_set_brightness(100 - (led_brightness_step * 10));
-    led_brightness_step++;
+    rgb_leds->brightness -= LED_BRIGHTNESS_STEP;
+    led_driver_pwm_set_brightness(rgb_leds->brightness);
 }

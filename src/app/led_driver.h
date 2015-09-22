@@ -17,13 +17,13 @@
 #define LED_COUNT                 12
 
 typedef enum user_led_sts {
-    LED_DISABLE = 0,
-    LED_ENABLE = 1,
+    LED_DISABLE     = 0,
+    LED_ENABLE      = 1,
 }user_led_sts_t;
 
 typedef enum led_sts {
-    LED_OFF = 0,
-    LED_ON = 1,
+    LED_OFF         = 0,
+    LED_ON          = 1,
 }led_sts_t;
 
 struct led_rgb_def {
@@ -33,9 +33,10 @@ struct led_rgb_def {
 };
 
 struct led_rgb {
-    struct led_rgb_def led_rgb_st;
-    led_sts_t led_status;
-    user_led_sts_t user_led_status;
+    struct led_rgb_def  led_rgb_st;
+    led_sts_t           led_status;
+    user_led_sts_t      user_led_status;
+    uint16_t            brightness;
 };
 
 extern struct led_rgb leds[LED_COUNT];
