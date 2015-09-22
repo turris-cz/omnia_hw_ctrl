@@ -35,12 +35,13 @@ int main(void)
 
     /* board startup */
     power_control_enable_regulator();
-
     sysres_out_startup();
     second_reset();
+
     /* initialization for other peripherals */
     debounce_config();
     led_driver_config();
+    wan_lan_pci_config();
 
     //power_control_usb_timeout_config();
     RCC_GetClocksFreq(&RCC_Clocks); //just for debugging - check frequency value
@@ -48,5 +49,6 @@ int main(void)
     while(1)
     {
         debounce_check_inputs();
+        wan_led_activity();
     }
 }

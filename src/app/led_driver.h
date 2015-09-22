@@ -26,6 +26,32 @@ typedef enum led_sts {
     LED_ON          = 1,
 }led_sts_t;
 
+enum led_numbers {
+    LED0            = 0,
+    LED1            = 1,
+    LED2            = 2,
+    LED3            = 3,
+    LED4            = 4,
+    LED5            = 5,
+    LED6            = 6,
+    LED7            = 7,
+    LED8            = 8,
+    LED9            = 9,
+    LED10           = 10,
+    LED11           = 11
+};
+
+enum led_names {
+    POWER_LED       = LED11,
+    WAN_LED         = LED0,
+    LAN1_LED        = LED1,
+    LAN2_LED        = LED2,
+    LAN3_LED        = LED3,
+    LAN4_LED        = LED4,
+    LAN5_LED        = LED5,
+};
+
+
 struct led_rgb_def {
     uint8_t blue; //[0..255]
     uint8_t green;

@@ -148,12 +148,12 @@ static void wan_lan_pci_exti_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-    wan_lan_pci_exti_config();
-    wan_sfp_set_tx_status(ENABLE);
+   // wan_lan_pci_exti_config();
+   // wan_sfp_set_tx_status(ENABLE);
     /* read status of signals after the reset */
-    wan_sfp_connector_detection();
-    wan_sfp_fault_detection();
-    wan_sfp_lost_detection();
+   // wan_sfp_connector_detection();
+   // wan_sfp_fault_detection();
+   // wan_sfp_lost_detection();
 }
 
 /*******************************************************************************
@@ -259,21 +259,21 @@ void wan_led_activity(void)
 
     if (led0_status == 0) //TODO: check real LED polarity
     {
-        //TODO: assign LED indexes (as a pointer) to real meanings
-        rgb_leds[0].led_status = LED_ON;
+        //TODO: assign LED indexes to real meanings
+        rgb_leds[LED1].led_status = LED_ON;
     }
     else
     {
-        led0_status = rgb_leds[0].led_status = LED_OFF;
+        rgb_leds[LED1].led_status = LED_OFF;
     }
 
     if (led1_status == 0)
     {
-        rgb_leds[1].led_status = LED_ON;
+        rgb_leds[LED2].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[1].led_status = LED_OFF;
+        rgb_leds[LED2].led_status = LED_OFF;
     }
 }
 
@@ -294,21 +294,20 @@ void pci_led_activity(void)
     //TODO: assign LED indexes to real meanings
     if(pcie_led0 == 0)
     {
-        //TODO: change to dynamic access
-        rgb_leds[2].led_status = LED_ON;
+        rgb_leds[LED3].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[2].led_status = LED_OFF;
+        rgb_leds[LED3].led_status = LED_OFF;
     }
 
     if (pcie_led1 == 0)
     {
-        rgb_leds[3].led_status = LED_ON;
+        rgb_leds[LED4].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[3].led_status = LED_OFF;
+        rgb_leds[LED4].led_status = LED_OFF;
     }
 }
 
@@ -327,63 +326,62 @@ void lan_led_activity(void)
 
     if((lan_led & LAN_R0_MASK) == 0)
     {
-        //TODO: change to dynamic access
         //TODO: assign LED indexes to real meanings
         /* PORT 0 */
         if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[4].led_status = LED_ON;
+            rgb_leds[LED5].led_status = LED_ON;
         else
-            rgb_leds[4].led_status = LED_OFF;
+            rgb_leds[LED5].led_status = LED_OFF;
 
          /* PORT 1 */
         if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[5].led_status = LED_ON;
+            rgb_leds[LED6].led_status = LED_ON;
         else
-            rgb_leds[5].led_status = LED_OFF;
+            rgb_leds[LED6].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[4].led_status = LED_OFF;
-        rgb_leds[5].led_status = LED_OFF;
+        rgb_leds[LED5].led_status = LED_OFF;
+        rgb_leds[LED6].led_status = LED_OFF;
     }
 
     if ((lan_led & LAN_R1_MASK) == 0)
     {
         /* PORT 2 */
         if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[6].led_status = LED_ON;
+            rgb_leds[LED7].led_status = LED_ON;
         else
-            rgb_leds[6].led_status = LED_OFF;
+            rgb_leds[LED7].led_status = LED_OFF;
 
         /* PORT 3 */
         if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[7].led_status = LED_ON;
+            rgb_leds[LED8].led_status = LED_ON;
         else
-            rgb_leds[7].led_status = LED_OFF;
+            rgb_leds[LED8].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[6].led_status = LED_OFF;
-        rgb_leds[7].led_status = LED_OFF;
+        rgb_leds[LED7].led_status = LED_OFF;
+        rgb_leds[LED8].led_status = LED_OFF;
     }
 
     if ((lan_led & LAN_R2_MASK) == 0)
     {
         /* PORT 4 */
         if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[8].led_status = LED_ON;
+            rgb_leds[LED9].led_status = LED_ON;
         else
-            rgb_leds[8].led_status = LED_OFF;
+            rgb_leds[LED9].led_status = LED_OFF;
 
         /* PORT 5 */
         if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[9].led_status = LED_ON;
+            rgb_leds[LED10].led_status = LED_ON;
         else
-            rgb_leds[9].led_status = LED_OFF;
+            rgb_leds[LED10].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[8].led_status = LED_OFF;
-        rgb_leds[9].led_status = LED_OFF;
+        rgb_leds[LED9].led_status = LED_OFF;
+        rgb_leds[LED10].led_status = LED_OFF;
     }
 }
