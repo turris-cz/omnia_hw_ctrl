@@ -251,11 +251,10 @@ void wan_sfp_set_tx_status(FunctionalState sfp_status)
   *****************************************************************************/
 void wan_led_activity(void)
 {
-    uint8_t led0_status, led1_status;
+    uint8_t led0_status;
     struct led_rgb *rgb_leds = leds;
 
     led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
-    led1_status = GPIO_ReadInputDataBit(WAN_LED1_PIN_PORT, WAN_LED1_PIN);
 
     if (led0_status == 0) //TODO: check real LED polarity
     {
@@ -265,15 +264,6 @@ void wan_led_activity(void)
     else
     {
         rgb_leds[LED1].led_status = LED_OFF;
-    }
-
-    if (led1_status == 0)
-    {
-        rgb_leds[LED2].led_status = LED_ON;
-    }
-    else
-    {
-        rgb_leds[LED2].led_status = LED_OFF;
     }
 }
 

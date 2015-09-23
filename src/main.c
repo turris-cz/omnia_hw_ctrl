@@ -50,5 +50,6 @@ int main(void)
     {
         debounce_check_inputs();
         wan_led_activity();
+        lan_led_activity();
     }
 }

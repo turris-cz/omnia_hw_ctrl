@@ -146,4 +146,12 @@ void wan_led_activity(void);
   *****************************************************************************/
 void pci_led_activity(void);
 
+/*******************************************************************************
+  * @function   pci_led_activity
+  * @brief      Toggle LAN LEDs according to the LAN status.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void lan_led_activity(void);
+
 #endif // WAN_LAN_PCI_STATUS_H
