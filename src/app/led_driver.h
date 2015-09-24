@@ -42,13 +42,13 @@ enum led_numbers {
 };
 
 enum led_names {
-    POWER_LED       = LED11,
-    WAN_LED         = LED0,
-    LAN1_LED        = LED1,
-    LAN2_LED        = LED2,
-    LAN3_LED        = LED3,
-    LAN4_LED        = LED4,
-    LAN5_LED        = LED5,
+    POWER_LED       = LED0,
+    WAN_LED         = LED1,
+    LAN1_LED        = LED2,
+    LAN2_LED        = LED3,
+    LAN3_LED        = LED4,
+    LAN4_LED        = LED5,
+    LAN5_LED        = LED6,
 };
 
 

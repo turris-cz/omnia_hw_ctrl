@@ -102,12 +102,12 @@ static void wan_lan_pci_io_config(void)
 }
 
 /*******************************************************************************
-  * @function   wan_lan_pci_exti_config
-  * @brief      EXTI configuration for WAN, LAN and PCIe indication signals.
+  * @function   wan_sfp_exti_config
+  * @brief      EXTI configuration for WAN SFP indication signals.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void wan_lan_pci_exti_config(void)
+static void wan_sfp_exti_config(void)
 {
     EXTI_InitTypeDef EXTI_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -148,7 +148,7 @@ static void wan_lan_pci_exti_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-   // wan_lan_pci_exti_config();
+   // wan_sfp_exti_config();
    // wan_sfp_set_tx_status(ENABLE);
     /* read status of signals after the reset */
    // wan_sfp_connector_detection();
@@ -258,12 +258,11 @@ void wan_led_activity(void)
 
     if (led0_status == 0) //TODO: check real LED polarity
     {
-        //TODO: assign LED indexes to real meanings
-        rgb_leds[LED1].led_status = LED_ON;
+        rgb_leds[WAN_LED].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[LED1].led_status = LED_OFF;
+        rgb_leds[WAN_LED].led_status = LED_OFF;
     }
 }
 
@@ -316,62 +315,54 @@ void lan_led_activity(void)
 
     if((lan_led & LAN_R0_MASK) == 0)
     {
-        //TODO: assign LED indexes to real meanings
         /* PORT 0 */
-        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[LED5].led_status = LED_ON;
+        if (lan_led & LAN_C0_MASK)
+            rgb_leds[LAN1_LED].led_status = LED_ON;
         else
-            rgb_leds[LED5].led_status = LED_OFF;
+            rgb_leds[LAN1_LED].led_status = LED_OFF;
 
          /* PORT 1 */
-        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[LED6].led_status = LED_ON;
+        if (lan_led & LAN_C1_MASK)
+            rgb_leds[LAN2_LED].led_status = LED_ON;
         else
-            rgb_leds[LED6].led_status = LED_OFF;
+            rgb_leds[LAN2_LED].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[LED5].led_status = LED_OFF;
-        rgb_leds[LED6].led_status = LED_OFF;
+        rgb_leds[LAN1_LED].led_status = LED_OFF;
+        rgb_leds[LAN2_LED].led_status = LED_OFF;
     }
 
     if ((lan_led & LAN_R1_MASK) == 0)
     {
         /* PORT 2 */
-        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[LED7].led_status = LED_ON;
+        if (lan_led & LAN_C0_MASK)
+            rgb_leds[LAN3_LED].led_status = LED_ON;
         else
-            rgb_leds[LED7].led_status = LED_OFF;
+            rgb_leds[LAN3_LED].led_status = LED_OFF;
 
         /* PORT 3 */
-        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[LED8].led_status = LED_ON;
+        if (lan_led & LAN_C1_MASK)
+            rgb_leds[LAN4_LED].led_status = LED_ON;
         else
-            rgb_leds[LED8].led_status = LED_OFF;
+            rgb_leds[LAN4_LED].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[LED7].led_status = LED_OFF;
-        rgb_leds[LED8].led_status = LED_OFF;
+        rgb_leds[LAN3_LED].led_status = LED_OFF;
+        rgb_leds[LAN4_LED].led_status = LED_OFF;
     }
 
     if ((lan_led & LAN_R2_MASK) == 0)
     {
         /* PORT 4 */
-        if ((lan_led & LAN_C0_MASK) || (lan_led & LAN_C2_MASK))
-            rgb_leds[LED9].led_status = LED_ON;
+        if (lan_led & LAN_C0_MASK)
+            rgb_leds[LAN5_LED].led_status = LED_ON;
         else
-            rgb_leds[LED9].led_status = LED_OFF;
-
-        /* PORT 5 */
-        if ((lan_led & LAN_C1_MASK) || (lan_led & LAN_C3_MASK))
-            rgb_leds[LED10].led_status = LED_ON;
-        else
-            rgb_leds[LED10].led_status = LED_OFF;
+            rgb_leds[LAN5_LED].led_status = LED_OFF;
     }
     else
     {
-        rgb_leds[LED9].led_status = LED_OFF;
-        rgb_leds[LED10].led_status = LED_OFF;
+        rgb_leds[LAN5_LED].led_status = LED_OFF;
     }
 }
