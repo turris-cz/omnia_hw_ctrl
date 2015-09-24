@@ -19,6 +19,7 @@
 #include "wan_lan_pci_status.h"
 #include "debug_serial.h"
 #include "slave_i2c_device.h"
+#include "app.h"
 
 /*******************************************************************************
  * @brief  Main program.

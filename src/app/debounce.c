@@ -113,9 +113,7 @@ void debounce_check_inputs(void)
         debounced_state = debounced_state & port_state[i];
     }
 
-    //TODO: reaction on level or edge (falling) ?
     port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
-    //port_changed = debounced_state;
 
     if (port_changed & MAN_RES_MASK)
     {
@@ -135,7 +133,7 @@ void debounce_check_inputs(void)
 
     if (port_changed & SYSRES_OUT_MASK)
     {
-        //no reaction necessary
+        //TODO: reaction ?
     }
 
     if (port_changed & DBG_RES_MASK)
@@ -168,7 +166,7 @@ void debounce_check_inputs(void)
     if (port_changed & USB30_OVC_MASK)
     {
         power_control_usb(USB3_PORT0, USB_OFF);
-        //TODO - when USB_ON again?
+        //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
@@ -176,7 +174,7 @@ void debounce_check_inputs(void)
     if (port_changed & USB31_OVC_MASK)
     {
         power_control_usb(USB3_PORT1, USB_OFF);
-        //TODO - when USB_ON again?
+        //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 

@@ -83,8 +83,8 @@ static void msata_pci_exti_config(void)
 void msata_pci_indication_config(void)
 {
     msata_pci_io_config();
-    msata_pci_exti_config();
-    msata_pci_card_detection();//read status of already inserted card after the reset
+    //msata_pci_exti_config();
+    //msata_pci_card_detection();//read status of already inserted card after the reset
 }
 
 /*******************************************************************************
