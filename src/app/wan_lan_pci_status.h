@@ -98,29 +98,28 @@ void wan_lan_pci_config(void);
 /*******************************************************************************
   * @function   wan_sfp_connector_detection
   * @brief      Detect inserted SFP+ connector.
-  *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     Input pin state.
   *****************************************************************************/
-void wan_sfp_connector_detection(void);
+__inline__ uint8_t wan_sfp_connector_detection(void);
 
 /*******************************************************************************
   * @function   wan_sfp_fault_detection
   * @brief      Detect a SFP fault.
   *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     Input pin state.
   *****************************************************************************/
-void wan_sfp_fault_detection(void);
+__inline__ uint8_t wan_sfp_fault_detection(void);
 
 /*******************************************************************************
   * @function   wan_sfp_lost_detection
   * @brief      Detect a lost communication.
   *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     Input pin state..
   *****************************************************************************/
-void wan_sfp_lost_detection(void);
+__inline__ uint8_t wan_sfp_lost_detection(void);
 
 /******************************************************************************
   * @function   wan_sfp_set_tx_status

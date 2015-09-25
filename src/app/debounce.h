@@ -23,6 +23,9 @@ struct input_sig {
     uint8_t usb31_ovc   :1;
     uint8_t rtc_alarm   :1;
     uint8_t led_brt     :1;
+    uint8_t sfp_det     :1;
+    uint8_t sfp_flt     :1;
+    uint8_t sfp_los     :1;
 };
 
 extern struct input_sig debounce_input_signal;

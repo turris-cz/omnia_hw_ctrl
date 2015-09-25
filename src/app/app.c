@@ -38,6 +38,7 @@ void app_mcu_init(void)
     led_driver_config(); //TODO: set all LED colour to white and then black
     msata_pci_indication_config();
     wan_lan_pci_config();
+    power_control_usb_timeout_config();
     slave_i2c_config();
 }
 
@@ -100,13 +101,27 @@ static ret_value_t input_manager(void)
         input_state->usb31_ovc = 0;
     }
 
+    if(input_state->sfp_det) //flag is cleared in debounce function
+        i2c_status_word |= SFP_DET_BIT;
+
+    if(input_state->sfp_los)
+        i2c_status_word |= SFP_LOS_BIT;
+
+    if(input_state->sfp_flt)
+        i2c_status_word |= SFP_FLT_BIT;
+
     return val;
 }
 
 static ret_value_t ic2_manager(void)
 {
-    if (i2c_status_word)
+    static uint16_t last_status_word;
+
+    if (i2c_status_word != last_status_word)
+    {
         SET_INTERRUPT;
+        last_status_word = i2c_status_word;
+    }
     else
         RESET_INTERRUPT;
 

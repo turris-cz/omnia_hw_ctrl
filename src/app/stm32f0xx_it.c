@@ -212,24 +212,6 @@ void EXTI4_15_IRQHandler(void)
         msata_pci_card_detection();
         EXTI_ClearITPendingBit(CARD_DET_PIN_EXTILINE);
     }
-
-    if ((EXTI_GetITStatus(SFP_DET_PIN_EXTILINE) != RESET))
-    {
-        wan_sfp_connector_detection();
-        EXTI_ClearITPendingBit(SFP_DET_PIN_EXTILINE);
-    }
-
-    if ((EXTI_GetITStatus(SFP_LOS_PIN_EXTILINE) != RESET))
-    {
-        wan_sfp_lost_detection();
-        EXTI_ClearITPendingBit(SFP_LOS_PIN_EXTILINE);
-    }
-
-    if ((EXTI_GetITStatus(SFP_FLT_PIN_EXTILINE) != RESET))
-    {
-        wan_sfp_fault_detection();
-        EXTI_ClearITPendingBit(SFP_FLT_PIN_EXTILINE);
-    }
 }
 
 /**

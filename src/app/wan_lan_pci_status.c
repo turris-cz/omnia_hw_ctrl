@@ -101,43 +101,6 @@ static void wan_lan_pci_io_config(void)
     GPIO_Init(C3_P5_LED_PIN_PORT, &GPIO_InitStructure);
 }
 
-/*******************************************************************************
-  * @function   wan_sfp_exti_config
-  * @brief      EXTI configuration for WAN SFP indication signals.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void wan_sfp_exti_config(void)
-{
-    EXTI_InitTypeDef EXTI_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* Enable SYSCFG clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-    SYSCFG_EXTILineConfig(SFP_LOS_PIN_EXTIPORT, SFP_LOS_PIN_EXTIPINSOURCE);
-
-    /* configure all ext. interrupt on rising and falling edge */
-    EXTI_InitStructure.EXTI_Line = SFP_LOS_PIN_EXTILINE;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(SFP_FLT_PIN_EXTIPORT, SFP_FLT_PIN_EXTIPINSOURCE);
-    EXTI_InitStructure.EXTI_Line = SFP_FLT_PIN_EXTILINE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(SFP_DET_PIN_EXTIPORT, SFP_DET_PIN_EXTIPINSOURCE);
-    EXTI_InitStructure.EXTI_Line = SFP_DET_PIN_EXTILINE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    /* Enable and set EXTI Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI4_15_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
 
 /*******************************************************************************
   * @function   wan_lan_pci_config
@@ -148,7 +111,6 @@ static void wan_sfp_exti_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-   // wan_sfp_exti_config();
    // wan_sfp_set_tx_status(ENABLE);
     /* read status of signals after the reset */
    // wan_sfp_connector_detection();
@@ -159,24 +121,12 @@ void wan_lan_pci_config(void)
 /*******************************************************************************
   * @function   wan_sfp_connector_detection
   * @brief      Detect inserted SFP+ connector.
-  *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     Input pin state.
   *****************************************************************************/
-void wan_sfp_connector_detection(void)
+inline uint8_t wan_sfp_connector_detection(void)
 {
-    uint8_t sfp_detected;
-
-    sfp_detected = GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN);
-
-    if (sfp_detected)
-    {
-        //TODO: log. 1 means SFP connector unconnected ?
-    }
-    else
-    {
-        //TODO: log. 0 means SFP connector connected ?
-    }
+    return (GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN));
 }
 
 /*******************************************************************************
@@ -184,22 +134,11 @@ void wan_sfp_connector_detection(void)
   * @brief      Detect a SFP fault.
   *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     Input pin state.
   *****************************************************************************/
-void wan_sfp_fault_detection(void)
+inline uint8_t wan_sfp_fault_detection(void)
 {
-    uint8_t sfp_fault_detected;
-
-    sfp_fault_detected = GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN);
-
-    if (sfp_fault_detected)
-    {
-        //TODO: do some action - no fault
-    }
-    else
-    {
-        //TODO: do some action - fault occures
-    }
+    return (GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN));
 }
 
 /*******************************************************************************
@@ -209,20 +148,9 @@ void wan_sfp_fault_detection(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void wan_sfp_lost_detection(void)
+inline uint8_t wan_sfp_lost_detection(void)
 {
-    uint8_t sfp_lost_detected;
-
-    sfp_lost_detected = GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN);
-
-    if (sfp_lost_detected)
-    {
-        //TODO: do some action - no lost detected
-    }
-    else
-    {
-        //TODO: do some action - lost detected
-    }
+    return (GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN));
 }
 
 /*******************************************************************************

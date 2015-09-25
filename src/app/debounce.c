@@ -13,6 +13,7 @@
 #include "power_control.h"
 #include "delay.h"
 #include "led_driver.h"
+#include "wan_lan_pci_status.h"
 
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
@@ -34,6 +35,10 @@ enum input_mask {
 };
 
 #define MAX_INPUT_STATES            3
+#define MAX_SFP_DET_STATES          5
+#define MAX_SFP_FLT_STATES          5
+#define MAX_SFP_LOS_STATES          5
+
 static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
@@ -77,6 +82,117 @@ static void debounce_timer_config(void)
 }
 
 /*******************************************************************************
+  * @function   debounce_sfp_det
+  * @brief      Debounce of SFP_DET input. Called in debounce timer interrupt.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_sfp_det(void)
+{
+    static uint16_t counter;
+    uint8_t pin;
+    struct input_sig *input_state = &debounce_input_signal;
+
+    pin = wan_sfp_connector_detection();
+
+    if (pin) //signal released
+    {
+        if (counter > 0)
+            counter--;
+    }
+    else //signal falls to low
+    {
+        if (counter < MAX_SFP_DET_STATES)
+            counter++;
+    }
+
+    if (counter == 0)
+        input_state->sfp_det = 0;
+    else
+    {
+        if(counter >= MAX_SFP_DET_STATES)
+        {
+            input_state->sfp_det = 1;
+            counter = MAX_SFP_DET_STATES;
+        }
+    }
+}
+
+/*******************************************************************************
+  * @function   debounce_sfp_flt
+  * @brief      Debounce of SFP_FLT input. Called in debounce timer interrupt.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_sfp_flt(void)
+{
+    static uint16_t counter;
+    uint8_t pin;
+    struct input_sig *input_state = &debounce_input_signal;
+
+    pin = wan_sfp_fault_detection();
+
+    if (pin) //signal released
+    {
+        if (counter > 0)
+            counter--;
+    }
+    else //signal falls to low
+    {
+        if (counter < MAX_SFP_FLT_STATES)
+            counter++;
+    }
+
+    if (counter == 0)
+        input_state->sfp_flt = 0;
+    else
+    {
+        if(counter >= MAX_SFP_FLT_STATES)
+        {
+            input_state->sfp_flt = 1;
+            counter = MAX_SFP_FLT_STATES;
+        }
+    }
+}
+
+/*******************************************************************************
+  * @function   debounce_sfp_los
+  * @brief      Debounce of SFP_LOS input. Called in debounce timer interrupt.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_sfp_los(void)
+{
+    static uint16_t counter;
+    uint8_t pin;
+    struct input_sig *input_state = &debounce_input_signal;
+
+    pin = wan_sfp_lost_detection();
+
+    if (pin) //signal released
+    {
+        if (counter > 0)
+            counter--;
+    }
+    else //signal falls to low
+    {
+        if (counter < MAX_SFP_LOS_STATES)
+            counter++;
+    }
+
+    if (counter == 0)
+        input_state->sfp_los = 0;
+    else
+    {
+        if(counter >= MAX_SFP_LOS_STATES)
+        {
+            input_state->sfp_los = 1;
+            counter = MAX_SFP_LOS_STATES;
+        }
+    }
+}
+
+/*******************************************************************************
   * @function   debounce_input_timer_handler
   * @brief      Main debounce function. Called in timer interrupt handler.
   * @param      None.
@@ -91,6 +207,10 @@ void debounce_input_timer_handler(void)
 
     if (idx >= MAX_INPUT_STATES)
         idx = 0;
+
+    debounce_sfp_det();
+    debounce_sfp_flt();
+    debounce_sfp_los();
 }
 
 /*******************************************************************************
