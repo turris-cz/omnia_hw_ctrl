@@ -46,6 +46,7 @@ enum i2c_commands {
 };
 
 static struct st_i2c_status i2c_status;
+uint16_t i2c_status_word;
 
 /*******************************************************************************
   * @function   slave_i2c_config
@@ -273,6 +274,10 @@ void slave_i2c_process_data(void)
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
         DBG("clear buffers\r\n");
+
+        // clear status word
+     //TODO: set to correct value
+        i2c_status_word = 0;
 
         // enable interrupt again
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);

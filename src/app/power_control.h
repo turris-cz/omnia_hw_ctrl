@@ -13,6 +13,10 @@
 #define USB_TIMEOUT_TIMER                   TIM14
 
 //Outputs
+#define INT_MCU_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
+#define INT_MCU_PIN_PORT                    GPIOC
+#define INT_MCU_PIN                         GPIO_Pin_0
+
 #define RES_RAM_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
 #define RES_RAM_PIN_PORT                    GPIOC
 #define RES_RAM_PIN                         GPIO_Pin_3

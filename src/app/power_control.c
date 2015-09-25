@@ -34,7 +34,7 @@ void power_control_io_config(void)
        ENABLE_1V5_PIN_PERIPH_CLOCK | ENABLE_1V2_PIN_PERIPH_CLOCK |
        ENABLE_VTT_PIN_PERIPH_CLOCK | USB30_PWRON_PIN_PERIPH_CLOCK |
        USB31_PWRON_PIN_PERIPH_CLOCK | SYSRES_OUT_PIN_PERIPH_CLOCK |
-                          MANRES_PIN_PERIPH_CLOCK , ENABLE);
+       INT_MCU_PIN_PERIPH_CLOCK | MANRES_PIN_PERIPH_CLOCK, ENABLE);
 
     /* Output signals */
     GPIO_InitStructure.GPIO_Pin = RES_RAM_PIN;
@@ -43,6 +43,9 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(RES_RAM_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = INT_MCU_PIN;
+    GPIO_Init(INT_MCU_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = ENABLE_5V_PIN;
     GPIO_Init(ENABLE_5V_PIN_PORT, &GPIO_InitStructure);
@@ -109,14 +112,10 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(MRES_PIN_PORT, &GPIO_InitStructure);
 
-
     GPIO_InitStructure.GPIO_Pin = DGBRES_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(DGBRES_PIN_PORT, &GPIO_InitStructure);
-
-    //GPIO_InitStructure.GPIO_Pin = MANRES_PIN;
-    //GPIO_Init(MANRES_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PG_5V_PIN;
     GPIO_Init(PG_5V_PIN_PORT, &GPIO_InitStructure);
@@ -155,6 +154,7 @@ void power_control_io_config(void)
     GPIO_Init(LED_BRT_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); //dont control this !
+    GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN);
 }
 
 /*******************************************************************************

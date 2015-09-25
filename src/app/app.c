@@ -18,6 +18,8 @@
 #include "slave_i2c_device.h"
 #include "wan_lan_pci_status.h"
 
+#define SET_INTERRUPT       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+#define RESET_INTERRUPT     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 
 static states_t next_state = POWER_ON;
 
@@ -33,7 +35,7 @@ void app_mcu_init(void)
     delay_systimer_config();
     //init ports and peripheral
     power_control_io_config();
-    led_driver_config(); //TODO: set all LED colour all to white and then black
+    led_driver_config(); //TODO: set all LED colour to white and then black
     msata_pci_indication_config();
     wan_lan_pci_config();
     slave_i2c_config();
@@ -86,16 +88,31 @@ static ret_value_t input_manager(void)
     }
 
     if(input_state->usb30_ovc)
-    {//TODO
-       input_state->usb30_ovc = 0;
+    {
+        i2c_status_word |= USB30_OVC_BIT;
+        input_state->usb30_ovc = 0;
+        //TODO: vypnout USB a nastavit bit v i2c_status_word
     }
 
     if(input_state->usb31_ovc)
     {
+        i2c_status_word |= USB31_OVC_BIT;
         input_state->usb31_ovc = 0;
     }
 
     return val;
+}
+
+static ret_value_t ic2_manager(void)
+{
+    if (i2c_status_word)
+        SET_INTERRUPT;
+    else
+        RESET_INTERRUPT;
+
+    slave_i2c_process_data();
+
+    return OK;
 }
 
 static ret_value_t led_manager(void)
@@ -106,7 +123,7 @@ static ret_value_t led_manager(void)
     return OK;
 }
 
-void app_cyclic(void)
+void app_mcu_cyclic(void)
 {
     ret_value_t val;
 
@@ -163,7 +180,11 @@ void app_cyclic(void)
         }
         break;
 
-    case I2C_MANAGER: next_state = LED_MANAGER;
+    case I2C_MANAGER:
+        {
+            ic2_manager();
+            next_state = LED_MANAGER;
+        }
         break;
 
     case LED_MANAGER:
