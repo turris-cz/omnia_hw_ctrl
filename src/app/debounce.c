@@ -37,6 +37,7 @@ enum input_mask {
 static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
+struct input_sig debounce_input_signal;
 
 #define  DEBOUNCE_TIM_PERIODE       (300 - 1)//300 -> 5ms; 600 -> 10ms
 #define  DEBOUNCE_TIM_PRESCALER     (800 - 1)
@@ -102,7 +103,7 @@ void debounce_check_inputs(void)
 {
     uint16_t i, port_changed;
     static uint16_t last_debounce_state;
-    static uint8_t man_reset;
+    struct input_sig *input_state = &debounce_input_signal;
 
     last_debounce_state = debounced_state;
 
@@ -116,20 +117,7 @@ void debounce_check_inputs(void)
     port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
 
     if (port_changed & MAN_RES_MASK)
-    {
-        //manual reset occured: set init state - disconnect switches
-        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        man_reset = 1;
-    }
-    else
-    {
-        if (man_reset) //manual reset ocurred last cycle
-        {
-            sysres_out_startup();
-            second_reset();
-            man_reset = 0;
-        }
-    }
+        input_state->man_res = 1;
 
     if (port_changed & SYSRES_OUT_MASK)
     {
@@ -156,26 +144,29 @@ void debounce_check_inputs(void)
          (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
          (port_changed & PG_1V2_MASK) || (port_changed & PG_VTT_MASK))
     {
-        power_control_disable_regulator();
+        input_state->pg = 1;
+        //power_control_disable_regulator();
         /* 100ms delay between the first and last voltage power-down
          * defined in Marvell HW specification, pg.97 (power-down sequence) */
-        delay(100);
-        NVIC_SystemReset(); // SW reset
+        //delay(100);
+       // NVIC_SystemReset(); // SW reset
     }
 
     if (port_changed & USB30_OVC_MASK)
     {
-        power_control_usb(USB3_PORT0, USB_OFF);
+        input_state->usb30_ovc = 1;
+        //power_control_usb(USB3_PORT0, USB_OFF);
         //USB timeout set to 1 sec
-        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+        //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
 
     if (port_changed & USB31_OVC_MASK)
     {
-        power_control_usb(USB3_PORT1, USB_OFF);
+        input_state->usb31_ovc = 1;
+        //power_control_usb(USB3_PORT1, USB_OFF);
         //USB timeout set to 1 sec
-        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+        //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
 
@@ -188,7 +179,6 @@ void debounce_check_inputs(void)
     {
         led_driver_step_brightness();
     }
-
 }
 
 /*******************************************************************************

@@ -36,8 +36,8 @@ int main(void)
 
     /* board startup */
     power_control_enable_regulator();
-    sysres_out_startup();
-    second_reset();
+    power_control_first_startup();
+    power_control_second_startup();
 
     /* initialization for other peripherals */
     debounce_config();
