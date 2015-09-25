@@ -11,16 +11,18 @@
 #define __APP_H
 
 typedef enum {
-    FAIL    = -1,
-    OK      = 0,
-}return_value_t;
+    FAIL                = -1,
+    OK                  = 0,
+    GO_TO_LIGHT_RESET   = 1,
+    GO_TO_HARD_RESET    = 2,
+}ret_value_t;
 
 typedef enum {
     POWER_ON,
     LIGHT_RESET,
     HARD_RESET,
     FACTORY_RESET,
-    SYSTEM_START,
+    LOAD_SETTINGS,
     ERROR_STATE,
     INPUT_MANAGER,
     I2C_MANAGER,
