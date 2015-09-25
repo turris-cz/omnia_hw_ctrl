@@ -170,12 +170,12 @@ void power_control_disable_regulator(void);
 void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
 
 /*******************************************************************************
-  * @function   sysres_out_startup
-  * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
+  * @function   power_control_first_startup
+  * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void sysres_out_startup(void);
+void power_control_first_startup(void);
 
 /*******************************************************************************
   * @function   debounce_usb_timeout_timer_config
@@ -185,14 +185,21 @@ void sysres_out_startup(void);
   *****************************************************************************/
 void power_control_usb_timeout_config(void);
 
-
 /*******************************************************************************
-  * @function   second_reset
+  * @function   power_control_second_startup
   * @brief      Second reset due to wrong startup.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void second_reset(void);
+void power_control_second_startup(void);
+
+/*******************************************************************************
+  * @function   power_control_set_startup_condition
+  * @brief      Set signals to reset state before board startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_startup_condition(void);
 
 #endif // POWER_CONTROL_H
 

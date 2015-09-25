@@ -154,13 +154,21 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_Pin = LED_BRT_PIN;
     GPIO_Init(LED_BRT_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
-    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); //dont control this !
+}
+
+/*******************************************************************************
+  * @function   power_control_set_startup_condition
+  * @brief      Set signals to reset state before board startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_startup_condition(void)
+{
+    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN); //disconnect switches
+    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN); //board reset activated
     power_control_usb(USB3_PORT0, USB_ON);
     power_control_usb(USB3_PORT1, USB_ON);
-    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
-
-
 }
 
 /*******************************************************************************
@@ -293,18 +301,18 @@ void power_control_usb_timeout_config(void)
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-
 }
 
 /*******************************************************************************
-  * @function   sysres_out_startup
-  * @brief      Handle SYSRES_OUT and CFG_CTRL signals during startup.
+  * @function   power_control_first_startup
+  * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void sysres_out_startup(void)
+void power_control_first_startup(void)
 {
     delay(200);
+    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
@@ -312,25 +320,26 @@ void sysres_out_startup(void)
         ;
 
     delay(5); // 5ms delay after releasing of reset signal
-
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 }
 
 /*******************************************************************************
-  * @function   second_reset
+  * @function   power_control_second_startup
   * @brief      Second reset due to wrong startup.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void second_reset(void)
+void power_control_second_startup(void)
 {
     delay(100);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
     delay(200);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
+
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
         ;
+
     delay(5);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 }
