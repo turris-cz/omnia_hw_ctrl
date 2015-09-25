@@ -42,6 +42,12 @@ void app_mcu_init(void)
     slave_i2c_config();
 }
 
+/*******************************************************************************
+  * @function   power_on
+  * @brief      Start the board / enable dc-dc regulators.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
 static ret_value_t power_on(void)
 {
     power_control_set_startup_condition();
@@ -53,10 +59,35 @@ static ret_value_t power_on(void)
     return OK;
 }
 
+static uint16_t get_status_word(void)
+{
+    uint16_t status_word = 0;
+
+    if (wan_sfp_connector_detection())
+        status_word |= SFP_DET_BIT;
+
+    if (wan_sfp_lost_detection())
+        status_word |= SFP_LOS_BIT;
+
+    if (wan_sfp_fault_detection())
+        status_word |= SFP_FLT_BIT;
+
+    if (msata_pci_card_detection())
+        status_word |= CARD_DET_BIT;
+
+    if (msata_pci_type_card_detection())
+        status_word |= MSATA_IND_BIT;
+
+    //TODO: SFP_DIS, USB
+
+    return status_word;
+}
 static ret_value_t load_settings(void)
 {
     debounce_config();
-//Marvell CPU should send settings now (led brigthness and colour)
+
+    i2c_status_word = get_status_word();
+    //Marvell CPU should send settings now (led brigthness and colour)
 
     return OK;
 }

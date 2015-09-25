@@ -24,8 +24,8 @@ extern uint16_t i2c_status_word;
  *      5   |   mSATA_IND   : 1 - mSATA card inserted, 0 - PCIe card inserted
  *      6   |   USB30_OVC   : 1 - USB3-port0 overcurrent, 0 - no overcurrent
  *      7   |   USB31_OVC   : 1 - USB3-port1 overcurrent, 0 - no overcurrent
- *      8   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB power off
- *      9   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB power off
+ *      8   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
+ *      9   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
 */
 enum status_word_bits {
     SFP_DET_BIT         = 0x0001,
@@ -33,7 +33,7 @@ enum status_word_bits {
     SFP_FLT_BIT         = 0x0004,
     SFP_DIS_BIT         = 0x0008,
     CARD_DET_BIT        = 0x0010,
-    mSATA_IND_BIT       = 0x0020,
+    MSATA_IND_BIT       = 0x0020,
     USB30_OVC_BIT       = 0x0040,
     USB31_OVC_BIT       = 0x0080,
     USB30_PWRON_BIT     = 0x0100,

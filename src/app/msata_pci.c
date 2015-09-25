@@ -54,17 +54,13 @@ static void msata_pci_exti_config(void)
     /* Enable SYSCFG clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-    SYSCFG_EXTILineConfig(CARD_DET_PIN_EXTIPORT, CARD_DET_PIN_EXTIPINSOURCE);
+    SYSCFG_EXTILineConfig(MSATALED_PIN_EXTIPORT, MSATALED_PIN_EXTIPINSOURCE);
 
     /* configure all ext. interrupt on rising and falling edge */
-    EXTI_InitStructure.EXTI_Line = CARD_DET_PIN_EXTILINE;
+    EXTI_InitStructure.EXTI_Line = MSATALED_PIN_EXTILINE;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(MSATALED_PIN_EXTIPORT, MSATALED_PIN_EXTIPINSOURCE);
-    EXTI_InitStructure.EXTI_Line = MSATALED_PIN_EXTILINE;
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set EXTI Interrupt */
@@ -83,8 +79,7 @@ static void msata_pci_exti_config(void)
 void msata_pci_indication_config(void)
 {
     msata_pci_io_config();
-    //msata_pci_exti_config();
-    //msata_pci_card_detection();//read status of already inserted card after the reset
+    msata_pci_exti_config();
 }
 
 /*******************************************************************************
@@ -112,31 +107,26 @@ void msata_pci_activity_handler(void)
 
 /*******************************************************************************
   * @function   msata_pci_card_detection
-  * @brief      Detect inserted card - PCIe or mSATA card.
-  *             Called in EXTI interrupt handler and during the initialization.
+  * @brief      Detect inserted card (whether is a card inserted or not)
   * @param      None.
-  * @retval     None.
+  * @retval     1 - a card inserted, 0 - no card inserted.
   *****************************************************************************/
-void msata_pci_card_detection(void)
+inline uint8_t msata_pci_card_detection(void)
 {
-    struct msata_pci_ind *msata_pci_detect = &msata_pci_status;
+    /* inverted due to the HW connection
+    HW connection: 1 = no card inserted, 0 = card inserted */
+    return (!(GPIO_ReadInputDataBit(CARD_DET_PIN_PORT, CARD_DET_PIN)));
+}
 
-    msata_pci_detect->card_det = GPIO_ReadInputDataBit(CARD_DET_PIN_PORT, CARD_DET_PIN);
-    msata_pci_detect->msata_ind = GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
-
-    if (msata_pci_detect->card_det == 0) //a card is inserted
-    {
-        if (msata_pci_detect->msata_ind)
-        {
-            //TODO: do some action -> PCIe card detected
-        }
-        else
-        {
-            //TODO: do some action -> mSATA card detected
-        }
-    }
-    else
-    {
-        //TODO: do some action - no card inserted
-    }
+/*******************************************************************************
+  * @function   msata_pci_type_card_detection
+  * @brief      Detect a type of inserted card - mSATA or miniPCIe
+  * @param      None.
+  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
+  *****************************************************************************/
+inline uint8_t msata_pci_type_card_detection(void)
+{
+    /* inverted due to the HW connection
+    HW connection: 1 = miniPCIE inserted, 0 = mSATA card inserted */
+    return (!(GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN)));
 }

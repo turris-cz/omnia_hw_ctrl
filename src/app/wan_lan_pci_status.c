@@ -122,35 +122,39 @@ void wan_lan_pci_config(void)
   * @function   wan_sfp_connector_detection
   * @brief      Detect inserted SFP+ connector.
   * @param      None.
-  * @retval     Input pin state.
+  * @retval     1 - SFP detected, 0 - SFP not detected.
   *****************************************************************************/
 inline uint8_t wan_sfp_connector_detection(void)
 {
-    return (GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN));
+    /* inverted due to the HW connection
+    HW connection: 1 = SFP not detected, 0 = SFP detected */
+    return (!(GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN)));
 }
 
 /*******************************************************************************
   * @function   wan_sfp_fault_detection
   * @brief      Detect a SFP fault.
-  *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     Input pin state.
+  * @retval     1 - SFP TX fault, 0 - SFP no TX fault.
   *****************************************************************************/
 inline uint8_t wan_sfp_fault_detection(void)
 {
-    return (GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN));
+    /* inverted due to the HW connection
+    HW connection: 1 = SFP no TX fault, 0 = SFP TX fault */
+    return (!(GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN)));
 }
 
 /*******************************************************************************
   * @function   wan_sfp_lost_detection
   * @brief      Detect a lost communication.
-  *             Called in EXTI interrupt handler and during the initialization.
   * @param      None.
-  * @retval     None.
+  * @retval     1 - SFP lost, 0 - no SFP lost.
   *****************************************************************************/
 inline uint8_t wan_sfp_lost_detection(void)
 {
-    return (GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN));
+    /* inverted due to the HW connection
+    HW connection: 1 = no SFP lost, 0 = SFP lost */
+    return (!(GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN)));
 }
 
 /*******************************************************************************

@@ -206,12 +206,6 @@ void EXTI4_15_IRQHandler(void)
         /* Clear the EXTI line pending bit */
         EXTI_ClearITPendingBit(MSATALED_PIN_EXTILINE);
     }
-
-    if ((EXTI_GetITStatus(CARD_DET_PIN_EXTILINE) != RESET))
-    {
-        msata_pci_card_detection();
-        EXTI_ClearITPendingBit(CARD_DET_PIN_EXTILINE);
-    }
 }
 
 /**

@@ -57,12 +57,19 @@ void msata_pci_activity_handler(void);
 
 /*******************************************************************************
   * @function   msata_pci_card_detection
-  * @brief      Detect inserted card - PCIe or mSATA card.
-  *             Called in EXTI interrupt handler and during the initialization.
+  * @brief      Detect inserted card (whether is a card inserted or not)
   * @param      None.
-  * @retval     None.
+  * @retval     1 - a card inserted, 0 - no card inserted.
   *****************************************************************************/
-void msata_pci_card_detection(void);
+__inline__ uint8_t msata_pci_card_detection(void);
+
+/*******************************************************************************
+  * @function   msata_pci_type_card_detection
+  * @brief      Detect a type of inserted card - mSATA or miniPCIe
+  * @param      None.
+  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
+  *****************************************************************************/
+__inline__ uint8_t msata_pci_type_card_detection(void);
 
 #endif // MSATA_PCI_H
 
