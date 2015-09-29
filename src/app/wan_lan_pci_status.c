@@ -208,23 +208,22 @@ void pci_led_activity(void)
     pcie_led0 = GPIO_ReadInputDataBit(PCI_LED0_PIN_PORT, PCI_LED0_PIN);
     pcie_led1 = GPIO_ReadInputDataBit(PCI_LED1_PIN_PORT, PCI_LED1_PIN);
 
-    //TODO: assign LED indexes to real meanings
     if(pcie_led0 == 0)
     {
-        rgb_leds[LED3].led_status = LED_ON;
+        rgb_leds[WIFI_24G_LED].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[LED3].led_status = LED_OFF;
+        rgb_leds[WIFI_24G_LED].led_status = LED_OFF;
     }
 
     if (pcie_led1 == 0)
     {
-        rgb_leds[LED4].led_status = LED_ON;
+        rgb_leds[WIFI_5G_LED].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[LED4].led_status = LED_OFF;
+        rgb_leds[WIFI_5G_LED].led_status = LED_OFF;
     }
 }
 

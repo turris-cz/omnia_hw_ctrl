@@ -49,6 +49,11 @@ enum led_names {
     LAN3_LED        = LED4,
     LAN4_LED        = LED5,
     LAN5_LED        = LED6,
+    WIFI_24G_LED    = LED7,
+    WIFI_5G_LED     = LED8,
+    MSATA_LED       = LED9,
+    USER_LED1       = LED10,
+    USER_LED2       = LED11
 };
 
 
