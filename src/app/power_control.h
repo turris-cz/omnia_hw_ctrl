@@ -190,6 +190,22 @@ void power_control_first_startup(void);
 void power_control_usb_timeout_config(void);
 
 /*******************************************************************************
+  * @function   power_control_get_usb_overcurrent
+  * @brief      Get USB overcurrent status.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
+  * @retval     1 - USB overcurrent ocurred; 0 - no USB overcurrent
+  *****************************************************************************/
+uint8_t power_control_get_usb_overcurrent(usb_ports_t usb_port);
+
+/*******************************************************************************
+  * @function   power_control_get_usb_poweron
+  * @brief      Get USB poweron status.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
+  * @retval     1 - USB power ON; 0 - USB power OFF
+  *****************************************************************************/
+uint8_t power_control_get_usb_poweron(usb_ports_t usb_port);
+
+/*******************************************************************************
   * @function   power_control_second_startup
   * @brief      Second reset due to wrong startup.
   * @param      None.

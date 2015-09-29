@@ -270,6 +270,34 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
 }
 
 /*******************************************************************************
+  * @function   power_control_get_usb_overcurrent
+  * @brief      Get USB overcurrent status.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
+  * @retval     1 - USB overcurrent ocurred; 0 - no USB overcurrent
+  *****************************************************************************/
+uint8_t power_control_get_usb_overcurrent(usb_ports_t usb_port)
+{
+    if (usb_port == USB3_PORT0)
+        return (!(GPIO_ReadInputDataBit(USB30_OVC_PIN_PORT, USB30_OVC_PIN)));
+    else //USB3_PORT1
+        return (!(GPIO_ReadInputDataBit(USB31_OVC_PIN_PORT, USB31_OVC_PIN)));
+}
+
+/*******************************************************************************
+  * @function   power_control_get_usb_poweron
+  * @brief      Get USB poweron status.
+  * @param      usb_port: USB3_PORT0 or USB3_PORT1.
+  * @retval     1 - USB power ON; 0 - USB power OFF
+  *****************************************************************************/
+uint8_t power_control_get_usb_poweron(usb_ports_t usb_port)
+{
+    if (usb_port == USB3_PORT0)
+        return (!(GPIO_ReadInputDataBit(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN)));
+    else //USB3_PORT1
+        return (!(GPIO_ReadInputDataBit(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN)));
+}
+
+/*******************************************************************************
   * @function   debounce_usb_timeout_timer_config
   * @brief      Timer configuration for USB recovery timeout.
   * @param      None.
