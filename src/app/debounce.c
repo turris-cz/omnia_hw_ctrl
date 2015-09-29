@@ -90,12 +90,12 @@ static void debounce_timer_config(void)
 static void debounce_sfp_det(void)
 {
     static uint16_t counter;
-    uint8_t pin;
+    uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    pin = wan_sfp_connector_detection();
+    state = ~(wan_sfp_connector_detection());
 
-    if (pin) //signal released
+    if (state) //signal released
     {
         if (counter > 0)
             counter--;
@@ -127,12 +127,12 @@ static void debounce_sfp_det(void)
 static void debounce_sfp_flt(void)
 {
     static uint16_t counter;
-    uint8_t pin;
+    uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    pin = wan_sfp_fault_detection();
+    state = ~(wan_sfp_fault_detection());
 
-    if (pin) //signal released
+    if (state) //signal released
     {
         if (counter > 0)
             counter--;
@@ -164,12 +164,12 @@ static void debounce_sfp_flt(void)
 static void debounce_sfp_los(void)
 {
     static uint16_t counter;
-    uint8_t pin;
+    uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    pin = wan_sfp_lost_detection();
+    state = ~(wan_sfp_lost_detection());
 
-    if (pin) //signal released
+    if (state) //signal released
     {
         if (counter > 0)
             counter--;
