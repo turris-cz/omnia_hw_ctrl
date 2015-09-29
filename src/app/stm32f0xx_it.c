@@ -185,6 +185,8 @@ void TIM14_IRQHandler(void)
         power_control_usb(USB3_PORT0, USB_ON);
         power_control_usb(USB3_PORT1, USB_ON);
 
+        i2c_status_word |= USB30_PWRON_BIT | USB31_PWRON_BIT;
+
         //disable timer and set initial condition
         TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);
         USB_TIMEOUT_TIMER->CNT = 0;

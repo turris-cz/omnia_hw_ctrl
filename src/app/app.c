@@ -21,8 +21,6 @@
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 #define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 
-static states_t next_state = POWER_ON;
-
 /*******************************************************************************
   * @function   app_mcu_init
   * @brief      Initialization of MCU and its ports and peripherals.
@@ -96,12 +94,13 @@ static uint16_t get_status_word(void)
 
     return status_word;
 }
+
 static ret_value_t load_settings(void)
 {
-    debounce_config();
+    debounce_config(); // start evaluation of inputs
 
     i2c_status_word = get_status_word();
-    //Marvell CPU should send settings now (led brigthness and colour)
+    //Marvell CPU should send settings now (led brightness and colour)
 
     return OK;
 }
@@ -143,13 +142,27 @@ static ret_value_t input_manager(void)
     {
         i2c_status_word |= USB30_OVC_BIT;
         input_state->usb30_ovc = 0;
-        //TODO: vypnout USB a nastavit bit v i2c_status_word
+        power_control_usb(USB3_PORT0, USB_OFF); //USB power off
+
+        if(!power_control_get_usb_poweron(USB3_PORT0)) //update status word
+            i2c_status_word &= (~USB30_PWRON_BIT);
+
+        //USB timeout set to 1 sec
+        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
     if(input_state->usb31_ovc)
     {
         i2c_status_word |= USB31_OVC_BIT;
         input_state->usb31_ovc = 0;
+
+        power_control_usb(USB3_PORT1, USB_OFF); //USB power off
+
+        if(!power_control_get_usb_poweron(USB3_PORT1)) //update status word
+            i2c_status_word &= (~USB31_PWRON_BIT);
+
+        //USB timeout set to 1 sec
+        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
     if (input_state->led_brt)
@@ -191,12 +204,20 @@ static ret_value_t led_manager(void)
 {
     wan_led_activity();
     lan_led_activity();
+    pci_led_activity();
 
     return OK;
 }
 
+/*******************************************************************************
+  * @function   app_mcu_cyclic
+  * @brief      Main cyclic function.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
 void app_mcu_cyclic(void)
 {
+    static states_t next_state = POWER_ON;
     ret_value_t val;
 
     switch(next_state)
