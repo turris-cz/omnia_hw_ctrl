@@ -18,8 +18,8 @@
 #include "slave_i2c_device.h"
 #include "wan_lan_pci_status.h"
 
-#define SET_INTERRUPT       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
-#define RESET_INTERRUPT     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+#define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+#define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 
 static states_t next_state = POWER_ON;
 
@@ -64,7 +64,11 @@ static uint16_t get_status_word(void)
     uint16_t status_word = 0;
 
     if (wan_sfp_connector_detection())
+    {
         status_word |= SFP_DET_BIT;
+        wan_sfp_set_tx_status(ENABLE);
+        status_word &= (~SFP_DIS_BIT);
+    }
 
     if (wan_sfp_lost_detection())
         status_word |= SFP_LOS_BIT;
@@ -78,7 +82,17 @@ static uint16_t get_status_word(void)
     if (msata_pci_type_card_detection())
         status_word |= MSATA_IND_BIT;
 
-    //TODO: SFP_DIS, USB
+    if (power_control_get_usb_overcurrent(USB3_PORT0))
+        status_word |= USB30_OVC_BIT;
+
+    if (power_control_get_usb_overcurrent(USB3_PORT1))
+        status_word |= USB31_OVC_BIT;
+
+    if (power_control_get_usb_poweron(USB3_PORT0))
+        status_word |= USB30_PWRON_BIT;
+
+    if (power_control_get_usb_poweron(USB3_PORT1))
+        status_word |= USB31_PWRON_BIT;
 
     return status_word;
 }
@@ -113,6 +127,12 @@ static ret_value_t input_manager(void)
         input_state->man_res = 0;
     }
 
+    if (input_state->sysres_out)
+    {
+        val = GO_TO_LIGHT_RESET; //TODO: reaction - light reset ?
+        input_state->sysres_out = 0;
+    }
+
     if(input_state->pg)
     {
         val = GO_TO_HARD_RESET;
@@ -130,6 +150,12 @@ static ret_value_t input_manager(void)
     {
         i2c_status_word |= USB31_OVC_BIT;
         input_state->usb31_ovc = 0;
+    }
+
+    if (input_state->led_brt)
+    {
+        led_driver_step_brightness();
+        input_state->led_brt = 0;
     }
 
     if(input_state->sfp_det) //flag is cleared in debounce function
@@ -150,11 +176,11 @@ static ret_value_t ic2_manager(void)
 
     if (i2c_status_word != last_status_word)
     {
-        SET_INTERRUPT;
+        SET_INTERRUPT_TO_CPU;
         last_status_word = i2c_status_word;
     }
     else
-        RESET_INTERRUPT;
+        RESET_INTERRUPT_TO_CPU;
 
     slave_i2c_process_data();
 

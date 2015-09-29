@@ -240,9 +240,7 @@ void debounce_check_inputs(void)
         input_state->man_res = 1;
 
     if (port_changed & SYSRES_OUT_MASK)
-    {
-        //TODO: reaction ?
-    }
+        input_state->sysres_out = 1;
 
     if (port_changed & DBG_RES_MASK)
     {
@@ -296,9 +294,7 @@ void debounce_check_inputs(void)
     }
 
     if (port_changed & LED_BRT_MASK)
-    {
-        led_driver_step_brightness();
-    }
+        input_state->led_brt = 1;
 }
 
 /*******************************************************************************

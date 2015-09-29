@@ -111,11 +111,7 @@ static void wan_lan_pci_io_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-   // wan_sfp_set_tx_status(ENABLE);
-    /* read status of signals after the reset */
-   // wan_sfp_connector_detection();
-   // wan_sfp_fault_detection();
-   // wan_sfp_lost_detection();
+    wan_sfp_set_tx_status(DISABLE);
 }
 
 /*******************************************************************************
