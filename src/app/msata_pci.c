@@ -10,6 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_conf.h"
 #include "msata_pci.h"
+#include "led_driver.h"
 
 struct msata_pci_ind msata_pci_status;
 
@@ -92,16 +93,17 @@ void msata_pci_indication_config(void)
 void msata_pci_activity_handler(void)
 {
     uint8_t msata_pci_activity;
+    struct led_rgb *rgb_leds = leds;
 
     msata_pci_activity = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
 
     if (msata_pci_activity)
     {
-        //TODO: LED actvity off
+        rgb_leds[MSATA_PCI_LED].led_status = LED_OFF;
     }
     else
     {
-        //TODO: LED activity on
+        rgb_leds[MSATA_PCI_LED].led_status = LED_ON;
     }
 }
 
