@@ -226,7 +226,7 @@ static void led_driver_send_data16b(const uint16_t data)
   * @function   led_driver_prepare_data
   * @brief      Prepare data to be sent to LED driver.
   * @param      colour: RED, GREEN or BLUE.
-  * @param      led_index: position of LED (0..11) or index >=12 -> all LED (default)
+  * @param      current_colour_level: colour density [0..255]
   * @retval     Data to be sent to LED driver.
   *****************************************************************************/
 static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t current_colour_level)
