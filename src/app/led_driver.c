@@ -308,8 +308,6 @@ void led_driver_send_frame(void)
 
     //latch enable pulse
     LATCH_HIGH;
-    //delay(1); //TODO: some longer delay necessary?
-    __NOP(); // or NO OPERATION is sufficient?
     __NOP();
     LATCH_LOW;
 
