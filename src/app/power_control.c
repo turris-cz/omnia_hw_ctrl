@@ -339,8 +339,8 @@ void power_control_usb_timeout_config(void)
   *****************************************************************************/
 void power_control_first_startup(void)
 {
-    delay(200);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+    delay(200);    
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
