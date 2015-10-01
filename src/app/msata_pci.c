@@ -12,8 +12,6 @@
 #include "msata_pci.h"
 #include "led_driver.h"
 
-struct msata_pci_ind msata_pci_status;
-
 /*******************************************************************************
   * @function   msata_pci_io_config
   * @brief      GPIO configuration for mSATA and PCIe indication signals.

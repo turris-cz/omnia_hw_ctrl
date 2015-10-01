@@ -180,12 +180,14 @@ void TIM3_IRQHandler(void)
   */
 void TIM14_IRQHandler(void)
 {
+    struct st_i2c_status *i2c_control = &i2c_status;
+
     if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
     {
         power_control_usb(USB3_PORT0, USB_ON);
         power_control_usb(USB3_PORT1, USB_ON);
 
-        i2c_status_word |= USB30_PWRON_BIT | USB31_PWRON_BIT;
+        i2c_control->status_word |= USB30_PWRON_BIT | USB31_PWRON_BIT;
 
         //disable timer and set initial condition
         TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);

@@ -474,7 +474,7 @@ void led_driver_config(void)
 
     led_driver_pwm_config();
     led_driver_init_led();
-    led_driver_set_led_mode(USER_LED1, LED_USER_ENABLE);
+    led_driver_set_led_mode(USER_LED1, LED_USER_ENABLE); //TODO: enable user led ?
     led_driver_set_led_mode(USER_LED2, LED_USER_ENABLE);
     led_driver_timer_config();
 }

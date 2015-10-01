@@ -97,11 +97,13 @@ static uint16_t get_status_word(void)
 
 static ret_value_t load_settings(void)
 {
-    debounce_config(); // start evaluation of inputs
+    struct st_i2c_status *i2c_control = &i2c_status;
 
-    i2c_status_word = get_status_word();
+    debounce_config(); // start evaluation of inputs
+    i2c_control->status_word_orig = i2c_control->status_word = get_status_word();
     //Marvell CPU should send settings now (led brightness and colour)
 
+    //TODO: go to I2C_MANAGER ?
     return OK;
 }
 
@@ -117,6 +119,7 @@ static ret_value_t input_manager(void)
 {
     ret_value_t val = OK;
     struct input_sig *input_state = &debounce_input_signal;
+    struct st_i2c_status *i2c_control = &i2c_status;
 
     debounce_check_inputs();
 
@@ -140,12 +143,12 @@ static ret_value_t input_manager(void)
 
     if(input_state->usb30_ovc)
     {
-        i2c_status_word |= USB30_OVC_BIT;
+        i2c_control->status_word |= USB30_OVC_BIT;
         input_state->usb30_ovc = 0;
         power_control_usb(USB3_PORT0, USB_OFF); //USB power off
 
         if(!power_control_get_usb_poweron(USB3_PORT0)) //update status word
-            i2c_status_word &= (~USB30_PWRON_BIT);
+            i2c_control->status_word &= (~USB30_PWRON_BIT);
 
         //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
@@ -153,13 +156,13 @@ static ret_value_t input_manager(void)
 
     if(input_state->usb31_ovc)
     {
-        i2c_status_word |= USB31_OVC_BIT;
+        i2c_control->status_word |= USB31_OVC_BIT;
         input_state->usb31_ovc = 0;
 
         power_control_usb(USB3_PORT1, USB_OFF); //USB power off
 
         if(!power_control_get_usb_poweron(USB3_PORT1)) //update status word
-            i2c_status_word &= (~USB31_PWRON_BIT);
+            i2c_control->status_word &= (~USB31_PWRON_BIT);
 
         //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
@@ -172,25 +175,26 @@ static ret_value_t input_manager(void)
     }
 
     if(input_state->sfp_det) //flag is cleared in debounce function
-        i2c_status_word |= SFP_DET_BIT;
+        i2c_control->status_word |= SFP_DET_BIT;
 
     if(input_state->sfp_los)
-        i2c_status_word |= SFP_LOS_BIT;
+        i2c_control->status_word |= SFP_LOS_BIT;
 
     if(input_state->sfp_flt)
-        i2c_status_word |= SFP_FLT_BIT;
+        i2c_control->status_word |= SFP_FLT_BIT;
 
     return val;
 }
 
 static ret_value_t ic2_manager(void)
 {
+    struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
 
-    if (i2c_status_word != last_status_word)
+    if (i2c_control->status_word != last_status_word)
     {
         SET_INTERRUPT_TO_CPU;
-        last_status_word = i2c_status_word;
+        last_status_word = i2c_control->status_word;
     }
     else
         RESET_INTERRUPT_TO_CPU;

@@ -31,13 +31,6 @@
 #define MSATAIND_PIN_EXTIPINSOURCE          EXTI_PinSource14
 #define MSATAIND_PIN_EXTILINE               EXTI_Line14
 
-struct msata_pci_ind {
-    uint8_t card_det:   1; /* 0: some card detected, 1: no card inserted */
-    uint8_t msata_ind:  1; /* 0: msata card inserted, 1: pcie card inserted */
-};
-
-extern struct msata_pci_ind msata_pci_status;
-
 /*******************************************************************************
   * @function   msata_pci_indication_config
   * @brief      Main configuration function for mSATA and PCIe indication.
