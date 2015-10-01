@@ -180,13 +180,13 @@ static void led_driver_timer_config(void)
 }
 
 /*******************************************************************************
-  * @function   led_driver_save_colour
-  * @brief      Save colour of LED specified in parameters to be displayed in next cycle.
+  * @function   led_driver_set_colour
+  * @brief      Set colour of LED specified in parameters to be displayed in next cycle.
   * @param      colour: LED colour (RGB range).
   * @param      led_index: position of LED (0..11) or index >=12 -> all LED (default)
   * @retval     None.
   *****************************************************************************/
-void led_driver_save_colour(const uint32_t colour, const uint8_t led_index)
+void led_driver_set_colour(const uint32_t colour, const uint8_t led_index)
 {
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
@@ -420,8 +420,8 @@ void led_driver_config(void)
     led_driver_io_config();
     led_driver_spi_config();
 
-    led_driver_save_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
-   // led_driver_save_colour(0xFF0000, 0); // except of the first led - red
+    led_driver_set_colour(0xFFFFFF, LED_COUNT); //all LED colour set to white
+   // led_driver_set_colour(0xFF0000, 0); // except of the first led - red
 
     led_driver_pwm_config();
     led_driver_init_led();

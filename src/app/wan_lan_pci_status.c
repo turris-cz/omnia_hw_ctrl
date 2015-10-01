@@ -210,20 +210,20 @@ void pci_led_activity(void)
 
     if(pcie_led0 == 0)
     {
-        rgb_leds[WIFI_24G_LED].led_status = LED_ON;
+        rgb_leds[PCI0_LED].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[WIFI_24G_LED].led_status = LED_OFF;
+        rgb_leds[PCI0_LED].led_status = LED_OFF;
     }
 
     if (pcie_led1 == 0)
     {
-        rgb_leds[WIFI_5G_LED].led_status = LED_ON;
+        rgb_leds[PCI1_LED].led_status = LED_ON;
     }
     else
     {
-        rgb_leds[WIFI_5G_LED].led_status = LED_OFF;
+        rgb_leds[PCI1_LED].led_status = LED_OFF;
     }
 }
 
