@@ -97,13 +97,16 @@ void msata_pci_activity_handler(void)
 
     msata_pci_activity = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
 
-    if (msata_pci_activity)
+    if (rgb_leds[MSATA_PCI_LED].user_led_status == LED_USER_DISABLE)
     {
-        rgb_leds[MSATA_PCI_LED].led_status = LED_OFF;
-    }
-    else
-    {
-        rgb_leds[MSATA_PCI_LED].led_status = LED_ON;
+        if (msata_pci_activity)
+        {
+            rgb_leds[MSATA_PCI_LED].led_status = LED_OFF;
+        }
+        else
+        {
+            rgb_leds[MSATA_PCI_LED].led_status = LED_ON;
+        }
     }
 }
 

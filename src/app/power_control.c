@@ -340,7 +340,7 @@ void power_control_usb_timeout_config(void)
 void power_control_first_startup(void)
 {
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-    delay(200);    
+    delay(200);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
@@ -370,4 +370,18 @@ void power_control_second_startup(void)
 
     delay(5);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+}
+
+/*******************************************************************************
+  * @function   power_control_set_power_led
+  * @brief      Set on power LED.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_power_led(void)
+{
+    struct led_rgb *rgb_leds = leds;
+
+    rgb_leds[POWER_LED].led_status = LED_ON;
+    led_driver_set_colour(POWER_LED, 0xFFFFFF);
 }

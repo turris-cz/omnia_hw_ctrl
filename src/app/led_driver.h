@@ -90,11 +90,11 @@ void led_driver_config(void);
 /*******************************************************************************
   * @function   led_driver_set_colour
   * @brief      Save colour of LED specified in parameters to be displayed in next cycle.
+  * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
   * @param      colour: LED colour (RGB range).
-  * @param      led_index: position of LED (0..11) or index >=12 -> all LED (default)
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_colour(const uint32_t colour, const uint8_t led_index);
+void led_driver_set_colour(const uint8_t led_index, const uint32_t colour);
 
 /*******************************************************************************
   * @function   led_driver_send_frame
