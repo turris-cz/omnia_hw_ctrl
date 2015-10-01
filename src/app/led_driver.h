@@ -17,8 +17,8 @@
 #define LED_COUNT                 12
 
 typedef enum user_led_sts {
-    LED_DISABLE     = 0,
-    LED_ENABLE      = 1,
+    LED_USER_DISABLE     = 0,
+    LED_USER_ENABLE      = 1,
 }user_led_sts_t;
 
 typedef enum led_sts {
@@ -57,17 +57,24 @@ enum led_names {
 };
 
 
-struct led_rgb_def {
+struct led_rgb_default {
+    uint8_t blue; //[0..255]
+    uint8_t green;
+    uint8_t red;
+};
+
+struct led_rgb_user {
     uint8_t blue; //[0..255]
     uint8_t green;
     uint8_t red;
 };
 
 struct led_rgb {
-    struct led_rgb_def  led_rgb_st;
-    led_sts_t           led_status;
-    user_led_sts_t      user_led_status;
-    uint16_t            brightness;
+    struct led_rgb_default  led_rgb_data;       // colour data
+    struct led_rgb_user     led_rgb_user_data;  // user data
+    led_sts_t               led_status;         // LED ON/OFF
+    user_led_sts_t          user_led_status;    // LED USER ENABLE/DISABLE
+    uint16_t                brightness;
 };
 
 extern struct led_rgb leds[LED_COUNT];
@@ -112,5 +119,14 @@ void led_driver_pwm_set_brightness(const uint16_t procent_val);
   * @retval     None.
   *****************************************************************************/
 void led_driver_step_brightness(void);
+
+/*******************************************************************************
+  * @function   led_driver_set_led_mode
+  * @brief      Set mode to LED(s) - default or user mode
+  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @parame     led_mode: LED_USER_DISABLE / LED_USER_ENABLE
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_led_mode(const uint8_t led_index, const user_led_sts_t led_mode);
 
 #endif /*__LED_DRIVER_H */

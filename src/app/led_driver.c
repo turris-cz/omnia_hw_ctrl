@@ -191,21 +191,40 @@ void led_driver_set_colour(const uint32_t colour, const uint8_t led_index)
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
 
-    if (led_index >= LED_COUNT)
+    if (led_index >= LED_COUNT) /* all LEDs */
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            rgb_leds->led_rgb_st.red = colour >> 16;
-            rgb_leds->led_rgb_st.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_st.blue = colour & 0xFF;
+            if (rgb_leds->user_led_status == LED_USER_DISABLE)
+            {
+                rgb_leds->led_rgb_data.red = colour >> 16;
+                rgb_leds->led_rgb_data.green = (colour >> 8) & 0xFF;
+                rgb_leds->led_rgb_data.blue = colour & 0xFF;
+            }
+            else /* LED_USER_ENABLE */
+            {
+                rgb_leds->led_rgb_user_data.red = colour >> 16;
+                rgb_leds->led_rgb_user_data.green = (colour >> 8) & 0xFF;
+                rgb_leds->led_rgb_user_data.blue = colour & 0xFF;
+            }
         }
     }
-    else
+    else /* individual LED */
     {
         rgb_leds += led_index;
-        rgb_leds->led_rgb_st.red = colour >> 16;
-        rgb_leds->led_rgb_st.green = (colour >> 8) & 0xFF;
-        rgb_leds->led_rgb_st.blue = colour & 0xFF;
+
+        if (rgb_leds->user_led_status == LED_USER_DISABLE)
+        {
+            rgb_leds->led_rgb_data.red = colour >> 16;
+            rgb_leds->led_rgb_data.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_data.blue = colour & 0xFF;
+        }
+        else /* LED_USER_ENABLE */
+        {
+            rgb_leds->led_rgb_user_data.red = colour >> 16;
+            rgb_leds->led_rgb_user_data.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_user_data.blue = colour & 0xFF;
+        }
     }
 }
 
@@ -243,9 +262,19 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
             {
                 if (rgb_leds->led_status == LED_ON)
                 {
-                    if (rgb_leds->led_rgb_st.red > current_colour_level)
+                    if (rgb_leds->user_led_status == LED_USER_DISABLE)
                     {
-                        data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
+                        if (rgb_leds->led_rgb_data.red > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
+                        }
+                    }
+                    else /* LED_USER_ENABLE */
+                    {
+                        if (rgb_leds->led_rgb_user_data.red > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx);
+                        }
                     }
                 }
             }
@@ -257,9 +286,19 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
             {
                 if (rgb_leds->led_status == LED_ON)
                 {
-                    if (rgb_leds->led_rgb_st.green > current_colour_level)
+                    if (rgb_leds->user_led_status == LED_USER_DISABLE)
                     {
-                        data |= 1 << (2 + idx);
+                        if (rgb_leds->led_rgb_data.green > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx);
+                        }
+                    }
+                    else /* LED_USER_ENABLE */
+                    {
+                        if (rgb_leds->led_rgb_user_data.green > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx);
+                        }
                     }
                 }
             }
@@ -271,9 +310,19 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
             {
                 if (rgb_leds->led_status == LED_ON)
                 {
-                    if (rgb_leds->led_rgb_st.blue > current_colour_level)
+                    if (rgb_leds->user_led_status == LED_USER_DISABLE)
                     {
-                        data |= 1 << (2 + idx);
+                        if (rgb_leds->led_rgb_data.blue > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx);
+                        }
+                    }
+                    else /* LED_USER_ENABLE */
+                    {
+                        if (rgb_leds->led_rgb_user_data.blue > current_colour_level)
+                        {
+                            data |= 1 << (2 + idx);
+                        }
                     }
                 }
             }
@@ -390,7 +439,7 @@ static void led_driver_pwm_config(void)
 
 /*******************************************************************************
   * @function   led_driver_init_led
-  * @brief      Enable all LED.
+  * @brief      Enable all LED to default mode (LEDs are ON).
   * @param      None.
   * @retval     None.
   *****************************************************************************/
@@ -402,7 +451,7 @@ static void led_driver_init_led(void)
     for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
     {
         rgb_leds->led_status = LED_ON;
-        rgb_leds->user_led_status = LED_ENABLE;
+        rgb_leds->user_led_status = LED_USER_DISABLE;
     }
 
     rgb_leds->brightness = 100; //100% brightness after reset
@@ -461,4 +510,30 @@ void led_driver_step_brightness(void)
 
     rgb_leds->brightness -= LED_BRIGHTNESS_STEP;
     led_driver_pwm_set_brightness(rgb_leds->brightness);
+}
+
+/*******************************************************************************
+  * @function   led_driver_set_led_mode
+  * @brief      Set mode to LED(s) - default or user mode
+  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @parame     led_mode: LED_USER_DISABLE / LED_USER_ENABLE
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_led_mode(const uint8_t led_index, const user_led_sts_t led_mode)
+{
+    uint8_t idx;
+    struct led_rgb *rgb_leds = leds;
+
+    if (led_index >= LED_COUNT) //all LED
+    {
+        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
+        {
+            rgb_leds->user_led_status = led_mode;
+        }
+    }
+    else // or individual LED
+    {
+        rgb_leds += led_index;
+        rgb_leds->user_led_status = led_mode;
+    }
 }
