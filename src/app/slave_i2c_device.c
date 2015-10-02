@@ -27,10 +27,27 @@
 
 #define I2C_SLAVE_ADDRESS               0x55
 
+enum i2c_basic_commands {
+    CMD_SLAVE_RX                        = 0x01, // slave only receives data
+    CMD_SLAVE_TX                        = 0x02, // slave sends back status word
+};
 
 enum i2c_commands {
-    CMD_SLAVE_RX = 0x01,
-    CMD_SLAVE_TX = 0x02,
+    CMD_GENERAL_CONTROL                 = 0x10,
+    CMD_LED_MODE                        = 0x20, // default/user
+    CMD_LED_STATE                       = 0x21, // LED on/off
+    CMD_LED_COLOUR                      = 0x22,
+    CMD_LED_BRIGHTNESS                  = 0x23,
+};
+
+enum i2_control_mask {
+    LIGHT_RST_MASK                      = 0x01,
+    HARD_RST_MASK                       = 0x02,
+    FACTORY_RST_MASK                    = 0x04,
+    SFP_DIS_MASK                        = 0x08,
+    USB30_PWRON_MASK                    = 0x10,
+    USB31_PWRON_MASK                    = 0x20,
+    ENABLE_4V5_MASK                     = 0x40,
 };
 
 struct st_i2c_status i2c_status;
@@ -225,7 +242,9 @@ void slave_i2c_process_data(void)
         {
             case CMD_SLAVE_TX: // slave TX (master expects data)
             {
-                //TODO: prepare data to be sent to master
+                //prepare data to be sent to the master
+                i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+                i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
                 I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI , ENABLE);
 
@@ -251,9 +270,13 @@ void slave_i2c_process_data(void)
         i2c_state->data_tx_complete = 0;
 
         // clear buffers
-        for (i = 0; i < MAX_BUFFER_SIZE; i++)
+        for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
         {
             i2c_state->rx_buf[i] = 0;
+        }
+
+        for (i = 0; i < MAX_TX_BUFFER_SIZE; i++)
+        {
             i2c_state->tx_buf[i] = 0;
         }
 
