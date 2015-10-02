@@ -11,6 +11,7 @@
 #include "stm32f0xx_conf.h"
 #include "slave_i2c_device.h"
 #include "debug_serial.h"
+#include "led_driver.h"
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -232,6 +233,7 @@ void slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t i;
+    uint32_t colour;
 
     if (i2c_state->data_rx_complete)
     {
@@ -254,6 +256,37 @@ void slave_i2c_process_data(void)
             {
                 //TODO: process RX data
                 DBG("process RX data\r\n");
+                switch (i2c_state->rx_buf[1])
+                {
+                case CMD_GENERAL_CONTROL:
+                    break;
+
+                case CMD_LED_MODE:
+                    led_driver_set_led_mode(i2c_state->rx_buf[2] & 0x0F,
+                                            (i2c_state->rx_buf[2] & 0x10) >> 4);
+                    break;
+
+                case CMD_LED_STATE:
+                    led_driver_set_led_state(i2c_state->rx_buf[2] & 0x0F,
+                                            (i2c_state->rx_buf[2] & 0x10) >> 4);
+                    break;
+
+                case CMD_LED_COLOUR:
+                {
+                    colour = (i2c_state->rx_buf[3] << 16) |
+                              (i2c_state->rx_buf[4] << 8) | i2c_state->rx_buf[5];
+
+                    led_driver_set_colour(i2c_state->rx_buf[2] & 0x0F, colour);
+                }
+                    break;
+
+                case CMD_LED_BRIGHTNESS:
+                    led_driver_pwm_set_brightness(i2c_state->rx_buf[2]);
+                    break;
+
+                default:
+                    break;
+                }
 
                 i2c_state->rx_data_ctr = 0;
                 I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);

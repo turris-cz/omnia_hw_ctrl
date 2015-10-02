@@ -74,7 +74,7 @@ extern struct st_i2c_status i2c_status;
  *  Bit Nr. |   Meanings
  * -----------------
  *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
- *      4   |   LED mode    : 1 - LED ON, 0 - LED OFF
+ *      4   |   LED state    : 1 - LED ON, 0 - LED OFF
  *   5..7   |   dont care
 */
 
