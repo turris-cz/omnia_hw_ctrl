@@ -16,15 +16,15 @@
 
 #define LED_COUNT                 12
 
-typedef enum user_led_sts {
-    LED_USER_DISABLE     = 0,
-    LED_USER_ENABLE      = 1,
-}user_led_sts_t;
+typedef enum led_modes {
+    LED_DEFAULT_MODE   = 0,
+    LED_USER_MODE      = 1,
+}led_mode_t;
 
-typedef enum led_sts {
+typedef enum led_states {
     LED_OFF         = 0,
     LED_ON          = 1,
-}led_sts_t;
+}led_state_t;
 
 enum led_numbers {
     LED0            = 0,
@@ -72,8 +72,8 @@ struct led_rgb_user {
 struct led_rgb {
     struct led_rgb_default  led_rgb_data;       // colour data
     struct led_rgb_user     led_rgb_user_data;  // user data
-    led_sts_t               led_status;         // LED ON/OFF
-    user_led_sts_t          user_led_status;    // LED USER ENABLE/DISABLE
+    led_state_t             led_state;          // LED ON/OFF
+    led_mode_t              led_mode;           // default / user mode
     uint16_t                brightness;
 };
 
@@ -124,9 +124,18 @@ void led_driver_step_brightness(void);
   * @function   led_driver_set_led_mode
   * @brief      Set mode to LED(s) - default or user mode
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_mode: LED_USER_DISABLE / LED_USER_ENABLE
+  * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_mode(const uint8_t led_index, const user_led_sts_t led_mode);
+void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode);
+
+/*******************************************************************************
+  * @function   led_driver_set_led_state
+  * @brief      Set state of the LED(s) - LED_ON / LED_OFF
+  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @parame     led_state: LED_OFF / LED_ON
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state);
 
 #endif /*__LED_DRIVER_H */
