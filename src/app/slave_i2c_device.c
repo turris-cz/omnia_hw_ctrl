@@ -12,6 +12,8 @@
 #include "slave_i2c_device.h"
 #include "debug_serial.h"
 #include "led_driver.h"
+#include "wan_lan_pci_status.h"
+#include "power_control.h"
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -224,16 +226,67 @@ void slave_i2c_handler(void)
 }
 
 /*******************************************************************************
+  * @function   slave_i2c_check_control_byte
+  * @brief      Decodes a control byte and perform suitable reaction.
+  * @param      control_byte: control byte sent from master (CPU)
+  * @param      state: pointer to next step (if necessary)
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *state)
+{
+    *state = OK;
+
+    if (control_byte & LIGHT_RST_CTRLBIT)
+    {
+        *state = GO_TO_LIGHT_RESET;
+        return;
+    }
+
+    if (control_byte & HARD_RST_CTRLBIT)
+    {
+        *state = GO_TO_HARD_RESET;
+        return;
+    }
+
+    if (control_byte & FACTORY_RST_CTRLBIT)
+    {
+        *state = GO_TO_FACTORY_RESET;
+        return;
+    }
+
+    if (control_byte & SFP_DIS_CTRLBIT)
+        wan_sfp_set_tx_status(DISABLE);
+    else
+        wan_sfp_set_tx_status(ENABLE);
+
+    if (control_byte & USB30_PWRON_CTRLBIT)
+        power_control_usb(USB3_PORT0, USB_ON);
+    else
+        power_control_usb(USB3_PORT0, USB_OFF);
+
+    if (control_byte & USB31_PWRON_CTRLBIT)
+        power_control_usb(USB3_PORT1, USB_ON);
+    else
+        power_control_usb(USB3_PORT1, USB_OFF);
+
+    if (control_byte & ENABLE_4V5_CTRLBIT)
+        GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+    else
+        GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+}
+
+/*******************************************************************************
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
   * @param      None.
-  * @retval     None.
+  * @retval     Next reaction (if necessary).
   *****************************************************************************/
-void slave_i2c_process_data(void)
+ret_value_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t i;
     uint32_t colour;
+    ret_value_t state = OK;
 
     if (i2c_state->data_rx_complete)
     {
@@ -259,6 +312,7 @@ void slave_i2c_process_data(void)
                 switch (i2c_state->rx_buf[1])
                 {
                 case CMD_GENERAL_CONTROL:
+                    slave_i2c_check_control_byte(i2c_state->rx_buf[2], &state);
                     break;
 
                 case CMD_LED_MODE:
@@ -325,4 +379,6 @@ void slave_i2c_process_data(void)
         // enable interrupt again
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
     }
+
+    return state;
 }

@@ -63,34 +63,34 @@ static uint16_t get_status_word(void)
 
     if (wan_sfp_connector_detection())
     {
-        status_word |= SFP_DET_BIT;
+        status_word |= SFP_DET_STSBIT;
         wan_sfp_set_tx_status(ENABLE);
-        status_word &= (~SFP_DIS_BIT);
+        status_word &= (~SFP_DIS_STSBIT);
     }
 
     if (wan_sfp_lost_detection())
-        status_word |= SFP_LOS_BIT;
+        status_word |= SFP_LOS_STSBIT;
 
     if (wan_sfp_fault_detection())
-        status_word |= SFP_FLT_BIT;
+        status_word |= SFP_FLT_STSBIT;
 
     if (msata_pci_card_detection())
-        status_word |= CARD_DET_BIT;
+        status_word |= CARD_DET_STSBIT;
 
     if (msata_pci_type_card_detection())
-        status_word |= MSATA_IND_BIT;
+        status_word |= MSATA_IND_STSBIT;
 
     if (power_control_get_usb_overcurrent(USB3_PORT0))
-        status_word |= USB30_OVC_BIT;
+        status_word |= USB30_OVC_STSBIT;
 
     if (power_control_get_usb_overcurrent(USB3_PORT1))
-        status_word |= USB31_OVC_BIT;
+        status_word |= USB31_OVC_STSBIT;
 
     if (power_control_get_usb_poweron(USB3_PORT0))
-        status_word |= USB30_PWRON_BIT;
+        status_word |= USB30_PWRON_STSBIT;
 
     if (power_control_get_usb_poweron(USB3_PORT1))
-        status_word |= USB31_PWRON_BIT;
+        status_word |= USB31_PWRON_STSBIT;
 
     return status_word;
 }
@@ -143,12 +143,12 @@ static ret_value_t input_manager(void)
 
     if(input_state->usb30_ovc)
     {
-        i2c_control->status_word |= USB30_OVC_BIT;
+        i2c_control->status_word |= USB30_OVC_STSBIT;
         input_state->usb30_ovc = 0;
         power_control_usb(USB3_PORT0, USB_OFF); //USB power off
 
         if(!power_control_get_usb_poweron(USB3_PORT0)) //update status word
-            i2c_control->status_word &= (~USB30_PWRON_BIT);
+            i2c_control->status_word &= (~USB30_PWRON_STSBIT);
 
         //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
@@ -156,13 +156,13 @@ static ret_value_t input_manager(void)
 
     if(input_state->usb31_ovc)
     {
-        i2c_control->status_word |= USB31_OVC_BIT;
+        i2c_control->status_word |= USB31_OVC_STSBIT;
         input_state->usb31_ovc = 0;
 
         power_control_usb(USB3_PORT1, USB_OFF); //USB power off
 
         if(!power_control_get_usb_poweron(USB3_PORT1)) //update status word
-            i2c_control->status_word &= (~USB31_PWRON_BIT);
+            i2c_control->status_word &= (~USB31_PWRON_STSBIT);
 
         //USB timeout set to 1 sec
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
@@ -175,13 +175,13 @@ static ret_value_t input_manager(void)
     }
 
     if(input_state->sfp_det) //flag is cleared in debounce function
-        i2c_control->status_word |= SFP_DET_BIT;
+        i2c_control->status_word |= SFP_DET_STSBIT;
 
     if(input_state->sfp_los)
-        i2c_control->status_word |= SFP_LOS_BIT;
+        i2c_control->status_word |= SFP_LOS_STSBIT;
 
     if(input_state->sfp_flt)
-        i2c_control->status_word |= SFP_FLT_BIT;
+        i2c_control->status_word |= SFP_FLT_STSBIT;
 
     return val;
 }
@@ -190,6 +190,7 @@ static ret_value_t ic2_manager(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
+    ret_value_t value = OK;
 
     if (i2c_control->status_word != last_status_word)
     {
@@ -199,9 +200,9 @@ static ret_value_t ic2_manager(void)
     else
         RESET_INTERRUPT_TO_CPU;
 
-    slave_i2c_process_data();
+    value = slave_i2c_process_data();
 
-    return OK;
+    return value;
 }
 
 static ret_value_t led_manager(void)
@@ -279,8 +280,16 @@ void app_mcu_cyclic(void)
 
     case I2C_MANAGER:
         {
-            ic2_manager();
-            next_state = LED_MANAGER;
+            val = ic2_manager();
+
+            switch(val)
+            {
+                case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
+                case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
+                //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
+                default: next_state = LED_MANAGER; break;
+            }
+
         }
         break;
 

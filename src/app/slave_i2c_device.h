@@ -7,6 +7,8 @@
  ******************************************************************************
  ******************************************************************************
  **/
+#include "app.h"
+
 #ifndef SLAVE_I2C_DEVICE_H
 #define SLAVE_I2C_DEVICE_H
 
@@ -90,16 +92,26 @@ extern struct st_i2c_status i2c_status;
 */
 
 enum status_word_bits {
-    SFP_DET_BIT         = 0x0001,
-    SFP_LOS_BIT         = 0x0002,
-    SFP_FLT_BIT         = 0x0004,
-    SFP_DIS_BIT         = 0x0008,
-    CARD_DET_BIT        = 0x0010,
-    MSATA_IND_BIT       = 0x0020,
-    USB30_OVC_BIT       = 0x0040,
-    USB31_OVC_BIT       = 0x0080,
-    USB30_PWRON_BIT     = 0x0100,
-    USB31_PWRON_BIT     = 0x0200,
+    SFP_DET_STSBIT         = 0x0001,
+    SFP_LOS_STSBIT         = 0x0002,
+    SFP_FLT_STSBIT         = 0x0004,
+    SFP_DIS_STSBIT         = 0x0008,
+    CARD_DET_STSBIT        = 0x0010,
+    MSATA_IND_STSBIT       = 0x0020,
+    USB30_OVC_STSBIT       = 0x0040,
+    USB31_OVC_STSBIT       = 0x0080,
+    USB30_PWRON_STSBIT     = 0x0100,
+    USB31_PWRON_STSBIT     = 0x0200,
+};
+
+enum control_byte_bits {
+    LIGHT_RST_CTRLBIT      = 0x01,
+    HARD_RST_CTRLBIT       = 0x02,
+    FACTORY_RST_CTRLBIT    = 0x04,
+    SFP_DIS_CTRLBIT        = 0x08,
+    USB30_PWRON_CTRLBIT    = 0x10,
+    USB31_PWRON_CTRLBIT    = 0x20,
+    ENABLE_4V5_CTRLBIT     = 0x40,
 };
 
 /*******************************************************************************
@@ -122,9 +134,9 @@ void slave_i2c_handler(void);
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
   * @param      None.
-  * @retval     None.
+  * @retval     Next reaction (if necessary).
   *****************************************************************************/
-void slave_i2c_process_data(void);
+ret_value_t slave_i2c_process_data(void);
 
 #endif // SLAVE_I2C_DEVICE_H
 

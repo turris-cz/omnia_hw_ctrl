@@ -15,6 +15,7 @@ typedef enum {
     OK                  = 0,
     GO_TO_LIGHT_RESET   = 1,
     GO_TO_HARD_RESET    = 2,
+    GO_TO_FACTORY_RESET = 3,
 }ret_value_t;
 
 typedef enum {
