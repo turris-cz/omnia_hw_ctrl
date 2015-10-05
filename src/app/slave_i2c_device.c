@@ -43,7 +43,7 @@ enum i2c_commands {
     CMD_LED_BRIGHTNESS                  = 0x23,
 };
 
-enum i2_control_mask {
+enum i2_control_byte_mask {
     LIGHT_RST_MASK                      = 0x01,
     HARD_RST_MASK                       = 0x02,
     FACTORY_RST_MASK                    = 0x04,
@@ -236,40 +236,40 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
 {
     *state = OK;
 
-    if (control_byte & LIGHT_RST_CTRLBIT)
+    if (control_byte & LIGHT_RST_MASK)
     {
         *state = GO_TO_LIGHT_RESET;
         return;
     }
 
-    if (control_byte & HARD_RST_CTRLBIT)
+    if (control_byte & HARD_RST_MASK)
     {
         *state = GO_TO_HARD_RESET;
         return;
     }
 
-    if (control_byte & FACTORY_RST_CTRLBIT)
+    if (control_byte & FACTORY_RST_MASK)
     {
         *state = GO_TO_FACTORY_RESET;
         return;
     }
 
-    if (control_byte & SFP_DIS_CTRLBIT)
+    if (control_byte & SFP_DIS_MASK)
         wan_sfp_set_tx_status(DISABLE);
     else
         wan_sfp_set_tx_status(ENABLE);
 
-    if (control_byte & USB30_PWRON_CTRLBIT)
+    if (control_byte & USB30_PWRON_MASK)
         power_control_usb(USB3_PORT0, USB_ON);
     else
         power_control_usb(USB3_PORT0, USB_OFF);
 
-    if (control_byte & USB31_PWRON_CTRLBIT)
+    if (control_byte & USB31_PWRON_MASK)
         power_control_usb(USB3_PORT1, USB_ON);
     else
         power_control_usb(USB3_PORT1, USB_OFF);
 
-    if (control_byte & ENABLE_4V5_CTRLBIT)
+    if (control_byte & ENABLE_4V5_MASK)
         GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
     else
         GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);

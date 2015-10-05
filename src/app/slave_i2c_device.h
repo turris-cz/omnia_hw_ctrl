@@ -104,16 +104,6 @@ enum status_word_bits {
     USB31_PWRON_STSBIT     = 0x0200,
 };
 
-enum control_byte_bits {
-    LIGHT_RST_CTRLBIT      = 0x01,
-    HARD_RST_CTRLBIT       = 0x02,
-    FACTORY_RST_CTRLBIT    = 0x04,
-    SFP_DIS_CTRLBIT        = 0x08,
-    USB30_PWRON_CTRLBIT    = 0x10,
-    USB31_PWRON_CTRLBIT    = 0x20,
-    ENABLE_4V5_CTRLBIT     = 0x40,
-};
-
 /*******************************************************************************
   * @function   slave_i2c_config
   * @brief      Configuration of I2C peripheral as a slave.
