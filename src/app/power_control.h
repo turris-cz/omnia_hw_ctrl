@@ -11,6 +11,26 @@
 #define POWER_CONTROL_H
 
 #define USB_TIMEOUT_TIMER                   TIM14
+#define STARTUP_TIMEOUT_TIMER               TIM6
+
+typedef struct state_sts {
+    uint8_t timeout_activated : 1;
+    uint8_t timeout_elapsed : 1;
+}states;
+
+struct timeout_status {
+    states pg_5v_error;
+    states pg_4v5_error;
+    states pg_3v3_error;
+    states pg_1v8_error;
+    states pg_1v5_error;
+    states pg_1v35_error;
+    states pg_vtt_error;
+    states pg_1v2_error;
+    states sysres_out_error;
+};
+
+extern struct timeout_status timeout_state;
 
 //Outputs
 #define INT_MCU_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
@@ -182,7 +202,7 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
 void power_control_first_startup(void);
 
 /*******************************************************************************
-  * @function   debounce_usb_timeout_timer_config
+  * @function   power_control_usb_timeout_config
   * @brief      Timer configuration for USB recovery timeout.
   * @param      None.
   * @retval     None.

@@ -307,7 +307,6 @@ ret_value_t slave_i2c_process_data(void)
 
             case CMD_SLAVE_RX: // slave RX
             {
-                //TODO: process RX data
                 DBG("process RX data\r\n");
                 switch (i2c_state->rx_buf[1])
                 {
@@ -371,10 +370,6 @@ ret_value_t slave_i2c_process_data(void)
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
         DBG("clear buffers\r\n");
-
-        // clear status word
-     //TODO: set to correct value
-
 
         // enable interrupt again
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);

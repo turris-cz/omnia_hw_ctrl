@@ -15,8 +15,11 @@
 
 /* Private define ------------------------------------------------------------*/
 #define USE_4V5_POWER
-/* Private functions ---------------------------------------------------------*/
 
+struct timeout_status timeout_state;
+
+
+/* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB signals.
@@ -179,6 +182,8 @@ void power_control_set_startup_condition(void)
   *****************************************************************************/
 void power_control_enable_regulator(void)
 {
+    struct timeout_status *timeout = &timeout_state;
+
     /*
      * power-up sequence:
      * 1) 5V regulator
@@ -191,8 +196,20 @@ void power_control_enable_regulator(void)
      * 7) 1.2V regulator
      */
     GPIO_SetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
+    delay(5);
+    power_control_set_timeout(ENABLE);
+
     while(!(GPIO_ReadInputDataBit(PG_5V_PIN_PORT, PG_5V_PIN)))
-        ;
+    {
+        if(timeout->pg_5v_error.timeout_elapsed)
+        {
+            power_control_set_timeout(DISABLE);
+            return; //TODO: add return value
+        }
+        delay(5);
+    }
+
+
 
 #ifdef USE_4V5_POWER
     GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
@@ -298,7 +315,7 @@ uint8_t power_control_get_usb_poweron(usb_ports_t usb_port)
 }
 
 /*******************************************************************************
-  * @function   debounce_usb_timeout_timer_config
+  * @function   power_control_usb_timeout_config
   * @brief      Timer configuration for USB recovery timeout.
   * @param      None.
   * @retval     None.
@@ -384,4 +401,52 @@ void power_control_set_power_led(void)
 
     rgb_leds[POWER_LED].led_state = LED_ON;
     led_driver_set_colour(POWER_LED, 0xFFFFFF);
+}
+
+/*******************************************************************************
+  * @function   power_control_timeout_config
+  * @brief      Timer configuration for general timeout during startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_timeout_config(void)
+{
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    // Clock enable
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+
+    /* Time base configuration - 2sec interrupt */
+    TIM_TimeBaseStructure.TIM_Period = 4000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(STARTUP_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(STARTUP_TIMEOUT_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(STARTUP_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+void power_control_set_timeout(FunctionalState state)
+{
+    if (state == ENABLE)
+    {
+        /* TIM enable counter */
+        TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
+    }
+    else
+    {
+        TIM_Cmd(STARTUP_TIMEOUT_TIMER, DISABLE);
+        STARTUP_TIMEOUT_TIMER->CNT = 0;
+    }
 }
