@@ -9,6 +9,7 @@
  **/
 #ifndef POWER_CONTROL_H
 #define POWER_CONTROL_H
+#include "app.h"
 
 #define USB_TIMEOUT_TIMER                   TIM14
 #define STARTUP_TIMEOUT_TIMER               TIM6
@@ -19,15 +20,15 @@ typedef struct state_sts {
 }states;
 
 struct timeout_status {
-    states pg_5v_error;
-    states pg_4v5_error;
-    states pg_3v3_error;
-    states pg_1v8_error;
-    states pg_1v5_error;
-    states pg_1v35_error;
-    states pg_vtt_error;
-    states pg_1v2_error;
-    states sysres_out_error;
+    states pg_5v;
+    states pg_4v5;
+    states pg_3v3;
+    states pg_1v8;
+    states pg_1v5;
+    states pg_1v35;
+    states pg_vtt;
+    states pg_1v2;
+    states sysres_out;
 };
 
 extern struct timeout_status timeout_state;
@@ -174,7 +175,7 @@ void power_control_io_config(void);
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_enable_regulator(void);
+ret_value_t power_control_enable_regulator(void);
 
 /*******************************************************************************
   * @function   power_control_disable_regulator
@@ -240,6 +241,14 @@ void power_control_second_startup(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_set_startup_condition(void);
+
+/*******************************************************************************
+  * @function   power_control_timeout_config
+  * @brief      Timer configuration for general timeout during startup.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_timeout_config(void);
 
 #endif // POWER_CONTROL_H
 

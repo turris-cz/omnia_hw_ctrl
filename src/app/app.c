@@ -33,11 +33,12 @@ void app_mcu_init(void)
     delay_systimer_config();
     //init ports and peripheral
     power_control_io_config();
-    led_driver_config(); //TODO: set all LED colour to white and then black
     msata_pci_indication_config();
     wan_lan_pci_config();
     power_control_usb_timeout_config();
     slave_i2c_config();
+    led_driver_config(); //TODO: set all LED colour to white and then black
+
 }
 
 /*******************************************************************************
@@ -48,13 +49,14 @@ void app_mcu_init(void)
   *****************************************************************************/
 static ret_value_t power_on(void)
 {
+    ret_value_t value = OK;
+
     power_control_set_startup_condition();
     power_control_disable_regulator();
     delay(100);
-    //TODO: add return value
-    power_control_enable_regulator();
+    value = power_control_enable_regulator();
 
-    return OK;
+    return value;
 }
 
 static uint16_t get_status_word(void)
@@ -214,6 +216,19 @@ static ret_value_t led_manager(void)
     return OK;
 }
 
+static void error_manager(ret_value_t state)
+{
+    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_driver_set_colour(LED_COUNT, 0xFF0000);
+
+    switch(state)
+    {
+    case PG_5V_ERROR: led_driver_set_led_state(LED0, LED_ON); break;
+
+    default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
+    }
+}
+
 /*******************************************************************************
   * @function   app_mcu_cyclic
   * @brief      Main cyclic function.
@@ -223,7 +238,7 @@ static ret_value_t led_manager(void)
 void app_mcu_cyclic(void)
 {
     static states_t next_state = POWER_ON;
-    ret_value_t val;
+    static ret_value_t val = OK;
 
     switch(next_state)
     {
@@ -263,6 +278,10 @@ void app_mcu_cyclic(void)
         break;
 
     case ERROR_STATE:
+        {
+            error_manager(val);
+            next_state = ERROR_STATE; //stay in error state
+        }
         break;
 
     case INPUT_MANAGER:

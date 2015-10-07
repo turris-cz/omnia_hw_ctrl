@@ -11,7 +11,7 @@
 #define __APP_H
 
 typedef enum {
-    FAIL                = -1,
+    PG_5V_ERROR         = -1,
     OK                  = 0,
     GO_TO_LIGHT_RESET   = 1,
     GO_TO_HARD_RESET    = 2,

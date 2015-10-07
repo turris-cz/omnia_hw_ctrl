@@ -174,15 +174,32 @@ void power_control_set_startup_condition(void)
     power_control_usb(USB3_PORT1, USB_ON);
 }
 
+
+void power_control_set_timeout(FunctionalState state)
+{
+    if (state == ENABLE)
+    {
+        /* TIM enable counter */
+        TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
+    }
+    else
+    {
+        TIM_Cmd(STARTUP_TIMEOUT_TIMER, DISABLE);
+        STARTUP_TIMEOUT_TIMER->CNT = 0;
+    }
+}
+
 /*******************************************************************************
   * @function   power_control_enable_regulator
   * @brief      Starts DC/DC regulators.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_enable_regulator(void)
+ret_value_t power_control_enable_regulator(void)
 {
     struct timeout_status *timeout = &timeout_state;
+    ret_value_t value = OK;
+    uint16_t counter = 0;
 
     /*
      * power-up sequence:
@@ -197,19 +214,27 @@ void power_control_enable_regulator(void)
      */
     GPIO_SetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
     delay(5);
-    power_control_set_timeout(ENABLE);
+   // power_control_set_timeout(ENABLE);
+   // timeout->pg_5v.timeout_activated = 1;
 
     while(!(GPIO_ReadInputDataBit(PG_5V_PIN_PORT, PG_5V_PIN)))
     {
-        if(timeout->pg_5v_error.timeout_elapsed)
+//        if(timeout->pg_5v.timeout_elapsed)
+//        {
+//            power_control_set_timeout(DISABLE);
+//            return PG_5V_ERROR;
+//        }
+        delay(20);
+        counter++;
+        if (counter >= 100)
         {
-            power_control_set_timeout(DISABLE);
-            return; //TODO: add return value
+            counter = 0;
+            return PG_5V_ERROR;
         }
-        delay(5);
     }
 
-
+    power_control_set_timeout(DISABLE);
+    timeout->pg_5v.timeout_activated = 0;
 
 #ifdef USE_4V5_POWER
     GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
@@ -239,6 +264,8 @@ void power_control_enable_regulator(void)
     GPIO_SetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
     while(!(GPIO_ReadInputDataBit(PG_1V2_PIN_PORT, PG_1V2_PIN)))
         ;
+
+    return value;
 }
 
 /*******************************************************************************
@@ -429,24 +456,10 @@ void power_control_timeout_config(void)
     TIM_ITConfig(STARTUP_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
 
     /* TIM enable counter */
-    //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+    //TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x03;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-}
-
-void power_control_set_timeout(FunctionalState state)
-{
-    if (state == ENABLE)
-    {
-        /* TIM enable counter */
-        TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
-    }
-    else
-    {
-        TIM_Cmd(STARTUP_TIMEOUT_TIMER, DISABLE);
-        STARTUP_TIMEOUT_TIMER->CNT = 0;
-    }
 }
