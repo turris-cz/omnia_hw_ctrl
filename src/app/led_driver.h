@@ -138,4 +138,20 @@ void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode)
   *****************************************************************************/
 void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state);
 
+/*******************************************************************************
+  * @function   led_driver_knight_rider_effect
+  * @brief      Display knight rider effect on LEDs.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_knight_rider_effect(void);
+
+/*******************************************************************************
+  * @function   led_driver_double_knight_rider_effect
+  * @brief      Display double knight rider effect on LEDs.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_double_knight_rider_effect(void);
+
 #endif /*__LED_DRIVER_H */
