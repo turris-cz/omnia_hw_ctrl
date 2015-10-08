@@ -119,6 +119,14 @@ __inline__ uint8_t wan_sfp_fault_detection(void);
   *****************************************************************************/
 __inline__ uint8_t wan_sfp_lost_detection(void);
 
+/*******************************************************************************
+  * @function   wan_sfp_lost_detection
+  * @brief      Detect a state of SFP transmitter.
+  * @param      None.
+  * @retval     1 - SFP TX disable, 0 - SFP TX enable.
+  *****************************************************************************/
+__inline__ uint8_t wan_sfp_get_tx_status(void);
+
 /******************************************************************************
   * @function   wan_sfp_set_tx_status
   * @brief      Enable/Disable SFP transmitting.

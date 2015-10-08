@@ -172,6 +172,19 @@ void wan_sfp_set_tx_status(FunctionalState sfp_status)
 }
 
 /*******************************************************************************
+  * @function   wan_sfp_lost_detection
+  * @brief      Detect a state of SFP transmitter.
+  * @param      None.
+  * @retval     1 - SFP TX disable, 0 - SFP TX enable.
+  *****************************************************************************/
+inline uint8_t wan_sfp_get_tx_status(void)
+{
+    /* inverted due to the HW connection
+    HW connection: 1 = TX enable, 0 = TX disable */
+    return (!(GPIO_ReadInputDataBit(SFP_DIS_PIN_PORT, SFP_DIS_PIN)));
+}
+
+/*******************************************************************************
   * @function   wan_led_activity
   * @brief      Toggle WAN LED according to the WAN activity.
   * @param      None.
