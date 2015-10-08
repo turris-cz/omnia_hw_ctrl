@@ -11,6 +11,7 @@
 #define __APP_H
 
 typedef enum {
+    GO_TO_RESET_ERROR    = -9,
     GO_TO_VTT_ERROR      = -8,
     GO_TO_1V2_ERROR      = -7,
     GO_TO_1V5_ERROR      = -6,

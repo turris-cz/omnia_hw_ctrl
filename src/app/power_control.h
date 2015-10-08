@@ -161,6 +161,7 @@ typedef enum error_types {
     PG_1V5_ERROR,
     PG_1V2_ERROR,
     PG_VTT_ERROR,
+    RESET_ERROR,
 }error_type_t;
 
 /*******************************************************************************
@@ -175,7 +176,7 @@ void power_control_io_config(void);
   * @function   power_control_start_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
 error_type_t power_control_enable_regulators(void);
 
@@ -200,9 +201,9 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
   * @function   power_control_first_startup
   * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
-void power_control_first_startup(void);
+error_type_t power_control_first_startup(void);
 
 /*******************************************************************************
   * @function   power_control_usb_timeout_config
@@ -232,9 +233,9 @@ uint8_t power_control_get_usb_poweron(usb_ports_t usb_port);
   * @function   power_control_second_startup
   * @brief      Second reset due to wrong startup.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
-void power_control_second_startup(void);
+error_type_t power_control_second_startup(void);
 
 /*******************************************************************************
   * @function   power_control_set_startup_condition

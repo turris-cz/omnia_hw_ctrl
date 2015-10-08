@@ -19,7 +19,8 @@
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
 #define DELAY_BETWEEN_READINGS  20
-#define TIMEOUT                 100 // 20 * 100 = 2 sec
+#define TIMEOUT                 100 // DELAY_BETWEEN_READINGS * 100 = 2 sec
+#define RESET_TIMEOUT           200 // DELAY_BETWEEN_READINGS * 100 = 4 sec
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -330,7 +331,7 @@ error_type_t power_control_start_regulator(reg_type_t regulator)
   * @function   power_control_enable_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
 error_type_t power_control_enable_regulators(void)
 {
@@ -496,30 +497,46 @@ void power_control_usb_timeout_config(void)
   * @function   power_control_first_startup
   * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
-void power_control_first_startup(void)
+error_type_t power_control_first_startup(void)
 {
+    error_type_t error = NO_ERROR;
+    uint16_t counter = 0;
+
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     delay(200);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-        ;
+    {
+        delay(DELAY_BETWEEN_READINGS);
+        counter++;
+        if (counter >= RESET_TIMEOUT)
+        {
+            error = RESET_ERROR;
+            return error;
+        }
+    }
 
     delay(5); // 5ms delay after releasing of reset signal
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
+    return error;
 }
 
 /*******************************************************************************
   * @function   power_control_second_startup
   * @brief      Second reset due to wrong startup.
   * @param      None.
-  * @retval     None.
+  * @retval     Error if timeout elapsed.
   *****************************************************************************/
-void power_control_second_startup(void)
+error_type_t power_control_second_startup(void)
 {
+    error_type_t error = NO_ERROR;
+    uint16_t counter = 0;
+
     delay(100);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
@@ -527,10 +544,20 @@ void power_control_second_startup(void)
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-        ;
+    {
+        delay(DELAY_BETWEEN_READINGS);
+        counter++;
+        if (counter >= RESET_TIMEOUT)
+        {
+            error = RESET_ERROR;
+            return error;
+        }
+    }
 
     delay(5);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
+    return error;
 }
 
 /*******************************************************************************
@@ -544,5 +571,5 @@ void power_control_set_power_led(void)
     struct led_rgb *rgb_leds = leds;
 
     rgb_leds[POWER_LED].led_state = LED_ON;
-    led_driver_set_colour(POWER_LED, 0xFFFFFF);
+    //led_driver_set_colour(POWER_LED, 0xFFFFFF); //TODO: pri initu
 }

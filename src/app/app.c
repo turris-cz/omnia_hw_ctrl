@@ -63,7 +63,7 @@ static ret_value_t power_on(void)
         case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
         case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
         case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
-        case PG_1V8_ERROR: value = GO_TO_1V5_ERROR; break;
+        case PG_1V8_ERROR: value = GO_TO_1V8_ERROR; break;
         case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
         case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
         case PG_VTT_ERROR: value = GO_TO_VTT_ERROR; break;
@@ -125,10 +125,18 @@ static ret_value_t load_settings(void)
 
 static ret_value_t light_reset(void)
 {
-    power_control_first_startup();
-    power_control_second_startup();
-//TODO: add return value
-    return OK;
+    error_type_t error = NO_ERROR;
+    ret_value_t value = OK;
+
+    error = power_control_first_startup();
+    error = power_control_second_startup();
+
+    if (error != NO_ERROR)
+        value = GO_TO_RESET_ERROR;
+    else
+        value = OK;
+
+    return value;
 }
 
 static ret_value_t input_manager(void)
@@ -248,6 +256,7 @@ static void error_manager(ret_value_t state)
         case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
         case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
         case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
+        case GO_TO_RESET_ERROR: led_driver_set_led_state(LED8, LED_ON); break;
 
         default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
     }
@@ -306,7 +315,7 @@ void app_mcu_cyclic(void)
     case ERROR_STATE:
         {
             error_manager(val);
-            next_state = ERROR_STATE; //stay in error state
+            next_state = ERROR_STATE; //TODO: stay in error state or HARD_RESET?
         }
         break;
 
