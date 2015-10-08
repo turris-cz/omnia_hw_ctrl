@@ -245,5 +245,13 @@ error_type_t power_control_second_startup(void);
   *****************************************************************************/
 void power_control_set_startup_condition(void);
 
+/*******************************************************************************
+  * @function   power_control_start_regulator
+  * @brief      Start DC/DC regulator and handle timeout.
+  * @param      regulator: regulator type.
+  * @retval     error, if problem with PG signal occures.
+  *****************************************************************************/
+error_type_t power_control_start_regulator(reg_type_t regulator);
+
 #endif // POWER_CONTROL_H
 

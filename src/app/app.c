@@ -81,8 +81,12 @@ static uint16_t get_status_word(void)
     {
         status_word |= SFP_DET_STSBIT;
         wan_sfp_set_tx_status(ENABLE);
-        status_word &= (~SFP_DIS_STSBIT);
     }
+
+    if(wan_sfp_get_tx_status())
+        status_word |= SFP_DIS_STSBIT;
+    else
+        status_word &= (~SFP_DIS_STSBIT);
 
     if (wan_sfp_lost_detection())
         status_word |= SFP_LOS_STSBIT;
@@ -200,12 +204,18 @@ static ret_value_t input_manager(void)
 
     if(input_state->sfp_det) //flag is cleared in debounce function
         i2c_control->status_word |= SFP_DET_STSBIT;
+    else
+        i2c_control->status_word &= (~SFP_DET_STSBIT);
 
     if(input_state->sfp_los)
         i2c_control->status_word |= SFP_LOS_STSBIT;
+    else
+        i2c_control->status_word &= (~SFP_LOS_STSBIT);
 
     if(input_state->sfp_flt)
         i2c_control->status_word |= SFP_FLT_STSBIT;
+    else
+        i2c_control->status_word &= (~SFP_FLT_STSBIT);
 
     return val;
 }

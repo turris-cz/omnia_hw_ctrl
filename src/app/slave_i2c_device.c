@@ -234,6 +234,7 @@ void slave_i2c_handler(void)
   *****************************************************************************/
 static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *state)
 {
+    struct st_i2c_status *i2c_control = &i2c_status;
     *state = OK;
 
     if (control_byte & LIGHT_RST_MASK)
@@ -259,18 +260,35 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     else
         wan_sfp_set_tx_status(ENABLE);
 
-    if (control_byte & USB30_PWRON_MASK)
-        power_control_usb(USB3_PORT0, USB_ON);
+    if(wan_sfp_get_tx_status())
+        status_word |= SFP_DIS_STSBIT;
     else
+        status_word &= (~SFP_DIS_STSBIT);
+
+    if (control_byte & USB30_PWRON_MASK)
+    {
+        power_control_usb(USB3_PORT0, USB_ON);
+        i2c_control->status_word |= USB30_PWRON_STSBIT;
+    }
+    else
+    {
         power_control_usb(USB3_PORT0, USB_OFF);
+        i2c_control->status_word &= (~USB30_PWRON_STSBIT);
+    }
 
     if (control_byte & USB31_PWRON_MASK)
+    {
         power_control_usb(USB3_PORT1, USB_ON);
+        i2c_control->status_word |= USB31_PWRON_STSBIT;
+    }
     else
+    {
         power_control_usb(USB3_PORT1, USB_OFF);
+        i2c_control->status_word &= (~USB31_PWRON_STSBIT);
+    }
 
     if (control_byte & ENABLE_4V5_MASK)
-        GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+        power_control_start_regulator(REG_4V5);
     else
         GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
 }
