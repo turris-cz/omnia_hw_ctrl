@@ -9,29 +9,8 @@
  **/
 #ifndef POWER_CONTROL_H
 #define POWER_CONTROL_H
-#include "app.h"
 
 #define USB_TIMEOUT_TIMER                   TIM14
-#define STARTUP_TIMEOUT_TIMER               TIM6
-
-typedef struct state_sts {
-    uint8_t timeout_activated : 1;
-    uint8_t timeout_elapsed : 1;
-}states;
-
-struct timeout_status {
-    states pg_5v;
-    states pg_4v5;
-    states pg_3v3;
-    states pg_1v8;
-    states pg_1v5;
-    states pg_1v35;
-    states pg_vtt;
-    states pg_1v2;
-    states sysres_out;
-};
-
-extern struct timeout_status timeout_state;
 
 //Outputs
 #define INT_MCU_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
@@ -161,6 +140,29 @@ typedef enum usb_ports {
     USB3_PORT1 = 1
 }usb_ports_t;
 
+typedef enum reg_types {
+    REG_5V,
+    REG_3V3,
+    REG_1V35,
+    REG_4V5,
+    REG_1V8,
+    REG_1V5,
+    REG_1V2,
+    REG_VTT,
+}reg_type_t;
+
+typedef enum error_types {
+    NO_ERROR,
+    PG_5V_ERROR,
+    PG_3V3_ERROR,
+    PG_1V35_ERROR,
+    PG_4V5_ERROR,
+    PG_1V8_ERROR,
+    PG_1V5_ERROR,
+    PG_1V2_ERROR,
+    PG_VTT_ERROR,
+}error_type_t;
+
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB control signals.
@@ -170,20 +172,20 @@ typedef enum usb_ports {
 void power_control_io_config(void);
 
 /*******************************************************************************
-  * @function   power_control_start_regulator
+  * @function   power_control_start_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-ret_value_t power_control_enable_regulator(void);
+error_type_t power_control_enable_regulators(void);
 
 /*******************************************************************************
-  * @function   power_control_disable_regulator
+  * @function   power_control_disable_regulators
   * @brief      Shutdown DC/DC regulators.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_disable_regulator(void);
+void power_control_disable_regulators(void);
 
 /*******************************************************************************
   * @function   power_control_usb
@@ -241,14 +243,6 @@ void power_control_second_startup(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_set_startup_condition(void);
-
-/*******************************************************************************
-  * @function   power_control_timeout_config
-  * @brief      Timer configuration for general timeout during startup.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_timeout_config(void);
 
 #endif // POWER_CONTROL_H
 

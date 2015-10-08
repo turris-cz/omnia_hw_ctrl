@@ -50,11 +50,25 @@ void app_mcu_init(void)
 static ret_value_t power_on(void)
 {
     ret_value_t value = OK;
+    error_type_t error = NO_ERROR;
 
     power_control_set_startup_condition();
-    power_control_disable_regulator();
+    power_control_disable_regulators();
     delay(100);
-    value = power_control_enable_regulator();
+    error = power_control_enable_regulators();
+
+    switch(error)
+    {
+        case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
+        case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
+        case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
+        case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
+        case PG_1V8_ERROR: value = GO_TO_1V5_ERROR; break;
+        case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
+        case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
+        case PG_VTT_ERROR: value = GO_TO_VTT_ERROR; break;
+        default: value = OK; break;
+    }
 
     return value;
 }
@@ -218,15 +232,27 @@ static ret_value_t led_manager(void)
 
 static void error_manager(ret_value_t state)
 {
+    led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
     led_driver_set_colour(LED_COUNT, 0xFF0000);
 
+    delay(300);
+
     switch(state)
     {
-    case PG_5V_ERROR: led_driver_set_led_state(LED0, LED_ON); break;
+        case GO_TO_5V_ERROR: led_driver_set_led_state(LED0, LED_ON); break;
+        case GO_TO_3V3_ERROR: led_driver_set_led_state(LED1, LED_ON); break;
+        case GO_TO_1V8_ERROR: led_driver_set_led_state(LED2, LED_ON); break;
+        case GO_TO_1V5_ERROR: led_driver_set_led_state(LED3, LED_ON); break;
+        case GO_TO_1V35_ERROR: led_driver_set_led_state(LED4, LED_ON); break;
+        case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
+        case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
+        case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
 
-    default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
+        default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
     }
+
+    delay(300);
 }
 
 /*******************************************************************************

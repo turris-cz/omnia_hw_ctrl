@@ -16,10 +16,11 @@
 /* Private define ------------------------------------------------------------*/
 #define USE_4V5_POWER
 
-struct timeout_status timeout_state;
+/* defines for timeout handling during regulator startup */
+#define DELAY_AFTER_ENABLE      5
+#define DELAY_BETWEEN_READINGS  20
+#define TIMEOUT                 100 // 20 * 100 = 2 sec
 
-
-/* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB signals.
@@ -174,32 +175,166 @@ void power_control_set_startup_condition(void)
     power_control_usb(USB3_PORT1, USB_ON);
 }
 
-
-void power_control_set_timeout(FunctionalState state)
+/*******************************************************************************
+  * @function   power_control_start_regulator
+  * @brief      Start DC/DC regulator and handle timeout.
+  * @param      regulator: regulator type.
+  * @retval     error, if problem with PG signal occures.
+  *****************************************************************************/
+error_type_t power_control_start_regulator(reg_type_t regulator)
 {
-    if (state == ENABLE)
+    error_type_t error = NO_ERROR;
+    uint16_t counter = 0;
+
+    switch(regulator)
     {
-        /* TIM enable counter */
-        TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
+        case REG_5V:
+        {
+            GPIO_SetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
+            delay(DELAY_AFTER_ENABLE);
+
+            while(!(GPIO_ReadInputDataBit(PG_5V_PIN_PORT, PG_5V_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_5V_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_3V3:
+        {
+            GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
+            delay(DELAY_AFTER_ENABLE);
+
+            while(!(GPIO_ReadInputDataBit(PG_3V3_PIN_PORT, PG_3V3_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_3V3_ERROR;
+                    break;
+                }
+            }
+
+        } break;
+
+        case REG_1V35:
+        {
+            GPIO_SetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_1V35_PIN_PORT, PG_1V35_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_1V35_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_4V5:
+        {
+            GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_4V5_PIN_PORT, PG_4V5_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_4V5_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_1V8:
+        {
+            GPIO_SetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_1V8_PIN_PORT, PG_1V8_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_1V8_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_1V5:
+        {
+            GPIO_SetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_1V5_PIN_PORT, PG_1V5_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_1V5_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_1V2:
+        {
+            GPIO_SetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_1V2_PIN_PORT, PG_1V2_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_1V2_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        case REG_VTT:
+        {
+            GPIO_SetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
+            delay(DELAY_AFTER_ENABLE);
+            while(!(GPIO_ReadInputDataBit(PG_VTT_PIN_PORT, PG_VTT_PIN)))
+            {
+                delay(DELAY_BETWEEN_READINGS);
+                counter++;
+                if (counter >= TIMEOUT)
+                {
+                    error = PG_VTT_ERROR;
+                    break;
+                }
+            }
+        }break;
+
+        default:
+            break;
     }
-    else
-    {
-        TIM_Cmd(STARTUP_TIMEOUT_TIMER, DISABLE);
-        STARTUP_TIMEOUT_TIMER->CNT = 0;
-    }
+
+    return error;
 }
 
 /*******************************************************************************
-  * @function   power_control_enable_regulator
+  * @function   power_control_enable_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-ret_value_t power_control_enable_regulator(void)
+error_type_t power_control_enable_regulators(void)
 {
-    struct timeout_status *timeout = &timeout_state;
-    ret_value_t value = OK;
-    uint16_t counter = 0;
+    error_type_t value = NO_ERROR;
 
     /*
      * power-up sequence:
@@ -212,69 +347,51 @@ ret_value_t power_control_enable_regulator(void)
      *    VTT regulator
      * 7) 1.2V regulator
      */
-    GPIO_SetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
-    delay(5);
-   // power_control_set_timeout(ENABLE);
-   // timeout->pg_5v.timeout_activated = 1;
 
-    while(!(GPIO_ReadInputDataBit(PG_5V_PIN_PORT, PG_5V_PIN)))
-    {
-//        if(timeout->pg_5v.timeout_elapsed)
-//        {
-//            power_control_set_timeout(DISABLE);
-//            return PG_5V_ERROR;
-//        }
-        delay(20);
-        counter++;
-        if (counter >= 100)
-        {
-            counter = 0;
-            return PG_5V_ERROR;
-        }
-    }
-
-    power_control_set_timeout(DISABLE);
-    timeout->pg_5v.timeout_activated = 0;
+    value = power_control_start_regulator(REG_5V);
+    if (value != NO_ERROR)
+        return value;
 
 #ifdef USE_4V5_POWER
-    GPIO_SetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_4V5_PIN_PORT, PG_4V5_PIN)))
-        ;
+    value = power_control_start_regulator(REG_4V5);
+    if (value != NO_ERROR)
+        return value;
 #endif
 
-    GPIO_SetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_3V3_PIN_PORT, PG_3V3_PIN)))
-        ;
+    value = power_control_start_regulator(REG_3V3);
+    if (value != NO_ERROR)
+        return value;
 
-    GPIO_SetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_1V8_PIN_PORT, PG_1V8_PIN)))
-        ;
+    value = power_control_start_regulator(REG_1V8);
+    if (value != NO_ERROR)
+        return value;
 
-    GPIO_SetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_1V5_PIN_PORT, PG_1V5_PIN)))
-        ;
+    value = power_control_start_regulator(REG_1V5);
+    if (value != NO_ERROR)
+        return value;
 
-    GPIO_SetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
-    GPIO_SetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_1V35_PIN_PORT, PG_1V35_PIN)))
-        ;
-    while(!(GPIO_ReadInputDataBit(PG_VTT_PIN_PORT, PG_VTT_PIN)))
-        ;
+    value = power_control_start_regulator(REG_1V35);
+    if (value != NO_ERROR)
+        return value;
 
-    GPIO_SetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
-    while(!(GPIO_ReadInputDataBit(PG_1V2_PIN_PORT, PG_1V2_PIN)))
-        ;
+    value = power_control_start_regulator(REG_VTT);
+    if (value != NO_ERROR)
+        return value;
+
+    value = power_control_start_regulator(REG_1V2);
+    if (value != NO_ERROR)
+        return value;
 
     return value;
 }
 
 /*******************************************************************************
-  * @function   power_control_disable_regulator
+  * @function   power_control_disable_regulators
   * @brief      Shutdown DC/DC regulators.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_disable_regulator(void)
+void power_control_disable_regulators(void)
 {
     GPIO_ResetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
     GPIO_ResetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
@@ -428,38 +545,4 @@ void power_control_set_power_led(void)
 
     rgb_leds[POWER_LED].led_state = LED_ON;
     led_driver_set_colour(POWER_LED, 0xFFFFFF);
-}
-
-/*******************************************************************************
-  * @function   power_control_timeout_config
-  * @brief      Timer configuration for general timeout during startup.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_timeout_config(void)
-{
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    // Clock enable
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
-
-    /* Time base configuration - 2sec interrupt */
-    TIM_TimeBaseStructure.TIM_Period = 4000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(STARTUP_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
-
-    TIM_ARRPreloadConfig(STARTUP_TIMEOUT_TIMER, ENABLE);
-    /* TIM Interrupts enable */
-    TIM_ITConfig(STARTUP_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
-
-    /* TIM enable counter */
-    //TIM_Cmd(STARTUP_TIMEOUT_TIMER, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x03;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
 }

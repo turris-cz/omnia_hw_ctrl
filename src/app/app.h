@@ -11,11 +11,18 @@
 #define __APP_H
 
 typedef enum {
-    PG_5V_ERROR         = -1,
-    OK                  = 0,
-    GO_TO_LIGHT_RESET   = 1,
-    GO_TO_HARD_RESET    = 2,
-    GO_TO_FACTORY_RESET = 3,
+    GO_TO_VTT_ERROR      = -8,
+    GO_TO_1V2_ERROR      = -7,
+    GO_TO_1V5_ERROR      = -6,
+    GO_TO_1V8_ERROR      = -5,
+    GO_TO_4V5_ERROR      = -4,
+    GO_TO_1V35_ERROR     = -3,
+    GO_TO_3V3_ERROR      = -2,
+    GO_TO_5V_ERROR       = -1,
+    OK                   = 0,
+    GO_TO_LIGHT_RESET    = 1,
+    GO_TO_HARD_RESET     = 2,
+    GO_TO_FACTORY_RESET  = 3,
 }ret_value_t;
 
 typedef enum {
