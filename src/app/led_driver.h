@@ -16,6 +16,13 @@
 
 #define LED_COUNT                 12
 
+enum colours {
+    WHITE_COLOUR        = 0xFFFFFF,
+    RED_COLOUR          = 0xFF0000,
+    GREEN_COLOUR        = 0x00FF00,
+    BLUE_COLOUR         = 0x0000FF,
+};
+
 typedef enum led_modes {
     LED_DEFAULT_MODE   = 0,
     LED_USER_MODE      = 1,
@@ -141,10 +148,18 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect
   * @brief      Display knight rider effect on LEDs.
+  * @param      colour: colour in RGB range.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_knight_rider_effect(uint32_t colour);
+
+/*******************************************************************************
+  * @function   led_driver_knight_rider_colour_effect
+  * @brief      Display knight rider effect on LEDs.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void led_driver_knight_rider_effect(void);
+void led_driver_knight_rider_colour_effect(void);
 
 /*******************************************************************************
   * @function   led_driver_double_knight_rider_effect

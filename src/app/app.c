@@ -322,7 +322,14 @@ void app_mcu_cyclic(void)
 
     case LOAD_SETTINGS:
         {
+            led_driver_knight_rider_effect(WHITE_COLOUR);
+            led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
+            led_driver_set_led_state(LED_COUNT, LED_ON);
+            delay(300);
+            led_driver_set_led_state(LED_COUNT, LED_OFF);
+
             load_settings();
+
             next_state = INPUT_MANAGER;
         }
         break;

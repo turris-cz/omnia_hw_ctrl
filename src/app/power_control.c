@@ -570,5 +570,6 @@ void power_control_set_power_led(void)
 {
     struct led_rgb *rgb_leds = leds;
 
+    led_driver_set_colour(POWER_LED, WHITE_COLOUR);
     rgb_leds[POWER_LED].led_state = LED_ON;
 }
