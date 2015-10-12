@@ -45,7 +45,8 @@ extern struct st_i2c_status i2c_status;
  *      7   |   USB31_OVC   : 1 - USB3-port1 overcurrent, 0 - no overcurrent
  *      8   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
  *      9   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
- * 10..15   |   dont care
+ *     10   |   ENABLE_4V5  : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
+ * 11..15   |   dont care
 */
 
 /*
@@ -102,6 +103,7 @@ enum status_word_bits {
     USB31_OVC_STSBIT       = 0x0080,
     USB30_PWRON_STSBIT     = 0x0100,
     USB31_PWRON_STSBIT     = 0x0200,
+    ENABLE_4V5_STSBIT      = 0x0400,
 };
 
 /*******************************************************************************
