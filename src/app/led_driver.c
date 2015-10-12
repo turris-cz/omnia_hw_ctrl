@@ -451,11 +451,9 @@ static void led_driver_init_led(void)
 
     for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
     {
-        rgb_leds->led_state = LED_ON;
+        rgb_leds->led_state = LED_OFF;
         rgb_leds->led_mode = LED_DEFAULT_MODE;
     }
-
-    led_driver_pwm_set_brightness(100); //100% brightness after reset
 }
 
 /*******************************************************************************
@@ -469,11 +467,12 @@ void led_driver_config(void)
     led_driver_io_config();
     led_driver_spi_config();
 
+    led_driver_init_led();
     led_driver_set_colour(LED_COUNT, 0xFFFFFF); //all LED colour set to white
    // led_driver_set_colour(0xFF0000, 0); // except of the first led - red
 
     led_driver_pwm_config();
-    led_driver_init_led();
+    led_driver_pwm_set_brightness(100); //100% brightness after reset
     led_driver_set_led_mode(USER_LED1, LED_USER_MODE); //TODO: enable user led ?
     led_driver_set_led_mode(USER_LED2, LED_USER_MODE);
     led_driver_timer_config();

@@ -253,5 +253,13 @@ void power_control_set_startup_condition(void);
   *****************************************************************************/
 error_type_t power_control_start_regulator(reg_type_t regulator);
 
+/*******************************************************************************
+  * @function   power_control_set_power_led
+  * @brief      Set on power LED.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_power_led(void);
+
 #endif // POWER_CONTROL_H
 

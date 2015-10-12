@@ -122,6 +122,8 @@ static ret_value_t load_settings(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
 
+    power_control_set_power_led(); //power led ON
+
     debounce_config(); // start evaluation of inputs
     i2c_control->status_word_orig = i2c_control->status_word = get_status_word();
     //Marvell CPU should send settings now (led brightness and colour)
