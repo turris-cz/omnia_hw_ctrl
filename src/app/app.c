@@ -174,6 +174,15 @@ static ret_value_t input_manager(void)
         input_state->pg = 0;
     }
 
+    if(i2c_control->status_word & ENABLE_4V5_STSBIT) //user option
+    {
+        if(input_state->pg_4v5)
+        {
+            val = GO_TO_HARD_RESET;
+            input_state->pg_4v5 = 0;
+        }
+    }
+
     if(input_state->usb30_ovc)
     {
         i2c_control->status_word |= USB30_OVC_STSBIT;

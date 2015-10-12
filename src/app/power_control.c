@@ -14,7 +14,6 @@
 #include "led_driver.h"
 
 /* Private define ------------------------------------------------------------*/
-#define USE_4V5_POWER
 
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
@@ -60,10 +59,10 @@ void power_control_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = ENABLE_1V35_PIN;
     GPIO_Init(ENABLE_1V35_PIN_PORT, &GPIO_InitStructure);
-#ifdef USE_4V5_POWER
+
     GPIO_InitStructure.GPIO_Pin = ENABLE_4V5_PIN;
     GPIO_Init(ENABLE_4V5_PIN_PORT, &GPIO_InitStructure);
-#endif
+
     GPIO_InitStructure.GPIO_Pin = ENABLE_1V8_PIN;
     GPIO_Init(ENABLE_1V8_PIN_PORT, &GPIO_InitStructure);
 
@@ -130,10 +129,10 @@ void power_control_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = PG_1V35_PIN;
     GPIO_Init(PG_1V35_PIN_PORT, &GPIO_InitStructure);
-#ifdef USE_4V5_POWER
+
     GPIO_InitStructure.GPIO_Pin = PG_4V5_PIN;
     GPIO_Init(PG_4V5_PIN_PORT, &GPIO_InitStructure);
-#endif
+
     GPIO_InitStructure.GPIO_Pin = PG_1V8_PIN;
     GPIO_Init(PG_1V8_PIN_PORT, &GPIO_InitStructure);
 
@@ -340,7 +339,7 @@ error_type_t power_control_enable_regulators(void)
     /*
      * power-up sequence:
      * 1) 5V regulator
-     * 2) 4.5V regulator - if used
+     * 2) 4.5V regulator - user selectable
      * 3) 3.3V regulator
      * 4) 1.8V regulator
      * 5) 1.5V regulator
@@ -353,11 +352,9 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
-#ifdef USE_4V5_POWER
-    value = power_control_start_regulator(REG_4V5);
-    if (value != NO_ERROR)
-        return value;
-#endif
+//    value = power_control_start_regulator(REG_4V5);
+//    if (value != NO_ERROR)
+//        return value;
 
     value = power_control_start_regulator(REG_3V3);
     if (value != NO_ERROR)
@@ -400,9 +397,7 @@ void power_control_disable_regulators(void)
     GPIO_ResetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
     GPIO_ResetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
     GPIO_ResetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
-#ifdef USE_4V5_POWER
     GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-#endif
     GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
 }
 

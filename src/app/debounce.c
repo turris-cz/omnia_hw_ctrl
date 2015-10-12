@@ -249,48 +249,30 @@ void debounce_check_inputs(void)
 
     // reaction: follow MRES signal
     if (port_changed & MRES_MASK)
-    {
         GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
-    }
     else
-    {
         GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
-    }
 
     if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
-         (port_changed & PG_1V35_MASK) || (port_changed & PG_4V5_MASK) ||
+         (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
          (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
-         (port_changed & PG_1V2_MASK) || (port_changed & PG_VTT_MASK))
-    {
+         (port_changed & PG_1V2_MASK))
         input_state->pg = 1;
-        //power_control_disable_regulator();
-        /* 100ms delay between the first and last voltage power-down
-         * defined in Marvell HW specification, pg.97 (power-down sequence) */
-        //delay(100);
-       // NVIC_SystemReset(); // SW reset
-    }
+
+    if (port_changed & PG_4V5_MASK) //4.5V separately - user selectable
+        input_state->pg_4v5 = 1;
 
     if (port_changed & USB30_OVC_MASK)
-    {
         input_state->usb30_ovc = 1;
-        //power_control_usb(USB3_PORT0, USB_OFF);
-        //USB timeout set to 1 sec
-        //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
-    }
 
 
     if (port_changed & USB31_OVC_MASK)
-    {
         input_state->usb31_ovc = 1;
-        //power_control_usb(USB3_PORT1, USB_OFF);
-        //USB timeout set to 1 sec
-        //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
-    }
 
 
     if (port_changed & RTC_ALARM_MASK)
     {
-        //TODO - probably no reaction needed
+        //probably no reaction needed
     }
 
     if (port_changed & LED_BRT_MASK)

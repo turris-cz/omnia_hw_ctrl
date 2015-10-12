@@ -19,6 +19,7 @@ struct input_sig {
     uint8_t dbg_res     :1;
     uint8_t m_res       :1;
     uint8_t pg          :1;
+    uint8_t pg_4v5      :1;
     uint8_t usb30_ovc   :1;
     uint8_t usb31_ovc   :1;
     uint8_t rtc_alarm   :1;
