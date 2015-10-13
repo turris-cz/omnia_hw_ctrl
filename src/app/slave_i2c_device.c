@@ -370,7 +370,10 @@ ret_value_t slave_i2c_process_data(void)
             } break;
 
             default:
-                break;
+            {
+                i2c_state->rx_data_ctr = 0;
+                I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
+            }break;
         }
     }
 
