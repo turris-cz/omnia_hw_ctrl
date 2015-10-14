@@ -110,7 +110,7 @@ void msata_pci_activity_handler(void)
 
 /*******************************************************************************
   * @function   msata_pci_card_detection
-  * @brief      Detect inserted card (whether is a card inserted or not)
+  * @brief      Detect inserted card (whether a card is inserted or not)
   * @param      None.
   * @retval     1 - a card inserted, 0 - no card inserted.
   *****************************************************************************/

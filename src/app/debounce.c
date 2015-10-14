@@ -14,6 +14,7 @@
 #include "delay.h"
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
+#include "msata_pci.h"
 
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
@@ -38,6 +39,8 @@ enum input_mask {
 #define MAX_SFP_DET_STATES          5
 #define MAX_SFP_FLT_STATES          5
 #define MAX_SFP_LOS_STATES          5
+#define MAX_CARD_DET_STATES         5
+#define MAX_MSATA_IND_STATES        5
 
 static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
@@ -93,7 +96,7 @@ static void debounce_sfp_det(void)
     uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    state = ~(wan_sfp_connector_detection());
+    state = !(wan_sfp_connector_detection());
 
     if (state) //signal released
     {
@@ -130,7 +133,7 @@ static void debounce_sfp_flt(void)
     uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    state = ~(wan_sfp_fault_detection());
+    state = !(wan_sfp_fault_detection());
 
     if (state) //signal released
     {
@@ -167,7 +170,7 @@ static void debounce_sfp_los(void)
     uint8_t state;
     struct input_sig *input_state = &debounce_input_signal;
 
-    state = ~(wan_sfp_lost_detection());
+    state = !(wan_sfp_lost_detection());
 
     if (state) //signal released
     {
@@ -193,6 +196,80 @@ static void debounce_sfp_los(void)
 }
 
 /*******************************************************************************
+  * @function   debounce_card_det
+  * @brief      Debounce of nCARD_DET input. Called in debounce timer interrupt.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_card_det(void)
+{
+    static uint16_t counter;
+    uint8_t state;
+    struct input_sig *input_state = &debounce_input_signal;
+
+    state = !(msata_pci_card_detection());
+
+    if (state) //signal released
+    {
+        if (counter > 0)
+            counter--;
+    }
+    else //signal falls to low
+    {
+        if (counter < MAX_CARD_DET_STATES)
+            counter++;
+    }
+
+    if (counter == 0)
+        input_state->card_det = 0;
+    else
+    {
+        if(counter >= MAX_CARD_DET_STATES)
+        {
+            input_state->card_det = 1;
+            counter = MAX_CARD_DET_STATES;
+        }
+    }
+}
+
+/*******************************************************************************
+  * @function   debounce_msata_ind
+  * @brief      Debounce of MSATAIND input. Called in debounce timer interrupt.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_msata_ind(void)
+{
+    static uint16_t counter;
+    uint8_t state;
+    struct input_sig *input_state = &debounce_input_signal;
+
+    state = !(msata_pci_type_card_detection());
+
+    if (state) //signal released
+    {
+        if (counter > 0)
+            counter--;
+    }
+    else //signal falls to low
+    {
+        if (counter < MAX_MSATA_IND_STATES)
+            counter++;
+    }
+
+    if (counter == 0)
+        input_state->msata_ind = 0;
+    else
+    {
+        if(counter >= MAX_MSATA_IND_STATES)
+        {
+            input_state->msata_ind = 1;
+            counter = MAX_MSATA_IND_STATES;
+        }
+    }
+}
+
+/*******************************************************************************
   * @function   debounce_input_timer_handler
   * @brief      Main debounce function. Called in timer interrupt handler.
   * @param      None.
@@ -211,6 +288,8 @@ void debounce_input_timer_handler(void)
     debounce_sfp_det();
     debounce_sfp_flt();
     debounce_sfp_los();
+    debounce_card_det();
+    debounce_msata_ind();
 }
 
 /*******************************************************************************

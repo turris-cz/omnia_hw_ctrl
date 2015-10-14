@@ -216,7 +216,8 @@ static ret_value_t input_manager(void)
         input_state->led_brt = 0;
     }
 
-    if(input_state->sfp_det) //flag is cleared in debounce function
+    /* flag is cleared in debounce function */
+    if(input_state->sfp_det)
         i2c_control->status_word |= SFP_DET_STSBIT;
     else
         i2c_control->status_word &= (~SFP_DET_STSBIT);
@@ -230,6 +231,16 @@ static ret_value_t input_manager(void)
         i2c_control->status_word |= SFP_FLT_STSBIT;
     else
         i2c_control->status_word &= (~SFP_FLT_STSBIT);
+
+    if(input_state->card_det)
+        i2c_control->status_word |= CARD_DET_STSBIT;
+    else
+        i2c_control->status_word &= (~CARD_DET_STSBIT);
+
+    if(input_state->msata_ind)
+        i2c_control->status_word |= MSATA_IND_STSBIT;
+    else
+        i2c_control->status_word &= (~MSATA_IND_STSBIT);
 
     return val;
 }

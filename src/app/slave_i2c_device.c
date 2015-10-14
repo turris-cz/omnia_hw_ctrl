@@ -319,7 +319,7 @@ ret_value_t slave_i2c_process_data(void)
 
         switch(i2c_state->rx_buf[0])
         {
-            case CMD_SLAVE_TX: // slave TX (master expects data)
+            case CMD_SLAVE_TX: /* slave TX (master expects data) */
             {
                 //prepare data to be sent to the master
                 i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
@@ -329,7 +329,7 @@ ret_value_t slave_i2c_process_data(void)
 
             } break;
 
-            case CMD_SLAVE_RX: // slave RX
+            case CMD_SLAVE_RX: /* slave RX */
             {
                 DBG("process RX data\r\n");
                 switch (i2c_state->rx_buf[1])
@@ -369,7 +369,7 @@ ret_value_t slave_i2c_process_data(void)
                 I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
             } break;
 
-            default:
+            default: /* unexpected data received */
             {
                 i2c_state->rx_data_ctr = 0;
                 // clear RX buffer
