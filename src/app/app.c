@@ -18,6 +18,7 @@
 #include "slave_i2c_device.h"
 #include "wan_lan_pci_status.h"
 
+#define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 #define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 
@@ -309,6 +310,7 @@ void app_mcu_cyclic(void)
 {
     static states_t next_state = POWER_ON;
     static ret_value_t val = OK;
+    static uint8_t error_counter;
 
     switch(next_state)
     {
@@ -357,7 +359,17 @@ void app_mcu_cyclic(void)
     case ERROR_STATE:
         {
             error_manager(val);
-            next_state = ERROR_STATE; //TODO: stay in error state or HARD_RESET?
+            error_counter++;
+
+            if(error_counter >= MAX_ERROR_COUNT)
+            {
+                next_state = HARD_RESET;
+                error_counter = 0;
+            }
+            else
+            {
+                next_state = ERROR_STATE;
+            }
         }
         break;
 
