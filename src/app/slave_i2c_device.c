@@ -289,7 +289,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
 
     if (control_byte & ENABLE_4V5_MASK)
     {
-        power_control_start_regulator(REG_4V5);
+        power_control_start_regulator(REG_4V5); //TODO: read return value
         i2c_control->status_word |= ENABLE_4V5_STSBIT;
     }
     else
@@ -372,6 +372,12 @@ ret_value_t slave_i2c_process_data(void)
             default:
             {
                 i2c_state->rx_data_ctr = 0;
+                // clear RX buffer
+                for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
+                {
+                    i2c_state->rx_buf[i] = 0;
+                }
+
                 I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
             }break;
         }
