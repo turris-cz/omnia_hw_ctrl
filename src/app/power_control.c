@@ -506,16 +506,16 @@ error_type_t power_control_first_startup(void)
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {
-        delay(DELAY_BETWEEN_READINGS);
-        counter++;
-        if (counter >= RESET_TIMEOUT)
-        {
-            error = RESET_ERROR;
-            return error;
-        }
+//        delay(DELAY_BETWEEN_READINGS);
+//        counter++;
+//        if (counter >= RESET_TIMEOUT)
+//        {
+//            error = RESET_ERROR;
+//            return error;
+//        }
     }
 
-    delay(5); // 5ms delay after releasing of reset signal
+    delay(15); // 15ms delay after releasing of reset signal
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
     return error;
@@ -540,16 +540,16 @@ error_type_t power_control_second_startup(void)
 
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {
-        delay(DELAY_BETWEEN_READINGS);
-        counter++;
-        if (counter >= RESET_TIMEOUT)
-        {
-            error = RESET_ERROR;
-            return error;
-        }
+//        delay(DELAY_BETWEEN_READINGS);
+//        counter++;
+//        if (counter >= RESET_TIMEOUT)
+//        {
+//            error = RESET_ERROR;
+//            return error;
+//        }
     }
 
-    delay(5);
+    delay(15);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
     return error;

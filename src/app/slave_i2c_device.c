@@ -166,30 +166,34 @@ void slave_i2c_handler(void)
         {
             /* at the moment the command from master is stored in rx_buf[0]
             and the master is waiting for data */
-            i2c_state->address_match_slave_tx = 1;
+           // i2c_state->address_match_slave_tx = 1;
             DBG("slave tx adddress match\r\n");
         }
         else
         {
-            i2c_state->address_match_slave_rx = 1;
+           // i2c_state->address_match_slave_rx = 1;
             DBG("slave rx adddress match\r\n");
         }
 
+        i2c_state->address_match_slave_rx = 1;
         /* Clear IT pending bit */
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
+
+
     }
 
     // transmit data
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET) && (i2c_state->address_match_slave_tx == 1))
     {
-        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-        DBG((const char*)&i2c_state->tx_buf[i2c_state->tx_data_ctr - 1]);
+       // I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
+       // DBG((const char*)&i2c_state->tx_buf[i2c_state->tx_data_ctr - 1]);
     }
 
     // receive data
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET) && (i2c_state->address_match_slave_rx == 1))
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+        I2C_SendData(I2C_PERIPH_NAME, 0xBB);
     }
 
     // stop detection after data from master are received
@@ -206,7 +210,7 @@ void slave_i2c_handler(void)
         i2c_state->data_rx_complete = 1;
         i2c_state->address_match_slave_rx = 0;
         // disable interrupt in order to process incoming data
-        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+       // I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
     }
 
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET) && (i2c_state->address_match_slave_tx == 1))
@@ -221,7 +225,7 @@ void slave_i2c_handler(void)
         i2c_state->data_tx_complete = 1;
 
         // disable interrupt in order to clear all buffers in data processing
-        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+      //  I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
     }
 }
 

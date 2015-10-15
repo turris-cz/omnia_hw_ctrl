@@ -36,10 +36,9 @@ void app_mcu_init(void)
     power_control_io_config();
     msata_pci_indication_config();
     wan_lan_pci_config();
-    power_control_usb_timeout_config();
-    slave_i2c_config();
+    power_control_usb_timeout_config();    
     led_driver_config(); //TODO: set all LED colour to white and then black
-
+    slave_i2c_config();
 }
 
 /*******************************************************************************
@@ -141,10 +140,10 @@ static ret_value_t light_reset(void)
     error = power_control_first_startup();
     error = power_control_second_startup();
 
-    if (error != NO_ERROR)
-        value = GO_TO_RESET_ERROR;
-    else
-        value = OK;
+//    if (error != NO_ERROR)
+//        value = GO_TO_RESET_ERROR;
+//    else
+//        value = OK;
 
     return value;
 }
@@ -292,7 +291,7 @@ static void error_manager(ret_value_t state)
         case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
         case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
         case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
-        case GO_TO_RESET_ERROR: led_driver_set_led_state(LED8, LED_ON); break;
+        //case GO_TO_RESET_ERROR: led_driver_set_led_state(LED8, LED_ON); break;
 
         default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
     }
@@ -349,6 +348,7 @@ void app_mcu_cyclic(void)
             led_driver_set_led_state(LED_COUNT, LED_ON);
             delay(300);
             led_driver_set_led_state(LED_COUNT, LED_OFF);
+            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
             load_settings();
 
