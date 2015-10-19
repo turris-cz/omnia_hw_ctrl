@@ -10,7 +10,7 @@
 #ifndef DEBUG_SERIAL_H
 #define DEBUG_SERIAL_H
 
-#define DBG_ENABLE      0
+#define DBG_ENABLE      1
 
 #if DBG_ENABLE
 #define DBG(buf)        debug_print(buf);

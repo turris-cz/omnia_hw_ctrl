@@ -9,6 +9,7 @@
  **/
 #include "string.h"
 #include "stm32f0xx_conf.h"
+#include "debug_serial.h"
 
 #define SERIAL_PORT      USART1
 
@@ -20,6 +21,7 @@
   *****************************************************************************/
 void debug_serial_config(void)
 {
+#if DBG_ENABLE // UART pins are used for CARD and SFP detection !
     USART_InitTypeDef USART_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -37,7 +39,7 @@ void debug_serial_config(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_BaudRate = 9600;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
     USART_InitStructure.USART_StopBits = USART_StopBits_1;
     USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -46,6 +48,7 @@ void debug_serial_config(void)
     USART_Init(SERIAL_PORT, &USART_InitStructure);
 
     USART_Cmd(SERIAL_PORT, ENABLE);
+#endif
 }
 
 /*******************************************************************************
@@ -59,13 +62,13 @@ static void debug_send_data(const char *buffer, uint16_t count)
 {
     while(count--)
     {
-        USART_SendData(SERIAL_PORT, *buffer++);
         /* Loop until the end of transmission */
         while(USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TXE) == RESET)
             ;
-        while(USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TC) == SET)
-            ;
+        USART_SendData(SERIAL_PORT, *buffer++);
     }
+    while(USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TC) == RESET)
+        ;
 }
 
 /*******************************************************************************

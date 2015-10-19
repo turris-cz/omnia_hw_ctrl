@@ -14,6 +14,7 @@
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
 #include "power_control.h"
+#include "delay.h"
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -28,7 +29,7 @@
 #define I2C_CLK_PIN                     GPIO_Pin_6 // I2C2_SCL - GPIOF
 #define I2C_GPIO_PORT                   GPIOF
 
-#define I2C_SLAVE_ADDRESS               0x55
+#define I2C_SLAVE_ADDRESS               0x55 //address in linux: 0x2A
 
 enum i2c_basic_commands {
     CMD_SLAVE_RX                        = 0x01, // slave only receives data
@@ -66,6 +67,11 @@ void slave_i2c_config(void)
     GPIO_InitTypeDef  GPIO_InitStructure;
     I2C_InitTypeDef  I2C_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* I2C Peripheral Disable */
+    I2C_DeInit(I2C_PERIPH_NAME);
+    I2C_Cmd(I2C_PERIPH_NAME, DISABLE);
+    RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, DISABLE);
 
     /* I2C Periph clock enable */
     RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, ENABLE);
@@ -180,7 +186,9 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     }
 
     if (control_byte & SFP_DIS_MASK)
-        wan_sfp_set_tx_status(DISABLE);
+    {
+        wan_sfp_set_tx_status(DISABLE);;
+    }
     else
         wan_sfp_set_tx_status(ENABLE);
 
@@ -248,6 +256,23 @@ static void slave_i2c_clear_buffers(void)
 }
 
 /*******************************************************************************
+  * @function   slave_i2c_delay
+  * @brief      Very short delay necessary in i2c communication.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_delay(void)
+{
+    uint16_t nop_delay = 20000;
+    uint16_t nop_counter;
+
+    for (nop_counter = 0; nop_counter < nop_delay; nop_counter++)
+    {
+        __NOP();
+    }
+}
+
+/*******************************************************************************
   * @function   slave_i2c_handler
   * @brief      Interrupt handler for I2C communication.
   * @param      None.
@@ -264,34 +289,43 @@ void slave_i2c_handler(void)
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
     }
 
-    // transmit data
+    /* transmit data */
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET) )
     {
-        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-        DBG((const char*)&i2c_state->tx_buf[i2c_state->tx_data_ctr - 1]);
+        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr]);
+        /* there is necessary to make short delay in communication */
+        slave_i2c_delay();
+        i2c_state->tx_data_ctr++;
     }
 
-    // receive data
+    /* receive data */
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET) )
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+        //DBG((const char*)i2c_state->rx_buf[i2c_state->rx_data_ctr - 1]);
+        //slave_i2c_delay();
+
         // first byte received
-        if (i2c_state->rx_data_ctr >= 1)
-        {
-            i2c_state->data_rx_complete = 1;
-        }
+       // if (i2c_state->rx_data_ctr >= 1)
+       // {
+            if (i2c_state->rx_buf[0] == CMD_SLAVE_TX)
+            {
+                i2c_state->data_tx_complete = 1;
+            }
+       // }
     }
 
-    // stop detection
+    /* stop detection */
     if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET) )
     {
-        //i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
-
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        DBG((const char*)i2c_state->rx_buf);
-        DBG(" -> data received\r\n");
+        if (!i2c_state->data_tx_complete)
+            i2c_state->data_rx_complete = 1;
 
+        DBG("\r\nRX data: ");
+        DBG((const char*)i2c_state->rx_buf);
+        DBG("\r\n");
         // clear counters
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
@@ -313,78 +347,85 @@ ret_value_t slave_i2c_process_data(void)
     uint32_t colour;
     ret_value_t state = OK;
 
-    if (i2c_state->data_rx_complete)
+    if (i2c_state->data_rx_complete || i2c_state->data_tx_complete)
     {
-        // clear flag
-        i2c_state->data_rx_complete = 0;
-
         switch(i2c_state->rx_buf[0])
         {
             case CMD_SLAVE_TX: /* slave TX (master expects data) */
             {
-                //prepare data to be sent to the master
-               // i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
-               // i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-
-                i2c_state->tx_buf[0] = 'C';
-                i2c_state->tx_buf[1] = 'D';
-
-                //I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[0]);
-                //I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[1]);
+                /* prepare data to be sent to the master */
+                i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+                i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
                 I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
-
+                DBG("transmit data now\r\n");
             } break;
 
             case CMD_SLAVE_RX: /* slave RX */
             {
-                DBG("process RX data\r\n");
                 switch (i2c_state->rx_buf[1])
                 {
-                case CMD_GENERAL_CONTROL:
-                    slave_i2c_check_control_byte(i2c_state->rx_buf[2], &state);
-                    break;
+                    case CMD_GENERAL_CONTROL:
+                    {
+                        slave_i2c_check_control_byte(i2c_state->rx_buf[2], &state);
+                        DBG("control byte\r\n");
+                    } break;
 
-                case CMD_LED_MODE:
-                    led_driver_set_led_mode(i2c_state->rx_buf[2] & 0x0F,
-                                            (i2c_state->rx_buf[2] & 0x10) >> 4);
-                    break;
+                    case CMD_LED_MODE:
+                    {
+                        led_driver_set_led_mode(i2c_state->rx_buf[2] & 0x0F,
+                                                (i2c_state->rx_buf[2] & 0x10) >> 4);
+                        DBG("set LED mode\r\n");
+                    } break;
 
-                case CMD_LED_STATE:
-                    led_driver_set_led_state(i2c_state->rx_buf[2] & 0x0F,
-                                            (i2c_state->rx_buf[2] & 0x10) >> 4);
-                    break;
+                    case CMD_LED_STATE:
+                    {
+                        led_driver_set_led_state(i2c_state->rx_buf[2] & 0x0F,
+                                                (i2c_state->rx_buf[2] & 0x10) >> 4);
+                        DBG("set LED state\r\n");
+                    } break;
 
-                case CMD_LED_COLOUR:
-                {
-                    colour = (i2c_state->rx_buf[3] << 16) |
-                              (i2c_state->rx_buf[4] << 8) | i2c_state->rx_buf[5];
+                    case CMD_LED_COLOUR:
+                    {
+                        colour = (i2c_state->rx_buf[3] << 16) |
+                                  (i2c_state->rx_buf[4] << 8) | i2c_state->rx_buf[5];
 
-                    led_driver_set_colour(i2c_state->rx_buf[2] & 0x0F, colour);
+                        led_driver_set_colour(i2c_state->rx_buf[2] & 0x0F, colour);
+                        DBG("set LED colour\r\n");
+                    } break;
+
+                    case CMD_LED_BRIGHTNESS:
+                    {
+                        led_driver_pwm_set_brightness(i2c_state->rx_buf[2]);
+                        DBG("set brightness\r\n");
+                    } break;
+
+                    default:
+                    {
+                        slave_i2c_clear_buffers();
+                        // clear counters
+                        i2c_state->rx_data_ctr = 0;
+                        i2c_state->tx_data_ctr = 0;
+                        slave_i2c_config();
+                        DBG("unexpected command\r\n");
+                    } break;
                 }
-                    break;
-
-                case CMD_LED_BRIGHTNESS:
-                    led_driver_pwm_set_brightness(i2c_state->rx_buf[2]);
-                    break;
-
-                default:
-                    break;
-                }
-
             } break;
 
-            default: /* unexpected data received */
+            default: /* unexpected reg. address received */
             {
                 slave_i2c_clear_buffers();
                 // clear counters
                 i2c_state->rx_data_ctr = 0;
                 i2c_state->tx_data_ctr = 0;
+                DBG("unexpected register address\r\n");
+                slave_i2c_config();
             } break;
         }
 
-        // enable interrupt again
-        //I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
+        // clear flag
+        i2c_state->data_rx_complete = 0;
+        i2c_state->data_tx_complete = 0;
     }
 
     return state;

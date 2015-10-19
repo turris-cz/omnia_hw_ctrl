@@ -17,6 +17,7 @@
 #include "msata_pci.h"
 #include "slave_i2c_device.h"
 #include "wan_lan_pci_status.h"
+#include "debug_serial.h"
 
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
@@ -36,9 +37,11 @@ void app_mcu_init(void)
     power_control_io_config();
     msata_pci_indication_config();
     wan_lan_pci_config();
-    power_control_usb_timeout_config();    
+    power_control_usb_timeout_config();
     led_driver_config(); //TODO: set all LED colour to white and then black
     slave_i2c_config();
+    debug_serial_config();
+    DBG("\r\nInit completed.\r\n");
 }
 
 /*******************************************************************************
