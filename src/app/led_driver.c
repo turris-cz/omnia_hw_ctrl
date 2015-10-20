@@ -509,7 +509,13 @@ void led_driver_step_brightness(void)
     struct led_rgb *rgb_leds = leds;
 
     if (rgb_leds->brightness <= MIN_LED_BRIGHTNESS)
-        rgb_leds->brightness = MAX_LED_BRIGHTNESS;
+        rgb_leds->brightness = MAX_LED_BRIGHTNESS + LED_BRIGHTNESS_STEP;
+    else
+    {
+        if ((rgb_leds->brightness > MIN_LED_BRIGHTNESS) &&
+                (rgb_leds->brightness < LED_BRIGHTNESS_STEP))
+                rgb_leds->brightness = LED_BRIGHTNESS_STEP;
+    }
 
     rgb_leds->brightness -= LED_BRIGHTNESS_STEP;
     led_driver_pwm_set_brightness(rgb_leds->brightness);
