@@ -16,8 +16,6 @@
 #define MAX_TX_BUFFER_SIZE                 2
 
 struct st_i2c_status {
-    uint8_t address_match_slave_rx   : 1;
-    uint8_t address_match_slave_tx   : 1;
     uint8_t data_rx_complete         : 1; // stop flag detected - all data received
     uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
     uint8_t timeout                  : 1;

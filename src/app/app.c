@@ -280,7 +280,7 @@ static void error_manager(ret_value_t state)
 {
     led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, 0xFF0000);
+    led_driver_set_colour(LED_COUNT, RED_COLOUR);
 
     delay(300);
 
@@ -347,7 +347,7 @@ void app_mcu_cyclic(void)
     case LOAD_SETTINGS:
         {
             led_driver_knight_rider_effect(WHITE_COLOUR);
-            led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
+            led_driver_set_colour(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
             led_driver_set_led_state(LED_COUNT, LED_ON);
             delay(300);
             led_driver_set_led_state(LED_COUNT, LED_OFF);
