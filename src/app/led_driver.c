@@ -449,11 +449,21 @@ static void led_driver_init_led(void)
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
 
+    /* user mode - all LEDs white and ON*/
     for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
+    {
+        rgb_leds->led_state = LED_ON;
+        rgb_leds->led_mode = LED_USER_MODE;
+    }
+    led_driver_set_colour(LED_COUNT, 0xFFFFFF); //all LED colour set to white
+
+    /* default mode - all LEDS OFF and white */
+    for (idx = 0, rgb_leds = leds; idx < LED_COUNT; idx++, rgb_leds++)
     {
         rgb_leds->led_state = LED_OFF;
         rgb_leds->led_mode = LED_DEFAULT_MODE;
     }
+    led_driver_set_colour(LED_COUNT, 0xFFFFFF);
 }
 
 /*******************************************************************************
@@ -467,13 +477,14 @@ void led_driver_config(void)
     led_driver_io_config();
     led_driver_spi_config();
 
-    led_driver_init_led();
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF); //all LED colour set to white
-   // led_driver_set_colour(0xFF0000, 0); // except of the first led - red
+    led_driver_init_led(); //set mode and state
 
     led_driver_pwm_config();
     led_driver_pwm_set_brightness(100); //100% brightness after reset
-    led_driver_set_led_mode(USER_LED1, LED_USER_MODE); //TODO: enable user led ?
+
+    led_driver_set_led_state(USER_LED1, LED_OFF); //TODO: enable user led ?
+    led_driver_set_led_state(USER_LED2, LED_OFF);
+    led_driver_set_led_mode(USER_LED1, LED_USER_MODE);
     led_driver_set_led_mode(USER_LED2, LED_USER_MODE);
     led_driver_timer_config();
 }
@@ -601,7 +612,7 @@ void led_driver_knight_rider_effect(uint32_t colour)
         led_driver_set_led_state(led, LED_ON);
     }
 
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF); //TODO: back to default or predefined colour
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
 }
 
@@ -642,7 +653,7 @@ void led_driver_double_knight_rider_effect(void)
     int8_t colour;
 
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF);
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
     for (colour = -1; colour < BLUE + 1; colour++)
     {
