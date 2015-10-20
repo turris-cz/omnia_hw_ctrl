@@ -46,6 +46,7 @@ static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
 struct input_sig debounce_input_signal;
+button_mode_t button_mode;
 
 #define  DEBOUNCE_TIM_PERIODE       (300 - 1)//300 -> 5ms; 600 -> 10ms
 #define  DEBOUNCE_TIM_PRESCALER     (800 - 1)
@@ -367,4 +368,5 @@ void debounce_check_inputs(void)
 void debounce_config(void)
 {
     debounce_timer_config();
+    button_mode = BUTTON_DEFAULT; /* default = brightness settings */
 }

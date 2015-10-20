@@ -13,6 +13,12 @@
 
 #define DEBOUNCE_TIMER		TIM16
 
+typedef enum button_modes {
+    BUTTON_DEFAULT,
+    BUTTON_USER,
+}button_mode_t;
+
+/* flags of input signals */
 struct input_sig {
     uint8_t man_res     :1;
     uint8_t sysres_out  :1;
@@ -32,6 +38,7 @@ struct input_sig {
 };
 
 extern struct input_sig debounce_input_signal;
+extern button_mode_t button_mode;
 
 /*******************************************************************************
   * @function   debounce_config

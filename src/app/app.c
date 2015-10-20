@@ -215,7 +215,16 @@ static ret_value_t input_manager(void)
 
     if (input_state->led_brt)
     {
-        led_driver_step_brightness();
+        if (button_mode == BUTTON_DEFAULT)
+        {
+            led_driver_step_brightness();
+            i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
+        }
+        else /* user button mode */
+        {
+            i2c_control->status_word |= BUTTON_MODE_STSBIT;
+        }
+
         input_state->led_brt = 0;
     }
 

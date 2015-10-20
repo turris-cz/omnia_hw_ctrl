@@ -15,6 +15,7 @@
 #include "wan_lan_pci_status.h"
 #include "power_control.h"
 #include "delay.h"
+#include "debounce.h"
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -51,6 +52,7 @@ enum i2_control_byte_mask {
     USB30_PWRON_MASK                    = 0x10,
     USB31_PWRON_MASK                    = 0x20,
     ENABLE_4V5_MASK                     = 0x40,
+    BUTTON_MODE_MASK                    = 0x80,
 };
 
 struct st_i2c_status i2c_status;
@@ -185,9 +187,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     }
 
     if (control_byte & SFP_DIS_MASK)
-    {
-        wan_sfp_set_tx_status(DISABLE);;
-    }
+        wan_sfp_set_tx_status(DISABLE);
     else
         wan_sfp_set_tx_status(ENABLE);
 
@@ -228,6 +228,11 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
         GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
         i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
     }
+
+    if (control_byte & BUTTON_MODE_MASK)
+       button_mode = BUTTON_USER;
+    else
+       button_mode = BUTTON_DEFAULT;
 }
 
 /*******************************************************************************
