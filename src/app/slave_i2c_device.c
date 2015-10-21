@@ -166,6 +166,7 @@ static void slave_i2c_wait_for_flag(uint32_t flag)
 static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *state)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
+    struct button_def *button = &button_front;
     *state = OK;
 
     if (control_byte & LIGHT_RST_MASK)
@@ -230,9 +231,9 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     }
 
     if (control_byte & BUTTON_MODE_MASK)
-       button_mode = BUTTON_USER;
+       button->button_mode = BUTTON_USER;
     else
-       button_mode = BUTTON_DEFAULT;
+       button->button_mode = BUTTON_DEFAULT;
 }
 
 /*******************************************************************************
@@ -334,10 +335,10 @@ void slave_i2c_handler(void)
 /*******************************************************************************
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
-  * @param      None.
+  * @param      system_status_word: status word to be sent to the master.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(void)
+ret_value_t slave_i2c_process_data(uint16_t system_status_word)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint8_t led_index;
@@ -347,16 +348,18 @@ ret_value_t slave_i2c_process_data(void)
     if (i2c_state->data_tx_complete) /* slave TX (master expects data) */
     {
         /* prepare data to be sent to the master */
-        i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
-        i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
+        i2c_state->tx_buf[0] = system_status_word & 0x00FF;
+        i2c_state->tx_buf[1] = (system_status_word & 0xFF00) >> 8;
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
-        delay(1); /* small delay before clearing the flag */
+        /* small delay before clearing the flag to give some time for sending */
+        delay(1);
         DBG("status word: ");
         DBG((const char*)i2c_state->tx_buf);
         DBG("\r\n");
         i2c_state->data_tx_complete = 0;
+        i2c_state->status_word_not_sent = 0;
     }
 
     if (i2c_state->data_rx_complete)

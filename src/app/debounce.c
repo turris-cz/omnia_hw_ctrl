@@ -32,7 +32,7 @@ enum input_mask {
     USB30_OVC_MASK                  = 0x1000,
     USB31_OVC_MASK                  = 0x2000,
     RTC_ALARM_MASK                  = 0x4000,
-    LED_BRT_MASK                    = 0x8000,
+    BUTTON_MASK                     = 0x8000,
 };
 
 #define MAX_INPUT_STATES            3
@@ -46,7 +46,7 @@ static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
 struct input_sig debounce_input_signal;
-button_mode_t button_mode;
+struct button_def button_front;
 
 #define  DEBOUNCE_TIM_PERIODE       (300 - 1)//300 -> 5ms; 600 -> 10ms
 #define  DEBOUNCE_TIM_PRESCALER     (800 - 1)
@@ -280,12 +280,14 @@ void debounce_input_timer_handler(void)
 {
     static uint16_t idx;
 
+    /* port B debounced by general function debounce_check_inputs() */
     port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); //read whole port
     idx++;
 
     if (idx >= MAX_INPUT_STATES)
         idx = 0;
 
+    /* other inputs not handled by general function debounce_check_inputs() */
     debounce_sfp_det();
     debounce_sfp_flt();
     debounce_sfp_los();
@@ -355,8 +357,8 @@ void debounce_check_inputs(void)
         //probably no reaction needed
     }
 
-    if (port_changed & LED_BRT_MASK)
-        input_state->led_brt = 1;
+    if (port_changed & BUTTON_MASK)
+        input_state->button_sts = 1;
 }
 
 /*******************************************************************************
@@ -367,6 +369,8 @@ void debounce_check_inputs(void)
   *****************************************************************************/
 void debounce_config(void)
 {
+    struct button_def *button = &button_front;
+
     debounce_timer_config();
-    button_mode = BUTTON_DEFAULT; /* default = brightness settings */
+    button->button_mode = BUTTON_DEFAULT; /* default = brightness settings */
 }

@@ -156,28 +156,33 @@ static ret_value_t input_manager(void)
     ret_value_t val = OK;
     struct input_sig *input_state = &debounce_input_signal;
     struct st_i2c_status *i2c_control = &i2c_status;
+    struct button_def *button = &button_front;
 
     debounce_check_inputs();
 
+    /* manual reset button */
     if(input_state->man_res)
     {
         val = GO_TO_LIGHT_RESET;
         input_state->man_res = 0;
     }
 
+    /* sw reset */
     if (input_state->sysres_out)
     {
         val = GO_TO_LIGHT_RESET; //TODO: reaction - light reset ?
         input_state->sysres_out = 0;
     }
 
+    /* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
     if(input_state->pg)
     {
         val = GO_TO_HARD_RESET;
         input_state->pg = 0;
     }
 
-    if(i2c_control->status_word & ENABLE_4V5_STSBIT) //user option
+    /* PG signal from 4.5V user controlled regulator */
+    if(i2c_control->status_word & ENABLE_4V5_STSBIT)
     {
         if(input_state->pg_4v5)
         {
@@ -186,6 +191,7 @@ static ret_value_t input_manager(void)
         }
     }
 
+    /* USB30 overcurrent */
     if(input_state->usb30_ovc)
     {
         i2c_control->status_word |= USB30_OVC_STSBIT;
@@ -199,6 +205,7 @@ static ret_value_t input_manager(void)
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
+    /* USB31 overcurrent */
     if(input_state->usb31_ovc)
     {
         i2c_control->status_word |= USB31_OVC_STSBIT;
@@ -213,19 +220,20 @@ static ret_value_t input_manager(void)
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
-    if (input_state->led_brt)
+    /* front button */
+    if (input_state->button_sts)
     {
-        if (button_mode == BUTTON_DEFAULT)
-        {
+        if (button->button_mode == BUTTON_DEFAULT)
             led_driver_step_brightness();
-            i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
-        }
-        else /* user button mode */
-        {
-            i2c_control->status_word |= BUTTON_MODE_STSBIT;
-        }
+        else /* user button mode - set status bit ot raise interrupt to CPU */
+            i2c_control->status_word |= BUTTON_PRESSED_STSBIT;
 
-        input_state->led_brt = 0;
+        input_state->button_sts = 0;
+    }
+    else
+    {
+        if(button->button_mode != BUTTON_DEFAULT)
+            i2c_control->status_word &= (~BUTTON_PRESSED_STSBIT);
     }
 
     /* flag is cleared in debounce function */
@@ -265,13 +273,17 @@ static ret_value_t ic2_manager(void)
 
     if (i2c_control->status_word != last_status_word)
     {
-        SET_INTERRUPT_TO_CPU;
-        last_status_word = i2c_control->status_word;
+        if (!i2c_control->status_word_not_sent)
+        {
+            SET_INTERRUPT_TO_CPU;
+            last_status_word = i2c_control->status_word;
+            i2c_control->status_word_not_sent = 1;
+        }
     }
     else
         RESET_INTERRUPT_TO_CPU;
 
-    value = slave_i2c_process_data();
+    value = slave_i2c_process_data(last_status_word);
 
     return value;
 }

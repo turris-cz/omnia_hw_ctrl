@@ -18,6 +18,11 @@ typedef enum button_modes {
     BUTTON_USER,
 }button_mode_t;
 
+typedef enum button_states {
+    BUTTON_PRESSED,
+    BUTTON_RELEASED,
+}button_state_t;
+
 /* flags of input signals */
 struct input_sig {
     uint8_t man_res     :1;
@@ -29,7 +34,7 @@ struct input_sig {
     uint8_t usb30_ovc   :1;
     uint8_t usb31_ovc   :1;
     uint8_t rtc_alarm   :1;
-    uint8_t led_brt     :1;
+    uint8_t button_sts  :1;
     uint8_t sfp_det     :1;
     uint8_t sfp_flt     :1;
     uint8_t sfp_los     :1;
@@ -37,8 +42,13 @@ struct input_sig {
     uint8_t msata_ind   :1;
 };
 
+struct button_def {
+    button_mode_t button_mode;
+    button_state_t button_state;
+};
+
 extern struct input_sig debounce_input_signal;
-extern button_mode_t button_mode;
+extern struct button_def button_front;
 
 /*******************************************************************************
   * @function   debounce_config

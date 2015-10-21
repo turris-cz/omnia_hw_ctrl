@@ -19,6 +19,7 @@ struct st_i2c_status {
     uint8_t data_rx_complete         : 1; // stop flag detected - all data received
     uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
     uint8_t timeout                  : 1;
+    uint8_t status_word_not_sent     : 1; // 1 -indicates that status word is not sent, 0 - status word sent
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
@@ -33,18 +34,18 @@ extern struct st_i2c_status i2c_status;
  * Bit meanings in status_word:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   SFP_DET     : 1 - SFP detected, 0 - SFP not detected
- *      1   |   SFP_LOS     : 1 - SFP receiver lost signal, 0 - no lost
- *      2   |   SFP_FLT     : 1 - SFP trasmitter fault, 0 - no TX fault
- *      3   |   SFP_DIS     : 1 - SFP TX disabled; 0 - SFP TX enabled
- *      4   |   CARD_DET    : 1 - mSATA/PCIe card detected, 0 - no card
- *      5   |   mSATA_IND   : 1 - mSATA card inserted, 0 - PCIe card inserted
- *      6   |   USB30_OVC   : 1 - USB3-port0 overcurrent, 0 - no overcurrent
- *      7   |   USB31_OVC   : 1 - USB3-port1 overcurrent, 0 - no overcurrent
- *      8   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
- *      9   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
- *     10   |   ENABLE_4V5  : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
- *     11   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)
+ *      0   |   SFP_DET         : 1 - SFP detected, 0 - SFP not detected
+ *      1   |   SFP_LOS         : 1 - SFP receiver lost signal, 0 - no lost
+ *      2   |   SFP_FLT         : 1 - SFP trasmitter fault, 0 - no TX fault
+ *      3   |   SFP_DIS         : 1 - SFP TX disabled; 0 - SFP TX enabled
+ *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
+ *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
+ *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent
+ *      7   |   USB31_OVC       : 1 - USB3-port1 overcurrent, 0 - no overcurrent
+ *      8   |   USB30_PWRON     : 1 - USB3-port0 power ON, 0 - USB-port0 power off
+ *      9   |   USB31_PWRON     : 1 - USB3-port1 power ON, 0 - USB-port1 power off
+ *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
+ *     11   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - basic state (no action)
  * 12..15   |   dont care
 */
 
@@ -103,7 +104,7 @@ enum status_word_bits {
     USB30_PWRON_STSBIT     = 0x0100,
     USB31_PWRON_STSBIT     = 0x0200,
     ENABLE_4V5_STSBIT      = 0x0400,
-    BUTTON_MODE_STSBIT     = 0x0800,
+    BUTTON_PRESSED_STSBIT  = 0x0800,
 };
 
 /*******************************************************************************
@@ -125,10 +126,10 @@ void slave_i2c_handler(void);
 /*******************************************************************************
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
-  * @param      None.
+  * @param      system_status_word: status word to be sent to the master.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(void);
+ret_value_t slave_i2c_process_data(uint16_t system_status_word);
 
 #endif // SLAVE_I2C_DEVICE_H
 
