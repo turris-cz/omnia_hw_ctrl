@@ -19,7 +19,7 @@
 #define DELAY_AFTER_ENABLE      5
 #define DELAY_BETWEEN_READINGS  20
 #define TIMEOUT                 100 // DELAY_BETWEEN_READINGS * 100 = 2 sec
-#define RESET_TIMEOUT           200 // DELAY_BETWEEN_READINGS * 100 = 4 sec
+#define RESET_TIMEOUT           200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -497,7 +497,6 @@ void power_control_usb_timeout_config(void)
 error_type_t power_control_first_startup(void)
 {
     error_type_t error = NO_ERROR;
-    uint16_t counter = 0;
 
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     delay(200);
@@ -505,15 +504,7 @@ error_type_t power_control_first_startup(void)
 
     // wait for main board reset signal
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-    {
-//        delay(DELAY_BETWEEN_READINGS);
-//        counter++;
-//        if (counter >= RESET_TIMEOUT)
-//        {
-//            error = RESET_ERROR;
-//            return error;
-//        }
-    }
+    {}
 
     delay(15); // 15ms delay after releasing of reset signal
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
@@ -530,7 +521,6 @@ error_type_t power_control_first_startup(void)
 error_type_t power_control_second_startup(void)
 {
     error_type_t error = NO_ERROR;
-    uint16_t counter = 0;
 
     delay(100);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
@@ -539,15 +529,7 @@ error_type_t power_control_second_startup(void)
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-    {
-//        delay(DELAY_BETWEEN_READINGS);
-//        counter++;
-//        if (counter >= RESET_TIMEOUT)
-//        {
-//            error = RESET_ERROR;
-//            return error;
-//        }
-    }
+    {}
 
     delay(15);
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
