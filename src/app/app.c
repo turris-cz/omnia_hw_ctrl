@@ -45,38 +45,12 @@ void app_mcu_init(void)
 }
 
 /*******************************************************************************
-  * @function   power_on
-  * @brief      Start the board / enable dc-dc regulators.
+  * @function   app_get_status_word
+  * @brief      Set status word after reset.
   * @param      None.
-  * @retval     None.
+  * @retval     system_status_word.
   *****************************************************************************/
-static ret_value_t power_on(void)
-{
-    ret_value_t value = OK;
-    error_type_t error = NO_ERROR;
-
-    power_control_set_startup_condition();
-    power_control_disable_regulators();
-    delay(100);
-    error = power_control_enable_regulators();
-
-    switch(error)
-    {
-        case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
-        case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
-        case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
-        case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
-        case PG_1V8_ERROR: value = GO_TO_1V8_ERROR; break;
-        case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
-        case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
-        case PG_VTT_ERROR: value = GO_TO_VTT_ERROR; break;
-        default: value = OK; break;
-    }
-
-    return value;
-}
-
-static uint16_t get_status_word(void)
+static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
@@ -121,20 +95,44 @@ static uint16_t get_status_word(void)
     return status_word;
 }
 
-static ret_value_t load_settings(void)
+/*******************************************************************************
+  * @function   power_on
+  * @brief      Start the board / enable dc-dc regulators.
+  * @param      None.
+  * @retval     value: next state.
+  *****************************************************************************/
+static ret_value_t power_on(void)
 {
-    struct st_i2c_status *i2c_control = &i2c_status;
+    ret_value_t value = OK;
+    error_type_t error = NO_ERROR;
 
-    power_control_set_power_led(); //power led ON
+    power_control_set_startup_condition();
+    power_control_disable_regulators();
+    delay(100);
+    error = power_control_enable_regulators();
 
-    debounce_config(); // start evaluation of inputs
-    i2c_control->status_word_orig = i2c_control->status_word = get_status_word();
-    //Marvell CPU should send settings now (led brightness and colour)
+    switch(error)
+    {
+        case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
+        case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
+        case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
+        case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
+        case PG_1V8_ERROR: value = GO_TO_1V8_ERROR; break;
+        case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
+        case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
+        case PG_VTT_ERROR: value = GO_TO_VTT_ERROR; break;
+        default: value = OK; break;
+    }
 
-    //TODO: go to I2C_MANAGER ?
-    return OK;
+    return value;
 }
 
+/*******************************************************************************
+  * @function   light_reset
+  * @brief      Perform light reset of the board.
+  * @param      None.
+  * @retval     value: next_state.
+  *****************************************************************************/
 static ret_value_t light_reset(void)
 {
     error_type_t error = NO_ERROR;
@@ -151,9 +149,34 @@ static ret_value_t light_reset(void)
     return value;
 }
 
+/*******************************************************************************
+  * @function   load_settings
+  * @brief      Set other initialization.
+  * @param      None.
+  * @retval     next_state.
+  *****************************************************************************/
+static ret_value_t load_settings(void)
+{
+    struct st_i2c_status *i2c_control = &i2c_status;
+
+    power_control_set_power_led(); //power led ON
+
+    debounce_config(); // start evaluation of inputs
+    i2c_control->status_word_orig = i2c_control->status_word = app_get_status_word();
+    //Marvell CPU should send settings now (led brightness and colour)
+
+    return OK;
+}
+
+/*******************************************************************************
+  * @function   input_manager
+  * @brief      Evaluate input signals and their reaction.
+  * @param      None.
+  * @retval     value: next_state.
+  *****************************************************************************/
 static ret_value_t input_manager(void)
 {
-    ret_value_t val = OK;
+    ret_value_t value = OK;
     struct input_sig *input_state = &debounce_input_signal;
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
@@ -163,21 +186,21 @@ static ret_value_t input_manager(void)
     /* manual reset button */
     if(input_state->man_res)
     {
-        val = GO_TO_LIGHT_RESET;
+        value = GO_TO_LIGHT_RESET;
         input_state->man_res = 0;
     }
 
     /* sw reset */
     if (input_state->sysres_out)
     {
-        val = GO_TO_LIGHT_RESET; //TODO: reaction - light reset ?
+        value = GO_TO_LIGHT_RESET; //TODO: reaction - light reset ?
         input_state->sysres_out = 0;
     }
 
     /* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
     if(input_state->pg)
     {
-        val = GO_TO_HARD_RESET;
+        value = GO_TO_HARD_RESET;
         input_state->pg = 0;
     }
 
@@ -186,7 +209,7 @@ static ret_value_t input_manager(void)
     {
         if(input_state->pg_4v5)
         {
-            val = GO_TO_HARD_RESET;
+            value = GO_TO_HARD_RESET;
             input_state->pg_4v5 = 0;
         }
     }
@@ -262,9 +285,15 @@ static ret_value_t input_manager(void)
     else
         i2c_control->status_word &= (~MSATA_IND_STSBIT);
 
-    return val;
+    return value;
 }
 
+/*******************************************************************************
+  * @function   ic2_manager
+  * @brief      Handle I2C communication.
+  * @param      None.
+  * @retval     value: next_state.
+  *****************************************************************************/
 static ret_value_t ic2_manager(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
@@ -288,6 +317,12 @@ static ret_value_t ic2_manager(void)
     return value;
 }
 
+/*******************************************************************************
+  * @function   led_manager
+  * @brief      System LED activity (WAN, LAN, WiFi...).
+  * @param      None.
+  * @retval     next_state.
+  *****************************************************************************/
 static ret_value_t led_manager(void)
 {
     wan_led_activity();
@@ -297,7 +332,13 @@ static ret_value_t led_manager(void)
     return OK;
 }
 
-static void error_manager(ret_value_t state)
+/*******************************************************************************
+  * @function   error_manager
+  * @brief      Handle error occuring in startup.
+  * @param      error_state: type of error.
+  * @retval     None.
+  *****************************************************************************/
+static void error_manager(ret_value_t error_state)
 {
     led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
@@ -305,7 +346,7 @@ static void error_manager(ret_value_t state)
 
     delay(300);
 
-    switch(state)
+    switch(error_state)
     {
         case GO_TO_5V_ERROR: led_driver_set_led_state(LED0, LED_ON); break;
         case GO_TO_3V3_ERROR: led_driver_set_led_state(LED1, LED_ON); break;
