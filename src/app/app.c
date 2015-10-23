@@ -248,15 +248,25 @@ static ret_value_t input_manager(void)
     {
         if (button->button_mode == BUTTON_DEFAULT)
             led_driver_step_brightness();
-        else /* user button mode - set status bit ot raise interrupt to CPU */
-            i2c_control->status_word |= BUTTON_PRESSED_STSBIT;
+        else /* user button mode */
+        {
+            button->button_pressed_counter++;
+            if (button->button_pressed_counter >= MAX_BUTTON_PRESSED_COUNTER)
+                button->button_pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
+        }
 
         input_state->button_sts = 0;
     }
-    else
+
+    if(button->button_mode != BUTTON_DEFAULT)
     {
-        if(button->button_mode != BUTTON_DEFAULT)
-            i2c_control->status_word &= (~BUTTON_PRESSED_STSBIT);
+        if (button->button_pressed_counter)
+        {
+            i2c_control->status_word |= (button->button_pressed_counter << 13) & BUTTON_COUNTER_VALBITS;
+            i2c_control->status_word |= BUTTON_PRESSED_STSBIT;
+        }
+        else
+            i2c_control->status_word &= (~(BUTTON_PRESSED_STSBIT | BUTTON_COUNTER_VALBITS));
     }
 
     /* flag is cleared in debounce function */
@@ -301,16 +311,11 @@ static ret_value_t ic2_manager(void)
     ret_value_t value = OK;
 
     if (i2c_control->status_word != last_status_word)
-    {
-        if (!i2c_control->status_word_not_sent)
-        {
-            SET_INTERRUPT_TO_CPU;
-            last_status_word = i2c_control->status_word;
-            i2c_control->status_word_not_sent = 1;
-        }
-    }
+        SET_INTERRUPT_TO_CPU;
     else
         RESET_INTERRUPT_TO_CPU;
+
+    last_status_word = i2c_control->status_word;
 
     value = slave_i2c_process_data(last_status_word);
 
