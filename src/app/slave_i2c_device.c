@@ -233,7 +233,10 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     if (control_byte & BUTTON_MODE_MASK)
        button->button_mode = BUTTON_USER;
     else
+    {
        button->button_mode = BUTTON_DEFAULT;
+       button->button_pressed_counter = 0;
+    }
 }
 
 /*******************************************************************************
@@ -268,7 +271,7 @@ static void slave_i2c_clear_buffers(void)
   *****************************************************************************/
 static void slave_i2c_delay(void)
 {
-    uint16_t nop_delay = 20000;
+    uint16_t nop_delay = 1000;
     uint16_t nop_counter;
 
     for (nop_counter = 0; nop_counter < nop_delay; nop_counter++)
@@ -288,23 +291,23 @@ void slave_i2c_handler(void)
     struct st_i2c_status *i2c_state = &i2c_status;
 
     /* Test on I2C Address match interrupt */
-    if((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET ))
+    if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
     {
         /* Clear IT pending bit */
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
     }
 
     /* transmit data */
-    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET) )
+    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
-        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr]);
-        /* there is necessary to make short delay in communication */
+        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
+        /* make a short delay in data transfer */
         slave_i2c_delay();
-        i2c_state->tx_data_ctr++;
+        //i2c_state->tx_data_ctr++;
     }
 
     /* receive data */
-    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET) )
+    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET)
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
 
@@ -316,11 +319,16 @@ void slave_i2c_handler(void)
     }
 
     /* stop detection */
-    if ((I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET) )
+    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        if (!i2c_state->data_tx_complete)
+        if (i2c_state->status_word_not_sent) // data have been sent to master
+        {
+            i2c_state->status_word_not_sent = 0;
+            i2c_state->data_tx_complete = 0;
+        }
+        else // data have been received from master
             i2c_state->data_rx_complete = 1;
 
         // clear counters
@@ -351,15 +359,13 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
         i2c_state->tx_buf[0] = system_status_word & 0x00FF;
         i2c_state->tx_buf[1] = (system_status_word & 0xFF00) >> 8;
 
+        i2c_state->status_word_not_sent = 1;
+
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
-        /* small delay before clearing the flag to give some time for sending */
-        delay(1);
         DBG("status word: ");
         DBG((const char*)i2c_state->tx_buf);
         DBG("\r\n");
-        i2c_state->data_tx_complete = 0;
-        i2c_state->status_word_not_sent = 0;
     }
 
     if (i2c_state->data_rx_complete)
