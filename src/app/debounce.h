@@ -46,7 +46,7 @@ struct input_sig {
 struct button_def {
     button_mode_t button_mode;
     button_state_t button_state;
-    uint8_t button_pressed_counter;
+    int8_t button_pressed_counter;
 };
 
 extern struct input_sig debounce_input_signal;

@@ -231,11 +231,15 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
     }
 
     if (control_byte & BUTTON_MODE_MASK)
+    {
        button->button_mode = BUTTON_USER;
+       i2c_control->status_word |= BUTTON_MODE_STSBIT;
+    }
     else
     {
        button->button_mode = BUTTON_DEFAULT;
        button->button_pressed_counter = 0;
+       i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
     }
 }
 
@@ -303,7 +307,6 @@ void slave_i2c_handler(void)
         I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
         /* make a short delay in data transfer */
         slave_i2c_delay();
-        //i2c_state->tx_data_ctr++;
     }
 
     /* receive data */
@@ -349,6 +352,7 @@ void slave_i2c_handler(void)
 ret_value_t slave_i2c_process_data(uint16_t system_status_word)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
+    struct button_def *button = &button_front;
     static uint8_t led_index;
     static uint32_t colour;
     ret_value_t state = OK;
@@ -356,10 +360,17 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
     if (i2c_state->data_tx_complete) /* slave TX (master expects data) */
     {
         /* prepare data to be sent to the master */
-        i2c_state->tx_buf[0] = system_status_word & 0x00FF;
-        i2c_state->tx_buf[1] = (system_status_word & 0xFF00) >> 8;
+        i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+        i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
-        i2c_state->status_word_not_sent = 1;
+        /* decrease button counter by the value is going to be sent */
+        button->button_pressed_counter -= (i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13;
+
+        if (button->button_pressed_counter <= 0) /* limitation */
+            button->button_pressed_counter = 0;
+
+        /* set flag in order to check it in the stop detection (in interrupt) */
+        i2c_state->status_word_not_sent = 1; //delete ?
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
@@ -368,7 +379,7 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
         DBG("\r\n");
     }
 
-    if (i2c_state->data_rx_complete)
+    if (i2c_state->data_rx_complete) /* slave RX (master sends data) */
     {
         DBG("\r\nRX data: ");
         DBG((const char*)i2c_state->rx_buf);
