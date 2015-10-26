@@ -59,19 +59,15 @@ struct st_i2c_status i2c_status;
 
 /*******************************************************************************
   * @function   slave_i2c_config
-  * @brief      Configuration of I2C peripheral as a slave.
+  * @brief      Configuration of pins for I2C.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_config(void)
+static void slave_i2c_io_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
-    I2C_InitTypeDef  I2C_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
 
     /* I2C Peripheral Disable */
-    I2C_DeInit(I2C_PERIPH_NAME);
-    I2C_Cmd(I2C_PERIPH_NAME, DISABLE);
     RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, DISABLE);
 
     /* I2C Periph clock enable */
@@ -96,6 +92,21 @@ void slave_i2c_config(void)
     /* Configure I2C pins: SDA */
     GPIO_InitStructure.GPIO_Pin = I2C_DATA_PIN;
     GPIO_Init(I2C_GPIO_PORT, &GPIO_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_periph_config
+  * @brief      Configuration of I2C peripheral as a slave.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_periph_config(void)
+{
+    I2C_InitTypeDef  I2C_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    I2C_DeInit(I2C_PERIPH_NAME);
+    I2C_Cmd(I2C_PERIPH_NAME, DISABLE);
 
     /* I2C configuration */
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
@@ -122,38 +133,87 @@ void slave_i2c_config(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_wait_for_flag
-  * @brief      Wait for given flag during ic2 communication.
-  * @param      flag: possible flags can be found in stm32f0xx_i2c.h
+  * @function   slave_i2c_timeout_config
+  * @brief      Timer configuration for I2C timeout recovery.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_wait_for_flag(uint32_t flag)
+static void slave_i2c_timeout_config(void)
 {
-    uint32_t i2c_timeout = 2000000u;
-    struct st_i2c_status *i2c_state = &i2c_status;
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-    if(flag == I2C_FLAG_BUSY)
-    {
-        while(I2C_GetFlagStatus(I2C_PERIPH_NAME, flag) != RESET)
-        {
-            if(i2c_timeout-- == 0)
-            {
-                i2c_state->timeout = 1;
-                return;
-            }
-        }
-    }
-    else
-    {
-        while(I2C_GetFlagStatus(I2C_PERIPH_NAME, flag) == RESET)
-        {
-            if(i2c_timeout-- == 0)
-            {
-                i2c_state->timeout = 1;
-                return;
-            }
-        }
-    }
+    // Clock enable
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+
+    /* Time base configuration - 1sec interrupt */
+    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(I2C_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(I2C_TIMEOUT_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(I2C_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    //TIM_Cmd(TIMEOUT_I2C_TIMER, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_UP_TRG_COM_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_timeout_enable
+  * @brief      Start timeout measuring.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_timeout_enable(void)
+{
+    /* TIM enable counter */
+    TIM_Cmd(I2C_TIMEOUT_TIMER, ENABLE);
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_timeout_disable
+  * @brief      Stop timeout measuring.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_timeout_disable(void)
+{
+    /* TIM disable counter */
+    TIM_Cmd(I2C_TIMEOUT_TIMER, DISABLE);
+    I2C_TIMEOUT_TIMER->CNT = 0;
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_timeout_handler
+  * @brief      Timeout occures -> reset I2C peripheral.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void slave_i2c_timeout_handler(void)
+{
+    slave_i2c_periph_config();
+    slave_i2c_timeout_disable();
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_config
+  * @brief      Configuration of I2C peripheral and its timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void slave_i2c_config(void)
+{
+    slave_i2c_io_config();
+    slave_i2c_periph_config();
+    slave_i2c_timeout_config();
 }
 
 /*******************************************************************************
@@ -299,6 +359,8 @@ void slave_i2c_handler(void)
     {
         /* Clear IT pending bit */
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
+        slave_i2c_timeout_enable();
+        DBG("address\r\n");
     }
 
     /* transmit data */
@@ -319,6 +381,8 @@ void slave_i2c_handler(void)
         {
             i2c_state->data_tx_complete = 1;
         }
+        DBG((const char*)&i2c_state->rx_buf[i2c_state->tx_data_ctr - 1]);
+        DBG("\r\n");
     }
 
     /* stop detection */
@@ -338,6 +402,7 @@ void slave_i2c_handler(void)
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
 
+        slave_i2c_timeout_disable();
         // disable TX interrupt
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE);
     }
@@ -359,6 +424,10 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
 
     if (i2c_state->data_tx_complete) /* slave TX (master expects data) */
     {
+        DBG("\r\nTX command: ");
+        DBG((const char*)i2c_state->rx_buf);
+        DBG("\r\n");
+
         /* prepare data to be sent to the master */
         i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
         i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
@@ -370,7 +439,7 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
             button->button_pressed_counter = 0;
 
         /* set flag in order to check it in the stop detection (in interrupt) */
-        i2c_state->status_word_not_sent = 1; //delete ?
+        i2c_state->status_word_not_sent = 1; //TODO: delete ?
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
