@@ -318,7 +318,7 @@ static ret_value_t ic2_manager(void)
 
     last_status_word = i2c_control->status_word;
 
-    value = slave_i2c_process_data(last_status_word);
+    value = slave_i2c_process_data();
 
     return value;
 }

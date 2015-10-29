@@ -131,10 +131,10 @@ void slave_i2c_handler(void);
 /*******************************************************************************
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
-  * @param      system_status_word: status word to be sent to the master.
+  * @param      None.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(uint16_t system_status_word);
+ret_value_t slave_i2c_process_data(void);
 
 /*******************************************************************************
   * @function   slave_i2c_timeout_handler

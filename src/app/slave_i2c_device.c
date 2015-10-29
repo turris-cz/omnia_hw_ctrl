@@ -33,6 +33,7 @@
 #define I2C_SLAVE_ADDRESS               0x55 //address in linux: 0x2A
 
 #define CMD_INDEX                       0
+#define STATUS_WORD_LENGHT              2 // bytes
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, // slave sends back status word
@@ -328,23 +329,6 @@ static void slave_i2c_clear_buffers(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_delay
-  * @brief      Very short delay necessary in i2c communication.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_delay(void)
-{
-    uint16_t nop_delay = 1000;
-    uint16_t nop_counter;
-
-    for (nop_counter = 0; nop_counter < nop_delay; nop_counter++)
-    {
-        __NOP();
-    }
-}
-
-/*******************************************************************************
   * @function   slave_i2c_handler
   * @brief      Interrupt handler for I2C communication.
   * @param      None.
@@ -359,6 +343,7 @@ void slave_i2c_handler(void)
     {
         /* Clear IT pending bit */
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
+
         slave_i2c_timeout_enable();
         DBG("address\r\n");
     }
@@ -366,9 +351,10 @@ void slave_i2c_handler(void)
     /* transmit data */
     if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
-        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-        /* make a short delay in data transfer */
-        slave_i2c_delay();
+        if (i2c_state->tx_data_ctr >= STATUS_WORD_LENGHT)
+            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE); // disable TX interrupt
+        else
+            I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
     }
 
     /* receive data */
@@ -381,8 +367,6 @@ void slave_i2c_handler(void)
         {
             i2c_state->data_tx_complete = 1;
         }
-        DBG((const char*)&i2c_state->rx_buf[i2c_state->tx_data_ctr - 1]);
-        DBG("\r\n");
     }
 
     /* stop detection */
@@ -390,12 +374,9 @@ void slave_i2c_handler(void)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        if (i2c_state->status_word_not_sent) // data have been sent to master
-        {
-            i2c_state->status_word_not_sent = 0;
+        if (i2c_state->data_tx_complete) // data have been sent to master
             i2c_state->data_tx_complete = 0;
-        }
-        else // data have been received from master
+        else                             // data have been received from master
             i2c_state->data_rx_complete = 1;
 
         // clear counters
@@ -403,18 +384,16 @@ void slave_i2c_handler(void)
         i2c_state->tx_data_ctr = 0;
 
         slave_i2c_timeout_disable();
-        // disable TX interrupt
-        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE);
     }
 }
 
 /*******************************************************************************
   * @function   slave_i2c_process_data
   * @brief      Process incoming/outcoming data.
-  * @param      system_status_word: status word to be sent to the master.
+  * @param      None.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(uint16_t system_status_word)
+ret_value_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     struct button_def *button = &button_front;
@@ -437,9 +416,6 @@ ret_value_t slave_i2c_process_data(uint16_t system_status_word)
 
         if (button->button_pressed_counter <= 0) /* limitation */
             button->button_pressed_counter = 0;
-
-        /* set flag in order to check it in the stop detection (in interrupt) */
-        i2c_state->status_word_not_sent = 1; //TODO: delete ?
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
