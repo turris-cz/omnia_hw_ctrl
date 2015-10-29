@@ -139,6 +139,7 @@ static ret_value_t light_reset(void)
     ret_value_t value = OK;
 
     error = power_control_first_startup();
+    delay(100);
     error = power_control_second_startup();
 
 //    if (error != NO_ERROR)

@@ -522,7 +522,6 @@ error_type_t power_control_second_startup(void)
 {
     error_type_t error = NO_ERROR;
 
-    delay(100);
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
     delay(200);
