@@ -30,6 +30,7 @@
 #include "wan_lan_pci_status.h"
 #include "slave_i2c_device.h"
 #include "power_control.h"
+#include "debug_serial.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -232,6 +233,7 @@ void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
     if (TIM_GetITStatus(I2C_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
     {
         slave_i2c_timeout_handler();
+        DBG("I2C timeout\r\n");
         /* Clear the EXTI line pending bit */
         TIM_ClearITPendingBit(I2C_TIMEOUT_TIMER, TIM_IT_Update);
     }

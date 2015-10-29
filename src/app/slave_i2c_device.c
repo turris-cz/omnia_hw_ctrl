@@ -168,6 +168,36 @@ static void slave_i2c_timeout_config(void)
 }
 
 /*******************************************************************************
+  * @function   slave_i2c_clear_buffers
+  * @brief      Clear RX and TX buffers.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void slave_i2c_clear_buffers(void)
+{
+    uint8_t i;
+    struct st_i2c_status *i2c_state = &i2c_status;
+
+    // clear buffers
+    for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
+    {
+        i2c_state->rx_buf[i] = 0;
+    }
+
+    for (i = 0; i < MAX_TX_BUFFER_SIZE; i++)
+    {
+        i2c_state->tx_buf[i] = 0;
+    }
+
+    i2c_state->data_rx_complete = 0;
+    i2c_state->data_tx_complete = 0;
+    i2c_state->rx_data_ctr = 0;
+    i2c_state->tx_data_ctr = 0;
+
+    DBG("clear buffers\r\n");
+}
+
+/*******************************************************************************
   * @function   slave_i2c_timeout_enable
   * @brief      Start timeout measuring.
   * @param      None.
@@ -200,8 +230,10 @@ static void slave_i2c_timeout_disable(void)
   *****************************************************************************/
 void slave_i2c_timeout_handler(void)
 {
-    slave_i2c_periph_config();
+    slave_i2c_config();
     slave_i2c_timeout_disable();
+    slave_i2c_clear_buffers();
+    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , DISABLE);
 }
 
 /*******************************************************************************
@@ -305,30 +337,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_clear_buffers
-  * @brief      Clear RX and TX buffers.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_clear_buffers(void)
-{
-    uint8_t i;
-    struct st_i2c_status *i2c_state = &i2c_status;
-
-    // clear buffers
-    for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
-    {
-        i2c_state->rx_buf[i] = 0;
-    }
-
-    for (i = 0; i < MAX_TX_BUFFER_SIZE; i++)
-    {
-        i2c_state->tx_buf[i] = 0;
-    }
-    DBG("clear buffers\r\n");
-}
-
-/*******************************************************************************
   * @function   slave_i2c_handler
   * @brief      Interrupt handler for I2C communication.
   * @param      None.
@@ -384,6 +392,7 @@ void slave_i2c_handler(void)
         i2c_state->tx_data_ctr = 0;
 
         slave_i2c_timeout_disable();
+        DBG("Stop\r\n");
     }
 }
 
