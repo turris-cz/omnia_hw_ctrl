@@ -33,7 +33,6 @@
 #define I2C_SLAVE_ADDRESS               0x55 //address in linux: 0x2A
 
 #define CMD_INDEX                       0
-#define STATUS_WORD_LENGHT              2 // bytes
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, // slave sends back status word
@@ -351,7 +350,7 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
 
-    /* Test on I2C Address match interrupt */
+    /* Test on I2C address match interrupt */
     if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
     {
         /* Clear IT pending bit */
@@ -364,8 +363,9 @@ void slave_i2c_handler(void)
     /* transmit data */
     if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
-        if (i2c_state->tx_data_ctr >= STATUS_WORD_LENGHT)
-            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE); // disable TX interrupt
+        /* disable TX interrupt when all bytes are sent */
+        if (i2c_state->tx_data_ctr >= MAX_TX_BUFFER_SIZE)
+            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE);
         else
             I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
     }
@@ -375,11 +375,16 @@ void slave_i2c_handler(void)
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
 
-        // first byte received
+        /* first byte received - if master wants to read the status word */
         if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
-        {
             i2c_state->data_tx_complete = 1;
-        }
+
+        /* If more than MAX_RX_BUFFER_SIZE bytes are received,
+         * disable the RX interrupt - no more bytes are received.
+         * RX interrupt is enabled again when timeout occurs.
+         * It should never happen in normal communication. */
+        if (i2c_state->rx_data_ctr > MAX_RX_BUFFER_SIZE)
+            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_RXI, DISABLE);
     }
 
     /* stop detection */
@@ -387,12 +392,12 @@ void slave_i2c_handler(void)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        if (i2c_state->data_tx_complete) // data have been sent to master
+        if (i2c_state->data_tx_complete) /* data have been sent to master */
             i2c_state->data_tx_complete = 0;
-        else                             // data have been received from master
+        else                             /* data have been received from master */
             i2c_state->data_rx_complete = 1;
 
-        // clear counters
+        /* clear counters */
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
 
@@ -527,7 +532,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
             } break;
         }
 
-        // clear flag
+        /* clear flag */
         i2c_state->data_rx_complete = 0;
     }
 
