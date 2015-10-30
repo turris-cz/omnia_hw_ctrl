@@ -256,27 +256,28 @@ void slave_i2c_config(void)
   * @param      state: pointer to next step (if necessary)
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *state)
+static void slave_i2c_check_control_byte(uint8_t control_byte, slave_i2c_states_t *state)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
-    *state = OK;
+    *state = SLAVE_I2C_OK;
+    error_type_t pwr_error = NO_ERROR;
 
     if (control_byte & LIGHT_RST_MASK)
     {
-        *state = GO_TO_LIGHT_RESET;
+        *state = SLAVE_I2C_LIGHT_RST;
         return;
     }
 
     if (control_byte & HARD_RST_MASK)
     {
-        *state = GO_TO_HARD_RESET;
+        *state = SLAVE_I2C_HARD_RST;
         return;
     }
 
     if (control_byte & FACTORY_RST_MASK)
     {
-        *state = GO_TO_FACTORY_RESET;
+        *state = SLAVE_I2C_FACTORY_RST;
         return;
     }
 
@@ -314,8 +315,12 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, ret_value_t *stat
 
     if (control_byte & ENABLE_4V5_MASK)
     {
-        power_control_start_regulator(REG_4V5); //TODO: read return value
-        i2c_control->status_word |= ENABLE_4V5_STSBIT;
+        pwr_error = power_control_start_regulator(REG_4V5);
+
+        if (pwr_error == NO_ERROR)
+            i2c_control->status_word |= ENABLE_4V5_STSBIT;
+        else
+            *state = SLAVE_I2C_PWR4V5_ERROR;
     }
     else
     {
@@ -402,13 +407,13 @@ void slave_i2c_handler(void)
   * @param      None.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(void)
+slave_i2c_states_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     struct button_def *button = &button_front;
     static uint8_t led_index;
     static uint32_t colour;
-    ret_value_t state = OK;
+    slave_i2c_states_t state = SLAVE_I2C_OK;
 
     if (i2c_state->data_tx_complete) /* slave TX (master expects data) */
     {

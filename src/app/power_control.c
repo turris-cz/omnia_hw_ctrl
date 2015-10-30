@@ -524,7 +524,7 @@ error_type_t power_control_second_startup(void)
 
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
-    delay(200);
+    delay(400);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))

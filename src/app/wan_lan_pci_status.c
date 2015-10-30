@@ -199,7 +199,7 @@ void wan_led_activity(void)
     {
         led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
 
-        if (led0_status == 0) //TODO: check real LED polarity
+        if (led0_status == 0)
         {
             rgb_leds[WAN_LED].led_state = LED_ON;
         }

@@ -7,7 +7,6 @@
  ******************************************************************************
  ******************************************************************************
  **/
-#include "app.h"
 
 #ifndef SLAVE_I2C_DEVICE_H
 #define SLAVE_I2C_DEVICE_H
@@ -31,6 +30,31 @@ struct st_i2c_status {
 };
 
 extern struct st_i2c_status i2c_status;
+
+enum status_word_bits {
+    SFP_DET_STSBIT         = 0x0001,
+    SFP_LOS_STSBIT         = 0x0002,
+    SFP_FLT_STSBIT         = 0x0004,
+    SFP_DIS_STSBIT         = 0x0008,
+    CARD_DET_STSBIT        = 0x0010,
+    MSATA_IND_STSBIT       = 0x0020,
+    USB30_OVC_STSBIT       = 0x0040,
+    USB31_OVC_STSBIT       = 0x0080,
+    USB30_PWRON_STSBIT     = 0x0100,
+    USB31_PWRON_STSBIT     = 0x0200,
+    ENABLE_4V5_STSBIT      = 0x0400,
+    BUTTON_MODE_STSBIT     = 0x0800,
+    BUTTON_PRESSED_STSBIT  = 0x1000,
+    BUTTON_COUNTER_VALBITS = 0xE000
+};
+
+typedef enum slave_i2c_states {
+    SLAVE_I2C_OK,
+    SLAVE_I2C_LIGHT_RST,
+    SLAVE_I2C_HARD_RST,
+    SLAVE_I2C_FACTORY_RST,
+    SLAVE_I2C_PWR4V5_ERROR,
+}slave_i2c_states_t;
 
 /*
  * Bit meanings in status_word:
@@ -95,23 +119,6 @@ extern struct st_i2c_status i2c_status;
  *  4.B     |  24..31 |   blue colour [0..255]
 */
 
-enum status_word_bits {
-    SFP_DET_STSBIT         = 0x0001,
-    SFP_LOS_STSBIT         = 0x0002,
-    SFP_FLT_STSBIT         = 0x0004,
-    SFP_DIS_STSBIT         = 0x0008,
-    CARD_DET_STSBIT        = 0x0010,
-    MSATA_IND_STSBIT       = 0x0020,
-    USB30_OVC_STSBIT       = 0x0040,
-    USB31_OVC_STSBIT       = 0x0080,
-    USB30_PWRON_STSBIT     = 0x0100,
-    USB31_PWRON_STSBIT     = 0x0200,
-    ENABLE_4V5_STSBIT      = 0x0400,
-    BUTTON_MODE_STSBIT     = 0x0800,
-    BUTTON_PRESSED_STSBIT  = 0x1000,
-    BUTTON_COUNTER_VALBITS = 0xE000
-};
-
 /*******************************************************************************
   * @function   slave_i2c_config
   * @brief      Configuration of I2C peripheral as a slave.
@@ -134,7 +141,7 @@ void slave_i2c_handler(void);
   * @param      None.
   * @retval     Next reaction (if necessary).
   *****************************************************************************/
-ret_value_t slave_i2c_process_data(void);
+slave_i2c_states_t slave_i2c_process_data(void);
 
 /*******************************************************************************
   * @function   slave_i2c_timeout_handler

@@ -31,9 +31,9 @@
   *****************************************************************************/
 void app_mcu_init(void)
 {
-    SystemCoreClockUpdate(); // set HSI and PLL
+    SystemCoreClockUpdate(); /* set HSI and PLL */
     delay_systimer_config();
-    //init ports and peripheral
+    /* init ports and peripheral */
     power_control_io_config();
     msata_pci_indication_config();
     wan_lan_pci_config();
@@ -139,7 +139,7 @@ static ret_value_t light_reset(void)
     ret_value_t value = OK;
 
     error = power_control_first_startup();
-    delay(100);
+    delay(30);
     error = power_control_second_startup();
 
 //    if (error != NO_ERROR)
@@ -160,11 +160,10 @@ static ret_value_t load_settings(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
 
-    power_control_set_power_led(); //power led ON
+    power_control_set_power_led(); /* power led ON */
 
-    debounce_config(); // start evaluation of inputs
+    debounce_config(); /* start evaluation of inputs */
     i2c_control->status_word_orig = i2c_control->status_word = app_get_status_word();
-    //Marvell CPU should send settings now (led brightness and colour)
 
     return OK;
 }
@@ -194,7 +193,7 @@ static ret_value_t input_manager(void)
     /* sw reset */
     if (input_state->sysres_out)
     {
-        value = GO_TO_LIGHT_RESET; //TODO: reaction - light reset ?
+        value = GO_TO_LIGHT_RESET;
         input_state->sysres_out = 0;
     }
 
@@ -220,9 +219,9 @@ static ret_value_t input_manager(void)
     {
         i2c_control->status_word |= USB30_OVC_STSBIT;
         input_state->usb30_ovc = 0;
-        power_control_usb(USB3_PORT0, USB_OFF); //USB power off
+        power_control_usb(USB3_PORT0, USB_OFF); /* USB power off */
 
-        if(!power_control_get_usb_poweron(USB3_PORT0)) //update status word
+        if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
             i2c_control->status_word &= (~USB30_PWRON_STSBIT);
 
         //USB timeout set to 1 sec
@@ -235,12 +234,12 @@ static ret_value_t input_manager(void)
         i2c_control->status_word |= USB31_OVC_STSBIT;
         input_state->usb31_ovc = 0;
 
-        power_control_usb(USB3_PORT1, USB_OFF); //USB power off
+        power_control_usb(USB3_PORT1, USB_OFF); /* USB power off */
 
-        if(!power_control_get_usb_poweron(USB3_PORT1)) //update status word
+        if(!power_control_get_usb_poweron(USB3_PORT1)) /* update status word */
             i2c_control->status_word &= (~USB31_PWRON_STSBIT);
 
-        //USB timeout set to 1 sec
+        /* USB timeout set to 1 sec */
         TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
     }
 
@@ -309,6 +308,7 @@ static ret_value_t ic2_manager(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
+    slave_i2c_states_t i2c_state = SLAVE_I2C_OK;
     ret_value_t value = OK;
 
     if (i2c_control->status_word != last_status_word)
@@ -318,7 +318,16 @@ static ret_value_t ic2_manager(void)
 
     last_status_word = i2c_control->status_word;
 
-    value = slave_i2c_process_data();
+    i2c_state = slave_i2c_process_data();
+
+    switch(i2c_state)
+    {
+        case SLAVE_I2C_LIGHT_RST:       value = GO_TO_LIGHT_RESET; break;
+        case SLAVE_I2C_HARD_RST:        value = GO_TO_HARD_RESET; break;
+        case SLAVE_I2C_FACTORY_RST:     value = GO_TO_FACTORY_RESET; break;
+        case SLAVE_I2C_PWR4V5_ERROR:    value = GO_TO_4V5_ERROR; break;
+        default:                        value = OK; break;
+    }
 
     return value;
 }
@@ -406,7 +415,7 @@ void app_mcu_cyclic(void)
         }
         break;
 
-    case HARD_RESET: next_state = POWER_ON;//TODO: go to POWER_ON or reset MCU ?
+    case HARD_RESET: next_state = POWER_ON;
         break;
 
     case FACTORY_RESET:
@@ -466,9 +475,9 @@ void app_mcu_cyclic(void)
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
                 //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
+                case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
             }
-
         }
         break;
 
@@ -477,6 +486,9 @@ void app_mcu_cyclic(void)
             led_manager();
             next_state = INPUT_MANAGER;
         }
+        break;
+
+    default: //next_state = HARD_RESET; // TODO - which state ?
         break;
     }
 }
