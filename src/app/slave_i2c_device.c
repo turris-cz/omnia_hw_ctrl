@@ -415,7 +415,6 @@ void slave_i2c_handler(void)
 slave_i2c_states_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    struct button_def *button = &button_front;
     static uint8_t led_index;
     static uint32_t colour;
     slave_i2c_states_t state = SLAVE_I2C_OK;
@@ -431,10 +430,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
         i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
         /* decrease button counter by the value is going to be sent */
-        button->button_pressed_counter -= (i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13;
-
-        if (button->button_pressed_counter <= 0) /* limitation */
-            button->button_pressed_counter = 0;
+        button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 

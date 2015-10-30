@@ -20,7 +20,6 @@ struct st_i2c_status {
     uint8_t data_rx_complete         : 1; // stop flag detected - all data received
     uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
     uint8_t timeout                  : 1;
-    uint8_t status_word_not_sent     : 1; // 1 -indicates that status word is not sent, 0 - status word sent
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer

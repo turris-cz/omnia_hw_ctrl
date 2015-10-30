@@ -10,7 +10,6 @@
 #ifndef __DEBOUNCE_H
 #define __DEBOUNCE_H
 
-
 #define DEBOUNCE_TIMER                  TIM16
 #define MAX_BUTTON_PRESSED_COUNTER      7
 
@@ -75,5 +74,21 @@ void debounce_input_timer_handler(void);
   * @retval     None.
   *****************************************************************************/
 void debounce_check_inputs(void);
+
+/*******************************************************************************
+  * @function   button_counter_increase
+  * @brief      Increase button counter.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void button_counter_increase(void);
+
+/*******************************************************************************
+  * @function   button_counter_decrease
+  * @brief      Decrease button counter by the current value in i2c status structure.
+  * @param      value: decrease the button counter by this parameter
+  * @retval     None.
+  *****************************************************************************/
+void button_counter_decrease(uint8_t value);
 
 #endif // __DEBOUNCE_H

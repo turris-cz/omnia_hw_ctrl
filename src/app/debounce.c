@@ -374,3 +374,37 @@ void debounce_config(void)
     debounce_timer_config();
     button->button_mode = BUTTON_DEFAULT; /* default = brightness settings */
 }
+
+/*******************************************************************************
+  * @function   button_counter_decrease
+  * @brief      Decrease button counter by the current value in i2c status structure.
+  * @param      value: decrease the button counter by this parameter
+  * @retval     None.
+  *****************************************************************************/
+void button_counter_decrease(uint8_t value)
+{
+    struct button_def *button = &button_front;
+
+    button->button_pressed_counter -= value;
+
+    /* limitation */
+    if (button->button_pressed_counter < 0)
+        button->button_pressed_counter = 0;
+}
+
+/*******************************************************************************
+  * @function   button_counter_increase
+  * @brief      Increase button counter.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void button_counter_increase(void)
+{
+    struct button_def *button = &button_front;
+
+    button->button_pressed_counter++;
+
+    /* limitation */
+    if (button->button_pressed_counter > MAX_BUTTON_PRESSED_COUNTER)
+        button->button_pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
+}

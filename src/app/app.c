@@ -249,11 +249,7 @@ static ret_value_t input_manager(void)
         if (button->button_mode == BUTTON_DEFAULT)
             led_driver_step_brightness();
         else /* user button mode */
-        {
-            button->button_pressed_counter++;
-            if (button->button_pressed_counter >= MAX_BUTTON_PRESSED_COUNTER)
-                button->button_pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
-        }
+            button_counter_increase();
 
         input_state->button_sts = 0;
     }
@@ -262,6 +258,7 @@ static ret_value_t input_manager(void)
     {
         if (button->button_pressed_counter)
         {
+            i2c_control->status_word &= ~BUTTON_COUNTER_VALBITS;
             i2c_control->status_word |= (button->button_pressed_counter << 13) & BUTTON_COUNTER_VALBITS;
             i2c_control->status_word |= BUTTON_PRESSED_STSBIT;
         }
