@@ -21,6 +21,8 @@
 #define TIMEOUT                 100 // DELAY_BETWEEN_READINGS * 100 = 2 sec
 #define RESET_TIMEOUT           200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
 
+static volatile uint32_t timingdelay;
+
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB signals.
@@ -465,8 +467,8 @@ void power_control_usb_timeout_config(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    // Clock enable
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
+    /* Clock enable */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
 
     /* Time base configuration - 1sec interrupt */
     TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
@@ -479,10 +481,7 @@ void power_control_usb_timeout_config(void)
     /* TIM Interrupts enable */
     TIM_ITConfig(USB_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
 
-    /* TIM enable counter */
-    //TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM14_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM17_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -573,4 +572,77 @@ void power_control_set_power_led(void)
 
     led_driver_set_colour(POWER_LED, WHITE_COLOUR);
     rgb_leds[POWER_LED].led_state = LED_ON;
+}
+
+/*******************************************************************************
+  * @function   power_control_nsdelay_config
+  * @brief      Timer configuration for slot delay in nanoseconds [250 ns].
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_nsdelay_config(void)
+{
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* Clock enable */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
+
+    /* Time base configuration - 250 ns interrupt */
+    TIM_TimeBaseStructure.TIM_Period = 4 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 3 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(NANOSECONDS_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(NANOSECONDS_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(NANOSECONDS_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    TIM_Cmd(NANOSECONDS_TIMER, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM14_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x00;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   power_control_nsdelay_disable
+  * @brief      Disable nanosecond timer.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_nsdelay_disable(void)
+{
+    TIM_Cmd(NANOSECONDS_TIMER, DISABLE);
+    NANOSECONDS_TIMER->CNT = 0;
+}
+
+/******************************************************************************
+  * @function   power_control_nsdelay
+  * @brief      Inserts a number of delay slot.
+  * @param      timeslot: 1 timeslot = 250ns
+  * @retval     None.
+  *****************************************************************************/
+void power_control_nsdelay(uint32_t timeslot)
+{
+    timingdelay = timeslot;
+
+    while(timingdelay != 0u);
+}
+
+/******************************************************************************
+  * @function   power_control_nsdelay_decrement
+  * @brief      Decrements the timingdelay variable.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_nsdelay_decrement(void)
+{
+    if (timingdelay != 0x00)
+    {
+        timingdelay--;
+    }
 }

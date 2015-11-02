@@ -158,7 +158,7 @@ static void slave_i2c_timeout_config(void)
     TIM_ITConfig(I2C_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
 
     /* TIM enable counter */
-    //TIM_Cmd(TIMEOUT_I2C_TIMER, ENABLE);
+   // TIM_Cmd(I2C_TIMEOUT_TIMER, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_UP_TRG_COM_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;

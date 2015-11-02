@@ -175,11 +175,11 @@ void TIM3_IRQHandler(void)
 
 
 /**
-  * @brief  This function handles TIM14 global interrupt request.
+  * @brief  This function handles TIM17 global interrupt request.
   * @param  None
   * @retval None
   */
-void TIM14_IRQHandler(void)
+void TIM17_IRQHandler(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
 
@@ -234,6 +234,21 @@ void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
         DBG("I2C timeout\r\n");
         /* Clear the EXTI line pending bit */
         TIM_ClearITPendingBit(I2C_TIMEOUT_TIMER, TIM_IT_Update);
+    }
+}
+
+/**
+  * @brief  This function handles TIM14 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM14_IRQHandler(void)
+{
+    if (TIM_GetITStatus(NANOSECONDS_TIMER, TIM_IT_Update) != RESET)
+    {
+        power_control_nsdelay_decrement();
+
+        TIM_ClearITPendingBit(NANOSECONDS_TIMER, TIM_IT_Update);
     }
 }
 
