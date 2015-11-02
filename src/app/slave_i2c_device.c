@@ -393,7 +393,11 @@ void slave_i2c_handler(void)
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
         if (i2c_state->data_tx_complete) /* data have been sent to master */
+        {
             i2c_state->data_tx_complete = 0;
+            /* decrease button counter by the value has been sent */
+            button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+        }
         else                             /* data have been received from master */
             i2c_state->data_rx_complete = 1;
 
@@ -428,9 +432,6 @@ slave_i2c_states_t slave_i2c_process_data(void)
         /* prepare data to be sent to the master */
         i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
         i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-
-        /* decrease button counter by the value is going to be sent */
-        button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
 
