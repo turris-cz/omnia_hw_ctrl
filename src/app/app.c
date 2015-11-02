@@ -224,8 +224,8 @@ static ret_value_t input_manager(void)
         if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
             i2c_control->status_word &= (~USB30_PWRON_STSBIT);
 
-        //USB timeout set to 1 sec
-        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+        /* USB timeout set to 1 sec */
+        power_control_usb_timeout_enable();
     }
 
     /* USB31 overcurrent */
@@ -240,7 +240,7 @@ static ret_value_t input_manager(void)
             i2c_control->status_word &= (~USB31_PWRON_STSBIT);
 
         /* USB timeout set to 1 sec */
-        TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+        power_control_usb_timeout_enable();
     }
 
     /* front button */

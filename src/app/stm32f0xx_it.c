@@ -190,9 +190,7 @@ void TIM14_IRQHandler(void)
 
         i2c_control->status_word |= USB30_PWRON_STSBIT | USB31_PWRON_STSBIT;
 
-        //disable timer and set initial condition
-        TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);
-        USB_TIMEOUT_TIMER->CNT = 0;
+        power_control_usb_timeout_disable();
 
         TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
     }

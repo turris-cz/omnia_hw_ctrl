@@ -489,6 +489,31 @@ void power_control_usb_timeout_config(void)
 }
 
 /*******************************************************************************
+  * @function   power_control_usb_timeout_enable
+  * @brief      Enable USB recovery timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb_timeout_enable(void)
+{
+    /* TIM enable counter */
+    TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+}
+
+/*******************************************************************************
+  * @function   power_control_usb_timeout_disable
+  * @brief      Disable USB recovery timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb_timeout_disable(void)
+{
+    /* disable timer and set initial condition */
+    TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);
+    USB_TIMEOUT_TIMER->CNT = 0;
+}
+
+/*******************************************************************************
   * @function   power_control_first_startup
   * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.

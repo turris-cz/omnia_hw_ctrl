@@ -261,5 +261,21 @@ error_type_t power_control_start_regulator(reg_type_t regulator);
   *****************************************************************************/
 void power_control_set_power_led(void);
 
+/*******************************************************************************
+  * @function   power_control_usb_timeout_enable
+  * @brief      Enable USB recovery timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb_timeout_enable(void);
+
+/*******************************************************************************
+  * @function   power_control_usb_timeout_disable
+  * @brief      Disable USB recovery timeout.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_usb_timeout_disable(void);
+
 #endif // POWER_CONTROL_H
 
