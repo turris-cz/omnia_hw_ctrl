@@ -3,7 +3,7 @@
  * @file    led_driver.c
  * @author  CZ.NIC, z.s.p.o.
  * @date    21-July-2015
- * @brief   LED RGB driver for Turris Lite
+ * @brief   LED RGB driver for Turris Omnia
  ******************************************************************************
  ******************************************************************************
  **/

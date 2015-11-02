@@ -266,7 +266,7 @@ static ret_value_t input_manager(void)
             i2c_control->status_word &= (~(BUTTON_PRESSED_STSBIT | BUTTON_COUNTER_VALBITS));
     }
 
-    /* flag is cleared in debounce function */
+    /* these flags are automatically cleared in debounce function */
     if(input_state->sfp_det)
         i2c_control->status_word |= SFP_DET_STSBIT;
     else

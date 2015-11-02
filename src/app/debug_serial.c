@@ -21,7 +21,7 @@
   *****************************************************************************/
 void debug_serial_config(void)
 {
-#if DBG_ENABLE // UART pins are used for CARD and SFP detection !
+#if DBG_ENABLE
     USART_InitTypeDef USART_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
