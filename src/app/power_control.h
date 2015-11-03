@@ -11,9 +11,8 @@
 #define POWER_CONTROL_H
 
 #define USB_TIMEOUT_TIMER                   TIM17
-#define NANOSECONDS_TIMER                   TIM14
 
-//Outputs
+/* Outputs */
 #define INT_MCU_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
 #define INT_MCU_PIN_PORT                    GPIOC
 #define INT_MCU_PIN                         GPIO_Pin_0
@@ -66,7 +65,11 @@
 #define CFG_CTRL_PIN_PORT                   GPIOC
 #define CFG_CTRL_PIN                        GPIO_Pin_15
 
-//Inputs
+#define PRG_4V5_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOF
+#define PRG_4V5_PIN_PORT                    GPIOF
+#define PRG_4V5_PIN                         GPIO_Pin_1
+
+/* Inputs */
 #define MANRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
 #define MANRES_PIN_PORT                     GPIOB
 #define MANRES_PIN                          GPIO_Pin_0
@@ -277,22 +280,6 @@ void power_control_usb_timeout_enable(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_usb_timeout_disable(void);
-
-/*******************************************************************************
-  * @function   power_control_nsdelay_config
-  * @brief      Timer configuration for slot delay in nanoseconds [250 ns].
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_nsdelay_config(void);
-
-/******************************************************************************
-  * @function   power_control_nsdelay_decrement
-  * @brief      Decrements the TimingDelay variable.
-  * @param      None
-  * @retval     None
-  *****************************************************************************/
-void power_control_nsdelay_decrement(void);
 
 #endif // POWER_CONTROL_H
 

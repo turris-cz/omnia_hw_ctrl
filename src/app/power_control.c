@@ -15,11 +15,15 @@
 
 /* Private define ------------------------------------------------------------*/
 
+/* programming pin */
+#define PRG_PIN_HIGH            GPIO_SetBits(PRG_4V5_PIN_PORT, PRG_4V5_PIN)
+#define PRG_PIN_LOW             GPIO_ResetBits(PRG_4V5_PIN_PORT, PRG_4V5_PIN)
+
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
 #define DELAY_BETWEEN_READINGS  20
 #define TIMEOUT                 100 // DELAY_BETWEEN_READINGS * 100 = 2 sec
-#define RESET_TIMEOUT           200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
+#define FACTORY_RESET_TIMEOUT   200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
 
 static volatile uint32_t timingdelay;
 
@@ -575,74 +579,92 @@ void power_control_set_power_led(void)
 }
 
 /*******************************************************************************
-  * @function   power_control_nsdelay_config
-  * @brief      Timer configuration for slot delay in nanoseconds [250 ns].
+  * @function   power_control_prog4v5_config
+  * @brief      Configuration for programming possibility of 4V5 power source.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_nsdelay_config(void)
+void power_control_prog4v5_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-    /* Clock enable */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
+    /* pin config for programming */
+    RCC_AHBPeriphClockCmd(PRG_4V5_PIN_PERIPH_CLOCK, ENABLE);
 
-    /* Time base configuration - 250 ns interrupt */
-    TIM_TimeBaseStructure.TIM_Period = 4 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 3 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(NANOSECONDS_TIMER, &TIM_TimeBaseStructure);
+    GPIO_InitStructure.GPIO_Pin = PRG_4V5_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(PRG_4V5_PIN_PORT, &GPIO_InitStructure);
 
-    TIM_ARRPreloadConfig(NANOSECONDS_TIMER, ENABLE);
-    /* TIM Interrupts enable */
-    TIM_ITConfig(NANOSECONDS_TIMER, TIM_IT_Update, ENABLE);
-
-    /* TIM enable counter */
-    TIM_Cmd(NANOSECONDS_TIMER, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM14_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x00;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    /* timer config for programming */
+    delay_250ns_timeslot_config();
 }
 
 /*******************************************************************************
-  * @function   power_control_nsdelay_disable
-  * @brief      Disable nanosecond timer.
+  * @function   power_control_set_logic_high
+  * @brief      Set logic level high.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_nsdelay_disable(void)
+static void power_control_set_logic_high(void)
 {
-    TIM_Cmd(NANOSECONDS_TIMER, DISABLE);
-    NANOSECONDS_TIMER->CNT = 0;
+    PRG_PIN_HIGH;
+    delay_250ns_timeslot(3);
+    PRG_PIN_LOW;
+    delay_250ns_timeslot(1);
 }
 
-/******************************************************************************
-  * @function   power_control_nsdelay
-  * @brief      Inserts a number of delay slot.
-  * @param      timeslot: 1 timeslot = 250ns
-  * @retval     None.
-  *****************************************************************************/
-void power_control_nsdelay(uint32_t timeslot)
-{
-    timingdelay = timeslot;
-
-    while(timingdelay != 0u);
-}
-
-/******************************************************************************
-  * @function   power_control_nsdelay_decrement
-  * @brief      Decrements the timingdelay variable.
+/*******************************************************************************
+  * @function   power_control_set_logic_low
+  * @brief      Set logic level low.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_nsdelay_decrement(void)
+static void power_control_set_logic_low(void)
 {
-    if (timingdelay != 0x00)
-    {
-        timingdelay--;
-    }
+    PRG_PIN_HIGH;
+    delay_250ns_timeslot(1);
+    PRG_PIN_LOW;
+    delay_250ns_timeslot(3);
+}
+
+/*******************************************************************************
+  * @function   power_control_set_start_cond
+  * @brief      Set start condition for programming.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_start_cond(void)
+{
+    power_control_set_logic_high();
+}
+
+/*******************************************************************************
+  * @function   power_control_set_chipsel
+  * @brief      Set chip select for programming.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_chipsel(void)
+{
+    power_control_set_logic_low();
+    power_control_set_logic_high();
+    power_control_set_logic_low();
+    power_control_set_logic_high();
+}
+
+/*******************************************************************************
+  * @function   power_control_set_reg_addr
+  * @brief      Set register address for programming.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_reg_addr(void)
+{
+    power_control_set_logic_low();
+    power_control_set_logic_low();
+    power_control_set_logic_high();
+    power_control_set_logic_low();
 }
