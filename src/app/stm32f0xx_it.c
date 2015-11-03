@@ -246,7 +246,7 @@ void TIM14_IRQHandler(void)
 {
     if (TIM_GetITStatus(NANOSECONDS_TIMER, TIM_IT_Update) != RESET)
     {
-        power_control_nsdelay_decrement();
+        delay_250ns_timeslot_decrement();
 
         TIM_ClearITPendingBit(NANOSECONDS_TIMER, TIM_IT_Update);
     }
