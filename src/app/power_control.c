@@ -18,6 +18,8 @@
 /* programming pin */
 #define PRG_PIN_HIGH            GPIO_SetBits(PRG_4V5_PIN_PORT, PRG_4V5_PIN)
 #define PRG_PIN_LOW             GPIO_ResetBits(PRG_4V5_PIN_PORT, PRG_4V5_PIN)
+#define PRG_TIME_LONG           35
+#define PRG_TIME_SHORT          11
 
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
@@ -26,6 +28,28 @@
 #define FACTORY_RESET_TIMEOUT   200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
 
 static volatile uint32_t timingdelay;
+
+enum PSET_VALUES {
+    PSET_MINUS_10P  = 0x8,
+    PSET_MINUS_7P5  = 0x9,
+    PSET_MINUS_5P   = 0xA,
+    PSET_MINUS_2P5  = 0xB,
+    PSET_PLUS_2P5   = 0xC,
+    PSET_PLUS_5P    = 0xD,
+    PSET_PLUS_7P5   = 0xE,
+    PSET_PLUS_10P   = 0xF,
+};
+
+enum VSET_VALUES {
+    VSET_1V0        = 0x8,
+    VSET_1V2        = 0x9,
+    VSET_1V5        = 0xA,
+    VSET_1V8        = 0xB,
+    VSET_2V5        = 0xC,
+    VSET_3V0        = 0xD,
+    VSET_3V3        = 0xE,
+    VSET_5V0        = 0xF,
+};
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -598,8 +622,7 @@ void power_control_prog4v5_config(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(PRG_4V5_PIN_PORT, &GPIO_InitStructure);
 
-    /* timer config for programming */
-    delay_250ns_timeslot_config();
+    PRG_PIN_LOW;
 }
 
 /*******************************************************************************
@@ -610,10 +633,25 @@ void power_control_prog4v5_config(void)
   *****************************************************************************/
 static void power_control_set_logic_high(void)
 {
+    unsigned i;
+
+    __disable_irq();
+
     PRG_PIN_HIGH;
-    delay_250ns_timeslot(3);
+
+    for (i = 0; i < PRG_TIME_LONG; i++)
+    {
+        __NOP();
+    }
+
     PRG_PIN_LOW;
-    delay_250ns_timeslot(1);
+
+    for (i = 0; i < PRG_TIME_SHORT; i++)
+    {
+        __NOP();
+    }
+
+    __enable_irq();
 }
 
 /*******************************************************************************
@@ -624,10 +662,25 @@ static void power_control_set_logic_high(void)
   *****************************************************************************/
 static void power_control_set_logic_low(void)
 {
+    unsigned i;
+
+    __disable_irq();
+
     PRG_PIN_HIGH;
-    delay_250ns_timeslot(1);
+
+    for (i = 0; i < PRG_TIME_SHORT; i++)
+    {
+        __NOP();
+    }
+
     PRG_PIN_LOW;
-    delay_250ns_timeslot(3);
+
+    for (i = 0; i < PRG_TIME_LONG; i++)
+    {
+        __NOP();
+    }
+
+    __enable_irq();
 }
 
 /*******************************************************************************
@@ -636,7 +689,7 @@ static void power_control_set_logic_low(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_start_cond(void)
+static void power_control_set_start_cond(void)
 {
     power_control_set_logic_high();
 }
@@ -647,7 +700,7 @@ void power_control_set_start_cond(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_stop_cond(void)
+static void power_control_set_stop_cond(void)
 {
     power_control_set_logic_high();
 }
@@ -658,7 +711,7 @@ void power_control_set_stop_cond(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_chipsel(void)
+static void power_control_set_chipsel(void)
 {
     power_control_set_logic_low();
     power_control_set_logic_high();
@@ -672,10 +725,26 @@ void power_control_set_chipsel(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_reg_addr(void)
+static void power_control_set_reg_addr(void)
 {
     power_control_set_logic_low();
     power_control_set_logic_low();
     power_control_set_logic_high();
     power_control_set_logic_low();
+}
+
+
+static void power_control_set_datafield(uint16_t value)
+{
+
+}
+
+void power_control_set_voltage(uint16_t voltage)
+{
+    power_control_set_start_cond();
+    power_control_set_chipsel();
+    power_control_set_reg_addr();
+    power_control_set_datafield(voltage);
+    power_control_set_stop_cond();
+    delay(1); /* delay at least 10us before the next sequence */
 }

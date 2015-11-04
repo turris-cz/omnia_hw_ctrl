@@ -34,7 +34,7 @@ static void wan_lan_pci_io_config(void)
     /* GPIO Periph clock enable */
     RCC_AHBPeriphClockCmd(PCI_LED0_PIN_PERIPH_CLOCK
                           | PCI_LED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
-                          | WAN_LED1_PIN_PERIPH_CLOCK | SFP_DIS_PIN_PERIPH_CLOCK
+                          | SFP_DIS_PIN_PERIPH_CLOCK
                           | SFP_LOS_PIN_PERIPH_CLOCK | SFP_FLT_PIN_PERIPH_CLOCK
                           | SFP_DET_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
                           | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
@@ -54,9 +54,6 @@ static void wan_lan_pci_io_config(void)
     /* WAN LED pins */
     GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
     GPIO_Init(WAN_LED0_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = WAN_LED1_PIN;
-    GPIO_Init(WAN_LED1_PIN_PORT, &GPIO_InitStructure);
 
     /* SFP_DIS output pin */
     GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;

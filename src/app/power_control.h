@@ -10,6 +10,8 @@
 #ifndef POWER_CONTROL_H
 #define POWER_CONTROL_H
 
+#include "stm32f0xx.h"
+
 #define USB_TIMEOUT_TIMER                   TIM17
 
 /* Outputs */
@@ -280,6 +282,15 @@ void power_control_usb_timeout_enable(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_usb_timeout_disable(void);
+
+/*******************************************************************************
+  * @function   power_control_prog4v5_config
+  * @brief      Configuration for programming possibility of 4V5 power source.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_prog4v5_config(void);
+
 
 #endif // POWER_CONTROL_H
 
