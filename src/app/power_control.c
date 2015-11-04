@@ -642,6 +642,17 @@ void power_control_set_start_cond(void)
 }
 
 /*******************************************************************************
+  * @function   power_control_set_stop_cond
+  * @brief      Set stop condition for programming.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_stop_cond(void)
+{
+    power_control_set_logic_high();
+}
+
+/*******************************************************************************
   * @function   power_control_set_chipsel
   * @brief      Set chip select for programming.
   * @param      None.
