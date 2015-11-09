@@ -21,27 +21,28 @@
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
 
 #define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
-#define I2C_TIMING                      0x10800000 //100kHz for 48MHz system clock
+#define I2C_TIMING                      0x10800000 /* 100kHz for 48MHz system clock */
 
 #define I2C_GPIO_CLOCK                  RCC_AHBPeriph_GPIOF
 #define I2C_PERIPH_NAME                 I2C2
 #define I2C_PERIPH_CLOCK                RCC_APB1Periph_I2C2
-#define I2C_DATA_PIN                    GPIO_Pin_7 // I2C2_SDA - GPIOF
-#define I2C_CLK_PIN                     GPIO_Pin_6 // I2C2_SCL - GPIOF
+#define I2C_DATA_PIN                    GPIO_Pin_7 /* I2C2_SDA - GPIOF */
+#define I2C_CLK_PIN                     GPIO_Pin_6 /* I2C2_SCL - GPIOF */
 #define I2C_GPIO_PORT                   GPIOF
 
-#define I2C_SLAVE_ADDRESS               0x55 //address in linux: 0x2A
+#define I2C_SLAVE_ADDRESS               0x55  /* address in linux: 0x2A */
 
 #define CMD_INDEX                       0
 
 enum i2c_commands {
-    CMD_GET_STATUS_WORD                 = 0x01, // slave sends back status word
+    CMD_GET_STATUS_WORD                 = 0x01, /* slave sends back status word */
     CMD_GENERAL_CONTROL                 = 0x02,
-    CMD_LED_MODE                        = 0x03, // default/user
-    CMD_LED_STATE                       = 0x04, // LED on/off
-    CMD_LED_COLOUR_PART1                = 0x05, // LED number + RED
-    CMD_LED_COLOUR_PART2                = 0x06, // GREEN + BLUE
+    CMD_LED_MODE                        = 0x03, /* default/user */
+    CMD_LED_STATE                       = 0x04, /* LED on/off */
+    CMD_LED_COLOUR_PART1                = 0x05, /* LED number + RED */
+    CMD_LED_COLOUR_PART2                = 0x06, /* GREEN + BLUE */
     CMD_LED_BRIGHTNESS                  = 0x07,
+    CMD_USER_VOLTAGE                    = 0x08,
 };
 
 enum i2_control_byte_mask {
@@ -511,6 +512,15 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
 
                 DBG("brightness: ");
+                DBG((const char*)(i2c_state->rx_buf + 1));
+                DBG("\r\n");
+            } break;
+
+            case CMD_USER_VOLTAGE:
+            {
+                //TODO - add function for setting up user voltage
+
+                DBG("user voltage: ");
                 DBG((const char*)(i2c_state->rx_buf + 1));
                 DBG("\r\n");
             } break;
