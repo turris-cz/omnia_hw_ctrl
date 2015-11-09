@@ -733,12 +733,47 @@ static void power_control_set_reg_addr(void)
     power_control_set_logic_low();
 }
 
-
-static void power_control_set_datafield(uint16_t value)
+/*******************************************************************************
+  * @function   power_control_decode_data
+  * @brief      Decode given data for serial programming.
+  * @param      data: data for serial programming.
+  * @retval     None.
+  *****************************************************************************/
+static void power_control_decode_data(uint8_t data)
 {
+    uint8_t mask;
 
+    for (mask = 0x80; mask; mask = mask >> 1)
+    {
+        if(data & mask)
+            power_control_set_logic_high();
+        else
+            power_control_set_logic_low();
+    }
 }
 
+/*******************************************************************************
+  * @function   power_control_set_datafield
+  * @brief      Set datafield for serial programming.
+  * @param      value: voltage value to be set.
+  * @retval     None.
+  *****************************************************************************/
+static void power_control_set_datafield(uint16_t value)
+{
+    switch(value)
+    {
+    case 33: power_control_decode_data(0xDF); break; /* 3.3V */
+    case 36: power_control_decode_data(0xEF); break; /* 3.63V */
+    case 50: power_control_decode_data(0xFC); break; /* 5.125V */
+    }
+}
+
+/*******************************************************************************
+  * @function   power_control_set_voltage
+  * @brief      Set given voltage to the user regulator.
+  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @retval     None.
+  *****************************************************************************/
 void power_control_set_voltage(uint16_t voltage)
 {
     power_control_set_start_cond();

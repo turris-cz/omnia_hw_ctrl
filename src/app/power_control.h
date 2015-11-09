@@ -291,6 +291,13 @@ void power_control_usb_timeout_disable(void);
   *****************************************************************************/
 void power_control_prog4v5_config(void);
 
+/*******************************************************************************
+  * @function   power_control_set_voltage
+  * @brief      Set given voltage to the user regulator.
+  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_voltage(uint16_t voltage);
 
 #endif // POWER_CONTROL_H
 

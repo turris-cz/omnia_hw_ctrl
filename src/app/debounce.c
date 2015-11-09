@@ -326,7 +326,7 @@ void debounce_check_inputs(void)
 
     if (port_changed & DBG_RES_MASK)
     {
-        //no reaction necessary
+        /* no reaction necessary */
     }
 
     // reaction: follow MRES signal
@@ -354,7 +354,7 @@ void debounce_check_inputs(void)
 
     if (port_changed & RTC_ALARM_MASK)
     {
-        //probably no reaction needed
+        /* no reaction necessary */
     }
 
     if (port_changed & BUTTON_MASK)
