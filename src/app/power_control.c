@@ -18,8 +18,48 @@
 /* programming pin */
 #define PRG_PIN_HIGH            PRG_4V5_PIN_PORT->BSRR = PRG_4V5_PIN
 #define PRG_PIN_LOW             PRG_4V5_PIN_PORT->BRR = PRG_4V5_PIN
-#define PRG_TIME_LONG           3
-#define PRG_TIME_SHORT          1
+#define SET_LOGIC_HIGH() ({PRG_PIN_HIGH; \
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    PRG_PIN_LOW;})
+
+#define SET_LOGIC_LOW() ({PRG_PIN_HIGH; \
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    PRG_PIN_LOW;\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();})
 
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
@@ -725,7 +765,7 @@ static inline void power_control_set_logic_low(void)
   *****************************************************************************/
 static void power_control_set_start_cond(void)
 {
-    power_control_set_logic_high();
+    SET_LOGIC_HIGH();
 }
 
 /*******************************************************************************
@@ -736,7 +776,7 @@ static void power_control_set_start_cond(void)
   *****************************************************************************/
 static void power_control_set_stop_cond(void)
 {
-    power_control_set_logic_high();
+    SET_LOGIC_HIGH();
 }
 
 /*******************************************************************************
@@ -747,10 +787,10 @@ static void power_control_set_stop_cond(void)
   *****************************************************************************/
 static void power_control_set_chipsel(void)
 {
-    power_control_set_logic_low();
-    power_control_set_logic_high();
-    power_control_set_logic_low();
-    power_control_set_logic_high();
+    SET_LOGIC_LOW();
+    SET_LOGIC_HIGH();
+    SET_LOGIC_LOW();
+    SET_LOGIC_HIGH();
 }
 
 /*******************************************************************************
@@ -761,10 +801,10 @@ static void power_control_set_chipsel(void)
   *****************************************************************************/
 static void power_control_set_reg_addr(void)
 {
-    power_control_set_logic_low();
-    power_control_set_logic_low();
-    power_control_set_logic_high();
-    power_control_set_logic_low();
+    SET_LOGIC_LOW();
+    SET_LOGIC_LOW();
+    SET_LOGIC_HIGH();
+    SET_LOGIC_LOW();
 }
 
 /*******************************************************************************
@@ -780,9 +820,9 @@ static void power_control_decode_data(uint8_t data)
     for (mask = 0x80; mask; mask = mask >> 1)
     {
         if(data & mask)
-            power_control_set_logic_high();
+            SET_LOGIC_HIGH();
         else
-            power_control_set_logic_low();
+            SET_LOGIC_LOW();
     }
 }
 
@@ -817,21 +857,27 @@ void power_control_set_voltage(uint16_t voltage)
 //    power_control_set_datafield(voltage);
 //    power_control_set_stop_cond();
 
-     power_control_set_logic_high();
+     /* start condition */
+     SET_LOGIC_HIGH();
 
-     power_control_set_logic_low();
-     power_control_set_logic_high();
-     power_control_set_logic_low();
-     power_control_set_logic_high();
+     /* chip select */
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
 
-     power_control_set_logic_low();
-     power_control_set_logic_low();
-     power_control_set_logic_high();
-     power_control_set_logic_low();
+     /* register address */
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
 
+     /* datafield */
      power_control_set_datafield(voltage);
 
-     power_control_set_logic_high();
+     /* stop condition */
+     SET_LOGIC_HIGH();
+
     __enable_irq();
     delay(1); /* delay at least 10us before the next sequence */
 }
