@@ -69,7 +69,7 @@
 
 static volatile uint32_t timingdelay;
 
-enum PSET_VALUES {
+enum PSET_values {
     PSET_MINUS_10P  = 0x8,
     PSET_MINUS_7P5  = 0x9,
     PSET_MINUS_5P   = 0xA,
@@ -80,7 +80,7 @@ enum PSET_VALUES {
     PSET_PLUS_10P   = 0xF,
 };
 
-enum VSET_VALUES {
+enum VSET_values {
     VSET_1V0        = 0x8,
     VSET_1V2        = 0x9,
     VSET_1V5        = 0xA,
@@ -89,6 +89,12 @@ enum VSET_VALUES {
     VSET_3V0        = 0xD,
     VSET_3V3        = 0xE,
     VSET_5V0        = 0xF,
+};
+
+enum voltage_values {
+    VOLTAGE_33 = 33,
+    VOLTAGE_36 = 36,
+    VOLTAGE_51 = 51,
 };
 
 /*******************************************************************************
@@ -843,12 +849,12 @@ static void power_control_set_datafield(uint16_t value)
 }
 
 /*******************************************************************************
-  * @function   power_control_set_voltage
-  * @brief      Set given voltage to the user regulator.
-  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @function   power_control_set_voltage33
+  * @brief      Set 3.3V voltage to the user regulator.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(uint16_t voltage)
+static void power_control_set_voltage33(void)
 {
      __disable_irq();
 //    power_control_set_start_cond();
@@ -872,12 +878,124 @@ void power_control_set_voltage(uint16_t voltage)
      SET_LOGIC_HIGH();
      SET_LOGIC_LOW();
 
-     /* datafield */
-     power_control_set_datafield(voltage);
+     /* datafield - 0xDF */
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
 
      /* stop condition */
      SET_LOGIC_HIGH();
 
     __enable_irq();
     delay(1); /* delay at least 10us before the next sequence */
+}
+
+/*******************************************************************************
+  * @function   power_control_set_voltage36
+  * @brief      Set 3.63V voltage to the user regulator.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void power_control_set_voltage36(void)
+{
+     __disable_irq();
+
+     /* start condition */
+     SET_LOGIC_HIGH();
+
+     /* chip select */
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+
+     /* register address */
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+
+     /* datafield - 0xEF */
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+
+     /* stop condition */
+     SET_LOGIC_HIGH();
+
+    __enable_irq();
+    delay(1); /* delay at least 10us before the next sequence */
+}
+
+/*******************************************************************************
+  * @function   power_control_set_voltage51
+  * @brief      Set 5.125V voltage to the user regulator.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void power_control_set_voltage51(void)
+{
+     __disable_irq();
+
+     /* start condition */
+     SET_LOGIC_HIGH();
+
+     /* chip select */
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+
+     /* register address */
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+
+     /* datafield - 0xFC */
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+
+     /* stop condition */
+     SET_LOGIC_HIGH();
+
+    __enable_irq();
+    delay(1); /* delay at least 10us before the next sequence */
+}
+
+/*******************************************************************************
+  * @function   power_control_set_voltage
+  * @brief      Set required voltage to the user regulator.
+  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_voltage(uint16_t voltage)
+{
+    switch (voltage)
+    {
+        case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */
+        case VOLTAGE_36: power_control_set_voltage36(); break; /* 3.63V */
+        case VOLTAGE_51: power_control_set_voltage51(); break; /* 5.125V */
+        default:
+            break;
+    }
 }

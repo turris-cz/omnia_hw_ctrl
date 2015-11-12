@@ -293,7 +293,7 @@ void power_control_prog4v5_config(void);
 
 /*******************************************************************************
   * @function   power_control_set_voltage
-  * @brief      Set given voltage to the user regulator.
+  * @brief      Set required voltage to the user regulator.
   * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
   * @retval     None.
   *****************************************************************************/
