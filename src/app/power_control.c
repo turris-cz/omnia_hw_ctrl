@@ -38,7 +38,24 @@
     __NOP();\
     __NOP();\
     __NOP();\
-    PRG_PIN_LOW;})
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    PRG_PIN_LOW;\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();})
 
 #define SET_LOGIC_LOW() ({PRG_PIN_HIGH; \
     __NOP();\
@@ -48,6 +65,24 @@
     __NOP();\
     __NOP();\
     PRG_PIN_LOW;\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
+    __NOP();\
     __NOP();\
     __NOP();\
     __NOP();\
@@ -91,11 +126,7 @@ enum VSET_values {
     VSET_5V0        = 0xF,
 };
 
-enum voltage_values {
-    VOLTAGE_33 = 33,
-    VOLTAGE_36 = 36,
-    VOLTAGE_51 = 51,
-};
+
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -600,11 +631,11 @@ error_type_t power_control_first_startup(void)
     delay(200);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
 
-    // wait for main board reset signal
+    /* wait for main board reset signal */
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {}
 
-    delay(15); // 15ms delay after releasing of reset signal
+    delay(15); /* 15ms delay after releasing of reset signal */
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
     return error;

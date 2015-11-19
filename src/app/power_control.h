@@ -136,6 +136,12 @@
 #define LED_BRT_PIN_PORT                    GPIOB
 #define LED_BRT_PIN                         GPIO_Pin_15
 
+enum voltage_values {
+    VOLTAGE_33 = 33,
+    VOLTAGE_36 = 36,
+    VOLTAGE_51 = 51,
+};
+
 typedef enum usb_states {
     USB_OFF = 0,
     USB_ON  = 1
