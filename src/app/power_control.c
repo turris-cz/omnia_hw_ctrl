@@ -12,6 +12,7 @@
 #include "power_control.h"
 #include "delay.h"
 #include "led_driver.h"
+#include "debug_serial.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -627,17 +628,23 @@ error_type_t power_control_first_startup(void)
 {
     error_type_t error = NO_ERROR;
 
+    DBG("enter first startup...\r\n");
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-    delay(200);
+    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+    DBG("board in manual reset\r\n");
+    delay(150);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
+    DBG("manual reset released\r\n");
 
     /* wait for main board reset signal */
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {}
 
+    DBG("sysres_out released\r\n");
     delay(15); /* 15ms delay after releasing of reset signal */
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
+    DBG("return from first startup...\r\n");
     return error;
 }
 
@@ -703,183 +710,6 @@ void power_control_prog4v5_config(void)
 }
 
 /*******************************************************************************
-  * @function   power_control_set_logic_high
-  * @brief      Set logic level high.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static inline void power_control_set_logic_high(void)
-{
-   // unsigned i = 0;
-
-    PRG_PIN_HIGH;
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-//    for (i = 0; i < PRG_TIME_LONG; i++)
-//    {
-//        __NOP();
-//    }
-
-    PRG_PIN_LOW;
-
-
-//    for (i = 0; i < PRG_TIME_SHORT; i++)
-//    {
-//        __NOP();
-//    }
-
-}
-
-/*******************************************************************************
-  * @function   power_control_set_logic_low
-  * @brief      Set logic level low.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static inline void power_control_set_logic_low(void)
-{
-
-    PRG_PIN_HIGH;
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-
-//    for (i = 0; i < PRG_TIME_SHORT; i++)
-//    {
-//        __NOP();
-//    }
-
-    PRG_PIN_LOW;
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-    __NOP();
-
-//    for (i = 0; i < PRG_TIME_LONG; i++)
-//    {
-//        __NOP();
-//    }
-}
-
-/*******************************************************************************
-  * @function   power_control_set_start_cond
-  * @brief      Set start condition for programming.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_start_cond(void)
-{
-    SET_LOGIC_HIGH();
-}
-
-/*******************************************************************************
-  * @function   power_control_set_stop_cond
-  * @brief      Set stop condition for programming.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_stop_cond(void)
-{
-    SET_LOGIC_HIGH();
-}
-
-/*******************************************************************************
-  * @function   power_control_set_chipsel
-  * @brief      Set chip select for programming.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_chipsel(void)
-{
-    SET_LOGIC_LOW();
-    SET_LOGIC_HIGH();
-    SET_LOGIC_LOW();
-    SET_LOGIC_HIGH();
-}
-
-/*******************************************************************************
-  * @function   power_control_set_reg_addr
-  * @brief      Set register address for programming.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_reg_addr(void)
-{
-    SET_LOGIC_LOW();
-    SET_LOGIC_LOW();
-    SET_LOGIC_HIGH();
-    SET_LOGIC_LOW();
-}
-
-/*******************************************************************************
-  * @function   power_control_decode_data
-  * @brief      Decode given data for serial programming.
-  * @param      data: data for serial programming.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_decode_data(uint8_t data)
-{
-    uint8_t mask;
-
-    for (mask = 0x80; mask; mask = mask >> 1)
-    {
-        if(data & mask)
-            SET_LOGIC_HIGH();
-        else
-            SET_LOGIC_LOW();
-    }
-}
-
-/*******************************************************************************
-  * @function   power_control_set_datafield
-  * @brief      Set datafield for serial programming.
-  * @param      value: voltage value to be set.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_datafield(uint16_t value)
-{
-    switch(value)
-    {
-    case 33: power_control_decode_data(0xDF); break; /* 3.3V */
-    case 36: power_control_decode_data(0xEF); break; /* 3.63V */
-    case 50: power_control_decode_data(0xFC); break; /* 5.125V */
-    }
-}
-
-/*******************************************************************************
   * @function   power_control_set_voltage33
   * @brief      Set 3.3V voltage to the user regulator.
   * @param      None.
@@ -888,11 +718,6 @@ static void power_control_set_datafield(uint16_t value)
 static void power_control_set_voltage33(void)
 {
      __disable_irq();
-//    power_control_set_start_cond();
-//    power_control_set_chipsel();
-//    power_control_set_reg_addr();
-//    power_control_set_datafield(voltage);
-//    power_control_set_stop_cond();
 
      /* start condition */
      SET_LOGIC_HIGH();
@@ -923,8 +748,8 @@ static void power_control_set_voltage33(void)
      /* stop condition */
      SET_LOGIC_HIGH();
 
-    __enable_irq();
-    delay(1); /* delay at least 10us before the next sequence */
+     __enable_irq();
+     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -966,8 +791,8 @@ static void power_control_set_voltage36(void)
      /* stop condition */
      SET_LOGIC_HIGH();
 
-    __enable_irq();
-    delay(1); /* delay at least 10us before the next sequence */
+     __enable_irq();
+     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -1009,8 +834,8 @@ static void power_control_set_voltage51(void)
      /* stop condition */
      SET_LOGIC_HIGH();
 
-    __enable_irq();
-    delay(1); /* delay at least 10us before the next sequence */
+     __enable_irq();
+     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************

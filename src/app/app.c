@@ -139,8 +139,8 @@ static ret_value_t light_reset(void)
     ret_value_t value = OK;
 
     error = power_control_first_startup();
-    //delay(30);
-    //error = power_control_second_startup();
+   //delay(30);
+   //error = power_control_second_startup();
 
 //    if (error != NO_ERROR)
 //        value = GO_TO_RESET_ERROR;
@@ -181,6 +181,7 @@ static ret_value_t input_manager(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
 
+    debounce_inputs();
     debounce_check_inputs();
 
     /* manual reset button */
@@ -200,6 +201,7 @@ static ret_value_t input_manager(void)
     /* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
     if(input_state->pg)
     {
+        DBG("PG all regulators\r\n");
         value = GO_TO_HARD_RESET;
         input_state->pg = 0;
     }
@@ -209,6 +211,7 @@ static ret_value_t input_manager(void)
     {
         if(input_state->pg_4v5)
         {
+            DBG("PG from 4V5\r\n");
             value = GO_TO_HARD_RESET;
             input_state->pg_4v5 = 0;
         }
@@ -392,6 +395,7 @@ void app_mcu_cyclic(void)
     {
     case POWER_ON:
         {
+            DBG("POWER_ON\r\n");
             val = power_on();
 
             if(val == OK)
@@ -403,6 +407,7 @@ void app_mcu_cyclic(void)
 
     case LIGHT_RESET:
         {
+            DBG("LIGHT_RESET\r\n");
             val = light_reset();
 
             if (val == OK)
@@ -412,7 +417,11 @@ void app_mcu_cyclic(void)
         }
         break;
 
-    case HARD_RESET: next_state = POWER_ON;
+    case HARD_RESET:
+        {
+            DBG("HARD_RESET\r\n");
+            next_state = POWER_ON;
+        }
         break;
 
     case FACTORY_RESET:
@@ -420,6 +429,7 @@ void app_mcu_cyclic(void)
 
     case LOAD_SETTINGS:
         {
+            DBG("LOAD_SETTINGS\r\n");
             led_driver_knight_rider_effect(WHITE_COLOUR);
             led_driver_set_colour(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
             led_driver_set_led_state(LED_COUNT, LED_ON);
@@ -435,6 +445,7 @@ void app_mcu_cyclic(void)
 
     case ERROR_STATE:
         {
+            DBG("ERROR_STATE\r\n");
             error_manager(val);
             error_counter++;
 
@@ -452,6 +463,7 @@ void app_mcu_cyclic(void)
 
     case INPUT_MANAGER:
         {
+            DBG("INPUT_MANAGER\r\n");
             val = input_manager();
 
             switch(val)
@@ -465,6 +477,7 @@ void app_mcu_cyclic(void)
 
     case I2C_MANAGER:
         {
+            DBG("I2C_MANAGER\r\n");
             val = ic2_manager();
 
             switch(val)
@@ -480,12 +493,17 @@ void app_mcu_cyclic(void)
 
     case LED_MANAGER:
         {
+            DBG("LED_MANAGER\r\n");
             led_manager();
             next_state = INPUT_MANAGER;
         }
         break;
 
     default: //next_state = HARD_RESET; // TODO - which state ?
+    {
+        DBG("DEFAULT_STATE\r\n");
+        next_state = HARD_RESET;
+    }
         break;
     }
 }

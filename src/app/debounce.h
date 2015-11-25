@@ -91,4 +91,6 @@ void button_counter_increase(void);
   *****************************************************************************/
 void button_counter_decrease(uint8_t value);
 
+void debounce_inputs(void);
+
 #endif // __DEBOUNCE_H

@@ -15,6 +15,7 @@
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
 #include "msata_pci.h"
+#include "debug_serial.h"
 
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
@@ -35,7 +36,7 @@ enum input_mask {
     BUTTON_MASK                     = 0x8000,
 };
 
-#define MAX_INPUT_STATES            3
+#define MAX_INPUT_STATES            1
 #define MAX_SFP_DET_STATES          5
 #define MAX_SFP_FLT_STATES          5
 #define MAX_SFP_LOS_STATES          5
@@ -278,14 +279,14 @@ static void debounce_msata_ind(void)
   *****************************************************************************/
 void debounce_input_timer_handler(void)
 {
-    static uint16_t idx;
+//    static uint16_t idx;
 
-    /* port B debounced by general function debounce_check_inputs() */
-    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); //read whole port
-    idx++;
+//    /* port B debounced by general function debounce_check_inputs() */
+//    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); //read whole port
+//    idx++;
 
-    if (idx >= MAX_INPUT_STATES)
-        idx = 0;
+//    if (idx >= MAX_INPUT_STATES)
+//        idx = 0;
 
     /* other inputs not handled by general function debounce_check_inputs() */
     debounce_sfp_det();
@@ -295,6 +296,16 @@ void debounce_input_timer_handler(void)
     debounce_msata_ind();
 }
 
+void debounce_inputs(void)
+{
+    static uint16_t idx;
+
+    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); /* read whole port */
+    idx++;
+
+    if (idx >= MAX_INPUT_STATES)
+        idx = 0;
+}
 /*******************************************************************************
   * @function   debounce_check_inputs
   * @brief      Check input signal.
@@ -309,7 +320,7 @@ void debounce_check_inputs(void)
 
     last_debounce_state = debounced_state;
 
-    debounced_state = 0xFFFF; //init for calculation - include of all 16 inputs
+    debounced_state = 0xFFFF; /* init for calculation - include of all 16 inputs */
 
     for (i = 0; i < MAX_INPUT_STATES; i++)
     {
@@ -319,10 +330,23 @@ void debounce_check_inputs(void)
     port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
 
     if (port_changed & MAN_RES_MASK)
+    {
+        DBG("manual reset\r\n");
         input_state->man_res = 1;
+        /* set CFG_CTRL pin to high state ASAP */
+        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+    }
 
     if (port_changed & SYSRES_OUT_MASK)
+    {
+        DBG("sysres_out set\r\n");
         input_state->sysres_out = 1;
+        /* set CFG_CTRL pin to high state ASAP */
+        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+        DBG("manual reset set\r\n");
+    }
 
     if (port_changed & DBG_RES_MASK)
     {
