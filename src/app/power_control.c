@@ -630,9 +630,9 @@ error_type_t power_control_first_startup(void)
 
     DBG("enter first startup...\r\n");
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+   // GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
     DBG("board in manual reset\r\n");
-    delay(150);
+    //delay(150);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
     DBG("manual reset released\r\n");
 

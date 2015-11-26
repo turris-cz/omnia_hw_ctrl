@@ -343,8 +343,8 @@ void debounce_check_inputs(void)
         DBG("sysres_out set\r\n");
         input_state->sysres_out = 1;
         /* set CFG_CTRL pin to high state ASAP */
-        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+        //GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         DBG("manual reset set\r\n");
     }
 
