@@ -63,7 +63,7 @@ static void debounce_timer_config(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    // Clock enable
+    /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
 
     /* Time base configuration */
@@ -100,12 +100,12 @@ static void debounce_sfp_det(void)
 
     state = !(wan_sfp_connector_detection());
 
-    if (state) //signal released
+    if (state) /* signal released */
     {
         if (counter > 0)
             counter--;
     }
-    else //signal falls to low
+    else /* signal falls to low */
     {
         if (counter < MAX_SFP_DET_STATES)
             counter++;
@@ -137,12 +137,12 @@ static void debounce_sfp_flt(void)
 
     state = !(wan_sfp_fault_detection());
 
-    if (state) //signal released
+    if (state) /* signal released */
     {
         if (counter > 0)
             counter--;
     }
-    else //signal falls to low
+    else /* signal falls to low */
     {
         if (counter < MAX_SFP_FLT_STATES)
             counter++;
@@ -174,12 +174,12 @@ static void debounce_sfp_los(void)
 
     state = !(wan_sfp_lost_detection());
 
-    if (state) //signal released
+    if (state) /* signal released */
     {
         if (counter > 0)
             counter--;
     }
-    else //signal falls to low
+    else /* signal falls to low */
     {
         if (counter < MAX_SFP_LOS_STATES)
             counter++;
@@ -211,12 +211,12 @@ static void debounce_card_det(void)
 
     state = !(msata_pci_card_detection());
 
-    if (state) //signal released
+    if (state) /* signal released */
     {
         if (counter > 0)
             counter--;
     }
-    else //signal falls to low
+    else /* signal falls to low */
     {
         if (counter < MAX_CARD_DET_STATES)
             counter++;
@@ -248,12 +248,12 @@ static void debounce_msata_ind(void)
 
     state = !(msata_pci_type_card_detection());
 
-    if (state) //signal released
+    if (state) /* signal released */
     {
         if (counter > 0)
             counter--;
     }
-    else //signal falls to low
+    else /* signal falls to low */
     {
         if (counter < MAX_MSATA_IND_STATES)
             counter++;
@@ -279,14 +279,16 @@ static void debounce_msata_ind(void)
   *****************************************************************************/
 void debounce_input_timer_handler(void)
 {
-//    static uint16_t idx;
+    static uint16_t idx;
+    struct button_def *button = &button_front;
 
-//    /* port B debounced by general function debounce_check_inputs() */
-//    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); //read whole port
-//    idx++;
+    /* port B, pins 0-14 debounced by general function debounce_check_inputs() */
+    /* only button on PB15 is debounced here, but read the whole port */
+    button->button_pin_state[idx] = ~(GPIO_ReadInputData(GPIOB));
+    idx++;
 
-//    if (idx >= MAX_INPUT_STATES)
-//        idx = 0;
+    if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
+        idx = 0;
 
     /* other inputs not handled by general function debounce_check_inputs() */
     debounce_sfp_det();
@@ -296,7 +298,13 @@ void debounce_input_timer_handler(void)
     debounce_msata_ind();
 }
 
-void debounce_inputs(void)
+/*******************************************************************************
+  * @function   debounce_sample_input
+  * @brief      Get sample of inputs of port B.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void debounce_sample_input(void)
 {
     static uint16_t idx;
 
@@ -306,6 +314,7 @@ void debounce_inputs(void)
     if (idx >= MAX_INPUT_STATES)
         idx = 0;
 }
+
 /*******************************************************************************
   * @function   debounce_check_inputs
   * @brief      Check input signal.
@@ -314,21 +323,44 @@ void debounce_inputs(void)
   *****************************************************************************/
 void debounce_check_inputs(void)
 {
-    uint16_t i, port_changed;
-    static uint16_t last_debounce_state;
+    uint16_t i, port_changed, button_changed;
+    static uint16_t last_debounce_state, last_button_debounce_state;
     struct input_sig *input_state = &debounce_input_signal;
+    struct button_def *button = &button_front;
 
+    /* PB0-14 ----------------------------------------------------------------
+     * No debounce is used now (we need a reaction immediately)
+     * If debounce required, set MAX_INPUT_STATES > 1.
+     * Recommendation: move function  debounce_sample_input() to debounce_input_timer_handler()
+     */
+
+    debounce_sample_input();
+
+    /* save previous state */
     last_debounce_state = debounced_state;
-
-    debounced_state = 0xFFFF; /* init for calculation - include of all 16 inputs */
+    debounced_state = 0x7FFF; /* init for calculation - only PB0-14 inputs */
 
     for (i = 0; i < MAX_INPUT_STATES; i++)
     {
         debounced_state = debounced_state & port_state[i];
     }
 
+    /* get status of port B, pins 0-14 */
     port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
 
+    /* PB15 ------------------------------------------------------------------
+     * button debounce */
+    last_button_debounce_state = button->button_debounce_state;
+    button->button_debounce_state = BUTTON_MASK;
+
+    for (i = 0; i < MAX_BUTTON_DEBOUNCE_STATE; i++)
+    {
+        button->button_debounce_state = button->button_debounce_state & button->button_pin_state[i];
+    }
+
+    button_changed = (button->button_debounce_state ^ last_button_debounce_state) & button->button_debounce_state;
+
+    /* results evaluation --------------------------------------------------- */
     if (port_changed & MAN_RES_MASK)
     {
         input_state->man_res = 1;
@@ -359,7 +391,7 @@ void debounce_check_inputs(void)
          (port_changed & PG_1V2_MASK))
         input_state->pg = 1;
 
-    if (port_changed & PG_4V5_MASK) //4.5V separately - user selectable
+    if (port_changed & PG_4V5_MASK)
         input_state->pg_4v5 = 1;
 
     if (port_changed & USB30_OVC_MASK)
@@ -375,7 +407,7 @@ void debounce_check_inputs(void)
         /* no reaction necessary */
     }
 
-    if (port_changed & BUTTON_MASK)
+    if (button_changed & BUTTON_MASK)
         input_state->button_sts = 1;
 }
 

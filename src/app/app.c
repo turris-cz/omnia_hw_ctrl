@@ -181,7 +181,6 @@ static ret_value_t input_manager(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
 
-    debounce_inputs();
     debounce_check_inputs();
 
     /* manual reset button */
@@ -499,7 +498,7 @@ void app_mcu_cyclic(void)
         }
         break;
 
-    default: //next_state = HARD_RESET; // TODO - which state ?
+    default: /* it should never occur */
     {
         DBG("DEFAULT_STATE\r\n");
         next_state = HARD_RESET;

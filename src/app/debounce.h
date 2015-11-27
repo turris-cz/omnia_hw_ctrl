@@ -12,6 +12,7 @@
 
 #define DEBOUNCE_TIMER                  TIM16
 #define MAX_BUTTON_PRESSED_COUNTER      7
+#define MAX_BUTTON_DEBOUNCE_STATE       3
 
 typedef enum button_modes {
     BUTTON_DEFAULT,
@@ -46,6 +47,8 @@ struct button_def {
     button_mode_t button_mode;
     button_state_t button_state;
     int8_t button_pressed_counter;
+    uint16_t button_pin_state[MAX_BUTTON_DEBOUNCE_STATE];
+    uint16_t button_debounce_state;
 };
 
 extern struct input_sig debounce_input_signal;
@@ -90,7 +93,5 @@ void button_counter_increase(void);
   * @retval     None.
   *****************************************************************************/
 void button_counter_decrease(uint8_t value);
-
-void debounce_inputs(void);
 
 #endif // __DEBOUNCE_H
