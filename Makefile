@@ -1,4 +1,4 @@
-PROJ_NAME=turris_lite_control
+PROJ_NAME=turris_omnia_control
 
 ################################################################################
 #                   SETUP TOOLS                                                #

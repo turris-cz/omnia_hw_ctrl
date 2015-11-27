@@ -49,18 +49,18 @@ enum led_numbers {
 };
 
 enum led_names {
-    POWER_LED       = LED0,
-    WAN_LED         = LED1,
-    LAN1_LED        = LED2,
-    LAN2_LED        = LED3,
-    LAN3_LED        = LED4,
-    LAN4_LED        = LED5,
-    LAN5_LED        = LED6,
-    PCI0_LED        = LED7,
-    PCI1_LED        = LED8,
-    MSATA_PCI_LED   = LED9,
-    USER_LED1       = LED10,
-    USER_LED2       = LED11
+    POWER_LED       = LED11,
+    LAN0_LED        = LED10,
+    LAN1_LED        = LED9,
+    LAN2_LED        = LED8,
+    LAN3_LED        = LED7,
+    LAN4_LED        = LED6,
+    WAN_LED         = LED5,
+    PCI1_LED        = LED4,
+    PCI2_LED        = LED3,
+    MSATA_PCI_LED   = LED2,
+    USER_LED1       = LED1,
+    USER_LED2       = LED0
 };
 
 

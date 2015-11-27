@@ -13,9 +13,9 @@
 #include "stm32f0xx_conf.h"
 
 /* PCIe status LED */
-#define PCI_LED0_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
-#define PCI_LED0_PIN_PORT                   GPIOC
-#define PCI_LED0_PIN                        GPIO_Pin_1
+#define PCI_LED2_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
+#define PCI_LED2_PIN_PORT                   GPIOC
+#define PCI_LED2_PIN                        GPIO_Pin_1
 
 #define PCI_LED1_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
 #define PCI_LED1_PIN_PORT                   GPIOC
