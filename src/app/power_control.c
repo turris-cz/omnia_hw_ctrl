@@ -628,23 +628,17 @@ error_type_t power_control_first_startup(void)
 {
     error_type_t error = NO_ERROR;
 
-    DBG("enter first startup...\r\n");
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-   // GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
-    DBG("board in manual reset\r\n");
-    //delay(150);
+    delay(50);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
-    DBG("manual reset released\r\n");
 
     /* wait for main board reset signal */
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {}
 
-    DBG("sysres_out released\r\n");
     delay(15); /* 15ms delay after releasing of reset signal */
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
-    DBG("return from first startup...\r\n");
     return error;
 }
 

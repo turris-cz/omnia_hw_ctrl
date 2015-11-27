@@ -266,6 +266,9 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, slave_i2c_states_
     if (control_byte & LIGHT_RST_MASK)
     {
         *state = SLAVE_I2C_LIGHT_RST;
+        /* set CFG_CTRL pin to high state ASAP */
+        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         return;
     }
 
