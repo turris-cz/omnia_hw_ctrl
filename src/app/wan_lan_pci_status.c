@@ -194,15 +194,29 @@ void wan_led_activity(void)
 
     if (rgb_leds[WAN_LED].led_mode == LED_DEFAULT_MODE)
     {
-        led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
-
-        if (led0_status == 0)
+        if (wan_sfp_connector_detection())
         {
-            rgb_leds[WAN_LED].led_state = LED_ON;
+            if (wan_sfp_lost_detection())
+            {
+                rgb_leds[WAN_LED].led_state = LED_OFF;
+            }
+            else
+            {
+                rgb_leds[WAN_LED].led_state = LED_ON;
+            }
         }
         else
         {
-            rgb_leds[WAN_LED].led_state = LED_OFF;
+            led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+
+            if (led0_status == 0)
+            {
+                rgb_leds[WAN_LED].led_state = LED_ON;
+            }
+            else
+            {
+                rgb_leds[WAN_LED].led_state = LED_OFF;
+            }
         }
     }
 }
