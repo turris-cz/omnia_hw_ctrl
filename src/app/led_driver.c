@@ -495,15 +495,15 @@ void led_driver_config(void)
   * @param      procent_val: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_pwm_set_brightness(const uint16_t procent_val)
+void led_driver_pwm_set_brightness(uint16_t procent_val)
 {
     uint16_t counter_val;
     struct led_rgb *rgb_leds = leds;
 
-    counter_val = procent_val * PWM_TIM_PERIODE / 100;
+    if (procent_val > MAX_LED_BRIGHTNESS)
+        procent_val = MAX_LED_BRIGHTNESS;
 
-    if(counter_val > PWM_TIM_PERIODE)
-        counter_val = PWM_TIM_PERIODE;
+    counter_val = procent_val * PWM_TIM_PERIODE / MAX_LED_BRIGHTNESS;
 
     PWM_TIMER->CCR2 = counter_val;
     rgb_leds->brightness = procent_val;

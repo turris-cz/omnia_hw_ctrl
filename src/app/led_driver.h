@@ -117,7 +117,7 @@ void led_driver_send_frame(void);
   * @param      procent_val: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_pwm_set_brightness(const uint16_t procent_val);
+void led_driver_pwm_set_brightness(uint16_t procent_val);
 
 /*******************************************************************************
   * @function   led_driver_step_brightness
