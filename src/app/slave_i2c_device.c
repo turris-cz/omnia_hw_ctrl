@@ -423,7 +423,7 @@ void slave_i2c_handler(void)
 slave_i2c_states_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    static uint8_t led_index;
+    static uint8_t led_index, led_colour_step_one_complete;
     static uint32_t colour;
     slave_i2c_states_t state = SLAVE_I2C_OK;
 
@@ -490,6 +490,8 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 led_index = i2c_state->rx_buf[1] & 0x0F;
                 colour = i2c_state->rx_buf[2] << 16;
 
+                led_colour_step_one_complete = 1;
+
                 DBG("set LED colour - LED index : ")
                 DBG((const char*)&led_index);
                 DBG("\r\nRED: ");
@@ -501,7 +503,11 @@ slave_i2c_states_t slave_i2c_process_data(void)
             {
                 colour |= (i2c_state->rx_buf[1] << 8) | i2c_state->rx_buf[2];
 
-                led_driver_set_colour(led_index, colour);
+                if(led_colour_step_one_complete)
+                {
+                    led_driver_set_colour(led_index, colour);
+                    led_colour_step_one_complete = 0;
+                }
 
                 DBG("\r\nGREEN: ");
                 DBG((const char*)(i2c_state->rx_buf + 1));
