@@ -366,7 +366,7 @@ void debounce_check_inputs(void)
         input_state->man_res = 1;
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
     }
 
     if (port_changed & SYSRES_OUT_MASK)
