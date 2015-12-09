@@ -381,7 +381,22 @@ void slave_i2c_handler(void)
 
         /* first byte received - if master wants to read the status word */
         if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+        {
             i2c_state->data_tx_complete = 1;
+            DBG("\r\nTX command: ");
+            DBG((const char*)i2c_state->rx_buf);
+            DBG("\r\n");
+
+            /* prepare data to be sent to the master */
+            i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+            i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
+
+            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
+
+            DBG("status word: ");
+            DBG((const char*)i2c_state->tx_buf);
+            DBG("\r\n");
+        }
 
         /* If more than MAX_RX_BUFFER_SIZE bytes are received,
          * disable the RX interrupt - no more bytes are received.
@@ -402,8 +417,10 @@ void slave_i2c_handler(void)
             /* decrease button counter by the value has been sent */
             button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
         }
-        else                             /* data have been received from master */
+        else /* data have been received from master */
+        {
             i2c_state->data_rx_complete = 1;
+        }
 
         /* clear counters */
         i2c_state->rx_data_ctr = 0;
@@ -426,23 +443,6 @@ slave_i2c_states_t slave_i2c_process_data(void)
     static uint8_t led_index, led_colour_step_one_complete;
     static uint32_t colour;
     slave_i2c_states_t state = SLAVE_I2C_OK;
-
-    if (i2c_state->data_tx_complete) /* slave TX (master expects data) */
-    {
-        DBG("\r\nTX command: ");
-        DBG((const char*)i2c_state->rx_buf);
-        DBG("\r\n");
-
-        /* prepare data to be sent to the master */
-        i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
-        i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-
-        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
-
-        DBG("status word: ");
-        DBG((const char*)i2c_state->tx_buf);
-        DBG("\r\n");
-    }
 
     if (i2c_state->data_rx_complete) /* slave RX (master sends data) */
     {
@@ -537,7 +537,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
             default: /* unexpected command received */
             {
                 slave_i2c_clear_buffers();
-                // clear counters
+                /* clear counters */
                 i2c_state->rx_data_ctr = 0;
                 i2c_state->tx_data_ctr = 0;
                 slave_i2c_config();
