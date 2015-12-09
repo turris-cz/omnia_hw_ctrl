@@ -36,6 +36,7 @@ typedef enum {
     INPUT_MANAGER,
     I2C_MANAGER,
     LED_MANAGER,
+    LED_EFFECT,
 } states_t;
 
 /*******************************************************************************
