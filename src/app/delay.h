@@ -12,6 +12,11 @@
 #ifndef __DELAY_H
 #define __DELAY_H
 
+#define DELAY_COUNTER_TRESHOLD        2000 /* 2 sec */
+
+extern volatile uint32_t delay_counter_ms;
+extern volatile uint16_t delay_counter_stop;
+
 /*******************************************************************************
   * @function   delay_systimer_config
   * @brief      Setup SysTick Timer for 1 msec interrupts.

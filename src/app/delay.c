@@ -12,7 +12,11 @@
 #include "delay.h"
 
 static volatile uint32_t timingdelay;
-static volatile uint32_t timing250ns;
+/* counter[ms] used for system initialization of the board
+ * (reading configuration through I2C) */
+volatile uint32_t delay_counter_ms;
+/* after reading configuration "delay_counter_ms" is not needed and is stopped */
+volatile uint16_t delay_counter_stop;
 
 /* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
@@ -56,4 +60,7 @@ void delay_timing_decrement(void)
     {
         timingdelay--;
     }
+
+    if (!delay_counter_stop)
+        delay_counter_ms++;
 }

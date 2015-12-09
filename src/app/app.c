@@ -408,9 +408,12 @@ void app_mcu_cyclic(void)
         {
             DBG("LIGHT_RESET\r\n");
             val = light_reset();
+            delay_counter_stop = 0; /* counter must count again after reset */
+            led_driver_set_led_state(LED_COUNT, LED_ON);
+            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
             if (val == OK)
-                next_state = LOAD_SETTINGS;
+                next_state = I2C_MANAGER;
             else
                 next_state = ERROR_STATE;
         }
@@ -486,6 +489,20 @@ void app_mcu_cyclic(void)
                 //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
                 case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
+            }
+
+            if (!delay_counter_stop)
+            {
+                if(delay_counter_ms >= DELAY_COUNTER_TRESHOLD)
+                {
+                    delay_counter_stop = 1;
+                    delay_counter_ms = 0;
+                    next_state = LOAD_SETTINGS;
+                }
+                else
+                {
+                    next_state = I2C_MANAGER;
+                }
             }
         }
         break;
