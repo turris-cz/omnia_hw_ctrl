@@ -34,16 +34,15 @@
 #define COLOUR_LEVELS				16
 #define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
 #define MAX_LED_BRIGHTNESS          100
-#define MIN_LED_BRIGHTNESS          0
-#define LED_BRIGHTNESS_STEP         10
+#define MAX_BRIGHTNESS_STEPS        8
 
 /*******************************************************************************
 // PWM Settings (Frequency und range)
 //------------------------------------------------------------------------------
 // period      = range (max = 0xFFFF => 16bit)
 // Basic freq. = (APB2=48MHz) => TIM_CLK=48MHz
-// period      : 0 to 0xFFFF
-// prescaler   : 0 to 0xFFFF
+// period range    : 0 to 0xFFFF
+// prescaler range : 0 to 0xFFFF
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
@@ -63,7 +62,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 #define LATCH_HIGH                  GPIO_SetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
-#define LATCH_LOW					GPIO_ResetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_LOW                   GPIO_ResetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum rgb_colour {
@@ -74,6 +73,9 @@ typedef enum rgb_colour {
 
 
 struct led_rgb leds[LED_COUNT];
+
+/* values for LED brightness [%] */
+static const uint16_t brightness_value[] = {100, 75, 50, 30, 15, 7, 2, 0};
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -511,25 +513,20 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
 
 /*******************************************************************************
   * @function   led_driver_step_brightness
-  * @brief      Decrease LED brightness by 10% each step (each function call).
+  * @brief      Decrease LED brightness by step (each function call).
   * @param      None.
   * @retval     None.
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
     struct led_rgb *rgb_leds = leds;
+    static uint8_t step = 1;
 
-    if (rgb_leds->brightness <= MIN_LED_BRIGHTNESS)
-        rgb_leds->brightness = MAX_LED_BRIGHTNESS + LED_BRIGHTNESS_STEP;
-    else
-    {
-        if ((rgb_leds->brightness > MIN_LED_BRIGHTNESS) &&
-                (rgb_leds->brightness < LED_BRIGHTNESS_STEP))
-                rgb_leds->brightness = LED_BRIGHTNESS_STEP;
-    }
-
-    rgb_leds->brightness -= LED_BRIGHTNESS_STEP;
+    rgb_leds->brightness = brightness_value[step++];
     led_driver_pwm_set_brightness(rgb_leds->brightness);
+
+    if (step >= MAX_BRIGHTNESS_STEPS)
+        step = 0;
 }
 
 /*******************************************************************************
