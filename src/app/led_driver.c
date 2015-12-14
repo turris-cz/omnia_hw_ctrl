@@ -13,25 +13,25 @@
 #include "delay.h"
 
 /* Private define ------------------------------------------------------------*/
-#define LED_SPI						SPI1
+#define LED_SPI                     SPI1
 
-#define LED_SPI_MOSI_PIN			GPIO_Pin_7
-#define LED_SPI_MOSI_PIN_PORT		GPIOA
+#define LED_SPI_MOSI_PIN            GPIO_Pin_7
+#define LED_SPI_MOSI_PIN_PORT       GPIOA
 #define LED_SPI_MOSI_PIN_CLOCK      RCC_AHBPeriph_GPIOA
 #define LED_SPI_MOSI_AF             GPIO_AF_0
 #define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
 
-#define LED_SPI_SCK_PIN				GPIO_Pin_5
-#define LED_SPI_SCK_PIN_PORT		GPIOA
+#define LED_SPI_SCK_PIN             GPIO_Pin_5
+#define LED_SPI_SCK_PIN_PORT        GPIOA
 #define LED_SPI_SCK_PIN_CLOCK       RCC_AHBPeriph_GPIOA
 #define LED_SPI_SCK_AF              GPIO_AF_0
 #define LED_SPI_SCK_SOURCE          GPIO_PinSource5
 
-#define LED_SPI_SS_PIN				GPIO_Pin_4
-#define LED_SPI_SS_PIN_PORT 		GPIOA
+#define LED_SPI_SS_PIN              GPIO_Pin_4
+#define LED_SPI_SS_PIN_PORT         GPIOA
 #define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
-#define COLOUR_LEVELS				16
+#define COLOUR_LEVELS               16
 #define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8

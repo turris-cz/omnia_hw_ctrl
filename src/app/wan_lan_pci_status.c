@@ -132,9 +132,8 @@ inline uint8_t wan_sfp_connector_detection(void)
   *****************************************************************************/
 inline uint8_t wan_sfp_fault_detection(void)
 {
-    /* inverted due to the HW connection
-    HW connection: 1 = SFP no TX fault, 0 = SFP TX fault */
-    return (!(GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN)));
+    /* HW connection: 0 = SFP no TX fault, 1 = SFP TX fault */
+    return (GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN));
 }
 
 /*******************************************************************************
@@ -145,9 +144,8 @@ inline uint8_t wan_sfp_fault_detection(void)
   *****************************************************************************/
 inline uint8_t wan_sfp_lost_detection(void)
 {
-    /* inverted due to the HW connection
-    HW connection: 1 = no SFP lost, 0 = SFP lost */
-    return (!(GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN)));
+    /* HW connection: 0 = no SFP lost (normal operation), 1 = SFP lost */
+    return (GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN));
 }
 
 /*******************************************************************************
@@ -160,25 +158,24 @@ void wan_sfp_set_tx_status(FunctionalState sfp_status)
 {
     if (sfp_status == ENABLE)
     {
-        GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+        GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
     }
     else
     {
-        GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+        GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
     }
 }
 
 /*******************************************************************************
-  * @function   wan_sfp_lost_detection
+  * @function   wan_sfp_get_tx_status
   * @brief      Detect a state of SFP transmitter.
   * @param      None.
   * @retval     1 - SFP TX disable, 0 - SFP TX enable.
   *****************************************************************************/
 inline uint8_t wan_sfp_get_tx_status(void)
 {
-    /* inverted due to the HW connection
-    HW connection: 1 = TX enable, 0 = TX disable */
-    return (!(GPIO_ReadInputDataBit(SFP_DIS_PIN_PORT, SFP_DIS_PIN)));
+    /* HW connection: 0 = TX enable, 1 = TX disable */
+    return (GPIO_ReadInputDataBit(SFP_DIS_PIN_PORT, SFP_DIS_PIN));
 }
 
 /*******************************************************************************
