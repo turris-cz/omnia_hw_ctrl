@@ -129,7 +129,5 @@ inline uint8_t msata_pci_card_detection(void)
   *****************************************************************************/
 inline uint8_t msata_pci_type_card_detection(void)
 {
-    /* inverted due to the HW connection
-    HW connection: 1 = miniPCIE inserted, 0 = mSATA card inserted */
-    return (!(GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN)));
+    return GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
 }
