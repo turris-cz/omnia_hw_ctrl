@@ -128,6 +128,28 @@ enum VSET_values {
 };
 
 
+/*******************************************************************************
+  * @function   power_control_prog4v5_config
+  * @brief      Configuration for programming possibility of 4V5 power source.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void power_control_prog4v5_config(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /* pin config for programming */
+    RCC_AHBPeriphClockCmd(PRG_4V5_PIN_PERIPH_CLOCK, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = PRG_4V5_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(PRG_4V5_PIN_PORT, &GPIO_InitStructure);
+
+    PRG_PIN_LOW;
+}
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -137,7 +159,7 @@ enum VSET_values {
   *****************************************************************************/
 void power_control_io_config(void)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
 
     /* GPIO Periph clock enable */
     RCC_AHBPeriphClockCmd(RES_RAM_PIN_PERIPH_CLOCK | ENABLE_5V_PIN_PERIPH_CLOCK |
@@ -265,8 +287,10 @@ void power_control_io_config(void)
     GPIO_InitStructure.GPIO_Pin = LED_BRT_PIN;
     GPIO_Init(LED_BRT_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); //dont control this !
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN);
+
+    power_control_prog4v5_config();
 }
 
 /*******************************************************************************
@@ -460,9 +484,9 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
-//    value = power_control_start_regulator(REG_4V5);
-//    if (value != NO_ERROR)
-//        return value;
+    value = power_control_start_regulator(REG_4V5);
+    if (value != NO_ERROR)
+        return value;
 
     value = power_control_start_regulator(REG_3V3);
     if (value != NO_ERROR)
@@ -678,29 +702,6 @@ void power_control_set_power_led(void)
 
     led_driver_set_colour(POWER_LED, WHITE_COLOUR);
     rgb_leds[POWER_LED].led_state = LED_ON;
-}
-
-/*******************************************************************************
-  * @function   power_control_prog4v5_config
-  * @brief      Configuration for programming possibility of 4V5 power source.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_prog4v5_config(void)
-{
-    GPIO_InitTypeDef  GPIO_InitStructure;
-
-    /* pin config for programming */
-    RCC_AHBPeriphClockCmd(PRG_4V5_PIN_PERIPH_CLOCK, ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = PRG_4V5_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(PRG_4V5_PIN_PORT, &GPIO_InitStructure);
-
-    PRG_PIN_LOW;
 }
 
 /*******************************************************************************

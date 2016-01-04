@@ -109,7 +109,13 @@ static ret_value_t power_on(void)
     power_control_set_startup_condition();
     power_control_disable_regulators();
     delay(100);
+
     error = power_control_enable_regulators();
+    power_control_set_voltage(VOLTAGE_33);
+    GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+    delay(10);
+    error = power_control_start_regulator(REG_4V5);
+
 
     switch(error)
     {

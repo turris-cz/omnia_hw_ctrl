@@ -290,14 +290,6 @@ void power_control_usb_timeout_enable(void);
 void power_control_usb_timeout_disable(void);
 
 /*******************************************************************************
-  * @function   power_control_prog4v5_config
-  * @brief      Configuration for programming possibility of 4V5 power source.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_prog4v5_config(void);
-
-/*******************************************************************************
   * @function   power_control_set_voltage
   * @brief      Set required voltage to the user regulator.
   * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
