@@ -285,14 +285,22 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, slave_i2c_states_
     }
 
     if (control_byte & SFP_DIS_MASK)
+    {
         wan_sfp_set_tx_status(DISABLE);
+    }
     else
+    {
         wan_sfp_set_tx_status(ENABLE);
+    }
 
     if(wan_sfp_get_tx_status())
+    {
         i2c_control->status_word |= SFP_DIS_STSBIT;
+    }
     else
+    {
         i2c_control->status_word &= (~SFP_DIS_STSBIT);
+    }
 
     if (control_byte & USB30_PWRON_MASK)
     {
@@ -527,7 +535,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
 
             case CMD_USER_VOLTAGE:
             {
-                //TODO - add function for setting up user voltage
+                power_control_set_voltage(i2c_state->rx_buf[1]);
 
                 DBG("user voltage: ");
                 DBG((const char*)(i2c_state->rx_buf + 1));

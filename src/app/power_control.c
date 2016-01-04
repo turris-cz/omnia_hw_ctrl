@@ -484,9 +484,9 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
-    value = power_control_start_regulator(REG_4V5);
-    if (value != NO_ERROR)
-        return value;
+//    value = power_control_start_regulator(REG_4V5);
+//    if (value != NO_ERROR)
+//        return value;
 
     value = power_control_start_regulator(REG_3V3);
     if (value != NO_ERROR)
@@ -834,17 +834,61 @@ static void power_control_set_voltage51(void)
 }
 
 /*******************************************************************************
-  * @function   power_control_set_voltage
-  * @brief      Set required voltage to the user regulator.
-  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @function   power_control_set_voltage45
+  * @brief      Set 4.5V voltage to the user regulator.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(uint16_t voltage)
+static void power_control_set_voltage45(void)
+{
+     __disable_irq();
+
+     /* start condition */
+     SET_LOGIC_HIGH();
+
+     /* chip select */
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+
+     /* register address */
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+
+     /* datafield - 0xF8 */
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+     SET_LOGIC_HIGH();
+
+     SET_LOGIC_HIGH();
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+     SET_LOGIC_LOW();
+
+     /* stop condition */
+     SET_LOGIC_HIGH();
+
+     __enable_irq();
+     delay(1); /* delay at least 10us before the next sequence */
+}
+
+/*******************************************************************************
+  * @function   power_control_set_voltage
+  * @brief      Set required voltage to the user regulator.
+  * @param      voltage: enum value for desired voltage.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_set_voltage(voltage_value_t voltage)
 {
     switch (voltage)
     {
         case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */
         case VOLTAGE_36: power_control_set_voltage36(); break; /* 3.63V */
+        case VOLTAGE_45: power_control_set_voltage45(); break; /* 4.5V */
         case VOLTAGE_51: power_control_set_voltage51(); break; /* 5.125V */
         default:
             break;

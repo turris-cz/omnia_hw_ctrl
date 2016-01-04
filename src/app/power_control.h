@@ -136,11 +136,12 @@
 #define LED_BRT_PIN_PORT                    GPIOB
 #define LED_BRT_PIN                         GPIO_Pin_15
 
-enum voltage_values {
-    VOLTAGE_33 = 33,
-    VOLTAGE_36 = 36,
-    VOLTAGE_51 = 51,
-};
+typedef enum voltages {
+    VOLTAGE_33 = 1,
+    VOLTAGE_36 = 2,
+    VOLTAGE_45 = 3,
+    VOLTAGE_51 = 4,
+}voltage_value_t;
 
 typedef enum usb_states {
     USB_OFF = 0,
@@ -292,10 +293,10 @@ void power_control_usb_timeout_disable(void);
 /*******************************************************************************
   * @function   power_control_set_voltage
   * @brief      Set required voltage to the user regulator.
-  * @param      voltage: voltage value to be set (e.g. 3.3V => voltage = 33).
+  * @param      voltage: enum value for desired voltage.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(uint16_t voltage);
+void power_control_set_voltage(voltage_value_t voltage);
 
 #endif // POWER_CONTROL_H
 
