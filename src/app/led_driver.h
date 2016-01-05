@@ -21,6 +21,7 @@ enum colours {
     RED_COLOUR          = 0xFF0000,
     GREEN_COLOUR        = 0x00FF00,
     BLUE_COLOUR         = 0x0000FF,
+    BLACK_COLOUR        = 0x000000,
 };
 
 typedef enum led_modes {
@@ -64,23 +65,18 @@ enum led_names {
 };
 
 
-struct led_rgb_default {
-    uint8_t blue; //[0..255]
+typedef struct led_rgb_data {
+    uint8_t blue; /* [0..255] */
     uint8_t green;
     uint8_t red;
-};
-
-struct led_rgb_user {
-    uint8_t blue; //[0..255]
-    uint8_t green;
-    uint8_t red;
-};
+}led_rgb_data_t;
 
 struct led_rgb {
-    struct led_rgb_default  led_rgb_data;       // colour data
-    struct led_rgb_user     led_rgb_user_data;  // user data
-    led_state_t             led_state;          // LED ON/OFF
-    led_mode_t              led_mode;           // default / user mode
+    led_rgb_data_t          led_rgb_default;    /* colour data */
+    led_rgb_data_t          led_rgb_user;       /* user data */
+    led_state_t             led_state_default;  /* LED ON/OFF default mode */
+    led_state_t             led_state_user;     /* LED ON/OFF user mode */
+    led_mode_t              led_mode;           /* default / user mode */
     uint16_t                brightness;
 };
 

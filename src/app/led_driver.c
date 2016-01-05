@@ -32,7 +32,7 @@
 #define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
 #define COLOUR_LEVELS               16
-#define COLOUR_DECIMATION           4 // 2exp(4) = 16 colour levels
+#define COLOUR_DECIMATION           4 /* 2exp(4) = 16 colour levels */
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8
 
@@ -46,15 +46,15 @@
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
-#define PWM_TIM_PERIODE             0xFF // period   (0xFF => 8bit)
-#define PWM_TIM_PRESCALE            0xFF // prescaler
+#define PWM_TIM_PERIODE             0xFF /* period   (0xFF => 8bit) */
+#define PWM_TIM_PRESCALE            0xFF /* prescaler */
 
-//--------------------------------------------------------------
+/*--------------------------------------------------------------
 // PWM Setting (Polarity)
 //
 // Hi => Hi-Impuls
 // Lo => Lo-Impuls
-//--------------------------------------------------------------
+//-------------------------------------------------------------*/
 //#define  PWM_TIM_POLARITY           TIM_OCPolarity_High
 #define PWM_TIM_POLARITY            TIM_OCPolarity_Low
 
@@ -68,7 +68,8 @@
 typedef enum rgb_colour {
     RED     = 0,
     GREEN   = 1,
-    BLUE    = 2
+    BLUE    = 2,
+    WHITE   = -1,
 }rgb_colour_t;
 
 
@@ -159,7 +160,7 @@ static void led_driver_timer_config(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    // Clock enable
+    /* Clock enable */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
     /* Time base configuration */
@@ -200,15 +201,15 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
         {
             if (rgb_leds->led_mode == LED_DEFAULT_MODE)
             {
-                rgb_leds->led_rgb_data.red = colour >> 16;
-                rgb_leds->led_rgb_data.green = (colour >> 8) & 0xFF;
-                rgb_leds->led_rgb_data.blue = colour & 0xFF;
+                rgb_leds->led_rgb_default.red = colour >> 16;
+                rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
+                rgb_leds->led_rgb_default.blue = colour & 0xFF;
             }
             else /* LED_USER_MODE */
             {
-                rgb_leds->led_rgb_user_data.red = colour >> 16;
-                rgb_leds->led_rgb_user_data.green = (colour >> 8) & 0xFF;
-                rgb_leds->led_rgb_user_data.blue = colour & 0xFF;
+                rgb_leds->led_rgb_user.red = colour >> 16;
+                rgb_leds->led_rgb_user.green = (colour >> 8) & 0xFF;
+                rgb_leds->led_rgb_user.blue = colour & 0xFF;
             }
         }
     }
@@ -218,15 +219,15 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
 
         if (rgb_leds->led_mode == LED_DEFAULT_MODE)
         {
-            rgb_leds->led_rgb_data.red = colour >> 16;
-            rgb_leds->led_rgb_data.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_data.blue = colour & 0xFF;
+            rgb_leds->led_rgb_default.red = colour >> 16;
+            rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_default.blue = colour & 0xFF;
         }
         else /* LED_USER_MODE */
         {
-            rgb_leds->led_rgb_user_data.red = colour >> 16;
-            rgb_leds->led_rgb_user_data.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_user_data.blue = colour & 0xFF;
+            rgb_leds->led_rgb_user.red = colour >> 16;
+            rgb_leds->led_rgb_user.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_user.blue = colour & 0xFF;
         }
     }
 }
@@ -240,7 +241,7 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
 static void led_driver_send_data16b(const uint16_t data)
 {
     SPI_I2S_SendData16(LED_SPI, data);
-    //wait for flag
+    /* wait for flag */
     while(SPI_I2S_GetFlagStatus(LED_SPI, SPI_I2S_FLAG_BSY));
 }
 
@@ -263,18 +264,21 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_state == LED_ON)
+                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                    if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_data.red > current_colour_level)
+                        if (rgb_leds->led_rgb_default.red > current_colour_level)
                         {
-                            data |= 1 << (2 + idx); //shift by 2 - due to the HW connection
+                            data |= 1 << (2 + idx); /* shift by 2 - due to the HW connection */
                         }
                     }
-                    else /* LED_USER_MODE */
+                }
+                else /* LED_USER_MODE */
+                {
+                    if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user_data.red > current_colour_level)
+                        if (rgb_leds->led_rgb_user.red > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -287,18 +291,21 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_state == LED_ON)
+                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                    if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_data.green > current_colour_level)
+                        if (rgb_leds->led_rgb_default.green > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
                     }
-                    else /* LED_USER_MODE */
+                }
+                else /* LED_USER_MODE */
+                {
+                    if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user_data.green > current_colour_level)
+                        if (rgb_leds->led_rgb_user.green > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -311,18 +318,21 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_state == LED_ON)
+                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                    if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_data.blue > current_colour_level)
+                        if (rgb_leds->led_rgb_default.blue > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
                     }
-                    else /* LED_USER_MODE */
+                }
+                else /* LED_USER_MODE */
+                {
+                    if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user_data.blue > current_colour_level)
+                        if (rgb_leds->led_rgb_user.blue > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -358,14 +368,15 @@ void led_driver_send_frame(void)
     data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
     led_driver_send_data16b(data);
 
-    //latch enable pulse
+     /* latch enable pulse */
     LATCH_HIGH;
     __NOP();
     LATCH_LOW;
 
     level++;
 
-    if (level >= COLOUR_LEVELS)//restart cycle - all levels were sent to driver
+    /* restart cycle - all levels were sent to driver */
+    if (level >= COLOUR_LEVELS)
         level = 0;
 }
 
@@ -379,7 +390,7 @@ static void led_driver_pwm_io_config(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    // Clock Enable
+    /* Clock Enable */
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
@@ -404,7 +415,7 @@ static void led_driver_pwm_timer_config(void)
     TIM_OCInitTypeDef  TIM_OCInitStructure;
     uint16_t init_value;
 
-    // Clock enable
+    /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
 
     TIM_TimeBaseStructure.TIM_Period = PWM_TIM_PERIODE;
@@ -422,7 +433,7 @@ static void led_driver_pwm_timer_config(void)
     TIM_OC2Init(PWM_TIMER, &TIM_OCInitStructure);
     TIM_OC2PreloadConfig(PWM_TIMER, TIM_OCPreload_Enable);
 
-    // Timer enable
+    /* Timer enable */
     TIM_ARRPreloadConfig(PWM_TIMER, ENABLE);
     TIM_Cmd(PWM_TIMER, ENABLE);
     TIM_CtrlPWMOutputs(PWM_TIMER, ENABLE);
@@ -451,21 +462,21 @@ static void led_driver_init_led(void)
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
 
-    /* user mode - all LEDs white and ON*/
+    /* user mode - all LEDs white and ON */
     for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
     {
-        rgb_leds->led_state = LED_ON;
+        rgb_leds->led_state_user = LED_ON;
         rgb_leds->led_mode = LED_USER_MODE;
     }
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF); //all LED colour set to white
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs black */
 
     /* default mode - all LEDS OFF and white */
     for (idx = 0, rgb_leds = leds; idx < LED_COUNT; idx++, rgb_leds++)
     {
-        rgb_leds->led_state = LED_OFF;
+        rgb_leds->led_state_default = LED_OFF;
         rgb_leds->led_mode = LED_DEFAULT_MODE;
     }
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF);
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs white */
 }
 
 /*******************************************************************************
@@ -479,15 +490,11 @@ void led_driver_config(void)
     led_driver_io_config();
     led_driver_spi_config();
 
-    led_driver_init_led(); //set mode and state
+    led_driver_init_led(); /* set mode and state - default after reset */
 
     led_driver_pwm_config();
-    led_driver_pwm_set_brightness(100); //100% brightness after reset
+    led_driver_pwm_set_brightness(100); /* 100% brightness after reset */
 
-    led_driver_set_led_state(USER_LED1, LED_OFF); //TODO: enable user led ?
-    led_driver_set_led_state(USER_LED2, LED_OFF);
-    led_driver_set_led_mode(USER_LED1, LED_USER_MODE);
-    led_driver_set_led_mode(USER_LED2, LED_USER_MODE);
     led_driver_timer_config();
 }
 
@@ -541,14 +548,14 @@ void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode)
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
 
-    if (led_index >= LED_COUNT) //all LED
+    if (led_index >= LED_COUNT)  /* all LED */
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
             rgb_leds->led_mode = led_mode;
         }
     }
-    else // or individual LED
+    else /* or individual LED */
     {
         rgb_leds += led_index;
         rgb_leds->led_mode = led_mode;
@@ -567,17 +574,32 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
 
-    if (led_index >= LED_COUNT) //all LED
+    if (led_index >= LED_COUNT) /* all LED */
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            rgb_leds->led_state = led_state;
+            if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+            {
+                rgb_leds->led_state_default = led_state;
+            }
+            else
+            {
+                rgb_leds->led_state_user = led_state;
+            }
         }
     }
-    else // or individual LED
+    else /* or individual LED */
     {
         rgb_leds += led_index;
-        rgb_leds->led_state = led_state;
+
+        if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+            {
+                rgb_leds->led_state_default = led_state;
+            }
+            else
+            {
+                rgb_leds->led_state_user = led_state;
+            }
     }
 }
 
@@ -625,7 +647,7 @@ void led_driver_knight_rider_colour_effect(void)
 
     led_driver_set_led_state(LED_COUNT, LED_OFF);
 
-    for (colour = -1; colour < BLUE + 1; colour++)
+    for (colour = WHITE; colour < BLUE + 1; colour++)
     {
         switch (colour)
         {
@@ -652,7 +674,7 @@ void led_driver_double_knight_rider_effect(void)
     led_driver_set_led_state(LED_COUNT, LED_OFF);
     led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
-    for (colour = -1; colour < BLUE + 1; colour++)
+    for (colour = WHITE; colour < BLUE + 1; colour++)
     {
         switch (colour)
         {
