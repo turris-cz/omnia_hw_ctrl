@@ -195,11 +195,11 @@ void wan_led_activity(void)
         {
             if (wan_sfp_lost_detection())
             {
-                rgb_leds[WAN_LED].led_state = LED_OFF;
+                rgb_leds[WAN_LED].led_state_default = LED_OFF;
             }
             else
             {
-                rgb_leds[WAN_LED].led_state = LED_ON;
+                rgb_leds[WAN_LED].led_state_default = LED_ON;
             }
         }
         else
@@ -208,11 +208,11 @@ void wan_led_activity(void)
 
             if (led0_status == 0)
             {
-                rgb_leds[WAN_LED].led_state = LED_ON;
+                rgb_leds[WAN_LED].led_state_default = LED_ON;
             }
             else
             {
-                rgb_leds[WAN_LED].led_state = LED_OFF;
+                rgb_leds[WAN_LED].led_state_default = LED_OFF;
             }
         }
     }
@@ -236,11 +236,11 @@ void pci_led_activity(void)
     {
         if(pcie_led2 == 0)
         {
-            rgb_leds[PCI2_LED].led_state = LED_ON;
+            rgb_leds[PCI2_LED].led_state_default = LED_ON;
         }
         else
         {
-            rgb_leds[PCI2_LED].led_state = LED_OFF;
+            rgb_leds[PCI2_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -248,11 +248,11 @@ void pci_led_activity(void)
     {
         if (pcie_led1 == 0)
         {
-            rgb_leds[PCI1_LED].led_state = LED_ON;
+            rgb_leds[PCI1_LED].led_state_default = LED_ON;
         }
         else
         {
-            rgb_leds[PCI1_LED].led_state = LED_OFF;
+            rgb_leds[PCI1_LED].led_state_default = LED_OFF;
         }
     }
 }
@@ -276,27 +276,27 @@ void lan_led_activity(void)
         {
             /* PORT 0 */
             if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN0_LED].led_state = LED_ON;
+                rgb_leds[LAN0_LED].led_state_default = LED_ON;
             else
-                rgb_leds[LAN0_LED].led_state = LED_OFF;
+                rgb_leds[LAN0_LED].led_state_default = LED_OFF;
         }
 
         if (rgb_leds[LAN1_LED].led_mode == LED_DEFAULT_MODE)
         {
              /* PORT 1 */
             if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN1_LED].led_state = LED_ON;
+                rgb_leds[LAN1_LED].led_state_default = LED_ON;
             else
-                rgb_leds[LAN1_LED].led_state = LED_OFF;
+                rgb_leds[LAN1_LED].led_state_default = LED_OFF;
         }
     }
     else
     {
         if (rgb_leds[LAN0_LED].led_mode == LED_DEFAULT_MODE)
-            rgb_leds[LAN0_LED].led_state = LED_OFF;
+            rgb_leds[LAN0_LED].led_state_default = LED_OFF;
 
         if (rgb_leds[LAN1_LED].led_mode == LED_DEFAULT_MODE)
-            rgb_leds[LAN1_LED].led_state = LED_OFF;
+            rgb_leds[LAN1_LED].led_state_default = LED_OFF;
     }
 
     if ((lan_led & LAN_R1_MASK) == 0)
@@ -305,27 +305,27 @@ void lan_led_activity(void)
         {
             /* PORT 2 */
             if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN2_LED].led_state = LED_ON;
+                rgb_leds[LAN2_LED].led_state_default = LED_ON;
             else
-                rgb_leds[LAN2_LED].led_state = LED_OFF;
+                rgb_leds[LAN2_LED].led_state_default = LED_OFF;
         }
 
         if (rgb_leds[LAN3_LED].led_mode == LED_DEFAULT_MODE)
         {
             /* PORT 3 */
             if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN3_LED].led_state = LED_ON;
+                rgb_leds[LAN3_LED].led_state_default = LED_ON;
             else
-                rgb_leds[LAN3_LED].led_state = LED_OFF;
+                rgb_leds[LAN3_LED].led_state_default = LED_OFF;
         }
     }
     else
     {
         if (rgb_leds[LAN2_LED].led_mode == LED_DEFAULT_MODE)
-            rgb_leds[LAN2_LED].led_state = LED_OFF;
+            rgb_leds[LAN2_LED].led_state_default = LED_OFF;
 
         if (rgb_leds[LAN3_LED].led_mode == LED_DEFAULT_MODE)
-            rgb_leds[LAN3_LED].led_state = LED_OFF;
+            rgb_leds[LAN3_LED].led_state_default = LED_OFF;
     }
 
     if ((lan_led & LAN_R2_MASK) == 0)
@@ -334,14 +334,14 @@ void lan_led_activity(void)
         {
             /* PORT 4 */
             if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN4_LED].led_state = LED_ON;
+                rgb_leds[LAN4_LED].led_state_default = LED_ON;
             else
-                rgb_leds[LAN4_LED].led_state = LED_OFF;
+                rgb_leds[LAN4_LED].led_state_default = LED_OFF;
         }
     }
     else
     {
         if (rgb_leds[LAN4_LED].led_mode == LED_DEFAULT_MODE)
-            rgb_leds[LAN4_LED].led_state = LED_OFF;
+            rgb_leds[LAN4_LED].led_state_default = LED_OFF;
     }
 }
