@@ -16,6 +16,7 @@
 #include "wan_lan_pci_status.h"
 #include "msata_pci.h"
 #include "debug_serial.h"
+#include "slave_i2c_device.h"
 
 enum input_mask {
     MAN_RES_MASK                    = 0x0001,
@@ -327,11 +328,12 @@ void debounce_check_inputs(void)
     static uint16_t last_debounce_state, last_button_debounce_state;
     struct input_sig *input_state = &debounce_input_signal;
     struct button_def *button = &button_front;
+    struct st_i2c_status *i2c_control = &i2c_status;
 
     /* PB0-14 ----------------------------------------------------------------
      * No debounce is used now (we need a reaction immediately)
      * If debounce required, set MAX_INPUT_STATES > 1.
-     * Recommendation: move function  debounce_sample_input() to debounce_input_timer_handler()
+     * And recommendation: move function  debounce_sample_input() to debounce_input_timer_handler()
      */
 
     debounce_sample_input();
@@ -366,7 +368,6 @@ void debounce_check_inputs(void)
         input_state->man_res = 1;
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
     }
 
     if (port_changed & SYSRES_OUT_MASK)
@@ -379,7 +380,7 @@ void debounce_check_inputs(void)
         /* no reaction necessary */
     }
 
-    // reaction: follow MRES signal
+    /* reaction: follow MRES signal */
     if (port_changed & MRES_MASK)
         GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
     else
@@ -391,8 +392,12 @@ void debounce_check_inputs(void)
          (port_changed & PG_1V2_MASK))
         input_state->pg = 1;
 
-    if (port_changed & PG_4V5_MASK)
-        input_state->pg_4v5 = 1;
+    /* PG signal from 4.5V user controlled regulator */
+    if(i2c_control->status_word & ENABLE_4V5_STSBIT)
+    {
+        if (port_changed & PG_4V5_MASK)
+            input_state->pg_4v5 = 1;
+    }
 
     if (port_changed & USB30_OVC_MASK)
         input_state->usb30_ovc = 1;

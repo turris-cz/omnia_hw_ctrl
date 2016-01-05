@@ -205,14 +205,11 @@ static ret_value_t input_manager(void)
     }
 
     /* PG signal from 4.5V user controlled regulator */
-    if(i2c_control->status_word & ENABLE_4V5_STSBIT)
+    if(input_state->pg_4v5)
     {
-        if(input_state->pg_4v5)
-        {
-            DBG("PG from 4V5\r\n");
-            value = GO_TO_HARD_RESET;
-            input_state->pg_4v5 = 0;
-        }
+        DBG("PG from 4V5\r\n");
+        value = GO_TO_HARD_RESET;
+        input_state->pg_4v5 = 0;
     }
 
     /* USB30 overcurrent */
