@@ -197,21 +197,6 @@ void TIM17_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles EXTI4_15 global interrupt request.
-  * @param  None
-  * @retval None
-  */
-void EXTI4_15_IRQHandler(void)
-{
-    if(EXTI_GetITStatus(MSATALED_PIN_EXTILINE) != RESET)
-    {
-        msata_pci_activity_handler();
-        /* Clear the EXTI line pending bit */
-        EXTI_ClearITPendingBit(MSATALED_PIN_EXTILINE);
-    }
-}
-
-/**
   * @brief  This function handles I2C global interrupt request.
   * @param  None
   * @retval None

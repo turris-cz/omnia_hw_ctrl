@@ -40,36 +40,6 @@ static void msata_pci_io_config(void)
 }
 
 /*******************************************************************************
-  * @function   msata_pci_exti_config
-  * @brief      EXTI configuration for PCIe and mSATA indication signals.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void msata_pci_exti_config(void)
-{
-    EXTI_InitTypeDef EXTI_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* Enable SYSCFG clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-    SYSCFG_EXTILineConfig(MSATALED_PIN_EXTIPORT, MSATALED_PIN_EXTIPINSOURCE);
-
-    /* configure all ext. interrupt on rising and falling edge */
-    EXTI_InitStructure.EXTI_Line = MSATALED_PIN_EXTILINE;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    /* Enable and set EXTI Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI4_15_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-/*******************************************************************************
   * @function   msata_pci_indication_config
   * @brief      Main configuration function for mSATA and PCIe status indication.
   * @param      None.
@@ -78,17 +48,15 @@ static void msata_pci_exti_config(void)
 void msata_pci_indication_config(void)
 {
     msata_pci_io_config();
-    msata_pci_exti_config();
 }
 
 /*******************************************************************************
-  * @function   msata_pci_activity_handler
+  * @function   msata_pci_activity
   * @brief      Toggle LED according to the activity of the connected card.
-  *             Called in EXTI interrupt handler.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void msata_pci_activity_handler(void)
+void msata_pci_activity(void)
 {
     uint8_t msata_pci_activity;
     struct led_rgb *rgb_leds = leds;
@@ -99,11 +67,11 @@ void msata_pci_activity_handler(void)
     {
         if (msata_pci_activity)
         {
-            rgb_leds[MSATA_PCI_LED].led_state = LED_OFF;
+            rgb_leds[MSATA_PCI_LED].led_state_default = LED_OFF;
         }
         else
         {
-            rgb_leds[MSATA_PCI_LED].led_state = LED_ON;
+            rgb_leds[MSATA_PCI_LED].led_state_default = LED_ON;
         }
     }
 }

@@ -40,13 +40,12 @@
 void msata_pci_indication_config(void);
 
 /*******************************************************************************
-  * @function   msata_pci_activity_handler
+  * @function   msata_pci_activity
   * @brief      Toggle LED according to the activity of the connected card.
-  *             Called in EXTI interrupt handler.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void msata_pci_activity_handler(void);
+void msata_pci_activity(void);
 
 /*******************************************************************************
   * @function   msata_pci_card_detection

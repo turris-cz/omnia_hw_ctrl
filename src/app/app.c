@@ -112,9 +112,6 @@ static ret_value_t power_on(void)
 
     error = power_control_enable_regulators();
 
-    power_control_start_regulator(REG_4V5);
-    power_control_set_voltage(VOLTAGE_36);
-
     switch(error)
     {
         case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
@@ -344,6 +341,7 @@ static ret_value_t led_manager(void)
     wan_led_activity();
     lan_led_activity();
     pci_led_activity();
+    msata_pci_activity();
 
     return OK;
 }
