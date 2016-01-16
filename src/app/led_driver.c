@@ -76,7 +76,7 @@ typedef enum rgb_colour {
 struct led_rgb leds[LED_COUNT];
 
 /* values for LED brightness [%] */
-static const uint16_t brightness_value[] = {100, 75, 50, 30, 15, 7, 2, 0};
+static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -493,7 +493,7 @@ void led_driver_config(void)
     led_driver_init_led(); /* set mode and state - default after reset */
 
     led_driver_pwm_config();
-    led_driver_pwm_set_brightness(100); /* 100% brightness after reset */
+    led_driver_pwm_set_brightness(1); /* 100% brightness after reset */
 
     led_driver_timer_config();
 }

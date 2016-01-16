@@ -391,7 +391,6 @@ void app_mcu_cyclic(void)
     {
         case POWER_ON:
         {
-            DBG("POWER_ON\r\n");
             val = power_on();
 
             if(val == OK)
@@ -403,7 +402,6 @@ void app_mcu_cyclic(void)
 
         case LIGHT_RESET:
         {
-            DBG("LIGHT_RESET\r\n");
             val = light_reset();
 
             if (val == OK)
@@ -415,7 +413,6 @@ void app_mcu_cyclic(void)
 
         case HARD_RESET:
         {
-            DBG("HARD_RESET\r\n");
             next_state = POWER_ON;
         }
         break;
@@ -425,7 +422,6 @@ void app_mcu_cyclic(void)
 
         case LOAD_SETTINGS:
         {
-            DBG("LOAD_SETTINGS\r\n");
             load_settings();
 
             next_state = LED_EFFECT;
@@ -449,7 +445,6 @@ void app_mcu_cyclic(void)
 
         case ERROR_STATE:
         {
-            DBG("ERROR_STATE\r\n");
             error_manager(val);
             error_counter++;
 
@@ -467,7 +462,6 @@ void app_mcu_cyclic(void)
 
         case INPUT_MANAGER:
         {
-            DBG("INPUT_MANAGER\r\n");
             val = input_manager();
 
             switch(val)
@@ -481,7 +475,6 @@ void app_mcu_cyclic(void)
 
         case I2C_MANAGER:
         {
-            DBG("I2C_MANAGER\r\n");
             val = ic2_manager();
 
             switch(val)
@@ -497,7 +490,6 @@ void app_mcu_cyclic(void)
 
         case LED_MANAGER:
         {
-            DBG("LED_MANAGER\r\n");
             led_manager();
             next_state = INPUT_MANAGER;
         }

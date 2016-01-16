@@ -33,6 +33,8 @@
 #define I2C_SLAVE_ADDRESS               0x55  /* address in linux: 0x2A */
 
 #define CMD_INDEX                       0
+#define ONE_BYTE_EXPECTED               1
+#define TWO_BYTES_EXPECTED              2
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends back status word */
@@ -122,7 +124,10 @@ static void slave_i2c_periph_config(void)
     I2C_Init(I2C_PERIPH_NAME, &I2C_InitStructure);
 
     /* Address match and receive interrupt */
-    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_STOPI, ENABLE);
+    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, ENABLE);
+
+    I2C_SlaveByteControlCmd(I2C_PERIPH_NAME, ENABLE);
+    I2C_ReloadCmd(I2C_PERIPH_NAME, ENABLE);
 
     /* I2C Peripheral Enable */
     I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
@@ -189,8 +194,6 @@ static void slave_i2c_clear_buffers(void)
         i2c_state->tx_buf[i] = 0;
     }
 
-    i2c_state->data_rx_complete = 0;
-    i2c_state->data_tx_complete = 0;
     i2c_state->rx_data_ctr = 0;
     i2c_state->tx_data_ctr = 0;
 
@@ -246,7 +249,7 @@ void slave_i2c_config(void)
 {
     slave_i2c_io_config();
     slave_i2c_periph_config();
-    slave_i2c_timeout_config();
+  //  slave_i2c_timeout_config();
 }
 
 /*******************************************************************************
@@ -361,81 +364,124 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, slave_i2c_states_
 void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
+    static uint16_t direction;
 
-    /* Test on I2C address match interrupt */
+    /* address match interrupt */
     if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
     {
         /* Clear IT pending bit */
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
 
-        slave_i2c_timeout_enable();
-        DBG("address\r\n");
-    }
-
-    /* transmit data */
-    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
-    {
-        /* disable TX interrupt when all bytes are sent */
-        if (i2c_state->tx_data_ctr >= MAX_TX_BUFFER_SIZE)
-            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI, DISABLE);
-        else
-            I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-    }
-
-    /* receive data */
-    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_RXNE) == SET)
-    {
-        i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
-
-        /* first byte received - if master wants to read the status word */
-        if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+        /* Check if transfer direction is read (slave transmitter) */
+        if ((I2C_PERIPH_NAME->ISR & I2C_ISR_DIR) == I2C_ISR_DIR)
         {
-            i2c_state->data_tx_complete = 1;
-            DBG("\r\nTX command: ");
+            direction = I2C_Direction_Transmitter;
+            DBG("Slave transmitter\r\n");
+        }
+        else
+        {
+            direction = I2C_Direction_Receiver;
+            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, 1);
+            DBG("Slave receiver\r\n");
+        }
+    }
+    /* transmit interrupt */
+    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
+    {
+        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
+
+        if (i2c_state->tx_data_ctr >= MAX_TX_BUFFER_SIZE)
+        {
+            i2c_state->tx_data_ctr = 0;
+        }
+        DBG("Data send\r\n");
+    }
+    /* transfer complet interrupt */
+    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
+    {
+        if(direction == I2C_Direction_Receiver)
+        {
+            i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+
+            if (i2c_state->rx_data_ctr == 1)
+            {
+                switch(i2c_state->rx_buf[CMD_INDEX])
+                {
+                    case CMD_GENERAL_CONTROL:
+                    case CMD_LED_MODE:
+                    case CMD_LED_STATE:
+                    case CMD_LED_BRIGHTNESS:
+                    case CMD_LED_COLOUR_PART1:
+                    case CMD_LED_COLOUR_PART2:
+                    case CMD_USER_VOLTAGE:
+                    {
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                        DBG("Send ACK 2byte\r\n");
+                    }break;
+
+                    case CMD_GET_STATUS_WORD:
+                    {
+                        /* prepare data to be sent to the master */
+                        i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+                        i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
+
+                        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
+                        DBG("Send ACK\r\n");
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
+                    }break;
+
+                    default: /* command doesnt exist - send NACK */
+                    {
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+                        DBG("Send NACK\r\n");
+                    } break;
+                }
+            }
+            else /* send ACK after last byte received */
+            {
+                I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                DBG("Send ACK last\r\n");
+            }
+
+            DBG("RX: \r\n");
             DBG((const char*)i2c_state->rx_buf);
             DBG("\r\n");
-
-            /* prepare data to be sent to the master */
-            i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
-            i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-
-            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
-
-            DBG("status word: ");
-            DBG((const char*)i2c_state->tx_buf);
-            DBG("\r\n");
         }
-
-        /* If more than MAX_RX_BUFFER_SIZE bytes are received,
-         * disable the RX interrupt - no more bytes are received.
-         * RX interrupt is enabled again when timeout occurs.
-         * It should never happen in normal communication. */
-        if (i2c_state->rx_data_ctr > MAX_RX_BUFFER_SIZE)
-            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_RXI, DISABLE);
+        else /* I2C_Direction_Transmitter */
+        {
+            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+            i2c_state->data_tx_complete = 1;
+            DBG("Send NACK - slave tx\r\n");
+        }
     }
 
-    /* stop detection */
-    if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
+    /* stop flag */
+    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
+        if (direction == I2C_Direction_Receiver)
+        {
+            i2c_state->data_rx_complete = 1;
+        }
         if (i2c_state->data_tx_complete) /* data have been sent to master */
         {
             i2c_state->data_tx_complete = 0;
             /* decrease button counter by the value has been sent */
             button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
         }
-        else /* data have been received from master */
-        {
-            i2c_state->data_rx_complete = 1;
-        }
+
+        DBG("STOP\r\n");
 
         /* clear counters */
         i2c_state->rx_data_ctr = 0;
         i2c_state->tx_data_ctr = 0;
 
-        slave_i2c_timeout_disable();
-        DBG("Stop\r\n");
+        direction = I2C_Direction_Receiver;
+        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
     }
 }
 
@@ -542,13 +588,9 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 DBG("\r\n");
             } break;
 
-            default: /* unexpected command received */
+            default:
             {
                 slave_i2c_clear_buffers();
-                /* clear counters */
-                i2c_state->rx_data_ctr = 0;
-                i2c_state->tx_data_ctr = 0;
-                slave_i2c_config();
 
                 DBG("unexpected command: ");
                 DBG((const char*)i2c_state->rx_buf);
@@ -556,6 +598,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
             } break;
         }
 
+        slave_i2c_clear_buffers();
         /* clear flag */
         i2c_state->data_rx_complete = 0;
     }
