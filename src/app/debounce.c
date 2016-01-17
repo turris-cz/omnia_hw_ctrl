@@ -291,7 +291,7 @@ void debounce_input_timer_handler(void)
     if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
         idx = 0;
 
-    /* other inputs not handled by general function debounce_check_inputs() */
+    /* other inputs handled by general function debounce_check_inputs() */
     debounce_sfp_det();
     debounce_sfp_flt();
     debounce_sfp_los();

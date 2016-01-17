@@ -123,11 +123,11 @@ static void slave_i2c_periph_config(void)
     /* Apply I2C configuration after enabling it */
     I2C_Init(I2C_PERIPH_NAME, &I2C_InitStructure);
 
-    /* Address match and receive interrupt */
-    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, ENABLE);
-
     I2C_SlaveByteControlCmd(I2C_PERIPH_NAME, ENABLE);
     I2C_ReloadCmd(I2C_PERIPH_NAME, ENABLE);
+
+    /* Address match and receive interrupt */
+    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, ENABLE);
 
     /* I2C Peripheral Enable */
     I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
@@ -291,6 +291,7 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
+    static uint16_t nack;
 
     /* address match interrupt */
     if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
@@ -307,9 +308,11 @@ void slave_i2c_handler(void)
         else
         {
             direction = I2C_Direction_Receiver;
-            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, 1);
+            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
             DBG("Slave receiver\r\n");
         }
+
+        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
     }
     /* transmit interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
@@ -344,7 +347,8 @@ void slave_i2c_handler(void)
                     {
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                        DBG("Send ACK 2byte\r\n");
+                        nack = 0;
+                        DBG("Send ACK\r\n");
                     }break;
 
                     case CMD_GET_STATUS_WORD:
@@ -354,27 +358,35 @@ void slave_i2c_handler(void)
                         i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
                         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
-                        DBG("Send ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
+                        nack = 0;
+                        DBG("Send ACK\r\n");
                     }break;
 
                     default: /* command doesnt exist - send NACK */
                     {
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+                        nack = 1;
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                         DBG("Send NACK\r\n");
                     } break;
                 }
             }
-            else /* send ACK after last byte received */
+            else if (i2c_state->rx_data_ctr > 1) /* send ACK after every byte received */
             {
                 I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                 I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                DBG("Send ACK last\r\n");
+
+                if (i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
+                {
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG("Send ACK every\r\n");
             }
 
-            DBG("RX: \r\n");
-            DBG((const char*)i2c_state->rx_buf);
+            DBG("RX1: \r\n");
+            DBG((const char*)(i2c_state->rx_buf));
             DBG("\r\n");
         }
         else /* I2C_Direction_Transmitter */
@@ -392,20 +404,27 @@ void slave_i2c_handler(void)
 
         if (direction == I2C_Direction_Receiver)
         {
-            i2c_state->data_rx_complete = 1;
+            if (!nack)
+            {
+                /* disable I2C interrupt */
+                I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, DISABLE);
+                i2c_state->data_rx_complete = 1;
+            }
+            else
+            {
+                i2c_state->data_rx_complete = 0;
+            }
         }
-        if (i2c_state->data_tx_complete) /* data have been sent to master */
+        else if (i2c_state->data_tx_complete) /* data have been sent to master */
         {
             i2c_state->data_tx_complete = 0;
+            i2c_state->tx_data_ctr = 0;
             /* decrease button counter by the value has been sent */
             button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
         }
 
         DBG("STOP\r\n");
-
-        /* clear counters */
         i2c_state->rx_data_ctr = 0;
-        i2c_state->tx_data_ctr = 0;
 
         direction = I2C_Direction_Receiver;
         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
@@ -421,7 +440,7 @@ void slave_i2c_handler(void)
 slave_i2c_states_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    static uint8_t led_index, led_colour_step_one_complete;
+    static uint8_t led_index, led_colour_part_one_complete;
     static uint32_t colour;
     slave_i2c_states_t state = SLAVE_I2C_OK;
 
@@ -430,6 +449,9 @@ slave_i2c_states_t slave_i2c_process_data(void)
         DBG("\r\nRX data: ");
         DBG((const char*)i2c_state->rx_buf);
         DBG("\r\n");
+
+        /* clear flag */
+        i2c_state->data_rx_complete = 0;
 
         switch(i2c_state->rx_buf[CMD_INDEX])
         {
@@ -471,7 +493,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 led_index = i2c_state->rx_buf[1] & 0x0F;
                 colour = i2c_state->rx_buf[2] << 16;
 
-                led_colour_step_one_complete = 1;
+                led_colour_part_one_complete = 1;
 
                 DBG("set LED colour - LED index : ")
                 DBG((const char*)&led_index);
@@ -484,10 +506,11 @@ slave_i2c_states_t slave_i2c_process_data(void)
             {
                 colour |= (i2c_state->rx_buf[1] << 8) | i2c_state->rx_buf[2];
 
-                if(led_colour_step_one_complete)
+                if(led_colour_part_one_complete)
                 {
                     led_driver_set_colour(led_index, colour);
-                    led_colour_step_one_complete = 0;
+                    led_colour_part_one_complete = 0;
+                    colour = 0;
                 }
 
                 DBG("\r\nGREEN: ");
@@ -517,7 +540,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
 
             default:
             {
-                slave_i2c_clear_buffers();
+                I2C_SoftwareResetCmd(I2C_PERIPH_NAME);
 
                 DBG("unexpected command: ");
                 DBG((const char*)i2c_state->rx_buf);
@@ -526,8 +549,8 @@ slave_i2c_states_t slave_i2c_process_data(void)
         }
 
         slave_i2c_clear_buffers();
-        /* clear flag */
-        i2c_state->data_rx_complete = 0;
+        /* enable I2C interrupt again */
+        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, ENABLE);
     }
 
     return state;
