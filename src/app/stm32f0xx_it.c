@@ -207,22 +207,6 @@ void I2C2_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles EXTI4_15 global interrupt request.
-  * @param  None
-  * @retval None
-  */
-void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
-{
-    if (TIM_GetITStatus(I2C_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
-    {
-        slave_i2c_timeout_handler();
-        DBG("I2C timeout\r\n");
-        /* Clear the EXTI line pending bit */
-        TIM_ClearITPendingBit(I2C_TIMEOUT_TIMER, TIM_IT_Update);
-    }
-}
-
-/**
   * @}
   */
 

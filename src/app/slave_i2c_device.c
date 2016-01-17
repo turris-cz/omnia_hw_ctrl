@@ -139,40 +139,6 @@ static void slave_i2c_periph_config(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_timeout_config
-  * @brief      Timer configuration for I2C timeout recovery.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_timeout_config(void)
-{
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    // Clock enable
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-
-    /* Time base configuration - 1sec interrupt */
-    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(I2C_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
-
-    TIM_ARRPreloadConfig(I2C_TIMEOUT_TIMER, ENABLE);
-    /* TIM Interrupts enable */
-    TIM_ITConfig(I2C_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
-
-    /* TIM enable counter */
-   // TIM_Cmd(I2C_TIMEOUT_TIMER, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_UP_TRG_COM_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-/*******************************************************************************
   * @function   slave_i2c_clear_buffers
   * @brief      Clear RX and TX buffers.
   * @param      None.
@@ -183,7 +149,7 @@ static void slave_i2c_clear_buffers(void)
     uint8_t i;
     struct st_i2c_status *i2c_state = &i2c_status;
 
-    // clear buffers
+    /* clear buffers */
     for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
     {
         i2c_state->rx_buf[i] = 0;
@@ -201,45 +167,6 @@ static void slave_i2c_clear_buffers(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_timeout_enable
-  * @brief      Start timeout measuring.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_timeout_enable(void)
-{
-    /* TIM enable counter */
-    TIM_Cmd(I2C_TIMEOUT_TIMER, ENABLE);
-}
-
-/*******************************************************************************
-  * @function   slave_i2c_timeout_disable
-  * @brief      Stop timeout measuring.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_timeout_disable(void)
-{
-    /* TIM disable counter */
-    TIM_Cmd(I2C_TIMEOUT_TIMER, DISABLE);
-    I2C_TIMEOUT_TIMER->CNT = 0;
-}
-
-/*******************************************************************************
-  * @function   slave_i2c_timeout_handler
-  * @brief      Timeout occures -> reset I2C peripheral.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void slave_i2c_timeout_handler(void)
-{
-    slave_i2c_config();
-    slave_i2c_timeout_disable();
-    slave_i2c_clear_buffers();
-    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , DISABLE);
-}
-
-/*******************************************************************************
   * @function   slave_i2c_config
   * @brief      Configuration of I2C peripheral and its timeout.
   * @param      None.
@@ -249,7 +176,6 @@ void slave_i2c_config(void)
 {
     slave_i2c_io_config();
     slave_i2c_periph_config();
-  //  slave_i2c_timeout_config();
 }
 
 /*******************************************************************************
@@ -405,6 +331,7 @@ void slave_i2c_handler(void)
 
             if (i2c_state->rx_data_ctr == 1)
             {
+                /* check if the command exists and send ACK */
                 switch(i2c_state->rx_buf[CMD_INDEX])
                 {
                     case CMD_GENERAL_CONTROL:

@@ -11,8 +11,6 @@
 #ifndef SLAVE_I2C_DEVICE_H
 #define SLAVE_I2C_DEVICE_H
 
-#define I2C_TIMEOUT_TIMER                  TIM1
-
 #define MAX_RX_BUFFER_SIZE                 10
 #define MAX_TX_BUFFER_SIZE                 2
 
@@ -141,13 +139,5 @@ void slave_i2c_handler(void);
   *****************************************************************************/
 slave_i2c_states_t slave_i2c_process_data(void);
 
-/*******************************************************************************
-  * @function   slave_i2c_timeout_handler
-  * @brief      Timeout occures -> reset I2C peripheral.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void slave_i2c_timeout_handler(void);
-
-#endif // SLAVE_I2C_DEVICE_H
+#endif /* SLAVE_I2C_DEVICE_H */
 

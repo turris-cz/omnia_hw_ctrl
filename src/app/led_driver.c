@@ -493,7 +493,7 @@ void led_driver_config(void)
     led_driver_init_led(); /* set mode and state - default after reset */
 
     led_driver_pwm_config();
-    led_driver_pwm_set_brightness(1); /* 100% brightness after reset */
+    led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
 
     led_driver_timer_config();
 }
