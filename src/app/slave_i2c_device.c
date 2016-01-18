@@ -303,13 +303,13 @@ void slave_i2c_handler(void)
         if ((I2C_PERIPH_NAME->ISR & I2C_ISR_DIR) == I2C_ISR_DIR)
         {
             direction = I2C_Direction_Transmitter;
-            DBG("Slave transmitter\r\n");
+            DBG("S.TX\r\n");
         }
         else
         {
             direction = I2C_Direction_Receiver;
             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-            DBG("Slave receiver\r\n");
+            DBG("S.RX\r\n");
         }
 
         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -323,7 +323,7 @@ void slave_i2c_handler(void)
         {
             i2c_state->tx_data_ctr = 0;
         }
-        DBG("Data send\r\n");
+        DBG("send\r\n");
     }
     /* transfer complet interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
@@ -348,7 +348,7 @@ void slave_i2c_handler(void)
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                         nack = 0;
-                        DBG("Send ACK\r\n");
+                        DBG("ACK\r\n");
                     }break;
 
                     case CMD_GET_STATUS_WORD:
@@ -361,7 +361,7 @@ void slave_i2c_handler(void)
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
                         nack = 0;
-                        DBG("Send ACK\r\n");
+                        DBG("ACK\r\n");
                     }break;
 
                     default: /* command doesnt exist - send NACK */
@@ -369,7 +369,7 @@ void slave_i2c_handler(void)
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
                         nack = 1;
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                        DBG("Send NACK\r\n");
+                        DBG("NACK\r\n");
                     } break;
                 }
             }
@@ -382,18 +382,18 @@ void slave_i2c_handler(void)
                 {
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG("Send ACK every\r\n");
+                DBG("ACKever\r\n");
             }
 
-            DBG("RX1: \r\n");
-            DBG((const char*)(i2c_state->rx_buf));
-            DBG("\r\n");
+            //DBG("RX1: \r\n");
+           // DBG((const char*)(i2c_state->rx_buf));
+           // DBG("\r\n");
         }
         else /* I2C_Direction_Transmitter */
         {
             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
             i2c_state->data_tx_complete = 1;
-            DBG("Send NACK - slave tx\r\n");
+            DBG("NACKtx\r\n");
         }
     }
 
@@ -446,9 +446,9 @@ slave_i2c_states_t slave_i2c_process_data(void)
 
     if (i2c_state->data_rx_complete) /* slave RX (master sends data) */
     {
-        DBG("\r\nRX data: ");
-        DBG((const char*)i2c_state->rx_buf);
-        DBG("\r\n");
+        //DBG("\r\nRX data: ");
+       // DBG((const char*)i2c_state->rx_buf);
+       // DBG("\r\n");
 
         /* clear flag */
         i2c_state->data_rx_complete = 0;
