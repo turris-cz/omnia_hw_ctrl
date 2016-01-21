@@ -37,14 +37,14 @@
 #define TWO_BYTES_EXPECTED              2
 
 enum i2c_commands {
-    CMD_GET_STATUS_WORD                 = 0x01, /* slave sends back status word */
+    CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
     CMD_GENERAL_CONTROL                 = 0x02,
     CMD_LED_MODE                        = 0x03, /* default/user */
     CMD_LED_STATE                       = 0x04, /* LED on/off */
-    CMD_LED_COLOUR_PART1                = 0x05, /* LED number + RED */
-    CMD_LED_COLOUR_PART2                = 0x06, /* GREEN + BLUE */
-    CMD_LED_BRIGHTNESS                  = 0x07,
-    CMD_USER_VOLTAGE                    = 0x08,
+    CMD_LED_COLOUR                      = 0x05, /* LED number + RED + GREEN + BLUE */
+    CMD_USER_VOLTAGE                    = 0x06,
+    CMD_SET_BRIGHTNESS                  = 0x07,
+    CMD_GET_BRIGHTNESS                  = 0x08
 };
 
 enum i2_control_byte_mask {
@@ -126,8 +126,8 @@ static void slave_i2c_periph_config(void)
     I2C_SlaveByteControlCmd(I2C_PERIPH_NAME, ENABLE);
     I2C_ReloadCmd(I2C_PERIPH_NAME, ENABLE);
 
-    /* Address match and receive interrupt */
-    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI, ENABLE);
+    /* Address match, transfer complete, stop and transmit interrupt */
+    I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, ENABLE);
 
     /* I2C Peripheral Enable */
     I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
@@ -136,34 +136,6 @@ static void slave_i2c_periph_config(void)
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-}
-
-/*******************************************************************************
-  * @function   slave_i2c_clear_buffers
-  * @brief      Clear RX and TX buffers.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_clear_buffers(void)
-{
-    uint8_t i;
-    struct st_i2c_status *i2c_state = &i2c_status;
-
-    /* clear buffers */
-    for (i = 0; i < MAX_RX_BUFFER_SIZE; i++)
-    {
-        i2c_state->rx_buf[i] = 0;
-    }
-
-    for (i = 0; i < MAX_TX_BUFFER_SIZE; i++)
-    {
-        i2c_state->tx_buf[i] = 0;
-    }
-
-    i2c_state->rx_data_ctr = 0;
-    i2c_state->tx_data_ctr = 0;
-
-    DBG("clear buffers\r\n");
 }
 
 /*******************************************************************************
@@ -292,6 +264,7 @@ void slave_i2c_handler(void)
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
     static uint16_t nack;
+    struct led_rgb *led = leds;
 
     __disable_irq();
 
@@ -332,7 +305,8 @@ void slave_i2c_handler(void)
     {
         if(direction == I2C_Direction_Receiver)
         {
-            if (!i2c_state->data_rx_complete) /* if data are already processed */
+            /* if data are already processed */
+            if ((!i2c_state->data_rx_complete) && (!i2c_state->data_tx_complete))
             {
                 i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
 
@@ -344,16 +318,15 @@ void slave_i2c_handler(void)
                         case CMD_GENERAL_CONTROL:
                         case CMD_LED_MODE:
                         case CMD_LED_STATE:
-                        case CMD_LED_BRIGHTNESS:
-                        case CMD_LED_COLOUR_PART1:
-                        case CMD_LED_COLOUR_PART2:
+                        case CMD_LED_COLOUR:
+                        case CMD_SET_BRIGHTNESS:
                         case CMD_USER_VOLTAGE:
                         {
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                             nack = 0;
                             DBG("ACK\r\n");
-                        }break;
+                        } break;
 
                         case CMD_GET_STATUS_WORD:
                         {
@@ -361,18 +334,26 @@ void slave_i2c_handler(void)
                             i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
                             i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
 
-                            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_TXI , ENABLE);
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
                             nack = 0;
                             DBG("ACK\r\n");
-                        }break;
+                        } break;
+
+                        case CMD_GET_BRIGHTNESS:
+                        {
+                            i2c_state->tx_buf[0] = led->brightness;
+
+                            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                            nack = 0;
+                        } break;
 
                         default: /* command doesnt exist - send NACK */
                         {
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
-                            nack = 1;
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                            nack = 1;
                             DBG("NACK\r\n");
                         } break;
                     }
@@ -386,6 +367,7 @@ void slave_i2c_handler(void)
                     {
                         i2c_state->rx_data_ctr = 0;
                     }
+                    nack = 0;
                     DBG("ACKever\r\n");
                 }
             }
@@ -393,6 +375,7 @@ void slave_i2c_handler(void)
             {
                 I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
                 I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                nack = 1;
                 DBG("NOT\r\n");
             }
         }
@@ -447,8 +430,8 @@ void slave_i2c_handler(void)
 slave_i2c_states_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    static uint8_t led_index, led_colour_part_one_complete;
-    static uint32_t colour;
+    uint8_t led_index;
+    uint32_t colour;
     slave_i2c_states_t state = SLAVE_I2C_OK;
 
     if (i2c_state->data_rx_complete) /* slave RX (master sends data) */
@@ -488,12 +471,13 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 DBG("\r\n");
             } break;
 
-            case CMD_LED_COLOUR_PART1:
+            case CMD_LED_COLOUR:
             {
                 led_index = i2c_state->rx_buf[1] & 0x0F;
-                colour = i2c_state->rx_buf[2] << 16;
+                /* colour = Red + Green + Blue */
+                colour = (i2c_state->rx_buf[2] << 16) | (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
 
-                led_colour_part_one_complete = 1;
+                led_driver_set_colour(led_index, colour);
 
                 DBG("set LED colour - LED index : ")
                 DBG((const char*)&led_index);
@@ -502,25 +486,7 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 DBG("\r\n");
             } break;
 
-            case CMD_LED_COLOUR_PART2:
-            {
-                colour |= (i2c_state->rx_buf[1] << 8) | i2c_state->rx_buf[2];
-
-                if(led_colour_part_one_complete)
-                {
-                    led_driver_set_colour(led_index, colour);
-                    led_colour_part_one_complete = 0;
-                    colour = 0;
-                }
-
-                DBG("\r\nGREEN: ");
-                DBG((const char*)(i2c_state->rx_buf + 1));
-                DBG("\r\nBLUE: ");
-                DBG((const char*)(i2c_state->rx_buf + 2));
-                DBG("\r\n");
-            } break;
-
-            case CMD_LED_BRIGHTNESS:
+            case CMD_SET_BRIGHTNESS:
             {
                 led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
 
