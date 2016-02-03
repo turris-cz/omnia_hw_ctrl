@@ -44,7 +44,6 @@ enum input_mask {
 #define MAX_CARD_DET_STATES         5
 #define MAX_MSATA_IND_STATES        5
 
-static uint16_t debounced_state;
 static uint16_t port_state[MAX_INPUT_STATES];
 
 struct input_sig debounce_input_signal;
@@ -113,12 +112,12 @@ static void debounce_sfp_det(void)
     }
 
     if (counter == 0)
-        input_state->sfp_det = 0;
+        input_state->sfp_det = DEACTIVATED;
     else
     {
         if(counter >= MAX_SFP_DET_STATES)
         {
-            input_state->sfp_det = 1;
+            input_state->sfp_det = ACTIVATED;
             counter = MAX_SFP_DET_STATES;
         }
     }
@@ -150,12 +149,12 @@ static void debounce_sfp_flt(void)
     }
 
     if (counter == 0)
-        input_state->sfp_flt = 0;
+        input_state->sfp_flt = DEACTIVATED;
     else
     {
         if(counter >= MAX_SFP_FLT_STATES)
         {
-            input_state->sfp_flt = 1;
+            input_state->sfp_flt = ACTIVATED;
             counter = MAX_SFP_FLT_STATES;
         }
     }
@@ -187,12 +186,12 @@ static void debounce_sfp_los(void)
     }
 
     if (counter == 0)
-        input_state->sfp_los = 0;
+        input_state->sfp_los = DEACTIVATED;
     else
     {
         if(counter >= MAX_SFP_LOS_STATES)
         {
-            input_state->sfp_los = 1;
+            input_state->sfp_los = ACTIVATED;
             counter = MAX_SFP_LOS_STATES;
         }
     }
@@ -224,12 +223,12 @@ static void debounce_card_det(void)
     }
 
     if (counter == 0)
-        input_state->card_det = 0;
+        input_state->card_det = DEACTIVATED;
     else
     {
         if(counter >= MAX_CARD_DET_STATES)
         {
-            input_state->card_det = 1;
+            input_state->card_det = ACTIVATED;
             counter = MAX_CARD_DET_STATES;
         }
     }
@@ -261,12 +260,12 @@ static void debounce_msata_ind(void)
     }
 
     if (counter == 0)
-        input_state->msata_ind = 0;
+        input_state->msata_ind = DEACTIVATED;
     else
     {
         if(counter >= MAX_MSATA_IND_STATES)
         {
-            input_state->msata_ind = 1;
+            input_state->msata_ind = ACTIVATED;
             counter = MAX_MSATA_IND_STATES;
         }
     }
@@ -325,30 +324,21 @@ static void debounce_sample_input(void)
 void debounce_check_inputs(void)
 {
     uint16_t i, port_changed, button_changed;
-    static uint16_t last_debounce_state, last_button_debounce_state;
+    static uint16_t last_button_debounce_state;
     struct input_sig *input_state = &debounce_input_signal;
     struct button_def *button = &button_front;
     struct st_i2c_status *i2c_control = &i2c_status;
 
     /* PB0-14 ----------------------------------------------------------------
      * No debounce is used now (we need a reaction immediately)
-     * If debounce required, set MAX_INPUT_STATES > 1.
-     * And recommendation: move function  debounce_sample_input() to debounce_input_timer_handler()
+     * If debounce required, set MAX_INPUT_STATES > 1, move function
+     * debounce_sample_input() to debounce_input_timer_handler() and implement
+     * the same procedure as for button debouncing.
      */
 
     debounce_sample_input();
 
-    /* save previous state */
-    last_debounce_state = debounced_state;
-    debounced_state = 0x7FFF; /* init for calculation - only PB0-14 inputs */
-
-    for (i = 0; i < MAX_INPUT_STATES; i++)
-    {
-        debounced_state = debounced_state & port_state[i];
-    }
-
-    /* get status of port B, pins 0-14 */
-    port_changed = (debounced_state ^ last_debounce_state) & debounced_state;
+    port_changed = port_state[0];
 
     /* PB15 ------------------------------------------------------------------
      * button debounce */
@@ -365,14 +355,14 @@ void debounce_check_inputs(void)
     /* results evaluation --------------------------------------------------- */
     if (port_changed & MAN_RES_MASK)
     {
-        input_state->man_res = 1;
+        input_state->man_res = ACTIVATED;
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     }
 
     if (port_changed & SYSRES_OUT_MASK)
     {
-        input_state->sysres_out = 1;
+        input_state->sysres_out = ACTIVATED;
     }
 
     if (port_changed & DBG_RES_MASK)
@@ -382,29 +372,38 @@ void debounce_check_inputs(void)
 
     /* reaction: follow MRES signal */
     if (port_changed & MRES_MASK)
+    {
         GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+    }
     else
+    {
         GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+    }
 
     if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
          (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
          (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
          (port_changed & PG_1V2_MASK))
-        input_state->pg = 1;
+    {
+        input_state->pg = ACTIVATED;
+    }
 
     /* PG signal from 4.5V user controlled regulator */
     if(i2c_control->status_word & ENABLE_4V5_STSBIT)
     {
         if (port_changed & PG_4V5_MASK)
-            input_state->pg_4v5 = 1;
+            input_state->pg_4v5 = ACTIVATED;
     }
 
     if (port_changed & USB30_OVC_MASK)
-        input_state->usb30_ovc = 1;
-
+    {
+        input_state->usb30_ovc = ACTIVATED;
+    }
 
     if (port_changed & USB31_OVC_MASK)
-        input_state->usb31_ovc = 1;
+    {
+        input_state->usb31_ovc = ACTIVATED;
+    }
 
 
     if (port_changed & RTC_ALARM_MASK)
@@ -413,7 +412,9 @@ void debounce_check_inputs(void)
     }
 
     if (button_changed & BUTTON_MASK)
-        input_state->button_sts = 1;
+    {
+        input_state->button_sts = ACTIVATED;
+    }
 }
 
 /*******************************************************************************

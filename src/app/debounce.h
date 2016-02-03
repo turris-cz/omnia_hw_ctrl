@@ -24,6 +24,11 @@ typedef enum button_states {
     BUTTON_RELEASED,
 }button_state_t;
 
+enum input_states {
+    DEACTIVATED = 0,
+    ACTIVATED = 1, /* when signal reaches a defined treshold */
+};
+
 /* flags of input signals */
 struct input_sig {
     uint8_t man_res     :1;
