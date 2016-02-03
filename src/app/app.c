@@ -162,7 +162,7 @@ static ret_value_t load_settings(void)
     struct st_i2c_status *i2c_control = &i2c_status;
 
     debounce_config(); /* start evaluation of inputs */
-    i2c_control->status_word_orig = i2c_control->status_word = app_get_status_word();
+    i2c_control->status_word = app_get_status_word();
 
     return OK;
 }
@@ -183,40 +183,40 @@ static ret_value_t input_manager(void)
     debounce_check_inputs();
 
     /* manual reset button */
-    if(input_state->man_res)
+    if(input_state->man_res == ACTIVATED)
     {
         value = GO_TO_LIGHT_RESET;
-        input_state->man_res = 0;
+        input_state->man_res = DEACTIVATED;
     }
 
     /* sw reset */
-    if (input_state->sysres_out)
+    if (input_state->sysres_out == ACTIVATED)
     {
         value = GO_TO_LIGHT_RESET;
-        input_state->sysres_out = 0;
+        input_state->sysres_out = DEACTIVATED;
     }
 
     /* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
-    if(input_state->pg)
+    if(input_state->pg == ACTIVATED)
     {
         DBG("PG all regulators\r\n");
         value = GO_TO_HARD_RESET;
-        input_state->pg = 0;
+        input_state->pg = DEACTIVATED;
     }
 
     /* PG signal from 4.5V user controlled regulator */
-    if(input_state->pg_4v5)
+    if(input_state->pg_4v5 == ACTIVATED)
     {
         DBG("PG from 4V5\r\n");
         value = GO_TO_HARD_RESET;
-        input_state->pg_4v5 = 0;
+        input_state->pg_4v5 = DEACTIVATED;
     }
 
     /* USB30 overcurrent */
-    if(input_state->usb30_ovc)
+    if(input_state->usb30_ovc == ACTIVATED)
     {
         i2c_control->status_word |= USB30_OVC_STSBIT;
-        input_state->usb30_ovc = 0;
+        input_state->usb30_ovc = DEACTIVATED;
         power_control_usb(USB3_PORT0, USB_OFF); /* USB power off */
 
         if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
@@ -227,10 +227,10 @@ static ret_value_t input_manager(void)
     }
 
     /* USB31 overcurrent */
-    if(input_state->usb31_ovc)
+    if(input_state->usb31_ovc == ACTIVATED)
     {
         i2c_control->status_word |= USB31_OVC_STSBIT;
-        input_state->usb31_ovc = 0;
+        input_state->usb31_ovc = DEACTIVATED;
 
         power_control_usb(USB3_PORT1, USB_OFF); /* USB power off */
 
@@ -242,16 +242,18 @@ static ret_value_t input_manager(void)
     }
 
     /* front button */
-    if (input_state->button_sts)
+    if (input_state->button_sts == ACTIVATED)
     {
         if (button->button_mode == BUTTON_DEFAULT)
             led_driver_step_brightness();
         else /* user button mode */
             button_counter_increase();
 
-        input_state->button_sts = 0;
+        input_state->button_sts = DEACTIVATED;
     }
 
+    /* in case of user button mode:
+     * store information in status_word - how many times a button was pressed  */
     if(button->button_mode != BUTTON_DEFAULT)
     {
         if (button->button_pressed_counter)
@@ -265,27 +267,27 @@ static ret_value_t input_manager(void)
     }
 
     /* these flags are automatically cleared in debounce function */
-    if(input_state->sfp_det)
+    if(input_state->sfp_det == ACTIVATED)
         i2c_control->status_word |= SFP_DET_STSBIT;
     else
         i2c_control->status_word &= (~SFP_DET_STSBIT);
 
-    if(input_state->sfp_los)
+    if(input_state->sfp_los == ACTIVATED)
         i2c_control->status_word |= SFP_LOS_STSBIT;
     else
         i2c_control->status_word &= (~SFP_LOS_STSBIT);
 
-    if(input_state->sfp_flt)
+    if(input_state->sfp_flt == ACTIVATED)
         i2c_control->status_word |= SFP_FLT_STSBIT;
     else
         i2c_control->status_word &= (~SFP_FLT_STSBIT);
 
-    if(input_state->card_det)
+    if(input_state->card_det == ACTIVATED)
         i2c_control->status_word |= CARD_DET_STSBIT;
     else
         i2c_control->status_word &= (~CARD_DET_STSBIT);
 
-    if(input_state->msata_ind)
+    if(input_state->msata_ind == ACTIVATED)
         i2c_control->status_word |= MSATA_IND_STSBIT;
     else
         i2c_control->status_word &= (~MSATA_IND_STSBIT);
@@ -418,7 +420,10 @@ void app_mcu_cyclic(void)
         break;
 
         case FACTORY_RESET:
-            break;
+        {
+            NVIC_SystemReset(); /* SW reset of MCU */
+        }
+        break;
 
         case LOAD_SETTINGS:
         {
@@ -468,6 +473,7 @@ void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
+                case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
                 default: next_state = I2C_MANAGER; break;
             }
         }
@@ -481,7 +487,7 @@ void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-                //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
+                case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
                 case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
             }
