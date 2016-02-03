@@ -243,14 +243,6 @@ uint8_t power_control_get_usb_overcurrent(usb_ports_t usb_port);
 uint8_t power_control_get_usb_poweron(usb_ports_t usb_port);
 
 /*******************************************************************************
-  * @function   power_control_second_startup
-  * @brief      Second reset due to wrong startup.
-  * @param      None.
-  * @retval     Error if timeout elapsed.
-  *****************************************************************************/
-error_type_t power_control_second_startup(void);
-
-/*******************************************************************************
   * @function   power_control_set_startup_condition
   * @brief      Set signals to reset state before board startup.
   * @param      None.

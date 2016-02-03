@@ -670,30 +670,6 @@ error_type_t power_control_first_startup(void)
 }
 
 /*******************************************************************************
-  * @function   power_control_second_startup
-  * @brief      Second reset due to wrong startup.
-  * @param      None.
-  * @retval     Error if timeout elapsed.
-  *****************************************************************************/
-error_type_t power_control_second_startup(void)
-{
-    error_type_t error = NO_ERROR;
-
-    GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-    GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
-    delay(400);
-    GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
-
-    while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-    {}
-
-    delay(15);
-    GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-
-    return error;
-}
-
-/*******************************************************************************
   * @function   power_control_set_power_led
   * @brief      Set on power LED.
   * @param      None.
