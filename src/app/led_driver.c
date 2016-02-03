@@ -468,7 +468,7 @@ static void led_driver_init_led(void)
         rgb_leds->led_state_user = LED_ON;
         rgb_leds->led_mode = LED_USER_MODE;
     }
-    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs black */
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs white */
 
     /* default mode - all LEDS OFF and white */
     for (idx = 0, rgb_leds = leds; idx < LED_COUNT; idx++, rgb_leds++)

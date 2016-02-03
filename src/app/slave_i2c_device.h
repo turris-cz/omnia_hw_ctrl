@@ -15,7 +15,6 @@
 #define MAX_TX_BUFFER_SIZE                 2
 
 struct st_i2c_status {
-    uint16_t status_word_orig;            // original status detected after startup
     uint16_t status_word;
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter

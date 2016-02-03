@@ -16,9 +16,12 @@
 
 /* Private define ------------------------------------------------------------*/
 
-/* programming pin */
+/* programming pin for user regulator */
 #define PRG_PIN_HIGH            PRG_4V5_PIN_PORT->BSRR = PRG_4V5_PIN
 #define PRG_PIN_LOW             PRG_4V5_PIN_PORT->BRR = PRG_4V5_PIN
+
+/* timing for logic '1' and '0' consists of only NOPs, because it must be very
+precise. Pulse for logic '1' or '0' takes only 1 us */
 #define SET_LOGIC_HIGH() ({PRG_PIN_HIGH; \
     __NOP();\
     __NOP();\
