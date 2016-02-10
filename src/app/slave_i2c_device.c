@@ -47,7 +47,7 @@ enum i2c_commands {
     CMD_GET_BRIGHTNESS                  = 0x08
 };
 
-enum i2_control_byte_mask {
+enum i2c_control_byte_mask {
     LIGHT_RST_MASK                      = 0x01,
     HARD_RST_MASK                       = 0x02,
     FACTORY_RST_MASK                    = 0x04,
@@ -57,6 +57,12 @@ enum i2_control_byte_mask {
     ENABLE_4V5_MASK                     = 0x40,
     BUTTON_MODE_MASK                    = 0x80,
 };
+
+typedef enum i2c_responses {
+    ACK_AND_WAIT_FOR_SECOND_START       = 0,
+    ACK                                 = 1,
+    NACK                                = 2
+} i2c_response_t;
 
 struct st_i2c_status i2c_status;
 
@@ -263,7 +269,7 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
-    static uint16_t nack;
+    static i2c_response_t response;
     struct led_rgb *led = leds;
 
     __disable_irq();
@@ -286,8 +292,6 @@ void slave_i2c_handler(void)
             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
             DBG("S.RX\r\n");
         }
-
-        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
     }
     /* transmit interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
@@ -300,7 +304,7 @@ void slave_i2c_handler(void)
         }
         DBG("send\r\n");
     }
-    /* transfer complet interrupt */
+    /* transfer complet interrupt (TX and RX) */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
     {
         if(direction == I2C_Direction_Receiver)
@@ -310,6 +314,7 @@ void slave_i2c_handler(void)
             {
                 i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
 
+                /* find out the requested command (register) */
                 if (i2c_state->rx_data_ctr == 1)
                 {
                     /* check if the command exists and send ACK */
@@ -322,10 +327,11 @@ void slave_i2c_handler(void)
                         case CMD_SET_BRIGHTNESS:
                         case CMD_USER_VOLTAGE:
                         {
-                            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                            nack = 0;
                             DBG("ACK\r\n");
+                            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                            /* release SCL line */
+                            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                            response = ACK;
                         } break;
 
                         case CMD_GET_STATUS_WORD:
@@ -333,33 +339,36 @@ void slave_i2c_handler(void)
                             /* prepare data to be sent to the master */
                             i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
                             i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
+                            DBG("ACK\r\n");
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
-                            nack = 0;
-                            DBG("ACK\r\n");
+                            response = ACK_AND_WAIT_FOR_SECOND_START;
                         } break;
 
                         case CMD_GET_BRIGHTNESS:
                         {
                             i2c_state->tx_buf[0] = led->brightness;
+                            DBG("brig\r\n");
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                            nack = 0;
+
+                            response = ACK_AND_WAIT_FOR_SECOND_START;
                         } break;
 
                         default: /* command doesnt exist - send NACK */
                         {
+                            DBG("NACK\r\n");
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                            nack = 1;
-                            DBG("NACK\r\n");
+                            response = NACK;
                         } break;
                     }
                 }
                 else if (i2c_state->rx_data_ctr > 1) /* send ACK after every byte received */
                 {
+                    DBG("ACKever\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
 
@@ -367,23 +376,22 @@ void slave_i2c_handler(void)
                     {
                         i2c_state->rx_data_ctr = 0;
                     }
-                    nack = 0;
-                    DBG("ACKever\r\n");
+                    response = ACK;
                 }
             }
             else /* else if data are not yet processed */
             {
+                DBG("NOT\r\n");
                 I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
                 I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                nack = 1;
-                DBG("NOT\r\n");
+                response = NACK;
             }
         }
         else /* I2C_Direction_Transmitter */
         {
-            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+            DBG("ACKtx\r\n");
+            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
             i2c_state->data_tx_complete = 1;
-            DBG("NACKtx\r\n");
         }
     }
 
@@ -394,7 +402,7 @@ void slave_i2c_handler(void)
 
         if (direction == I2C_Direction_Receiver)
         {
-            if (!nack)
+            if (response == ACK)
             {
                 i2c_state->data_rx_complete = 1;
             }

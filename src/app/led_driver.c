@@ -359,6 +359,7 @@ void led_driver_send_frame(void)
     static uint8_t level;
     uint16_t data;
 
+    /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
     data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
     led_driver_send_data16b(data);
 
