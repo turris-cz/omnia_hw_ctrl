@@ -269,7 +269,7 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
-    static i2c_response_t response;
+    static i2c_response_t response = NACK;
     struct led_rgb *led = leds;
 
     __disable_irq();

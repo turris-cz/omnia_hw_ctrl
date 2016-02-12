@@ -37,14 +37,12 @@ enum input_mask {
     BUTTON_MASK                     = 0x8000,
 };
 
-#define MAX_INPUT_STATES            1
 #define MAX_SFP_DET_STATES          5
 #define MAX_SFP_FLT_STATES          5
 #define MAX_SFP_LOS_STATES          5
 #define MAX_CARD_DET_STATES         5
 #define MAX_MSATA_IND_STATES        5
 
-static uint16_t port_state[MAX_INPUT_STATES];
 
 struct input_sig debounce_input_signal;
 struct button_def button_front;
@@ -299,23 +297,6 @@ void debounce_input_timer_handler(void)
 }
 
 /*******************************************************************************
-  * @function   debounce_sample_input
-  * @brief      Get sample of inputs of port B.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_sample_input(void)
-{
-    static uint16_t idx;
-
-    port_state[idx] = ~(GPIO_ReadInputData(GPIOB)); /* read whole port */
-    idx++;
-
-    if (idx >= MAX_INPUT_STATES)
-        idx = 0;
-}
-
-/*******************************************************************************
   * @function   debounce_check_inputs
   * @brief      Check input signal.
   * @param      None.
@@ -330,15 +311,9 @@ void debounce_check_inputs(void)
     struct st_i2c_status *i2c_control = &i2c_status;
 
     /* PB0-14 ----------------------------------------------------------------
-     * No debounce is used now (we need a reaction immediately)
-     * If debounce required, set MAX_INPUT_STATES > 1, move function
-     * debounce_sample_input() to debounce_input_timer_handler() and implement
-     * the same procedure as for button debouncing.
-     */
+     * No debounce is used now (we need a reaction immediately) */
 
-    debounce_sample_input();
-
-    port_changed = port_state[0];
+    port_changed = ~(GPIO_ReadInputData(GPIOB)); /* read the whole port */
 
     /* PB15 ------------------------------------------------------------------
      * button debounce */
