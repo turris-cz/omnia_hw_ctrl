@@ -103,10 +103,20 @@ precise. Pulse for logic '1' or '0' takes only 1 us */
 /* defines for timeout handling during regulator startup */
 #define DELAY_AFTER_ENABLE      5
 #define DELAY_BETWEEN_READINGS  20
-#define TIMEOUT                 100 // DELAY_BETWEEN_READINGS * 100 = 2 sec
-#define FACTORY_RESET_TIMEOUT   200 // DELAY_BETWEEN_READINGS * 200 = 4 sec
+#define TIMEOUT                 100 /* DELAY_BETWEEN_READINGS * 100 = 2 sec */
 
-static volatile uint32_t timingdelay;
+/* define for timeout handlling during factory reset */
+#define FACTORY_RESET_STATE_READING     5 /* ms */
+#define FACTORY_RESET_TIMEOFFSET        90 /* FACTORY_RESET_STATE_READING * 90 = 0.45 sec */
+#define RESET_TIMEOUT                   12 * FACTORY_RESET_TIMEOFFSET /* 5.4 sec */
+
+typedef enum reset_states {
+    FACT_RST_INIT,
+    FACT_RST_LED_WHITE,
+    FACT_RST_LED_YELLOW,
+    FACT_RST_LED_BLUE,
+    FACT_RST_LED_RED,
+} reset_state_t;
 
 enum PSET_values {
     PSET_MINUS_10P  = 0x8,
@@ -129,7 +139,6 @@ enum VSET_values {
     VSET_3V3        = 0xE,
     VSET_5V0        = 0xF,
 };
-
 
 /*******************************************************************************
   * @function   power_control_prog4v5_config
@@ -647,13 +656,16 @@ void power_control_usb_timeout_disable(void)
 
 /*******************************************************************************
   * @function   power_control_first_startup
-  * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
+  * @brief      Handle SYSRES_OUT, MAN_RES, CFG_CTRL signals and factory reset
+  *             during startup.
   * @param      None.
-  * @retval     Error if timeout elapsed.
+  * @retval     Type of factory reset.
   *****************************************************************************/
-error_type_t power_control_first_startup(void)
+reset_type_t power_control_first_startup(void)
 {
-    error_type_t error = NO_ERROR;
+    reset_type_t reset_type = NORMAL_RESET;
+    reset_state_t factory_reset_state = FACT_RST_INIT;
+    uint16_t factory_reset_cnt = 0, factory_reset_led_offset = 1;
 
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     delay(50);
@@ -661,12 +673,105 @@ error_type_t power_control_first_startup(void)
 
     /* wait for main board reset signal */
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
-    {}
+    {
+        /* handle factory reset timeouts */
+        delay(FACTORY_RESET_STATE_READING);
+        factory_reset_cnt++;
 
-    delay(15); /* 15ms delay after releasing of reset signal */
+        if (factory_reset_cnt >= FACTORY_RESET_TIMEOFFSET)
+        {
+            switch (factory_reset_state)
+            {
+                case FACT_RST_INIT:
+                {
+                    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+                    led_driver_set_led_state(LED_COUNT, LED_OFF);
+                    led_driver_pwm_set_brightness(100);
+                    factory_reset_state = FACT_RST_LED_WHITE;
+                } break;
+
+                case FACT_RST_LED_WHITE:
+                {
+                    reset_type = NORMAL_RESET; /* normal reset */
+
+                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+
+                    if (factory_reset_led_offset > LED_COUNT)
+                    {
+                        factory_reset_state = FACT_RST_LED_YELLOW;
+                        factory_reset_led_offset = 1;
+                        led_driver_set_led_state(LED_COUNT, LED_OFF);
+                        led_driver_set_colour(LED_COUNT, YELLOW_COLOUR);
+                    }
+                    else
+                    {
+                        factory_reset_state = FACT_RST_LED_WHITE;
+                        factory_reset_led_offset++;
+                    }
+                } break;
+
+                case FACT_RST_LED_YELLOW:
+                {
+                    reset_type = FACTORY_RESET1;
+
+                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+
+                    if (factory_reset_led_offset > LED_COUNT)
+                    {
+                        factory_reset_state = FACT_RST_LED_BLUE;
+                        factory_reset_led_offset = 1;
+                        led_driver_set_led_state(LED_COUNT, LED_OFF);
+                        led_driver_set_colour(LED_COUNT, BLUE_COLOUR);
+                    }
+                    else
+                    {
+                        factory_reset_state = FACT_RST_LED_YELLOW;
+                        factory_reset_led_offset++;
+                    }
+
+                } break;
+
+                case FACT_RST_LED_BLUE:
+                {
+                    reset_type = FACTORY_RESET2;
+
+                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+
+                    if(factory_reset_led_offset > LED_COUNT)
+                    {
+                        factory_reset_state = FACT_RST_LED_RED;
+                        factory_reset_led_offset = 1;
+                        led_driver_set_led_state(LED_COUNT, LED_OFF);
+                        led_driver_set_colour(LED_COUNT, RED_COLOUR);
+                    }
+                    else
+                    {
+                        factory_reset_state = FACT_RST_LED_BLUE;
+                        factory_reset_led_offset++;
+                    }
+
+                } break;
+
+                case FACT_RST_LED_RED:
+                {
+                    reset_type = FACTORY_RESET3;
+
+                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+
+                    factory_reset_state = FACT_RST_LED_RED;
+                    factory_reset_led_offset++;
+
+                } break;
+            }
+
+            factory_reset_cnt = 0;
+        }
+    }
+
+    delay(10); /* 10 + 5ms (in while loop) delay after releasing of reset signal */
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
 
-    return error;
+    return reset_type;
 }
 
 /*******************************************************************************

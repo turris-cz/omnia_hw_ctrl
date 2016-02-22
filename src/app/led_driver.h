@@ -22,6 +22,7 @@ enum colours {
     GREEN_COLOUR        = 0x00FF00,
     BLUE_COLOUR         = 0x0000FF,
     BLACK_COLOUR        = 0x000000,
+    YELLOW_COLOUR       = 0xFFFF00,
 };
 
 typedef enum led_modes {

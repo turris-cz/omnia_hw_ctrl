@@ -174,8 +174,14 @@ typedef enum error_types {
     PG_1V5_ERROR,
     PG_1V2_ERROR,
     PG_VTT_ERROR,
-    RESET_ERROR,
 }error_type_t;
+
+typedef enum reset_types {
+    NORMAL_RESET        = 0,
+    FACTORY_RESET1      = 1,
+    FACTORY_RESET2      = 2,
+    FACTORY_RESET3      = 3
+}reset_type_t;
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -214,9 +220,9 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
   * @function   power_control_first_startup
   * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
-  * @retval     Error if timeout elapsed.
+  * @retval     Type of factory reset.
   *****************************************************************************/
-error_type_t power_control_first_startup(void);
+reset_type_t power_control_first_startup(void);
 
 /*******************************************************************************
   * @function   power_control_usb_timeout_config
