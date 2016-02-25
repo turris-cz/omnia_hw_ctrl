@@ -37,7 +37,7 @@
 #define MAX_BRIGHTNESS_STEPS        8
 
 /*******************************************************************************
-// PWM Settings (Frequency und range)
+// PWM Settings (Frequency and range)
 //------------------------------------------------------------------------------
 // period      = range (max = 0xFFFF => 16bit)
 // Basic freq. = (APB2=48MHz) => TIM_CLK=48MHz
@@ -46,8 +46,8 @@
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
-#define PWM_TIM_PERIODE             0xFF /* period   (0xFF => 8bit) */
-#define PWM_TIM_PRESCALE            0xFF /* prescaler */
+#define PWM_TIM_PERIODE             199
+#define PWM_TIM_PRESCALE            24
 
 /*--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -99,7 +99,7 @@ static void led_driver_spi_config(void)
     SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
     SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
     SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_128;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_Init(LED_SPI, &SPI_InitStructure);
 
@@ -164,8 +164,8 @@ static void led_driver_timer_config(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
     /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 0xFF - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 0xFF - 1;
+    TIM_TimeBaseStructure.TIM_Period = 200 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 200 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
