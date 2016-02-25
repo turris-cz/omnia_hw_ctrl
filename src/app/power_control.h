@@ -177,10 +177,10 @@ typedef enum error_types {
 }error_type_t;
 
 typedef enum reset_types {
-    NORMAL_RESET        = 0,
-    FACTORY_RESET1      = 1,
-    FACTORY_RESET2      = 2,
-    FACTORY_RESET3      = 3
+    NORMAL_RESET            = 0,
+    PREVIOUS_SNAPSHOT       = 1,
+    NORMAL_FACTORY_RESET    = 2,
+    HARD_FACTORY_RESET      = 3
 }reset_type_t;
 
 /*******************************************************************************

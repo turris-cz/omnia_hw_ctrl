@@ -415,8 +415,13 @@ void slave_i2c_handler(void)
         {
             i2c_state->data_tx_complete = 0;
             i2c_state->tx_data_ctr = 0;
-            /* decrease button counter by the value has been sent */
-            button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+
+            /* delete reset type and button status bit from status_word */
+            if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+            {
+                i2c_state->status_word &= ~RESET_TYPE_BITS;
+                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+            }
         }
 
         DBG("STOP\r\n");

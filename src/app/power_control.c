@@ -105,17 +105,16 @@ precise. Pulse for logic '1' or '0' takes only 1 us */
 #define DELAY_BETWEEN_READINGS  20
 #define TIMEOUT                 100 /* DELAY_BETWEEN_READINGS * 100 = 2 sec */
 
-/* define for timeout handlling during factory reset */
-#define FACTORY_RESET_STATE_READING     5 /* ms */
-#define FACTORY_RESET_TIMEOFFSET        90 /* FACTORY_RESET_STATE_READING * 90 = 0.45 sec */
-#define RESET_TIMEOUT                   12 * FACTORY_RESET_TIMEOFFSET /* 5.4 sec */
+/* define for timeout handlling during reset */
+#define RESET_STATE_READING     5 /* ms */
+#define RESET_TIMEOFFSET        80 /* FACTORY_RESET_STATE_READING * 80 = 0.4 sec */
 
 typedef enum reset_states {
-    FACT_RST_INIT,
-    FACT_RST_LED_WHITE,
-    FACT_RST_LED_YELLOW,
-    FACT_RST_LED_BLUE,
-    FACT_RST_LED_RED,
+    RST_INIT,
+    RST_LED_WHITE,
+    RST_LED_YELLOW,
+    RST_LED_BLUE,
+    RST_LED_RED,
 } reset_state_t;
 
 enum PSET_values {
@@ -664,8 +663,8 @@ void power_control_usb_timeout_disable(void)
 reset_type_t power_control_first_startup(void)
 {
     reset_type_t reset_type = NORMAL_RESET;
-    reset_state_t factory_reset_state = FACT_RST_INIT;
-    uint16_t factory_reset_cnt = 0, factory_reset_led_offset = 1;
+    reset_state_t reset_state = RST_INIT;
+    uint16_t reset_cnt = 0, reset_led_offset = 1;
 
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     delay(50);
@@ -675,96 +674,106 @@ reset_type_t power_control_first_startup(void)
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
     {
         /* handle factory reset timeouts */
-        delay(FACTORY_RESET_STATE_READING);
-        factory_reset_cnt++;
+        delay(RESET_STATE_READING);
+        reset_cnt++;
 
-        if (factory_reset_cnt >= FACTORY_RESET_TIMEOFFSET)
+        if (reset_cnt >= RESET_TIMEOFFSET)
         {
-            switch (factory_reset_state)
+            switch (reset_state)
             {
-                case FACT_RST_INIT:
+                case RST_INIT:
                 {
                     led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
                     led_driver_set_led_state(LED_COUNT, LED_OFF);
                     led_driver_pwm_set_brightness(100);
-                    factory_reset_state = FACT_RST_LED_WHITE;
+                    reset_state = RST_LED_WHITE;
                 } break;
 
-                case FACT_RST_LED_WHITE:
+                case RST_LED_WHITE:
                 {
-                    reset_type = NORMAL_RESET; /* normal reset */
+                    reset_type = NORMAL_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
 
-                    if (factory_reset_led_offset > LED_COUNT)
+                    if (reset_led_offset > LED_COUNT)
                     {
-                        factory_reset_state = FACT_RST_LED_YELLOW;
-                        factory_reset_led_offset = 1;
+                        reset_state = RST_LED_YELLOW;
+                        reset_led_offset = 1;
                         led_driver_set_led_state(LED_COUNT, LED_OFF);
                         led_driver_set_colour(LED_COUNT, YELLOW_COLOUR);
                     }
                     else
                     {
-                        factory_reset_state = FACT_RST_LED_WHITE;
-                        factory_reset_led_offset++;
+                        reset_state = RST_LED_WHITE;
+                        reset_led_offset++;
                     }
                 } break;
 
-                case FACT_RST_LED_YELLOW:
+                case RST_LED_YELLOW:
                 {
-                    reset_type = FACTORY_RESET1;
+                    reset_type = PREVIOUS_SNAPSHOT;
 
-                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
 
-                    if (factory_reset_led_offset > LED_COUNT)
+                    if (reset_led_offset > LED_COUNT)
                     {
-                        factory_reset_state = FACT_RST_LED_BLUE;
-                        factory_reset_led_offset = 1;
+                        reset_state = RST_LED_BLUE;
+                        reset_led_offset = 1;
                         led_driver_set_led_state(LED_COUNT, LED_OFF);
                         led_driver_set_colour(LED_COUNT, BLUE_COLOUR);
                     }
                     else
                     {
-                        factory_reset_state = FACT_RST_LED_YELLOW;
-                        factory_reset_led_offset++;
+                        reset_state = RST_LED_YELLOW;
+                        reset_led_offset++;
                     }
 
                 } break;
 
-                case FACT_RST_LED_BLUE:
+                case RST_LED_BLUE:
                 {
-                    reset_type = FACTORY_RESET2;
+                    reset_type = NORMAL_FACTORY_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
 
-                    if(factory_reset_led_offset > LED_COUNT)
+                    if(reset_led_offset > LED_COUNT)
                     {
-                        factory_reset_state = FACT_RST_LED_RED;
-                        factory_reset_led_offset = 1;
+                        reset_state = RST_LED_RED;
+                        reset_led_offset = 1;
                         led_driver_set_led_state(LED_COUNT, LED_OFF);
                         led_driver_set_colour(LED_COUNT, RED_COLOUR);
                     }
                     else
                     {
-                        factory_reset_state = FACT_RST_LED_BLUE;
-                        factory_reset_led_offset++;
+                        reset_state = RST_LED_BLUE;
+                        reset_led_offset++;
                     }
 
                 } break;
 
-                case FACT_RST_LED_RED:
+                case RST_LED_RED:
                 {
-                    reset_type = FACTORY_RESET3;
+                    reset_type = HARD_FACTORY_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - factory_reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
 
-                    factory_reset_state = FACT_RST_LED_RED;
-                    factory_reset_led_offset++;
+                    if(reset_led_offset > LED_COUNT)
+                    {
+                        reset_state = RST_LED_WHITE; /* back to start */
+                        reset_led_offset = 1;
+                        led_driver_set_led_state(LED_COUNT, LED_OFF);
+                        led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+                    }
+                    else
+                    {
+                        reset_state = RST_LED_RED;
+                        reset_led_offset++;
+                    }
 
                 } break;
             }
 
-            factory_reset_cnt = 0;
+            reset_cnt = 0;
         }
     }
 

@@ -29,7 +29,7 @@ typedef enum {
     POWER_ON,
     LIGHT_RESET,
     HARD_RESET,
-    FACTORY_RESET,
+    RESET_MANAGER,
     LOAD_SETTINGS,
     ERROR_STATE,
     INPUT_MANAGER,

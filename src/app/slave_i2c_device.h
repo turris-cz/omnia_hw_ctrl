@@ -40,7 +40,7 @@ enum status_word_bits {
     ENABLE_4V5_STSBIT      = 0x0400,
     BUTTON_MODE_STSBIT     = 0x0800,
     BUTTON_PRESSED_STSBIT  = 0x1000,
-    BUTTON_COUNTER_VALBITS = 0xE000
+    RESET_TYPE_BITS        = 0x6000
 };
 
 typedef enum slave_i2c_states {
@@ -68,7 +68,9 @@ typedef enum slave_i2c_states {
  *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
  *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings)
  *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed
- * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode
+ * 13..14   |   RESET_TYPE      : 0 - normal reset, 1 - previous snapshot,
+ *                                2 - normal factory reset, 3 - hard factory reset
+ *     15   |   dont care
 */
 
 /*
@@ -77,7 +79,7 @@ typedef enum slave_i2c_states {
  * -----------------
  *      0   |   LIGHT_RST   : 1 - do light reset, 0 - no reset
  *      1   |   HARD_RST    : 1 - do hard reset, 0 - no reset
- *      2   |   FACTORY_RST : 1 - do factory reset, 0 - no reset
+ *      2   |   FACTORY_RST : 1 - do factory reset, 0 - no reset (not used)
  *      3   |   SFP_DIS     : 1 - SFP TX disabled; 0 - SFP TX enabled
  *      4   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
  *      5   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
