@@ -476,7 +476,7 @@ void app_mcu_cyclic(void)
         {
             reset_manager(&reset_type);
 
-            next_state = INPUT_MANAGER;
+            next_state = LOAD_SETTINGS;
         }
         break;
 
