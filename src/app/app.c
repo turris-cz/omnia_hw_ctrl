@@ -497,6 +497,7 @@ void app_mcu_cyclic(void)
             led_driver_set_led_state(LED_COUNT, LED_OFF);
             led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
+            led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
             power_control_set_power_led(); /* power led ON */
 
             next_state = INPUT_MANAGER;
