@@ -17,6 +17,8 @@
 #include "delay.h"
 #include "debounce.h"
 
+//static const volatile uint8_t version[20] = VERSION;
+
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
 

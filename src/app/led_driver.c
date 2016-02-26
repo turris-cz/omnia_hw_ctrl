@@ -31,8 +31,8 @@
 #define LED_SPI_SS_PIN_PORT         GPIOA
 #define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
-#define COLOUR_LEVELS               16
-#define COLOUR_DECIMATION           4 /* 2exp(4) = 16 colour levels */
+#define COLOUR_LEVELS               64
+#define COLOUR_DECIMATION           2
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8
 
