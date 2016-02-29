@@ -10,7 +10,7 @@ AS      = arm-none-eabi-as
 SIZE	= arm-none-eabi-size
 
 ##### Preprocessor options
-FW_VERSION = "{ `git rev-parse HEAD | sed 's/\(..\)/0x\1, /g' | sed 's/,,$///'`}"
+FW_VERSION = "{ $(shell git rev-parse HEAD | sed 's/\(..\)/0x\1, /g' | sed -r 's/,\s+$$//') }"
 
 #defines needed when working with the STM peripherals library
 DEFS 	= -DSTM32F030R8T6
@@ -18,7 +18,7 @@ DEFS   += -DSTM32F030X8
 DEFS   += -DUSE_STDPERIPH_DRIVER
 #DEFS   += -DUSE_FULL_ASSERT
 DEFS   += -D__ASSEMBLY_
-#DEFS   += -DVERSION = $(FW_VERSION)
+DEFS   += -DVERSION=$(FW_VERSION)
 
 ##### Assembler options
 
