@@ -421,7 +421,7 @@ void slave_i2c_handler(void)
             /* delete reset type and button status bit from status_word */
             if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
             {
-                i2c_state->status_word &= ~RESET_TYPE_BITS;
+               // i2c_state->status_word &= ~RESET_TYPE_BITS;
                 i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
             }
         }

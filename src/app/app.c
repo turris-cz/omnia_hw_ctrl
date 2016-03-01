@@ -147,7 +147,7 @@ static ret_value_t light_reset(reset_type_t *reset_event)
     {
         case NORMAL_RESET:
         {
-            value = OK;
+            value = RESET_MANAGER;
             *reset_event = NORMAL_RESET;
         } break;
 
@@ -187,7 +187,7 @@ static ret_value_t load_settings(void)
     struct st_i2c_status *i2c_control = &i2c_status;
 
     debounce_config(); /* start evaluation of inputs */
-    i2c_control->status_word = app_get_status_word();
+    i2c_control->status_word |= app_get_status_word();
 
     return OK;
 }
@@ -414,15 +414,32 @@ static void reset_manager(reset_type_t *reset_type)
 
     switch (*reset_type)
     {
+        case NORMAL_RESET:
+        {
+            i2c_control->status_word &= ~RESET_TYPE_BITS;
+        }
+        break;
+
         case PREVIOUS_SNAPSHOT:
+        {
+            i2c_control->status_word &= ~RESET_TYPE_BITS;
             i2c_control->status_word |= PREVIOUS_SNAPSHOT << RESET_TYPE_STARTBIT;
-            break;
+        }
+        break;
+
         case NORMAL_FACTORY_RESET:
+        {
+            i2c_control->status_word &= ~RESET_TYPE_BITS;
             i2c_control->status_word |= NORMAL_FACTORY_RESET << RESET_TYPE_STARTBIT;
-            break;
+        }
+        break;
+
         case HARD_FACTORY_RESET:
+        {
+            i2c_control->status_word &= ~RESET_TYPE_BITS;
             i2c_control->status_word |= HARD_FACTORY_RESET << RESET_TYPE_STARTBIT;
-            break;
+        }
+        break;
 
         default:
             break;
@@ -459,10 +476,7 @@ void app_mcu_cyclic(void)
         {
             val = light_reset(&reset_type);
 
-            if (val == OK)
-                next_state = LOAD_SETTINGS;
-            else
-                next_state = RESET_MANAGER;
+            next_state = RESET_MANAGER;
         }
         break;
 
