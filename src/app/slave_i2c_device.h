@@ -16,6 +16,7 @@
 
 struct st_i2c_status {
     uint16_t status_word;
+    uint8_t reset_type;
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
@@ -40,7 +41,6 @@ enum status_word_bits {
     ENABLE_4V5_STSBIT      = 0x0400,
     BUTTON_MODE_STSBIT     = 0x0800,
     BUTTON_PRESSED_STSBIT  = 0x1000,
-    RESET_TYPE_BITS        = 0x6000
 };
 
 typedef enum slave_i2c_states {
@@ -68,9 +68,15 @@ typedef enum slave_i2c_states {
  *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
  *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings)
  *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed
- * 13..14   |   RESET_TYPE      : 0 - normal reset, 1 - previous snapshot,
- *                                2 - normal factory reset, 3 - hard factory reset
- *     15   |   dont care
+ * 13..15   |   dont care
+*/
+
+/*
+ * Byte meanings in reset_byte:
+ *  Byte Nr. |   Meanings
+ * -----------------
+ *   1.B    |   RESET_TYPE      : 0 - normal reset, 1 - previous snapshot,
+ *                              2 - normal factory reset, 3 - hard factory reset
 */
 
 /*

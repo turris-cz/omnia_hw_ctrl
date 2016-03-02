@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:creation-date>2016-02-12T15:11:59.023365256</meta:creation-date><meta:editing-duration>PT2M13S</meta:editing-duration><meta:editing-cycles>7</meta:editing-cycles><meta:generator>LibreOffice/4.2.8.2$Linux_X86_64 LibreOffice_project/420m0$Build-2</meta:generator><meta:initial-creator>Jirka </meta:initial-creator><dc:date>2016-02-25T15:38:59.707394220</dc:date><dc:creator>Jirka </dc:creator><meta:document-statistic meta:table-count="0" meta:image-count="2" meta:object-count="1" meta:page-count="5" meta:paragraph-count="177" meta:word-count="1127" meta:character-count="6331" meta:non-whitespace-character-count="4539"/></office:meta>
+ <office:meta><meta:creation-date>2016-02-12T15:11:59.023365256</meta:creation-date><meta:editing-duration>PT9M9S</meta:editing-duration><meta:editing-cycles>9</meta:editing-cycles><meta:generator>LibreOffice/4.2.8.2$Linux_X86_64 LibreOffice_project/420m0$Build-2</meta:generator><meta:initial-creator>Jirka </meta:initial-creator><dc:date>2016-03-02T17:05:21.067798571</dc:date><dc:creator>Jirka </dc:creator><meta:document-statistic meta:table-count="0" meta:image-count="3" meta:object-count="0" meta:page-count="5" meta:paragraph-count="192" meta:word-count="1182" meta:character-count="6678" meta:non-whitespace-character-count="4789"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="ViewAreaTop" config:type="long">43568</config:config-item>
+   <config:config-item config:name="ViewAreaTop" config:type="long">134585</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
    <config:config-item config:name="ViewAreaWidth" config:type="long">22359</config:config-item>
    <config:config-item config:name="ViewAreaHeight" config:type="long">16914</config:config-item>
@@ -13,12 +13,12 @@
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">16813</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">52231</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">8710</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">143161</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleTop" config:type="long">43568</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">134585</config:config-item>
      <config:config-item config:name="VisibleRight" config:type="long">22357</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">60480</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">151497</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -81,9 +81,9 @@
    <config:config-item config:name="ConsiderTextWrapOnObjPos" config:type="boolean">false</config:config-item>
    <config:config-item config:name="CurrentDatabaseCommandType" config:type="int">0</config:config-item>
    <config:config-item config:name="RedlineProtectionKey" config:type="base64Binary"/>
-   <config:config-item config:name="Rsid" config:type="int">615702</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">726437</config:config-item>
    <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">jAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAsgAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6QTQARHVwbGV4Ok5vbmUAABIAQ09NUEFUX0RVUExFWF9NT0RFCgBEVVBMRVhfT0ZG</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">jAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAsgAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKRHVwbGV4Ok5vbmUAUGFnZVNpemU6QTQAABIAQ09NUEFUX0RVUExFWF9NT0RFCgBEVVBMRVhfT0ZG</config:config-item>
    <config:config-item config:name="AlignTabStopPosition" config:type="boolean">true</config:config-item>
    <config:config-item config:name="ProtectForm" config:type="boolean">false</config:config-item>
    <config:config-item config:name="InvertBorderSpacing" config:type="boolean">false</config:config-item>
@@ -117,6 +117,7 @@
   <style:font-face style:name="Curier New" svg:font-family="&apos;Curier New&apos;"/>
   <style:font-face style:name="MinionPro-Regular" svg:font-family="MinionPro-Regular"/>
   <style:font-face style:name="OpenSymbol" svg:font-family="OpenSymbol"/>
+  <style:font-face style:name="Arial2" svg:font-family="Arial" style:font-family-generic="swiss"/>
   <style:font-face style:name="Lucida Sans1" svg:font-family="&apos;Lucida Sans&apos;" style:font-family-generic="swiss"/>
   <style:font-face style:name="Courier New" svg:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed"/>
   <style:font-face style:name="Droid Sans Fallback" svg:font-family="&apos;Droid Sans Fallback&apos;" style:font-family-generic="modern" style:font-pitch="fixed"/>
@@ -525,101 +526,127 @@
    <style:text-properties style:font-name="Courier New" fo:font-size="8pt" officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981" style:font-size-asian="8pt" style:font-size-complex="8pt"/>
   </style:style>
   <style:style style:name="P40" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
-   <style:text-properties officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P41" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
-   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-  </style:style>
-  <style:style style:name="P42" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
-   <style:text-properties fo:font-size="10pt" officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-  </style:style>
-  <style:style style:name="P43" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-  </style:style>
-  <style:style style:name="P44" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
-   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false" style:page-number="auto"/>
-   <style:text-properties officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P45" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
-   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-  </style:style>
-  <style:style style:name="P46" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
-   <style:paragraph-properties fo:margin-left="1.378in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false" style:page-number="auto"/>
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
-  </style:style>
-  <style:style style:name="P47" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P48" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P49" style:family="paragraph" style:parent-style-name="Heading_20_3">
-   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P50" style:family="paragraph" style:parent-style-name="Heading_20_3">
-   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P51" style:family="paragraph" style:parent-style-name="Title">
-   <style:text-properties fo:font-size="13pt" officeooo:paragraph-rsid="0007c981" style:font-size-asian="13pt" style:font-size-complex="13pt"/>
-  </style:style>
-  <style:style style:name="P52" style:family="paragraph" style:parent-style-name="Heading_20_1">
-   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P53" style:family="paragraph" style:parent-style-name="Heading_20_1">
-   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P54" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
-   <style:text-properties officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P55" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
-   <style:text-properties officeooo:rsid="000cb6b8" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P56" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P57" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P58" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
-   <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P59" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L5">
-   <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P60" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
-   <style:text-properties fo:color="#ff3333" fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" officeooo:rsid="0030bf50" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
-  </style:style>
-  <style:style style:name="P61" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L6">
-   <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P62" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L7">
-   <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P63" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
-   <style:text-properties officeooo:rsid="002d849f" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P64" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
-   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="002c0b9b" officeooo:paragraph-rsid="0007c981" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
-  </style:style>
-  <style:style style:name="P65" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
    <style:text-properties style:use-window-font-color="true" style:font-name="Curier New" fo:font-size="9pt" officeooo:paragraph-rsid="00096516" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
-  <style:style style:name="P66" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P41" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
    <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" officeooo:paragraph-rsid="00096516" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
-  <style:style style:name="P67" style:family="paragraph" style:parent-style-name="Heading_20_1">
+  <style:style style:name="P42" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P43" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P44" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P45" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P46" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false" style:page-number="auto"/>
+   <style:text-properties officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P47" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P48" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
+   <style:paragraph-properties fo:margin-left="1.378in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false" style:page-number="auto"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="0007c981" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+  </style:style>
+  <style:style style:name="P49" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P50" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:text-properties officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P68" style:family="paragraph" style:parent-style-name="Heading_20_1">
+  <style:style style:name="P51" style:family="paragraph" style:parent-style-name="Heading_20_3">
    <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P52" style:family="paragraph" style:parent-style-name="Heading_20_3">
+   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P53" style:family="paragraph" style:parent-style-name="Title">
+   <style:text-properties fo:font-size="13pt" officeooo:paragraph-rsid="0007c981" style:font-size-asian="13pt" style:font-size-complex="13pt"/>
+  </style:style>
+  <style:style style:name="P54" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P55" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P56" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+   <style:text-properties officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P57" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+   <style:text-properties officeooo:rsid="000cb6b8" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P58" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P59" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P60" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
+   <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P61" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L5">
+   <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P62" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
+   <style:text-properties fo:color="#ff3333" fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" officeooo:rsid="0030bf50" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="P63" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L6">
+   <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P64" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L7">
+   <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P65" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties officeooo:rsid="002d849f" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P66" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P67" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="P68" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="P69" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="000b15a5" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P70" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties style:font-name="Arial2" fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="P71" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties style:use-window-font-color="true" style:font-name="Arial2" fo:font-size="10pt" officeooo:paragraph-rsid="000b15a5" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P72" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="0039fb3b" officeooo:paragraph-rsid="0007c981" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="P73" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="000b15a5" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P74" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P75" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P76" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0in" style:contextual-spacing="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties style:use-window-font-color="true" style:font-name="Arial2" fo:font-size="10pt" officeooo:paragraph-rsid="000b15a5" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T1" style:family="text">
    <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
@@ -706,91 +733,121 @@
    <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" officeooo:rsid="002edb1a" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T29" style:family="text">
-   <style:text-properties officeooo:rsid="001f98c1"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f"/>
   </style:style>
   <style:style style:name="T30" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties officeooo:rsid="001f98c1"/>
   </style:style>
   <style:style style:name="T31" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T32" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001cff47" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T33" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:font-style="italic" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001cff47" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T34" style:family="text">
-   <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-size="10pt" fo:font-style="italic" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T35" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T36" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="002d849f" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T37" style:family="text">
-   <style:text-properties officeooo:rsid="0020e1a4"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="002d849f" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T38" style:family="text">
-   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="0020e1a4" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000b15a5" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T39" style:family="text">
-   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="003da210" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties officeooo:rsid="0020e1a4"/>
   </style:style>
   <style:style style:name="T40" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="00269971"/>
+   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="0020e1a4" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
   <style:style style:name="T41" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="0024cd52"/>
+   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="003da210" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
   <style:style style:name="T42" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="002edb1a"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="00269971"/>
   </style:style>
   <style:style style:name="T43" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="003556c8"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="0024cd52"/>
   </style:style>
   <style:style style:name="T44" style:family="text">
-   <style:text-properties officeooo:rsid="003bb963"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="002edb1a"/>
   </style:style>
   <style:style style:name="T45" style:family="text">
-   <style:text-properties officeooo:rsid="0024cd52"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="003556c8"/>
   </style:style>
   <style:style style:name="T46" style:family="text">
-   <style:text-properties fo:font-size="12pt" fo:language="en" fo:country="US" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties officeooo:rsid="003bb963"/>
   </style:style>
   <style:style style:name="T47" style:family="text">
-   <style:text-properties officeooo:rsid="003610be"/>
+   <style:text-properties officeooo:rsid="0024cd52"/>
   </style:style>
   <style:style style:name="T48" style:family="text">
-   <style:text-properties officeooo:rsid="002edb1a"/>
+   <style:text-properties fo:font-size="12pt" fo:language="en" fo:country="US" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T49" style:family="text">
-   <style:text-properties officeooo:rsid="0034d44a"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="001d126c" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T50" style:family="text">
-   <style:text-properties officeooo:rsid="003556c8"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T51" style:family="text">
-   <style:text-properties officeooo:rsid="0007c981"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="002c59c6" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T52" style:family="text">
-   <style:text-properties fo:color="#c0c0c0"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="000b15a5" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T53" style:family="text">
-   <style:text-properties fo:color="#008000"/>
+   <style:text-properties officeooo:rsid="003610be"/>
   </style:style>
   <style:style style:name="T54" style:family="text">
-   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="002c0b9b" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties officeooo:rsid="002edb1a"/>
   </style:style>
   <style:style style:name="T55" style:family="text">
-   <style:text-properties style:font-name="Courier New"/>
+   <style:text-properties officeooo:rsid="0034d44a"/>
   </style:style>
   <style:style style:name="T56" style:family="text">
-   <style:text-properties style:font-name="Courier New" officeooo:rsid="00096516"/>
+   <style:text-properties officeooo:rsid="003556c8"/>
   </style:style>
   <style:style style:name="T57" style:family="text">
+   <style:text-properties officeooo:rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="T58" style:family="text">
+   <style:text-properties fo:color="#c0c0c0"/>
+  </style:style>
+  <style:style style:name="T59" style:family="text">
+   <style:text-properties fo:color="#008000"/>
+  </style:style>
+  <style:style style:name="T60" style:family="text">
+   <style:text-properties fo:color="#008000" officeooo:rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="T61" style:family="text">
+   <style:text-properties style:font-name="Courier New"/>
+  </style:style>
+  <style:style style:name="T62" style:family="text">
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="002c0b9b" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="T63" style:family="text">
+   <style:text-properties style:font-name="Courier New" officeooo:rsid="00096516"/>
+  </style:style>
+  <style:style style:name="T64" style:family="text">
    <style:text-properties officeooo:rsid="00096516"/>
+  </style:style>
+  <style:style style:name="T65" style:family="text">
+   <style:text-properties fo:color="#000000"/>
+  </style:style>
+  <style:style style:name="T66" style:family="text">
+   <style:text-properties fo:color="#000000" officeooo:rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="T67" style:family="text">
+   <style:text-properties officeooo:rsid="000b15a5"/>
   </style:style>
   <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Graphics">
    <style:graphic-properties style:protect="size position" style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0in, 0in, 0in, 0in)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
@@ -798,8 +855,8 @@
   <style:style style:name="fr2" style:family="graphic" style:parent-style-name="Graphics">
    <style:graphic-properties style:protect="size position" style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="page-start-margin" style:mirror="none" fo:clip="rect(0in, 0in, 0in, 0in)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
   </style:style>
-  <style:style style:name="fr3" style:family="graphic" style:parent-style-name="OLE">
-   <style:graphic-properties style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph" draw:ole-draw-aspect="1"/>
+  <style:style style:name="fr3" style:family="graphic" style:parent-style-name="Graphics">
+   <style:graphic-properties style:mirror="none" fo:clip="rect(0in, 0in, 0in, 0in)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
   </style:style>
   <text:list-style style:name="L1">
    <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" text:bullet-char="•">
@@ -3712,7 +3769,7 @@
        </office:binary-data>
       </draw:image>
      </draw:frame><text:span text:style-name="T1">CZ.NIC</text:span>, z. s. p. o.<text:tab/>IČ 67985726 <text:tab/>T<text:tab/>+420 222 745 111<text:tab/>kontakt@nic.cz<text:tab/></text:p>
-    <text:p text:style-name="P3"><text:span text:style-name="T2">Milešovská</text:span> <text:span text:style-name="T2">5</text:span>, 1<text:span text:style-name="T2">3</text:span>0 00 Prague <text:span text:style-name="T2">3</text:span><text:tab/>DIČ CZ67985726<text:tab/>M<text:tab/>+420 731 657 660<text:tab/>www.nic.cz<text:tab/><text:span text:style-name="T1"><text:page-number text:select-page="current">2</text:page-number></text:span><text:span text:style-name="T1">/</text:span><text:span text:style-name="T1"><text:page-count>5</text:page-count></text:span></text:p>
+    <text:p text:style-name="P3"><text:span text:style-name="T2">Milešovská</text:span> <text:span text:style-name="T2">5</text:span>, 1<text:span text:style-name="T2">3</text:span>0 00 Prague <text:span text:style-name="T2">3</text:span><text:tab/>DIČ CZ67985726<text:tab/>M<text:tab/>+420 731 657 660<text:tab/>www.nic.cz<text:tab/><text:span text:style-name="T1"><text:page-number text:select-page="current">5</text:page-number></text:span><text:span text:style-name="T1">/</text:span><text:span text:style-name="T1"><text:page-count>5</text:page-count></text:span></text:p>
     <text:p text:style-name="P4"/>
     <text:p text:style-name="P5">CZ.NIC is an interest association of legal entities, recorded in the Associations register maintained by the Municipal court in Prague, File ref.: L 58624.</text:p>
    </style:footer>
@@ -3737,29 +3794,29 @@
     <text:sequence-decl text:display-outline-level="0" text:name="Text"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
    </text:sequence-decls>
-   <text:p text:style-name="P51"><text:span text:style-name="T7">Turris Omnia - d</text:span>escription of I2C communication between MCU and <text:span text:style-name="T51">main</text:span> CPU </text:p>
+   <text:p text:style-name="P53"><text:span text:style-name="T7">Turris Omnia - d</text:span>escription of I2C communication between MCU and <text:span text:style-name="T57">main</text:span> CPU </text:p>
    <text:p text:style-name="P13"/>
-   <text:h text:style-name="P52" text:outline-level="1"><text:span text:style-name="T1">A</text:span><text:span text:style-name="T4">d</text:span><text:span text:style-name="T1">dre</text:span><text:span text:style-name="T4">s</text:span><text:span text:style-name="T1">s, </text:span><text:span text:style-name="T4">timing</text:span></text:h>
-   <text:list xml:id="list2482497644277515405" text:style-name="L1">
+   <text:h text:style-name="P54" text:outline-level="1"><text:span text:style-name="T1">A</text:span><text:span text:style-name="T4">d</text:span><text:span text:style-name="T1">dre</text:span><text:span text:style-name="T4">s</text:span><text:span text:style-name="T1">s, </text:span><text:span text:style-name="T4">timing</text:span></text:h>
+   <text:list xml:id="list8408679888495125798" text:style-name="L1">
     <text:list-item>
-     <text:p text:style-name="P54"><text:span text:style-name="T8">c</text:span>urrent I2C address of MCU</text:p>
+     <text:p text:style-name="P56"><text:span text:style-name="T8">c</text:span>urrent I2C address of MCU</text:p>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P55">0x<text:span text:style-name="T9">2A</text:span></text:p>
+       <text:p text:style-name="P57">0x<text:span text:style-name="T9">2A</text:span></text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P55">I2C <text:span text:style-name="T10">timing</text:span> / <text:span text:style-name="T10">speed</text:span> </text:p>
+     <text:p text:style-name="P57">I2C <text:span text:style-name="T10">timing</text:span> / <text:span text:style-name="T10">speed</text:span> </text:p>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P55">100kHz </text:p>
+       <text:p text:style-name="P57">100kHz </text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
    </text:list>
    <text:p text:style-name="P13"/>
-   <text:h text:style-name="P53" text:outline-level="1">Commands <text:span text:style-name="T51">(= register addresses)</text:span></text:h>
+   <text:h text:style-name="P55" text:outline-level="1">Commands <text:span text:style-name="T57">(= register addresses)</text:span></text:h>
    <text:p text:style-name="P33"/>
    <text:p text:style-name="P34">enum i2c_commands {</text:p>
    <text:p text:style-name="P34"><text:s text:c="4"/>CMD_GET_STATUS_WORD <text:s text:c="16"/>= 0x01, /* slave sends status word back */</text:p>
@@ -3769,551 +3826,347 @@
    <text:p text:style-name="P34"><text:s text:c="4"/>CMD_LED_COLOUR <text:s text:c="21"/>= 0x05, /* LED number + RED + GREEN + BLUE */</text:p>
    <text:p text:style-name="P34"><text:s text:c="4"/>CMD_USER_VOLTAGE <text:s text:c="19"/>= 0x06,</text:p>
    <text:p text:style-name="P34"><text:s text:c="4"/>CMD_SET_BRIGHTNESS <text:s text:c="17"/>= 0x07,</text:p>
-   <text:p text:style-name="P34"><text:s text:c="4"/>CMD_GET_BRIGHTNESS <text:s text:c="17"/>= 0x08</text:p>
+   <text:p text:style-name="P34"><text:s text:c="4"/>CMD_GET_BRIGHTNESS <text:s text:c="17"/>= 0x08,</text:p>
+   <text:p text:style-name="P34"><text:s/><text:span text:style-name="T65"><text:s text:c="3"/></text:span><text:span text:style-name="T66">CMD_GET_RESET<text:tab/><text:tab/><text:tab/><text:tab/> = 0x09,</text:span></text:p>
    <text:p text:style-name="P34">};</text:p>
    <text:p text:style-name="P13"/>
-   <text:h text:style-name="P53" text:outline-level="1">Communication</text:h>
-   <text:p text:style-name="P47"/>
-   <text:p text:style-name="P48"><draw:frame draw:style-name="fr3" draw:name="Objekt1" text:anchor-type="paragraph" svg:width="6.9161in" svg:height="1.9972in" draw:z-index="10"><draw:object>
-      <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.spreadsheet">
-       <office:meta><meta:generator>LibreOffice/4.2.8.2$Linux_X86_64 LibreOffice_project/420m0$Build-2</meta:generator><dc:date>2016-02-25T15:38:43.008272232</dc:date><dc:creator>Jirka </dc:creator><meta:editing-duration>PT5M10S</meta:editing-duration><meta:editing-cycles>3</meta:editing-cycles><meta:document-statistic meta:table-count="1" meta:cell-count="55" meta:object-count="0"/></office:meta>
-       <office:settings>
-        <config:config-item-set config:name="ooo:view-settings">
-         <config:config-item config:name="VisibleAreaTop" config:type="int">451</config:config-item>
-         <config:config-item config:name="VisibleAreaLeft" config:type="int">0</config:config-item>
-         <config:config-item config:name="VisibleAreaWidth" config:type="int">21477</config:config-item>
-         <config:config-item config:name="VisibleAreaHeight" config:type="int">5189</config:config-item>
-         <config:config-item-map-indexed config:name="Views">
-          <config:config-item-map-entry>
-           <config:config-item config:name="ActiveTable" config:type="string">List1</config:config-item>
-          </config:config-item-map-entry>
-         </config:config-item-map-indexed>
-        </config:config-item-set>
-        <config:config-item-set config:name="ooo:configuration-settings">
-         <config:config-item config:name="LoadReadonly" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="IsDocumentShared" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="IsKernAsianPunctuation" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="CharacterCompressionType" config:type="short">0</config:config-item>
-         <config:config-item config:name="PrinterSetup" config:type="base64Binary">jAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAsgAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKRHVwbGV4Ok5vbmUAUGFnZVNpemU6QTQAABIAQ09NUEFUX0RVUExFWF9NT0RFCgBEVVBMRVhfT0ZG</config:config-item>
-         <config:config-item config:name="PrinterName" config:type="string">Generic Printer</config:config-item>
-         <config:config-item config:name="UpdateFromTemplate" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="AutoCalculate" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="EmbedFonts" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="RasterIsVisible" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="IsSnapToRaster" config:type="boolean">false</config:config-item>
-         <config:config-item config:name="RasterSubdivisionX" config:type="int">1</config:config-item>
-         <config:config-item config:name="IsOutlineSymbolsSet" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="AllowPrintJobCancel" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="RasterResolutionX" config:type="int">1000</config:config-item>
-         <config:config-item config:name="HasSheetTabs" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="LinkUpdateMode" config:type="short">3</config:config-item>
-         <config:config-item config:name="IsRasterAxisSynchronized" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="ShowPageBreaks" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="HasColumnRowHeaders" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="GridColor" config:type="long">12632256</config:config-item>
-         <config:config-item config:name="ShowGrid" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="RasterSubdivisionY" config:type="int">1</config:config-item>
-         <config:config-item config:name="RasterResolutionY" config:type="int">1000</config:config-item>
-         <config:config-item config:name="ShowNotes" config:type="boolean">true</config:config-item>
-         <config:config-item config:name="ShowZeroValues" config:type="boolean">true</config:config-item>
-        </config:config-item-set>
-       </office:settings>
-       <office:scripts>
-        <office:script script:language="ooo:Basic">
-         <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <ooo:library-embedded ooo:name="Standard"/>
-         </ooo:libraries>
-        </office:script>
-       </office:scripts>
-       <office:font-face-decls>
-        <style:font-face style:name="Liberation Sans" svg:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
-        <style:font-face style:name="DejaVu Sans" svg:font-family="&apos;DejaVu Sans&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
-        <style:font-face style:name="Mangal" svg:font-family="Mangal" style:font-family-generic="system" style:font-pitch="variable"/>
-        <style:font-face style:name="Microsoft YaHei" svg:font-family="&apos;Microsoft YaHei&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
-        <style:font-face style:name="Segoe UI" svg:font-family="&apos;Segoe UI&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
-        <style:font-face style:name="Tahoma" svg:font-family="Tahoma" style:font-family-generic="system" style:font-pitch="variable"/>
-       </office:font-face-decls>
-       <office:styles>
-        <style:default-style style:family="table-cell">
-         <style:paragraph-properties style:tab-stop-distance="0.4921in"/>
-         <style:text-properties style:font-name="Liberation Sans" fo:language="cs" fo:country="CZ" style:font-name-asian="Segoe UI" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Tahoma" style:language-complex="hi" style:country-complex="IN"/>
-        </style:default-style>
-        <number:number-style style:name="N0">
-         <number:number number:min-integer-digits="1"/>
-        </number:number-style>
-        <number:currency-style style:name="N121P0" style:volatile="true">
-         <number:number number:decimal-places="2" number:min-integer-digits="1" number:grouping="true"/>
-         <number:text> </number:text>
-         <number:currency-symbol number:language="cs" number:country="CZ">Kč</number:currency-symbol>
-        </number:currency-style>
-        <number:currency-style style:name="N121">
-         <style:text-properties fo:color="#ff0000"/>
-         <number:text>-</number:text>
-         <number:number number:decimal-places="2" number:min-integer-digits="1" number:grouping="true"/>
-         <number:text> </number:text>
-         <number:currency-symbol number:language="cs" number:country="CZ">Kč</number:currency-symbol>
-         <style:map style:condition="value()&gt;=0" style:apply-style-name="N121P0"/>
-        </number:currency-style>
-        <style:style style:name="Default" style:family="table-cell">
-         <style:text-properties style:font-name-asian="Microsoft YaHei" style:font-family-asian="&apos;Microsoft YaHei&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-name-complex="Mangal" style:font-family-complex="Mangal" style:font-family-generic-complex="system" style:font-pitch-complex="variable"/>
-        </style:style>
-        <style:style style:name="Result" style:family="table-cell" style:parent-style-name="Default">
-         <style:text-properties fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold"/>
-        </style:style>
-        <style:style style:name="Result2" style:family="table-cell" style:parent-style-name="Result" style:data-style-name="N121"/>
-        <style:style style:name="Heading" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
-         <style:paragraph-properties fo:text-align="center"/>
-         <style:text-properties fo:font-size="16pt" fo:font-style="italic" fo:font-weight="bold"/>
-        </style:style>
-        <style:style style:name="Heading1" style:family="table-cell" style:parent-style-name="Heading">
-         <style:table-cell-properties style:rotation-angle="90"/>
-        </style:style>
-       </office:styles>
-       <office:automatic-styles>
-        <style:style style:name="co1" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="2.1547in"/>
-        </style:style>
-        <style:style style:name="co2" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="1.328in"/>
-        </style:style>
-        <style:style style:name="co3" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="1.2516in"/>
-        </style:style>
-        <style:style style:name="co4" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="1.3492in"/>
-        </style:style>
-        <style:style style:name="co5" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="1.1319in"/>
-        </style:style>
-        <style:style style:name="co6" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="1.2402in"/>
-        </style:style>
-        <style:style style:name="co7" style:family="table-column">
-         <style:table-column-properties fo:break-before="auto" style:column-width="0.889in"/>
-        </style:style>
-        <style:style style:name="ro1" style:family="table-row">
-         <style:table-row-properties style:row-height="0.178in" fo:break-before="auto" style:use-optimal-row-height="true"/>
-        </style:style>
-        <style:style style:name="ro2" style:family="table-row">
-         <style:table-row-properties style:row-height="0.3311in" fo:break-before="auto" style:use-optimal-row-height="false"/>
-        </style:style>
-        <style:style style:name="ro3" style:family="table-row">
-         <style:table-row-properties style:row-height="0.2898in" fo:break-before="auto" style:use-optimal-row-height="false"/>
-        </style:style>
-        <style:style style:name="ta1" style:family="table" style:master-page-name="Default">
-         <style:table-properties table:display="true" style:writing-mode="lr-tb"/>
-        </style:style>
-        <style:style style:name="ce1" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties fo:border-bottom="0.74pt solid #000000" fo:border-left="0.74pt solid #000000" fo:border-right="none" fo:border-top="0.74pt solid #000000"/>
-         <style:text-properties fo:font-size="12pt" fo:font-weight="bold" style:font-size-asian="12pt" style:font-weight-asian="bold" style:font-size-complex="12pt" style:font-weight-complex="bold"/>
-        </style:style>
-        <style:style style:name="ce2" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:border="0.74pt solid #000000"/>
-         <style:paragraph-properties fo:text-align="center" fo:margin-left="0in"/>
-         <style:text-properties fo:font-size="11pt" fo:font-weight="bold" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
-        </style:style>
-        <style:style style:name="ce3" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:border="0.74pt solid #000000"/>
-         <style:paragraph-properties fo:text-align="center" fo:margin-left="0in"/>
-         <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-        </style:style>
-        <style:style style:name="ce4" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:border="0.74pt solid #000000"/>
-         <style:paragraph-properties fo:text-align="center" fo:margin-left="0in"/>
-        </style:style>
-        <style:style style:name="ce5" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties fo:border-bottom="0.74pt solid #000000" fo:border-left="none" fo:border-right="none" fo:border-top="0.74pt solid #000000"/>
-         <style:text-properties fo:font-size="12pt" fo:font-weight="bold" style:font-size-asian="12pt" style:font-weight-asian="bold" style:font-size-complex="12pt" style:font-weight-complex="bold"/>
-        </style:style>
-        <style:style style:name="ce6" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties fo:border-bottom="0.74pt solid #000000" fo:border-left="none" fo:border-right="0.74pt solid #000000" fo:border-top="0.74pt solid #000000"/>
-         <style:text-properties fo:font-size="12pt" fo:font-weight="bold" style:font-size-asian="12pt" style:font-weight-asian="bold" style:font-size-complex="12pt" style:font-weight-complex="bold"/>
-        </style:style>
-        <style:style style:name="ce7" style:family="table-cell" style:parent-style-name="Default">
-         <style:table-cell-properties fo:border="0.74pt solid #000000"/>
-         <style:text-properties fo:font-size="12pt" fo:font-weight="bold" style:font-size-asian="12pt" style:font-weight-asian="bold" style:font-size-complex="12pt" style:font-weight-complex="bold"/>
-        </style:style>
-        <style:page-layout style:name="pm1">
-         <style:page-layout-properties style:writing-mode="lr-tb"/>
-         <style:header-style>
-          <style:header-footer-properties fo:min-height="0.2953in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-bottom="0.0984in"/>
-         </style:header-style>
-         <style:footer-style>
-          <style:header-footer-properties fo:min-height="0.2953in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.0984in"/>
-         </style:footer-style>
-        </style:page-layout>
-        <style:page-layout style:name="pm2">
-         <style:page-layout-properties style:writing-mode="lr-tb"/>
-         <style:header-style>
-          <style:header-footer-properties fo:min-height="0.2953in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-bottom="0.0984in" fo:border="2.49pt solid #000000" fo:padding="0.0071in" fo:background-color="#c0c0c0">
-           <style:background-image/>
-          </style:header-footer-properties>
-         </style:header-style>
-         <style:footer-style>
-          <style:header-footer-properties fo:min-height="0.2953in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.0984in" fo:border="2.49pt solid #000000" fo:padding="0.0071in" fo:background-color="#c0c0c0">
-           <style:background-image/>
-          </style:header-footer-properties>
-         </style:footer-style>
-        </style:page-layout>
-       </office:automatic-styles>
-       <office:master-styles>
-        <style:master-page style:name="Default" style:page-layout-name="pm1">
-         <style:header>
-          <text:p><text:sheet-name>???</text:sheet-name></text:p>
-         </style:header>
-         <style:header-left style:display="false"/>
-         <style:footer>
-          <text:p>Stránka <text:page-number>1</text:page-number></text:p>
-         </style:footer>
-         <style:footer-left style:display="false"/>
-        </style:master-page>
-        <style:master-page style:name="Report" style:page-layout-name="pm2">
-         <style:header>
-          <style:region-left>
-           <text:p><text:sheet-name>???</text:sheet-name> (<text:title>???</text:title>)</text:p>
-          </style:region-left>
-          <style:region-right>
-           <text:p><text:date style:data-style-name="N2" text:date-value="2016-02-25">00/00/0000</text:date>, <text:time style:data-style-name="N2" text:time-value="15:35:44.642523569">00:00:00</text:time></text:p>
-          </style:region-right>
-         </style:header>
-         <style:header-left style:display="false"/>
-         <style:footer>
-          <text:p>Stránka <text:page-number>1</text:page-number> / <text:page-count>99</text:page-count></text:p>
-         </style:footer>
-         <style:footer-left style:display="false"/>
-        </style:master-page>
-       </office:master-styles>
-       <office:body>
-        <office:spreadsheet>
-         <table:table table:name="List1" table:style-name="ta1">
-          <table:table-column table:style-name="co1" table:default-cell-style-name="ce3"/>
-          <table:table-column table:style-name="co2" table:default-cell-style-name="ce3"/>
-          <table:table-column table:style-name="co3" table:default-cell-style-name="ce3"/>
-          <table:table-column table:style-name="co4" table:default-cell-style-name="ce3"/>
-          <table:table-column table:style-name="co5" table:default-cell-style-name="ce3"/>
-          <table:table-column table:style-name="co6" table:default-cell-style-name="ce3"/>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell table:style-name="Default" table:number-columns-repeated="6"/>
-          </table:table-row>
-          <table:table-row table:style-name="ro2">
-           <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string" table:number-columns-spanned="3" table:number-rows-spanned="1">
-            <text:p>Master request (CPU)</text:p>
-           </table:table-cell>
-           <table:covered-table-cell table:number-columns-repeated="2" table:style-name="ce5"/>
-           <table:table-cell table:style-name="ce6"/>
-           <table:table-cell table:style-name="ce7" office:value-type="string" calcext:value-type="string" table:number-columns-spanned="2" table:number-rows-spanned="1">
-            <text:p>Slave response (MCU)</text:p>
-           </table:table-cell>
-           <table:covered-table-cell table:style-name="ce7"/>
-          </table:table-row>
-          <table:table-row table:style-name="ro3">
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>basic command</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>data type</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>data lenght [B]</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>frame lenght [B]</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>data type</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce2" office:value-type="string" calcext:value-type="string">
-            <text:p>data lenght [B]</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_GET_STATUS_WORD</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-           <table:table-cell/>
-           <table:table-cell office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>status_word</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_GENERAL_CONTROL</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>control_byte</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_LED_MODE</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>led_mode_byte</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_LED_STATE</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>led_state_byte</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_LED_COLOUR</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="string" calcext:value-type="string">
-            <text:p>led_colour</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="4" calcext:value-type="float">
-            <text:p>4</text:p>
-           </table:table-cell>
-           <table:table-cell office:value-type="float" office:value="5" calcext:value-type="float">
-            <text:p>5</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_USER_VOLTAGE</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>user_voltage_byte</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_SET_BRIGHTNESS</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>brightness_byte</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="float" office:value="2" calcext:value-type="float">
-            <text:p>2</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="2" table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-          </table:table-row>
-          <table:table-row table:style-name="ro1">
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>CMD_GET_BRIGHTNESS</text:p>
-           </table:table-cell>
-           <table:table-cell table:number-columns-repeated="3" table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>-</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="string" calcext:value-type="string">
-            <text:p>brightness_byte</text:p>
-           </table:table-cell>
-           <table:table-cell table:style-name="ce4" office:value-type="float" office:value="1" calcext:value-type="float">
-            <text:p>1</text:p>
-           </table:table-cell>
-          </table:table-row>
-         </table:table>
-         <table:named-expressions/>
-        </office:spreadsheet>
-       </office:body>
-      </office:document>
-     </draw:object><draw:image>
-      <office:binary-data>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
-       LgAAHgUAAPouAADbFQAA7C4AAOkVAADeLgAA2xUAAN4uAAAeBQAA7C4AABAFAAAAAIUAAQAF
-       AAAAAAAAAAGEAAEABQAAAAAAAAAAbwACAD4AAAABAAcAQTwAAMIBAABPPAAA0AEAAE88AADb
-       FQAAQTwAAOkVAAAzPAAA2xUAADM8AADQAQAAQTwAAMIBAAAAAIUAAQAFAAAAAAAAAAGEAAEA
-       BQAAAAAAAAAAbwACAD4AAAABAAcAa0cAABAFAAB5RwAAHgUAAHlHAADbFQAAa0cAAOkVAABd
-       RwAA2xUAAF1HAAAeBQAAa0cAABAFAAAAAIUAAQAFAAAAAAAAAAGEAAEABQAAAAAAAAAAbwAC
-       AD4AAAABAAcAt1MAAMIBAADFUwAAtAEAAMVTAAD3FQAAt1MAAOkVAACpUwAA2xUAAKlTAADQ
-       AQAAt1MAAMIBAAAAAIoAAQBBAAAAAwA7AAAADwBMaWJlcmF0aW9uIFNhbnMAAAAAAACnAQAA
-       TAAFAAIACAAAAAAAAAAFBAAAAAAAAAAAAP8DAAAAAACIAAEAAgAAAAEAhwABAAUAAAD/////
-       AIYAAQAEAAAAAAAAAJEAAQAFAAAA/////wGXAAEABQAAAP////8BcQACAKAAAAAkAAAAegQA
-       ABQATWFzdGVyIHJlcXVlc3QgKENQVSkAABQAFAAAAFgBAABGAgAANAMAALkDAACnBAAARQUA
-       AK8FAABOBgAAPAcAAEUIAABNCQAAOwoAACoLAACuCwAAGAwAAJwMAADZDQAA/A4AADoQAAC+
-       EAAAFABNAGEAcwB0AGUAcgAgAHIAZQBxAHUAZQBzAHQAIAAoAEMAUABVACkAcQACAKAAAABl
-       PAAAegQAABQAU2xhdmUgcmVzcG9uc2UgKE1DVSkAABQAFAAAACMBAACNAQAAewIAAGkDAABX
-       BAAAwQQAAGAFAABOBgAAPAcAAEUIAABNCQAAVgoAAEQLAAAyDAAAnAwAACANAAB4DgAAtg8A
-       APMQAAB3EQAAFABTAGwAYQB2AGUAIAByAGUAcwBwAG8AbgBzAGUAIAAoAE0AQwBVACkAigAB
-       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
+   <text:h text:style-name="P55" text:outline-level="1">Communication</text:h>
+   <text:p text:style-name="P49"/>
+   <text:p text:style-name="P50"><draw:frame draw:style-name="fr3" draw:name="Image1" text:anchor-type="paragraph" svg:width="6.6929in" svg:height="1.7555in" draw:z-index="10"><draw:image>
+      <office:binary-data>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
       </office:binary-data>
      </draw:image>
-     <svg:desc>OLE-object</svg:desc>
     </draw:frame></text:p>
-   <text:p text:style-name="P48"/>
-   <text:p text:style-name="P48"/>
-   <text:p text:style-name="P48"/>
-   <text:h text:style-name="P52" text:outline-level="1"><text:soft-page-break/><text:span text:style-name="T1">Dat</text:span><text:span text:style-name="T5">a types</text:span></text:h>
-   <text:list xml:id="list1127416710659557513" text:style-name="L2">
+   <text:p text:style-name="P50"/>
+   <text:p text:style-name="P50"/>
+   <text:p text:style-name="P50"/>
+   <text:h text:style-name="P54" text:outline-level="1"><text:soft-page-break/><text:span text:style-name="T1">Dat</text:span><text:span text:style-name="T5">a types</text:span></text:h>
+   <text:list xml:id="list4357263497423332319" text:style-name="L2">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P56">status_word</text:p>
+       <text:p text:style-name="P58">status_word</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4335,9 +4188,9 @@
    <text:p text:style-name="P35"><text:s/>* <text:s text:c="4"/>10 <text:s text:c="2"/>| <text:s text:c="2"/>ENABLE_4V5 <text:s text:c="5"/>: 1 - 4.5V power is enabled, 0 - 4.5V power is disabled</text:p>
    <text:p text:style-name="P35"><text:s/>* <text:s text:c="4"/>11 <text:s text:c="2"/>| <text:s text:c="2"/>BUTTON_MODE <text:s text:c="4"/>: 1 - user mode, 0 - default mode (brightness settings)</text:p>
    <text:p text:style-name="P35"><text:s/>* <text:s text:c="4"/>12 <text:s text:c="2"/>| <text:s text:c="2"/>BUTTON_PRESSED <text:s/>: 1 - button pressed in user mode, 0 - button not pressed</text:p>
-   <text:p text:style-name="P66">* <text:s/>13..14 <text:s text:c="2"/>| <text:s text:c="2"/>RESET_TYPE <text:s text:c="5"/>: 0 - normal reset, 1 - previous snapshot,</text:p>
-   <text:p text:style-name="P66">* <text:s text:c="31"/>2 - normal factory reset, 3 - hard factory reset</text:p>
-   <text:p text:style-name="P65"><text:span text:style-name="T55">* <text:s text:c="4"/><text:tab/>15 <text:s text:c="3"/></text:span><text:span text:style-name="T56">|</text:span><text:span text:style-name="T55"> <text:s text:c="2"/>dont car</text:span>e</text:p>
+   <text:p text:style-name="P41">* <text:s/>13..14 <text:s text:c="2"/>| <text:s text:c="2"/>RESET_TYPE <text:s text:c="5"/>: 0 - normal reset, 1 - previous snapshot,</text:p>
+   <text:p text:style-name="P41">* <text:s text:c="31"/>2 - normal factory reset, 3 - hard factory reset</text:p>
+   <text:p text:style-name="P40"><text:span text:style-name="T61">* <text:s text:c="4"/><text:tab/>15 <text:s text:c="3"/></text:span><text:span text:style-name="T63">|</text:span><text:span text:style-name="T61"> <text:s text:c="2"/>dont car</text:span>e</text:p>
    <text:p text:style-name="P35"/>
    <text:p text:style-name="P35">*/</text:p>
    <text:p text:style-name="P16"/>
@@ -4352,11 +4205,11 @@
    <text:p text:style-name="P18"><text:tab/>1 – „address of register“ = command</text:p>
    <text:p text:style-name="P18"><text:tab/>w – word data type</text:p>
    <text:p text:style-name="P17"/>
-   <text:list xml:id="list5349469022523885539" text:style-name="L3">
+   <text:list xml:id="list4176277741965517248" text:style-name="L3">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P57">control_byte</text:p>
+       <text:p text:style-name="P59">control_byte</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4368,7 +4221,7 @@
    <text:p text:style-name="P36"><text:s/>* -----------------</text:p>
    <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>0 <text:s text:c="2"/>| <text:s text:c="2"/>LIGHT_RST <text:s text:c="2"/>: 1 - do light reset, 0 - no reset</text:p>
    <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>1 <text:s text:c="2"/>| <text:s text:c="2"/>HARD_RST <text:s text:c="3"/>: 1 - do hard reset, 0 - no reset</text:p>
-   <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>2 <text:s text:c="2"/>| <text:s text:c="2"/>FACTORY_RST : 1 - do factory reset, 0 - no reset <text:span text:style-name="T57">(not used)</text:span></text:p>
+   <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>2 <text:s text:c="2"/>| <text:s text:c="2"/>FACTORY_RST : 1 - do factory reset, 0 - no reset <text:span text:style-name="T64">(not used)</text:span></text:p>
    <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>3 <text:s text:c="2"/>| <text:s text:c="2"/>SFP_DIS <text:s text:c="4"/>: 1 - SFP TX disabled; 0 - SFP TX enabled</text:p>
    <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>4 <text:s text:c="2"/>| <text:s text:c="2"/>USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off</text:p>
    <text:p text:style-name="P36"><text:s/>* <text:s text:c="5"/>5 <text:s text:c="2"/>| <text:s text:c="2"/>USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off</text:p>
@@ -4384,18 +4237,18 @@
    <text:p text:style-name="P18"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/>2</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T29">1</text:span> – <text:span text:style-name="T29">do light reset</text:span></text:p>
-   <text:p text:style-name="P17"><text:span text:style-name="T31"><text:tab/>b</text:span><text:span text:style-name="T30"> – </text:span><text:span text:style-name="T31">byte</text:span><text:span text:style-name="T30"> data type</text:span></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T30">1</text:span> – <text:span text:style-name="T30">do light reset</text:span></text:p>
+   <text:p text:style-name="P17"><text:span text:style-name="T32"><text:tab/>b</text:span><text:span text:style-name="T31"> – </text:span><text:span text:style-name="T32">byte</text:span><text:span text:style-name="T31"> data type</text:span></text:p>
    <text:p text:style-name="P20"/>
    <text:p text:style-name="P27"/>
-   <text:list xml:id="list1235596801959233767" text:style-name="L4">
+   <text:list xml:id="list2610042159554582961" text:style-name="L4">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P58"><text:span text:style-name="T35">led_mode_byte </text:span>– default or user led mode</text:p>
+       <text:p text:style-name="P60"><text:span text:style-name="T36">led_mode_byte </text:span>– default or user led mode</text:p>
       </text:list-item>
      </text:list>
-     <text:p text:style-name="P60">! Note: Order of the LEDs is reversed! LED0 is USER_LED2 and LED11 is POWER_LED</text:p>
+     <text:p text:style-name="P62">! Note: Order of the LEDs is reversed! LED0 is USER_LED2 and LED11 is POWER_LED</text:p>
     </text:list-item>
    </text:list>
    <text:p text:style-name="P37">/*</text:p>
@@ -4414,15 +4267,15 @@
    <text:p text:style-name="P18"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/>3</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T37">0x1A</text:span> – <text:span text:style-name="T37">LED1 set to user mode</text:span></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T39">0x1A</text:span> – <text:span text:style-name="T39">LED1 set to user mode</text:span></text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
    <text:p text:style-name="P27"/>
    <text:p text:style-name="P13"/>
-   <text:list xml:id="list4859561184410639034" text:style-name="L5">
+   <text:list xml:id="list5645857095358333446" text:style-name="L5">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P59"><text:span text:style-name="T35">led_state_byte</text:span> – <text:span text:style-name="T8">LED can be set to OFF/ON state</text:span></text:p>
+       <text:p text:style-name="P61"><text:span text:style-name="T36">led_state_byte</text:span> – <text:span text:style-name="T8">LED can be set to OFF/ON state</text:span></text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4438,7 +4291,7 @@
    <text:p text:style-name="P38">*/</text:p>
    <text:p text:style-name="P11"><text:tab/></text:p>
    <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED state</text:span><text:span text:style-name="T15"> (</text:span><text:span text:style-name="T17">LED1</text:span><text:span text:style-name="T18">0</text:span><text:span text:style-name="T17"> set to ON</text:span><text:span text:style-name="T15">)</text:span><text:span text:style-name="T14">:</text:span></text:p>
-   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T38">Note: LED1</text:span><text:span text:style-name="T39">0</text:span><text:span text:style-name="T38"> was set to user mode in previous step.</text:span></text:p>
+   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T40">Note: LED1</text:span><text:span text:style-name="T41">0</text:span><text:span text:style-name="T40"> was set to user mode in previous step.</text:span></text:p>
    <text:p text:style-name="P26"/>
    <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A </text:span><text:span text:style-name="T17">4</text:span><text:span text:style-name="T14"> </text:span><text:span text:style-name="T17">0x1</text:span><text:span text:style-name="T18">A</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
    <text:p text:style-name="P26"/>
@@ -4446,15 +4299,15 @@
    <text:p text:style-name="P18"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/>4</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T37">0x1A</text:span> – <text:span text:style-name="T37">LED1 set to ON</text:span></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:span text:style-name="T39">0x1A</text:span> – <text:span text:style-name="T39">LED1 set to ON</text:span></text:p>
    <text:p text:style-name="P18"><text:soft-page-break/><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
    <text:p text:style-name="P28"/>
    <text:p text:style-name="P28"/>
-   <text:list xml:id="list2917970437066896773" text:style-name="L6">
+   <text:list xml:id="list921683102192145915" text:style-name="L6">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P61"><text:span text:style-name="T35">led_colour</text:span> – set colour for LEDs </text:p>
+       <text:p text:style-name="P63"><text:span text:style-name="T36">led_colour</text:span> – set colour for LEDs </text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4471,25 +4324,25 @@
    <text:p text:style-name="P39"><text:s/>* <text:s/>4.B <text:s text:c="4"/>| <text:s/>24..31 | <text:s text:c="2"/>blue colour [0..255]</text:p>
    <text:p text:style-name="P39">*/</text:p>
    <text:p text:style-name="P30"/>
-   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED</text:span><text:span text:style-name="T20">1</text:span><text:span text:style-name="T21">0</text:span><text:span text:style-name="T17"> </text:span><text:span text:style-name="T20">colour – </text:span><text:span text:style-name="T40">green</text:span><text:span text:style-name="T20"> colour = 0x</text:span><text:span text:style-name="T40">00</text:span><text:span text:style-name="T20">FF</text:span><text:span text:style-name="T40">00</text:span><text:span text:style-name="T14">:</text:span></text:p>
+   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED</text:span><text:span text:style-name="T20">1</text:span><text:span text:style-name="T21">0</text:span><text:span text:style-name="T17"> </text:span><text:span text:style-name="T20">colour – </text:span><text:span text:style-name="T42">green</text:span><text:span text:style-name="T20"> colour = 0x</text:span><text:span text:style-name="T42">00</text:span><text:span text:style-name="T20">FF</text:span><text:span text:style-name="T42">00</text:span><text:span text:style-name="T14">:</text:span></text:p>
    <text:p text:style-name="P11"><text:tab/><text:tab/></text:p>
    <text:p text:style-name="P12"><text:tab/>“i2cset 1 0x2a 5 0x0A 0x00 0xFF 0x00 i”</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/>Meanings:</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/><text:tab/>5</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P18"><text:tab/><text:tab/><text:span text:style-name="T44">0x0A - LED10</text:span></text:p>
-   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T37">0x00 0xFF 0 x00</text:span> – <text:span text:style-name="T37">red colour = 0x00, green = 0xFF, blue = 0x00</text:span></text:p>
+   <text:p text:style-name="P18"><text:tab/><text:tab/><text:span text:style-name="T46">0x0A - LED10</text:span></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T39">0x00 0xFF 0 x00</text:span> – <text:span text:style-name="T39">red colour = 0x00, green = 0xFF, blue = 0x00</text:span></text:p>
    <text:p text:style-name="P19"><text:span text:style-name="T14"><text:tab/><text:tab/>i</text:span><text:span text:style-name="T22"> – </text:span><text:span text:style-name="T23">word</text:span><text:span text:style-name="T22"> data type</text:span></text:p>
    <text:p text:style-name="P21"><text:tab/></text:p>
-   <text:list xml:id="list2672006502802271198" text:style-name="L7">
+   <text:list xml:id="list4560853729776980467" text:style-name="L7">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P62"><text:span text:style-name="T35">brightness_</text:span><text:span text:style-name="T36">byte</text:span> – brightness settings for LEDs</text:p>
+       <text:p text:style-name="P64"><text:span text:style-name="T36">brightness_</text:span><text:span text:style-name="T37">byte</text:span> – brightness settings for LEDs</text:p>
        <text:list>
         <text:list-item>
-         <text:p text:style-name="P62">value in <text:span text:style-name="T14">range 0..100 [%] </text:span></text:p>
+         <text:p text:style-name="P64">value in <text:span text:style-name="T14">range 0..100 [%] </text:span></text:p>
         </text:list-item>
        </text:list>
       </text:list-item>
@@ -4497,41 +4350,41 @@
     </text:list-item>
    </text:list>
    <text:p text:style-name="P30"/>
-   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">a) </text:span><text:span text:style-name="T14">Example of setting to </text:span><text:span text:style-name="T41">20</text:span><text:span text:style-name="T14">% brightness:</text:span></text:p>
+   <text:p text:style-name="P26"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">a) </text:span><text:span text:style-name="T14">Example of setting to </text:span><text:span text:style-name="T43">20</text:span><text:span text:style-name="T14">% brightness:</text:span></text:p>
    <text:p text:style-name="P26"/>
-   <text:p text:style-name="P44"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A 7 </text:span><text:span text:style-name="T41">20</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
-   <text:p text:style-name="P40"/>
-   <text:p text:style-name="P41"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P41"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
-   <text:p text:style-name="P41"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P41"><text:span text:style-name="T12"><text:tab/>7</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P42"><text:tab/><text:span text:style-name="T45">2</text:span>0 – brightness <text:span text:style-name="T25">[%]</text:span></text:p>
-   <text:p text:style-name="P41"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
-   <text:p text:style-name="P41"/>
-   <text:p text:style-name="P45"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">b) </text:span><text:span text:style-name="T46">Reading of brightness:</text:span></text:p>
-   <text:p text:style-name="P46"><text:span text:style-name="T19">“i2c</text:span><text:span text:style-name="T24">get</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">8</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
-   <text:p text:style-name="P41"><text:tab/></text:p>
-   <text:p text:style-name="P41"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P41"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
-   <text:p text:style-name="P41"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P41"><text:span text:style-name="T12"><text:tab/>8</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P43"><text:tab/>b – byte data type</text:p>
+   <text:p text:style-name="P46"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A 7 </text:span><text:span text:style-name="T43">20</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
+   <text:p text:style-name="P42"/>
+   <text:p text:style-name="P43"><text:tab/>Meanings:</text:p>
+   <text:p text:style-name="P43"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P43"><text:tab/>0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P43"><text:span text:style-name="T12"><text:tab/>7</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P44"><text:tab/><text:span text:style-name="T47">2</text:span>0 – brightness <text:span text:style-name="T25">[%]</text:span></text:p>
+   <text:p text:style-name="P43"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
+   <text:p text:style-name="P43"/>
+   <text:p text:style-name="P47"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">b) </text:span><text:span text:style-name="T48">Reading of brightness:</text:span></text:p>
+   <text:p text:style-name="P48"><text:span text:style-name="T19">“i2c</text:span><text:span text:style-name="T24">get</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">8</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
+   <text:p text:style-name="P43"><text:tab/></text:p>
+   <text:p text:style-name="P43"><text:tab/>Meanings:</text:p>
+   <text:p text:style-name="P43"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P43"><text:tab/>0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P43"><text:span text:style-name="T12"><text:tab/>8</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P45"><text:tab/>b – byte data type</text:p>
    <text:p text:style-name="P30"/>
    <text:p text:style-name="P30"/>
    <text:p text:style-name="P30"/>
    <text:p text:style-name="P30"><text:soft-page-break/></text:p>
    <text:p text:style-name="P30"/>
    <text:p text:style-name="P30"/>
-   <text:list xml:id="list8218976697504243883" text:style-name="L8">
+   <text:list xml:id="list3631972570976473209" text:style-name="L8">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P63"><text:span text:style-name="T35">user_voltage_byte</text:span> – voltage setup on user r<text:span text:style-name="T47">e</text:span>gulator</text:p>
+       <text:p text:style-name="P65"><text:span text:style-name="T36">user_voltage_byte</text:span> – voltage setup on user r<text:span text:style-name="T53">e</text:span>gulator</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
    </text:list>
-   <text:p text:style-name="P32"><text:tab/><text:span text:style-name="T33">enum voltage_values {</text:span></text:p>
+   <text:p text:style-name="P32"><text:tab/><text:span text:style-name="T34">enum voltage_values {</text:span></text:p>
    <text:p text:style-name="P24"><text:s text:c="4"/><text:tab/><text:tab/>VOLTAGE_33 = 1,</text:p>
    <text:p text:style-name="P24"><text:s text:c="3"/><text:tab/><text:tab/>VOLTAGE_36 = 2,</text:p>
    <text:p text:style-name="P24"><text:s text:c="4"/><text:tab/><text:tab/>VOLTAGE_45 = 3,</text:p>
@@ -4543,23 +4396,48 @@
    <text:p text:style-name="P31"><text:span text:style-name="T26"><text:tab/></text:span><text:span text:style-name="T27">1</text:span><text:span text:style-name="T26">.step: enable regulator (using </text:span><text:span text:style-name="T28">control_byte</text:span><text:span text:style-name="T26">)</text:span></text:p>
    <text:p text:style-name="P31"><text:span text:style-name="T26"><text:tab/><text:tab/></text:span><text:span text:style-name="T19">“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T15">2</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T26">0x40</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
    <text:p text:style-name="P31"/>
-   <text:p text:style-name="P31"><text:span text:style-name="T19"><text:tab/><text:tab/></text:span><text:span text:style-name="T32">Meanings:</text:span></text:p>
+   <text:p text:style-name="P31"><text:span text:style-name="T19"><text:tab/><text:tab/></text:span><text:span text:style-name="T33">Meanings:</text:span></text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/><text:tab/>2</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T48">0x40</text:span> – <text:span text:style-name="T42">enable regulator</text:span></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T54">0x40</text:span> – <text:span text:style-name="T44">enable regulator</text:span></text:p>
    <text:p text:style-name="P22"><text:tab/><text:tab/>b – byte data type</text:p>
    <text:p text:style-name="P22"/>
-   <text:p text:style-name="P31"><text:tab/><text:span text:style-name="T49">2.step: set desired voltage</text:span></text:p>
-   <text:p text:style-name="P31"><text:tab/><text:tab/><text:span text:style-name="T19">“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">6</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T43">1</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
+   <text:p text:style-name="P31"><text:tab/><text:span text:style-name="T55">2.step: set desired voltage</text:span></text:p>
+   <text:p text:style-name="P31"><text:tab/><text:tab/><text:span text:style-name="T19">“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">6</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T45">1</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
    <text:p text:style-name="P31"/>
    <text:p text:style-name="P23"><text:tab/><text:tab/>Meanings:</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P18"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P18"><text:span text:style-name="T12"><text:tab/><text:tab/>8</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T50">1</text:span> – <text:span text:style-name="T43">enum value for 3.3V</text:span></text:p>
-   <text:p text:style-name="P11"><text:span text:style-name="T34"><text:tab/><text:tab/>b – byte data type</text:span><text:tab/></text:p>
+   <text:p text:style-name="P19"><text:tab/><text:tab/><text:span text:style-name="T56">1</text:span> – <text:span text:style-name="T45">enum value for 3.3V</text:span></text:p>
+   <text:p text:style-name="P11"><text:span text:style-name="T35"><text:tab/><text:tab/>b – byte data type</text:span><text:tab/></text:p>
    <text:p text:style-name="P11"><text:tab/><text:tab/></text:p>
+   <text:p text:style-name="P11"/>
+   <text:list xml:id="list170522715730100" text:continue-numbering="true" text:style-name="L8">
+    <text:list-item>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P67"><text:span text:style-name="T38">reset_byte</text:span> – <text:span text:style-name="T67">reports reset type</text:span></text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="P70"/>
+   <text:p text:style-name="P71"><text:span text:style-name="T29"><text:tab/><text:tab/></text:span>0 - normal reset</text:p>
+   <text:p text:style-name="P71"><text:tab/><text:tab/>1 - previous snapshot</text:p>
+   <text:p text:style-name="P76"><text:s text:c="12"/><text:tab/><text:tab/><text:span text:style-name="T67">2</text:span> - normal factory reset</text:p>
+   <text:p text:style-name="P76"><text:tab/><text:tab/>3 - hard factory reset</text:p>
+   <text:p text:style-name="P68"/>
+   <text:p text:style-name="P68"><text:tab/><text:span text:style-name="T67">Example of reading reset_byte:</text:span></text:p>
+   <text:p text:style-name="P68"><text:tab/><text:tab/></text:p>
+   <text:p text:style-name="P68"><text:span text:style-name="T49"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T50">get</text:span><text:span text:style-name="T49"> </text:span><text:span text:style-name="T51">1</text:span><text:span text:style-name="T49"> 0x2A </text:span><text:span text:style-name="T52">9</text:span><text:span text:style-name="T49"> b”</text:span></text:p>
+   <text:p text:style-name="P73"><text:tab/></text:p>
+   <text:p text:style-name="P73"><text:tab/>Meanings:</text:p>
+   <text:p text:style-name="P73"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P73"><text:tab/>0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P73"><text:span text:style-name="T12"><text:tab/>9</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P69"><text:tab/><text:tab/> <text:s text:c="10"/>b – byte data type</text:p>
   </office:text>
  </office:body>
 </office:document>

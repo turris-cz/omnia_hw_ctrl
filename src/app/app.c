@@ -132,46 +132,18 @@ static ret_value_t power_on(void)
 /*******************************************************************************
   * @function   light_reset
   * @brief      Perform light reset of the board.
-  * @param      reset_event: pointer to reset event which should be performed
-  *             in the next step.
+  * @param      None.
   * @retval     value: next_state.
   *****************************************************************************/
-static ret_value_t light_reset(reset_type_t *reset_event)
+static ret_value_t light_reset(void)
 {
-    reset_type_t reset_type = NORMAL_RESET;
     ret_value_t value = OK;
+    reset_type_t reset_event = NORMAL_RESET;
+    struct st_i2c_status *i2c_control = &i2c_status;
 
-    reset_type = power_control_first_startup();
+    reset_event = power_control_first_startup();
 
-    switch (reset_type)
-    {
-        case NORMAL_RESET:
-        {
-            value = RESET_MANAGER;
-            *reset_event = NORMAL_RESET;
-        } break;
-
-        case PREVIOUS_SNAPSHOT:
-        {
-            value = RESET_MANAGER;
-            *reset_event = PREVIOUS_SNAPSHOT;
-        } break;
-
-        case NORMAL_FACTORY_RESET:
-        {
-            value = RESET_MANAGER;
-            *reset_event = NORMAL_FACTORY_RESET;
-        } break;
-
-        case HARD_FACTORY_RESET:
-        {
-            value = RESET_MANAGER;
-            *reset_event = HARD_FACTORY_RESET;
-        } break;
-
-        default:
-            break;
-    }
+    i2c_control->reset_type = reset_event;
 
     return value;
 }
@@ -187,7 +159,7 @@ static ret_value_t load_settings(void)
     struct st_i2c_status *i2c_control = &i2c_status;
 
     debounce_config(); /* start evaluation of inputs */
-    i2c_control->status_word |= app_get_status_word();
+    i2c_control->status_word = app_get_status_word();
 
     return OK;
 }
@@ -394,56 +366,11 @@ static void error_manager(ret_value_t error_state)
         case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
         case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
         case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
-        //case GO_TO_RESET_ERROR: led_driver_set_led_state(LED8, LED_ON); break;
 
         default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
     }
 
     delay(300);
-}
-
-/*******************************************************************************
-  * @function   reset_manager
-  * @brief      Handle different reset types.
-  * @param      reset_type: type of reset.
-  * @retval     None.
-  *****************************************************************************/
-static void reset_manager(reset_type_t *reset_type)
-{
-    struct st_i2c_status *i2c_control = &i2c_status;
-
-    switch (*reset_type)
-    {
-        case NORMAL_RESET:
-        {
-            i2c_control->status_word &= ~RESET_TYPE_BITS;
-        }
-        break;
-
-        case PREVIOUS_SNAPSHOT:
-        {
-            i2c_control->status_word &= ~RESET_TYPE_BITS;
-            i2c_control->status_word |= PREVIOUS_SNAPSHOT << RESET_TYPE_STARTBIT;
-        }
-        break;
-
-        case NORMAL_FACTORY_RESET:
-        {
-            i2c_control->status_word &= ~RESET_TYPE_BITS;
-            i2c_control->status_word |= NORMAL_FACTORY_RESET << RESET_TYPE_STARTBIT;
-        }
-        break;
-
-        case HARD_FACTORY_RESET:
-        {
-            i2c_control->status_word &= ~RESET_TYPE_BITS;
-            i2c_control->status_word |= HARD_FACTORY_RESET << RESET_TYPE_STARTBIT;
-        }
-        break;
-
-        default:
-            break;
-    }
 }
 
 /*******************************************************************************
@@ -457,7 +384,6 @@ void app_mcu_cyclic(void)
     static states_t next_state = POWER_ON;
     static ret_value_t val = OK;
     static uint8_t error_counter;
-    static reset_type_t reset_type = NORMAL_RESET;
 
     switch(next_state)
     {
@@ -474,23 +400,15 @@ void app_mcu_cyclic(void)
 
         case LIGHT_RESET:
         {
-            val = light_reset(&reset_type);
+            val = light_reset();
 
-            next_state = RESET_MANAGER;
+            next_state = LOAD_SETTINGS;
         }
         break;
 
         case HARD_RESET:
         {
             next_state = POWER_ON;
-        }
-        break;
-
-        case RESET_MANAGER:
-        {
-            reset_manager(&reset_type);
-
-            next_state = LOAD_SETTINGS;
         }
         break;
 
@@ -543,7 +461,6 @@ void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-                //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
                 default: next_state = I2C_MANAGER; break;
             }
         }
@@ -557,7 +474,6 @@ void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-                //case GO_TO_FACTORY_RESET: next_state = FACTORY_RESET; break;
                 case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
             }

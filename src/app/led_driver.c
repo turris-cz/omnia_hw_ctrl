@@ -165,7 +165,7 @@ static void led_driver_timer_config(void)
 
     /* Time base configuration */
     TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 5 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 20 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);

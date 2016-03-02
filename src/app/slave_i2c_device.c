@@ -17,7 +17,7 @@
 #include "delay.h"
 #include "debounce.h"
 
-static const volatile uint8_t version[] = VERSION;
+static const uint8_t version[] = VERSION;
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -46,7 +46,8 @@ enum i2c_commands {
     CMD_LED_COLOUR                      = 0x05, /* LED number + RED + GREEN + BLUE */
     CMD_USER_VOLTAGE                    = 0x06,
     CMD_SET_BRIGHTNESS                  = 0x07,
-    CMD_GET_BRIGHTNESS                  = 0x08
+    CMD_GET_BRIGHTNESS                  = 0x08,
+    CMD_GET_RESET                       = 0x09,
 };
 
 enum i2c_control_byte_mask {
@@ -352,6 +353,17 @@ void slave_i2c_handler(void)
                         {
                             i2c_state->tx_buf[0] = led->brightness;
                             DBG("brig\r\n");
+
+                            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+
+                            response = ACK_AND_WAIT_FOR_SECOND_START;
+                        } break;
+
+                        case CMD_GET_RESET:
+                        {
+                            i2c_state->tx_buf[0] = i2c_state->reset_type;
+                            DBG("RST\r\n");
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
