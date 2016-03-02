@@ -12,7 +12,7 @@
 #define SLAVE_I2C_DEVICE_H
 
 #define MAX_RX_BUFFER_SIZE                 10
-#define MAX_TX_BUFFER_SIZE                 2
+#define MAX_TX_BUFFER_SIZE                 20
 
 struct st_i2c_status {
     uint16_t status_word;

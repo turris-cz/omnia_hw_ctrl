@@ -37,6 +37,7 @@ static const uint8_t version[] = VERSION;
 #define CMD_INDEX                       0
 #define ONE_BYTE_EXPECTED               1
 #define TWO_BYTES_EXPECTED              2
+#define TWENTY_BYTES_EXPECTED           20
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
@@ -48,6 +49,7 @@ enum i2c_commands {
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
     CMD_GET_RESET                       = 0x09,
+    CMD_GET_FW_VERSION                  = 0x0A,
 };
 
 enum i2c_control_byte_mask {
@@ -274,6 +276,7 @@ void slave_i2c_handler(void)
     static uint16_t direction;
     static i2c_response_t response = NACK;
     struct led_rgb *led = leds;
+    uint16_t idx;
 
     __disable_irq();
 
@@ -367,6 +370,20 @@ void slave_i2c_handler(void)
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+
+                            response = ACK_AND_WAIT_FOR_SECOND_START;
+                        } break;
+
+                        case CMD_GET_FW_VERSION:
+                        {
+                            for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
+                            {
+                                i2c_state->tx_buf[idx] = version[idx];
+                            }
+                            DBG("RST\r\n");
+
+                            I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
 
                             response = ACK_AND_WAIT_FOR_SECOND_START;
                         } break;
