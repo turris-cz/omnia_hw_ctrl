@@ -47,7 +47,7 @@
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
 #define PWM_TIM_PERIODE             199
-#define PWM_TIM_PRESCALE            49
+#define PWM_TIM_PRESCALE            14
 
 /*--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -418,7 +418,7 @@ static void led_driver_pwm_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
     GPIO_Init(GPIOA, &GPIO_InitStructure);

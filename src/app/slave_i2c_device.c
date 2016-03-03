@@ -49,7 +49,8 @@ enum i2c_commands {
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
     CMD_GET_RESET                       = 0x09,
-    CMD_GET_FW_VERSION                  = 0x0B,
+    CMD_GET_FW_VERSION                  = 0x0A,
+    CMD_WATCHDOG                        = 0x0B
 };
 
 enum i2c_control_byte_mask {
@@ -332,6 +333,7 @@ void slave_i2c_handler(void)
                         case CMD_LED_COLOUR:
                         case CMD_SET_BRIGHTNESS:
                         case CMD_USER_VOLTAGE:
+                        case CMD_WATCHDOG:
                         {
                             DBG("ACK\r\n");
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -547,6 +549,11 @@ slave_i2c_states_t slave_i2c_process_data(void)
                 DBG("user voltage: ");
                 DBG((const char*)(i2c_state->rx_buf + 1));
                 DBG("\r\n");
+            } break;
+
+            case CMD_WATCHDOG:
+            {
+                watchdog_sts = i2c_state->rx_buf[1];
             } break;
 
             default: /* it should never happen */

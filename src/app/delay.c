@@ -11,7 +11,12 @@
 #include "stm32f0xx.h"
 #include "delay.h"
 
+#define WATCHDOG_ENABLE     0
+#define WATCHDOG_TIMEOUT    120000 /* ms */
+
 static volatile uint32_t timingdelay;
+
+watchdog_status_t watchdog_sts = STOP;
 
 /* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
@@ -45,14 +50,33 @@ void delay(volatile uint32_t nTime)
 
 /******************************************************************************
   * @function   delay_timing_decrement
-  * @brief      Decrements the TimingDelay variable.
+  * @brief      Decrements the TimingDelay variable in System Timer and
+  *             takes care of watchdog timeout.
   * @param      None
   * @retval     None
   *****************************************************************************/
 void delay_timing_decrement(void)
 {
+    static uint32_t wdg_cnt = 0;
+
     if (timingdelay != 0x00)
     {
         timingdelay--;
     }
+
+#if WATCHDOG_ENABLE
+    if (watchdog_sts == RUN)
+    {
+        wdg_cnt++;
+
+        if (wdg_cnt >= WATCHDOG_TIMEOUT)
+        {
+            NVIC_SystemReset(); /* SW reset */
+        }
+    }
+    else
+    {
+        wdg_cnt = 0;
+    }
+#endif
 }

@@ -144,6 +144,7 @@ static ret_value_t light_reset(void)
     reset_event = power_control_first_startup();
 
     i2c_control->reset_type = reset_event;
+    watchdog_sts = RUN;
 
     return value;
 }

@@ -12,6 +12,13 @@
 #ifndef __DELAY_H
 #define __DELAY_H
 
+typedef enum watchdog_status {
+    RUN             = 0,
+    STOP            = 1,
+} watchdog_status_t;
+
+extern watchdog_status_t watchdog_sts;
+
 /*******************************************************************************
   * @function   delay_systimer_config
   * @brief      Setup SysTick Timer for 1 msec interrupts.
@@ -30,7 +37,8 @@ void delay(volatile uint32_t nTime);
 
 /******************************************************************************
   * @function   delay_timing_decrement
-  * @brief      Decrements the TimingDelay variable.
+  * @brief      Decrements the TimingDelay variable in System Timer and
+  *             takes care of watchdog timeout.
   * @param      None
   * @retval     None
   *****************************************************************************/
