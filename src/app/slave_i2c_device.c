@@ -49,7 +49,7 @@ enum i2c_commands {
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
     CMD_GET_RESET                       = 0x09,
-    CMD_GET_FW_VERSION                  = 0x0A,
+    CMD_GET_FW_VERSION                  = 0x0B,
 };
 
 enum i2c_control_byte_mask {
@@ -345,7 +345,7 @@ void slave_i2c_handler(void)
                             /* prepare data to be sent to the master */
                             i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
                             i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-                            DBG("ACK\r\n");
+                            DBG("STS\r\n");
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
@@ -380,7 +380,7 @@ void slave_i2c_handler(void)
                             {
                                 i2c_state->tx_buf[idx] = version[idx];
                             }
-                            DBG("RST\r\n");
+                            DBG("FW\r\n");
 
                             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
@@ -445,7 +445,7 @@ void slave_i2c_handler(void)
         else if (i2c_state->data_tx_complete) /* data have been sent to master */
         {
             i2c_state->data_tx_complete = 0;
-            i2c_state->tx_data_ctr = 0;
+
 
             /* delete reset type and button status bit from status_word */
             if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
@@ -457,6 +457,7 @@ void slave_i2c_handler(void)
 
         DBG("STOP\r\n");
         i2c_state->rx_data_ctr = 0;
+        i2c_state->tx_data_ctr = 0;
 
         direction = I2C_Direction_Receiver;
         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);

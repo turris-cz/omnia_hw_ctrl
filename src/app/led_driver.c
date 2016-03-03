@@ -358,27 +358,49 @@ void led_driver_send_frame(void)
 {
     static uint8_t level;
     uint16_t data;
+    static rgb_colour_t colour = RED;
 
-    /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
-    data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
+    switch (colour)
+    {
+        case RED:
+        {
+            /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
+            data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
+            colour = GREEN;
+        } break;
+
+        case GREEN:
+        {
+            data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
+            colour = BLUE;
+        } break;
+
+        case BLUE: /* last colour -> go back to RED */
+        {
+            data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
+            colour = RED;
+        } break;
+
+        default:
+            break;
+    }
+
     led_driver_send_data16b(data);
 
-    data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(data);
+    /* blue colour were sent to driver -> enable latch to write to LEDs */
+    if (colour == RED)
+    {
+         /* latch enable pulse */
+        LATCH_HIGH;
+        __NOP();
+        LATCH_LOW;
 
-    data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(data);
+        level++;
 
-     /* latch enable pulse */
-    LATCH_HIGH;
-    __NOP();
-    LATCH_LOW;
-
-    level++;
-
-    /* restart cycle - all levels were sent to driver */
-    if (level >= COLOUR_LEVELS)
-        level = 0;
+        /* restart cycle - all levels were sent to driver */
+        if (level >= COLOUR_LEVELS)
+            level = 0;
+    }
 }
 
 /*******************************************************************************
