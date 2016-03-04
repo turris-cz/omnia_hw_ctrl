@@ -193,7 +193,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, slave_i2c_states_
 
     if (control_byte & FACTORY_RST_MASK)
     {
-        *state = SLAVE_I2C_FACTORY_RST;
+        /* not used */
         return;
     }
 
@@ -449,11 +449,12 @@ void slave_i2c_handler(void)
             i2c_state->data_tx_complete = 0;
 
 
-            /* delete reset type and button status bit from status_word */
+            /* delete button status and counter bit from status_word */
             if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
             {
-               // i2c_state->status_word &= ~RESET_TYPE_BITS;
                 i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+                /* decrease button counter by the value has been sent */
+                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
             }
         }
 

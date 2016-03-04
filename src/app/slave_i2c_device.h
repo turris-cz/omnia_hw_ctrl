@@ -41,6 +41,7 @@ enum status_word_bits {
     ENABLE_4V5_STSBIT      = 0x0400,
     BUTTON_MODE_STSBIT     = 0x0800,
     BUTTON_PRESSED_STSBIT  = 0x1000,
+    BUTTON_COUNTER_VALBITS = 0xE000
 };
 
 typedef enum slave_i2c_states {
@@ -68,7 +69,7 @@ typedef enum slave_i2c_states {
  *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
  *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings)
  *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed
- * 13..15   |   dont care
+ * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode
 */
 
 /*

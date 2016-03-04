@@ -256,12 +256,14 @@ static ret_value_t input_manager(void)
     {
         if (button->button_pressed_counter)
         {
-           // i2c_control->status_word &= ~BUTTON_COUNTER_VALBITS;
-           // i2c_control->status_word |= (button->button_pressed_counter << 13) & BUTTON_COUNTER_VALBITS;
+            i2c_control->status_word &= ~BUTTON_COUNTER_VALBITS;
+            i2c_control->status_word |= (button->button_pressed_counter << 13) & BUTTON_COUNTER_VALBITS;
             i2c_control->status_word |= BUTTON_PRESSED_STSBIT;
         }
         else
-            i2c_control->status_word &= ~BUTTON_PRESSED_STSBIT; // | BUTTON_COUNTER_VALBITS));
+        {
+            i2c_control->status_word &= (~(BUTTON_PRESSED_STSBIT | BUTTON_COUNTER_VALBITS));
+        }
     }
 
     /* these flags are automatically cleared in debounce function */
@@ -319,7 +321,6 @@ static ret_value_t ic2_manager(void)
     {
         case SLAVE_I2C_LIGHT_RST:       value = GO_TO_LIGHT_RESET; break;
         case SLAVE_I2C_HARD_RST:        value = GO_TO_HARD_RESET; break;
-        case SLAVE_I2C_FACTORY_RST:     value = GO_TO_FACTORY_RESET; break;
         case SLAVE_I2C_PWR4V5_ERROR:    value = GO_TO_4V5_ERROR; break;
         default:                        value = OK; break;
     }
