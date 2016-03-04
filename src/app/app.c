@@ -385,6 +385,7 @@ void app_mcu_cyclic(void)
     static states_t next_state = POWER_ON;
     static ret_value_t val = OK;
     static uint8_t error_counter;
+    static uint8_t state_decision;
 
     switch(next_state)
     {
@@ -478,13 +479,25 @@ void app_mcu_cyclic(void)
                 case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
             }
+            /* give more CPU time to I2C_MANAGER:
+               go to I2C_MANAGER from LED_MANAGER and INPUT_MANAGER as well  */
+            if (state_decision == 0)
+            {
+                next_state = LED_MANAGER;
+                state_decision++;
+            }
+            else
+            {
+                next_state = INPUT_MANAGER;
+                state_decision = 0;
+            }
         }
         break;
 
         case LED_MANAGER:
         {
             led_manager();
-            next_state = INPUT_MANAGER;
+            next_state = I2C_MANAGER;
         }
         break;
 
