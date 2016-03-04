@@ -46,8 +46,8 @@
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
-#define PWM_TIM_PERIODE             199
-#define PWM_TIM_PRESCALE            14
+#define PWM_TIM_PERIODE             2000
+#define PWM_TIM_PRESCALE            8
 
 /*--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -441,8 +441,8 @@ static void led_driver_pwm_timer_config(void)
     /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = PWM_TIM_PERIODE;
-    TIM_TimeBaseStructure.TIM_Prescaler = PWM_TIM_PRESCALE;
+    TIM_TimeBaseStructure.TIM_Period = PWM_TIM_PERIODE - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = PWM_TIM_PRESCALE - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(PWM_TIMER, &TIM_TimeBaseStructure);
