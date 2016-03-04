@@ -10,6 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx.h"
 #include "delay.h"
+#include "power_control.h"
 
 #define WATCHDOG_ENABLE     0
 #define WATCHDOG_TIMEOUT    120000 /* ms */
@@ -71,6 +72,8 @@ void delay_timing_decrement(void)
 
         if (wdg_cnt >= WATCHDOG_TIMEOUT)
         {
+            power_control_set_startup_condition();
+            power_control_disable_regulators();
             NVIC_SystemReset(); /* SW reset */
         }
     }
