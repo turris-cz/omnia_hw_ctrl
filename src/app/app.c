@@ -305,7 +305,7 @@ static ret_value_t ic2_manager(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
-    slave_i2c_states_t i2c_state = SLAVE_I2C_OK;
+    //slave_i2c_states_t i2c_state = SLAVE_I2C_OK;
     ret_value_t value = OK;
 
     if (i2c_control->status_word != last_status_word)
@@ -315,9 +315,9 @@ static ret_value_t ic2_manager(void)
 
     last_status_word = i2c_control->status_word;
 
-    i2c_state = slave_i2c_process_data();
+    //i2c_state = slave_i2c_process_data();
 
-    switch(i2c_state)
+    switch(i2c_control->state)
     {
         case SLAVE_I2C_LIGHT_RST:       value = GO_TO_LIGHT_RESET; break;
         case SLAVE_I2C_HARD_RST:        value = GO_TO_HARD_RESET; break;

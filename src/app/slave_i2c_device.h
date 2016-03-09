@@ -14,9 +14,17 @@
 #define MAX_RX_BUFFER_SIZE                 10
 #define MAX_TX_BUFFER_SIZE                 20
 
+typedef enum slave_i2c_states {
+    SLAVE_I2C_OK,
+    SLAVE_I2C_LIGHT_RST,
+    SLAVE_I2C_HARD_RST,
+    SLAVE_I2C_PWR4V5_ERROR,
+}slave_i2c_states_t;
+
 struct st_i2c_status {
     uint16_t status_word;
     uint8_t reset_type;
+    slave_i2c_states_t state;             // state which is reported in main state machine
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
@@ -43,14 +51,6 @@ enum status_word_bits {
     BUTTON_PRESSED_STSBIT  = 0x1000,
     BUTTON_COUNTER_VALBITS = 0xE000
 };
-
-typedef enum slave_i2c_states {
-    SLAVE_I2C_OK,
-    SLAVE_I2C_LIGHT_RST,
-    SLAVE_I2C_HARD_RST,
-    SLAVE_I2C_FACTORY_RST,
-    SLAVE_I2C_PWR4V5_ERROR,
-}slave_i2c_states_t;
 
 /*
  * Bit meanings in status_word:
