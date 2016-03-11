@@ -180,7 +180,15 @@ typedef enum reset_types {
     NORMAL_RESET            = 0,
     PREVIOUS_SNAPSHOT       = 1,
     NORMAL_FACTORY_RESET    = 2,
-    HARD_FACTORY_RESET      = 3
+    HARD_FACTORY_RESET      = 3,
+    USER_RESET1             = 4,
+    USER_RESET2             = 5,
+    USER_RESET3             = 6,
+    USER_RESET4             = 7,
+    USER_RESET5             = 8,
+    USER_RESET6             = 9,
+    USER_RESET7             = 10,
+    USER_RESET8             = 11,
 }reset_type_t;
 
 /*******************************************************************************

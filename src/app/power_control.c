@@ -107,14 +107,24 @@ precise. Pulse for logic '1' or '0' takes only 1 us */
 
 /* define for timeout handlling during reset */
 #define RESET_STATE_READING     5 /* ms */
-#define RESET_TIMEOFFSET        80 /* FACTORY_RESET_STATE_READING * 80 = 0.4 sec */
+#define RESET_TIMEOFFSET        2
+
+#define RGB_COLOUR_LEVELS       255
 
 typedef enum reset_states {
     RST_INIT,
-    RST_LED_WHITE,
-    RST_LED_YELLOW,
-    RST_LED_BLUE,
-    RST_LED_RED,
+    RST_LED0,
+    RST_LED1,
+    RST_LED2,
+    RST_LED3,
+    RST_LED4,
+    RST_LED5,
+    RST_LED6,
+    RST_LED7,
+    RST_LED8,
+    RST_LED9,
+    RST_LED10,
+    RST_LED11,
 } reset_state_t;
 
 enum PSET_values {
@@ -664,11 +674,17 @@ reset_type_t power_control_first_startup(void)
 {
     reset_type_t reset_type = NORMAL_RESET;
     reset_state_t reset_state = RST_INIT;
-    uint16_t reset_cnt = 0, reset_led_offset = 1;
+    uint16_t reset_cnt = 0;
+    uint8_t red, green, idx;
+    uint32_t colour = 0;
+    uint16_t user_brightness;
 
     GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     delay(50);
     GPIO_SetBits(MANRES_PIN_PORT, MANRES_PIN);
+
+    /* save brightness value to restore it */
+    user_brightness = led_driver_pwm_get_brightness();
 
     /* wait for main board reset signal */
     while (!GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN))
@@ -679,97 +695,333 @@ reset_type_t power_control_first_startup(void)
 
         if (reset_cnt >= RESET_TIMEOFFSET)
         {
-            switch (reset_state)
+            switch(reset_state)
             {
                 case RST_INIT:
                 {
-                    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+                    led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
                     led_driver_set_led_state(LED_COUNT, LED_OFF);
+                    led_driver_set_led_state(LED11, LED_ON);
                     led_driver_pwm_set_brightness(100);
-                    reset_state = RST_LED_WHITE;
+                    reset_state = RST_LED11;
+                    idx = 0;
+                    red = 0;
+                    green = RGB_COLOUR_LEVELS;
                 } break;
 
-                case RST_LED_WHITE:
+                case RST_LED11:
                 {
                     reset_type = NORMAL_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED11, LED_ON);
 
-                    if (reset_led_offset > LED_COUNT)
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);
+
+                    led_driver_set_colour(LED11, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
                     {
-                        reset_state = RST_LED_YELLOW;
-                        reset_led_offset = 1;
-                        led_driver_set_led_state(LED_COUNT, LED_OFF);
-                        led_driver_set_colour(LED_COUNT, YELLOW_COLOUR);
+                        reset_state = RST_LED10; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
                     }
                     else
                     {
-                        reset_state = RST_LED_WHITE;
-                        reset_led_offset++;
+                        reset_state = RST_LED11;
                     }
                 } break;
 
-                case RST_LED_YELLOW:
+                case RST_LED10:
                 {
                     reset_type = PREVIOUS_SNAPSHOT;
 
-                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED10, LED_ON);
 
-                    if (reset_led_offset > LED_COUNT)
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED10, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
                     {
-                        reset_state = RST_LED_BLUE;
-                        reset_led_offset = 1;
-                        led_driver_set_led_state(LED_COUNT, LED_OFF);
-                        led_driver_set_colour(LED_COUNT, BLUE_COLOUR);
+                        reset_state = RST_LED9; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
                     }
                     else
                     {
-                        reset_state = RST_LED_YELLOW;
-                        reset_led_offset++;
+                        reset_state = RST_LED10;
                     }
-
                 } break;
 
-                case RST_LED_BLUE:
+                case RST_LED9:
                 {
                     reset_type = NORMAL_FACTORY_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED9, LED_ON);
 
-                    if(reset_led_offset > LED_COUNT)
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED9, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
                     {
-                        reset_state = RST_LED_RED;
-                        reset_led_offset = 1;
-                        led_driver_set_led_state(LED_COUNT, LED_OFF);
-                        led_driver_set_colour(LED_COUNT, RED_COLOUR);
+                        reset_state = RST_LED8; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
                     }
                     else
                     {
-                        reset_state = RST_LED_BLUE;
-                        reset_led_offset++;
+                        reset_state = RST_LED9;
                     }
-
                 } break;
 
-                case RST_LED_RED:
+                case RST_LED8:
                 {
                     reset_type = HARD_FACTORY_RESET;
 
-                    led_driver_set_led_state(LED_COUNT - reset_led_offset, LED_ON);
+                    led_driver_set_led_state(LED8, LED_ON);
 
-                    if(reset_led_offset > LED_COUNT)
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED8, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
                     {
-                        reset_state = RST_LED_WHITE; /* back to start */
-                        reset_led_offset = 1;
-                        led_driver_set_led_state(LED_COUNT, LED_OFF);
-                        led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+                        reset_state = RST_LED7; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
                     }
                     else
                     {
-                        reset_state = RST_LED_RED;
-                        reset_led_offset++;
+                        reset_state = RST_LED8;
                     }
+                } break;
 
+                case RST_LED7:
+                {
+                    reset_type = USER_RESET1;
+
+                    led_driver_set_led_state(LED7, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED7, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED6; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED7;
+                    }
+                } break;
+
+                case RST_LED6:
+                {
+                    reset_type = USER_RESET2;
+
+                    led_driver_set_led_state(LED6, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED6, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED5; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED6;
+                    }
+                } break;
+
+                case RST_LED5:
+                {
+                    reset_type = USER_RESET3;
+
+                    led_driver_set_led_state(LED5, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED5, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED4; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED5;
+                    }
+                } break;
+
+                case RST_LED4:
+                {
+                    reset_type = USER_RESET4;
+
+                    led_driver_set_led_state(LED4, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED4, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED3; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED4;
+                    }
+                } break;
+
+                case RST_LED3:
+                {
+                    reset_type = USER_RESET5;
+
+                    led_driver_set_led_state(LED3, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED3, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED2; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED3;
+                    }
+                } break;
+
+                case RST_LED2:
+                {
+                    reset_type = USER_RESET6;
+
+                    led_driver_set_led_state(LED2, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED2, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED1; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED2;
+                    }
+                } break;
+
+                case RST_LED1:
+                {
+                    reset_type = USER_RESET7;
+
+                    led_driver_set_led_state(LED1, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED1, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED0; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                    }
+                    else
+                    {
+                        reset_state = RST_LED1;
+                    }
+                } break;
+
+                case RST_LED0:
+                {
+                    reset_type = USER_RESET8;
+
+                    led_driver_set_led_state(LED0, LED_ON);
+
+                    idx++; /* increase colour level */
+                    red++;
+                    green--;
+                    colour = (red << 16) | (green << 8);;
+
+                    led_driver_set_colour(LED0, colour);
+
+                    if (idx >= RGB_COLOUR_LEVELS)
+                    {
+                        reset_state = RST_LED11; /* next state */
+                        idx = 0;
+                        red = 0;
+                        green = RGB_COLOUR_LEVELS;
+                        /* final state - go back to start */
+                        led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
+                        led_driver_set_led_state(LED_COUNT, LED_OFF);
+                    }
+                    else
+                    {
+                        reset_state = RST_LED0;
+                    }
                 } break;
             }
 
@@ -779,6 +1031,21 @@ reset_type_t power_control_first_startup(void)
 
     delay(10); /* 10 + 5ms (in while loop) delay after releasing of reset signal */
     GPIO_ResetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
+    if (reset_type != NORMAL_RESET)
+    {
+        led_driver_pwm_set_brightness(0);
+        delay(300);
+        led_driver_pwm_set_brightness(100);
+        delay(300);
+        led_driver_pwm_set_brightness(0);
+        delay(300);
+        led_driver_pwm_set_brightness(100);
+        delay(600);
+    }
+
+    /* restore brightness */
+    led_driver_pwm_set_brightness(user_brightness);
 
     return reset_type;
 }

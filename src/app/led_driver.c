@@ -542,6 +542,19 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
 }
 
 /*******************************************************************************
+  * @function   led_driver_pwm_get_brightness
+  * @brief      Set PWM value.
+  * @param      None.
+  * @retval     procent_val: PWM value in [%].
+  *****************************************************************************/
+uint16_t led_driver_pwm_get_brightness(void)
+{
+    struct led_rgb *rgb_leds = leds;
+
+    return  rgb_leds->brightness;
+}
+
+/*******************************************************************************
   * @function   led_driver_step_brightness
   * @brief      Decrease LED brightness by step (each function call).
   * @param      None.
