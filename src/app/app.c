@@ -18,6 +18,7 @@
 #include "slave_i2c_device.h"
 #include "wan_lan_pci_status.h"
 #include "debug_serial.h"
+#include "eeprom.h"
 
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
@@ -32,7 +33,12 @@
   *****************************************************************************/
 void app_mcu_init(void)
 {
+    struct st_watchdog *wdg = &watchdog;
+
     SystemCoreClockUpdate(); /* set HSI and PLL */
+    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    EE_Init(); /* EEPROM Init */
+
     delay_systimer_config();
     /* init ports and peripheral */
     power_control_io_config();
@@ -42,6 +48,15 @@ void app_mcu_init(void)
     led_driver_config();
     slave_i2c_config();
     debug_serial_config();
+
+    EE_ReadVariable(WDG_VIRT_ADDR, &wdg->watchdog_enable);
+
+    if(wdg->watchdog_enable == WDG_NOT_DEFINED)
+    {
+        wdg->watchdog_enable = WDG_ENABLE;
+        EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_enable);
+    }
+
     DBG("\r\nInit completed.\r\n");
 }
 
@@ -140,11 +155,23 @@ static ret_value_t light_reset(void)
     ret_value_t value = OK;
     reset_type_t reset_event = NORMAL_RESET;
     struct st_i2c_status *i2c_control = &i2c_status;
+    struct st_watchdog *wdg = &watchdog;
 
     reset_event = power_control_first_startup();
 
     i2c_control->reset_type = reset_event;
-    watchdog_sts = RUN;
+
+    /* read watchdog status */
+    EE_ReadVariable(WDG_VIRT_ADDR, &wdg->watchdog_enable);
+
+    if(wdg->watchdog_enable == WDG_ENABLE)
+    {
+        wdg->watchdog_sts = RUN;
+    }
+    else
+    {
+        wdg->watchdog_sts = STOP;
+    }
 
     return value;
 }

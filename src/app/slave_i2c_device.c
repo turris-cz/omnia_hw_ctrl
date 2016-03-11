@@ -16,6 +16,7 @@
 #include "power_control.h"
 #include "delay.h"
 #include "debounce.h"
+#include "eeprom.h"
 
 static const uint8_t version[] = VERSION;
 
@@ -272,6 +273,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte)
 void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
+    struct st_watchdog *wdg = &watchdog;
     static uint16_t direction;
     struct led_rgb *led = leds;
     uint16_t idx;
@@ -434,7 +436,18 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        watchdog_sts = i2c_state->rx_buf[1];
+                        wdg->watchdog_sts = i2c_state->rx_buf[1];
+
+                        if (wdg->watchdog_sts == STOP)
+                        {
+                            wdg->watchdog_enable = WDG_DISABLE;
+                        }
+                        else
+                        {
+                            wdg->watchdog_enable = WDG_ENABLE;
+                        }
+
+                        EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_enable);
 
                         DBG("WDT: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));

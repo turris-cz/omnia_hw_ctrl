@@ -17,7 +17,7 @@
 
 static volatile uint32_t timingdelay;
 
-watchdog_status_t watchdog_sts = STOP;
+struct st_watchdog watchdog;
 
 /* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
@@ -66,7 +66,7 @@ void delay_timing_decrement(void)
     }
 
 #if WATCHDOG_ENABLE
-    if (watchdog_sts == RUN)
+    if (watchdog.watchdog_sts == RUN)
     {
         wdg_cnt++;
 
