@@ -12,22 +12,19 @@
 #ifndef __DELAY_H
 #define __DELAY_H
 
-#define WDG_VIRT_ADDR       0x0001
+typedef enum watchdog_state {
+    STOP                 = 0,
+    RUN                  = 1
+} watchdog_state_t;
 
-typedef enum watchdog_status {
-    RUN                 = 0,
-    STOP                = 1,
-} watchdog_status_t;
-
-enum watchdog_state {
-    WDG_NOT_DEFINED     = 0x00,
-    WDG_ENABLE          = 0xAA,
-    WDG_DISABLE         = 0x55
+enum watchdog_status {
+    WDG_DISABLE          = 0,
+    WDG_ENABLE           = 1
 };
 
 struct st_watchdog {
-    watchdog_status_t watchdog_sts;
-    uint16_t watchdog_enable;
+    watchdog_state_t watchdog_state;
+    uint16_t watchdog_sts;
 };
 
 extern struct st_watchdog watchdog;

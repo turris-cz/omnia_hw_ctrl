@@ -47,8 +47,9 @@ enum i2c_commands {
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
     CMD_GET_RESET                       = 0x09,
-    CMD_GET_FW_VERSION                  = 0x0A,
-    CMD_WATCHDOG                        = 0x0B
+    CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
+    CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
+    CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
 };
 
 enum i2c_control_byte_mask {
@@ -279,6 +280,7 @@ void slave_i2c_handler(void)
     uint16_t idx;
     uint8_t led_index;
     uint32_t colour;
+    eeprom_var_t ee_var;
 
     __disable_irq();
 
@@ -432,23 +434,40 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                case CMD_WATCHDOG:
+                case CMD_WATCHDOG_STATE:
+                {
+                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                    {
+                        wdg->watchdog_state = i2c_state->rx_buf[1];
+
+                        DBG("WDT STATE: ");
+                        DBG((const char*)(i2c_state->rx_buf + 1));
+                        DBG("\r\n");
+                    }
+                    DBG("ACK\r\n");
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
+                case CMD_WATCHDOG_STATUS:
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
                         wdg->watchdog_sts = i2c_state->rx_buf[1];
 
-                        if (wdg->watchdog_sts == STOP)
-                        {
-                            wdg->watchdog_enable = WDG_DISABLE;
-                        }
-                        else
-                        {
-                            wdg->watchdog_enable = WDG_ENABLE;
-                        }
+                        ee_var = EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
 
-                        EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_enable);
-
+//#if DBG_ENABLE
+                        switch(ee_var)
+                        {
+                            case VAR_FLASH_COMPLETE: DBG("WDT: OK\r\n"); break;
+                            case VAR_PAGE_FULL: DBG("WDT: Pg full\r\n"); break;
+                            case VAR_NO_VALID_PAGE: DBG("WDT: No Pg\r\n"); break;
+                            default:
+                                break;
+                        }
+//#endif
                         DBG("WDT: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
                         DBG("\r\n");
@@ -490,7 +509,7 @@ void slave_i2c_handler(void)
 
                 /* U-Boot divides reading more than 16B in several steps
                     - transmit bytes step by step
-                    - save 1B to NBYTES register */
+                    - set 1B to NBYTES register */
                 case CMD_GET_FW_VERSION:
                 {
                     for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)

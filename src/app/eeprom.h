@@ -71,6 +71,20 @@
 /* Variables' number */
 #define NB_OF_VAR             ((uint8_t)0x03)
 
+enum virt_address {
+    WDG_VIRT_ADDR       = 0x6666,
+    VIRT_ADDR1          = 0x7777,
+    VIRT_ADDR2          = 0x8888
+};
+
+typedef enum eeprom_var {
+    VAR_NOT_FOUND       = 1,
+    VAR_FOUND           = 0,
+    VAR_NO_VALID_PAGE   = NO_VALID_PAGE,
+    VAR_FLASH_COMPLETE  = FLASH_COMPLETE,
+    VAR_PAGE_FULL       = PAGE_FULL
+}eeprom_var_t;
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */

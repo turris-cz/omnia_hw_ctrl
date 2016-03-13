@@ -34,10 +34,32 @@
 void app_mcu_init(void)
 {
     struct st_watchdog *wdg = &watchdog;
+    eeprom_var_t ee_var;
 
     SystemCoreClockUpdate(); /* set HSI and PLL */
     FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
+
+    ee_var = EE_ReadVariable(WDG_VIRT_ADDR, (uint16_t *)&wdg->watchdog_sts);
+
+    switch(ee_var)
+    {
+        case VAR_NOT_FOUND:
+        {
+            wdg->watchdog_sts = WDG_ENABLE;
+            EE_WriteVariable(WDG_VIRT_ADDR, (uint16_t)wdg->watchdog_sts);
+            DBG("Init - EEPROM var not found\r\n");
+        } break;
+
+        case VAR_FOUND: DBG("Init - EEPROM var found\r\n");
+            break;
+
+        case VAR_NO_VALID_PAGE : DBG("Init - No valid page\r\n");
+            break;
+
+        default:
+            break;
+    }
 
     delay_systimer_config();
     /* init ports and peripheral */
@@ -48,14 +70,6 @@ void app_mcu_init(void)
     led_driver_config();
     slave_i2c_config();
     debug_serial_config();
-
-    EE_ReadVariable(WDG_VIRT_ADDR, &wdg->watchdog_enable);
-
-    if(wdg->watchdog_enable == WDG_NOT_DEFINED)
-    {
-        wdg->watchdog_enable = WDG_ENABLE;
-        EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_enable);
-    }
 
     DBG("\r\nInit completed.\r\n");
 }
@@ -161,16 +175,15 @@ static ret_value_t light_reset(void)
 
     i2c_control->reset_type = reset_event;
 
-    /* read watchdog status */
-    EE_ReadVariable(WDG_VIRT_ADDR, &wdg->watchdog_enable);
-
-    if(wdg->watchdog_enable == WDG_ENABLE)
+    if(wdg->watchdog_sts == WDG_ENABLE)
     {
-        wdg->watchdog_sts = RUN;
+        wdg->watchdog_state = RUN;
+        DBG("RST - WDG runs\r\n");
     }
     else
     {
-        wdg->watchdog_sts = STOP;
+        wdg->watchdog_state = STOP;
+        DBG("RST - WDG doesnt run\r\n")
     }
 
     return value;
@@ -410,7 +423,6 @@ void app_mcu_cyclic(void)
     static states_t next_state = POWER_ON;
     static ret_value_t val = OK;
     static uint8_t error_counter;
-    static uint8_t state_decision;
 
     switch(next_state)
     {
@@ -504,25 +516,13 @@ void app_mcu_cyclic(void)
                 case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
                 default: next_state = LED_MANAGER; break;
             }
-            /* give more CPU time to I2C_MANAGER:
-               go to I2C_MANAGER from LED_MANAGER and INPUT_MANAGER as well  */
-            if (state_decision == 0)
-            {
-                next_state = LED_MANAGER;
-                state_decision++;
-            }
-            else
-            {
-                next_state = INPUT_MANAGER;
-                state_decision = 0;
-            }
         }
         break;
 
         case LED_MANAGER:
         {
             led_manager();
-            next_state = I2C_MANAGER;
+            next_state = INPUT_MANAGER;
         }
         break;
 
