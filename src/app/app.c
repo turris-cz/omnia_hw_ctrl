@@ -35,26 +35,53 @@ void app_mcu_init(void)
 {
     struct st_watchdog *wdg = &watchdog;
     eeprom_var_t ee_var;
+    uint16_t ee_data;
 
     SystemCoreClockUpdate(); /* set HSI and PLL */
     FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
 
-    ee_var = EE_ReadVariable(WDG_VIRT_ADDR, (uint16_t *)&wdg->watchdog_sts);
+    ee_var = EE_ReadVariable(WDG_VIRT_ADDR, &ee_data);
 
     switch(ee_var)
     {
         case VAR_NOT_FOUND:
         {
             wdg->watchdog_sts = WDG_ENABLE;
-            EE_WriteVariable(WDG_VIRT_ADDR, (uint16_t)wdg->watchdog_sts);
-            DBG("Init - EEPROM var not found\r\n");
+            EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
+            DBG("Init - WDG var not found\r\n");
         } break;
 
-        case VAR_FOUND: DBG("Init - EEPROM var found\r\n");
+        case VAR_FOUND:
+        {
+            wdg->watchdog_sts = ee_data;
+            DBG("Init - WDG var found\r\n");
+        } break;
+
+        case VAR_NO_VALID_PAGE : DBG("Init - WDG-No valid page\r\n");
             break;
 
-        case VAR_NO_VALID_PAGE : DBG("Init - No valid page\r\n");
+        default:
+            break;
+    }
+
+    ee_var = EE_ReadVariable(CARD_VIRT_ADDR, &ee_data);
+
+    switch(ee_var)
+    {
+        case VAR_NOT_FOUND:
+        {
+            card_mode_override = CARD_DEFAULT;
+            DBG("Init - CARD var not found in EEPROM\r\n");
+        } break;
+
+        case VAR_FOUND:
+        {
+            card_mode_override = ee_data;
+            DBG("Init - CARD var found\r\n");
+        } break;
+
+        case VAR_NO_VALID_PAGE : DBG("Init - CARD-No valid page\r\n");
             break;
 
         default:

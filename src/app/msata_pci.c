@@ -12,6 +12,8 @@
 #include "msata_pci.h"
 #include "led_driver.h"
 
+uint16_t card_mode_override;
+
 /*******************************************************************************
   * @function   msata_pci_io_config
   * @brief      GPIO configuration for mSATA and PCIe indication signals.
@@ -97,5 +99,12 @@ inline uint8_t msata_pci_card_detection(void)
   *****************************************************************************/
 inline uint8_t msata_pci_type_card_detection(void)
 {
-    return GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
+    if (card_mode_override == CARD_DEFAULT)
+    {
+        return GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
+    }
+    else
+    {
+        return card_mode_override;
+    }
 }

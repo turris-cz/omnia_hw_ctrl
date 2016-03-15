@@ -1,4 +1,4 @@
-PROJ_NAME=turris_omnia_control
+PROJ_NAME=omnia_hw_ctrl
 
 ################################################################################
 #                   SETUP TOOLS                                                #
