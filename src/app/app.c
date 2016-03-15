@@ -389,6 +389,8 @@ static ret_value_t ic2_manager(void)
         default:                        value = OK; break;
     }
 
+    i2c_control->state = SLAVE_I2C_OK;
+
     return value;
 }
 

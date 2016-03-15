@@ -17,6 +17,7 @@
 #include "delay.h"
 #include "debounce.h"
 #include "eeprom.h"
+#include "msata_pci.h"
 
 static const uint8_t version[] = VERSION;
 
@@ -50,6 +51,7 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
+    CMD_CARD_FORCE_MODE                 = 0x0D, /* 0 - force PCIe, 1 - force mSATA */
 };
 
 enum i2c_control_byte_mask {
@@ -166,9 +168,10 @@ void slave_i2c_config(void)
   * @function   slave_i2c_check_control_byte
   * @brief      Decodes a control byte and perform suitable reaction.
   * @param      control_byte: control byte sent from master (CPU)
+  * @param      bit_mask: 0 - dont care bit, 1 - write bit
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_check_control_byte(uint8_t control_byte)
+static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
@@ -176,16 +179,16 @@ static void slave_i2c_check_control_byte(uint8_t control_byte)
 
     i2c_control->state = SLAVE_I2C_OK;
 
-    if (control_byte & LIGHT_RST_MASK)
+    if ((control_byte & LIGHT_RST_MASK) && (bit_mask & LIGHT_RST_MASK))
     {
         i2c_control->state = SLAVE_I2C_LIGHT_RST;
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         return;
     }
 
-    if (control_byte & HARD_RST_MASK)
+    if ((control_byte & HARD_RST_MASK) && (bit_mask & HARD_RST_MASK))
     {
         i2c_control->state = SLAVE_I2C_HARD_RST;
         return;
@@ -197,13 +200,16 @@ static void slave_i2c_check_control_byte(uint8_t control_byte)
         return;
     }
 
-    if (control_byte & SFP_DIS_MASK)
+    if (bit_mask & SFP_DIS_MASK)
     {
-        wan_sfp_set_tx_status(DISABLE);
-    }
-    else
-    {
-        wan_sfp_set_tx_status(ENABLE);
+        if (control_byte & SFP_DIS_MASK)
+        {
+            wan_sfp_set_tx_status(DISABLE);
+        }
+        else
+        {
+            wan_sfp_set_tx_status(ENABLE);
+        }
     }
 
     if(wan_sfp_get_tx_status())
@@ -215,53 +221,65 @@ static void slave_i2c_check_control_byte(uint8_t control_byte)
         i2c_control->status_word &= (~SFP_DIS_STSBIT);
     }
 
-    if (control_byte & USB30_PWRON_MASK)
+    if (bit_mask & USB30_PWRON_MASK)
     {
-        power_control_usb(USB3_PORT0, USB_ON);
-        i2c_control->status_word |= USB30_PWRON_STSBIT;
-    }
-    else
-    {
-        power_control_usb(USB3_PORT0, USB_OFF);
-        i2c_control->status_word &= (~USB30_PWRON_STSBIT);
-    }
-
-    if (control_byte & USB31_PWRON_MASK)
-    {
-        power_control_usb(USB3_PORT1, USB_ON);
-        i2c_control->status_word |= USB31_PWRON_STSBIT;
-    }
-    else
-    {
-        power_control_usb(USB3_PORT1, USB_OFF);
-        i2c_control->status_word &= (~USB31_PWRON_STSBIT);
-    }
-
-    if (control_byte & ENABLE_4V5_MASK)
-    {
-        pwr_error = power_control_start_regulator(REG_4V5);
-
-        if (pwr_error == NO_ERROR)
-            i2c_control->status_word |= ENABLE_4V5_STSBIT;
+        if (control_byte & USB30_PWRON_MASK)
+        {
+            power_control_usb(USB3_PORT0, USB_ON);
+            i2c_control->status_word |= USB30_PWRON_STSBIT;
+        }
         else
-            i2c_control->state = SLAVE_I2C_PWR4V5_ERROR;
-    }
-    else
-    {
-        GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-        i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
+        {
+            power_control_usb(USB3_PORT0, USB_OFF);
+            i2c_control->status_word &= (~USB30_PWRON_STSBIT);
+        }
     }
 
-    if (control_byte & BUTTON_MODE_MASK)
+    if (bit_mask & USB31_PWRON_MASK)
     {
-       button->button_mode = BUTTON_USER;
-       i2c_control->status_word |= BUTTON_MODE_STSBIT;
+        if (control_byte & USB31_PWRON_MASK)
+        {
+            power_control_usb(USB3_PORT1, USB_ON);
+            i2c_control->status_word |= USB31_PWRON_STSBIT;
+        }
+        else
+        {
+            power_control_usb(USB3_PORT1, USB_OFF);
+            i2c_control->status_word &= (~USB31_PWRON_STSBIT);
+        }
     }
-    else
+
+    if (bit_mask & ENABLE_4V5_MASK)
     {
-       button->button_mode = BUTTON_DEFAULT;
-       button->button_pressed_counter = 0;
-       i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
+        if (control_byte & ENABLE_4V5_MASK)
+        {
+            pwr_error = power_control_start_regulator(REG_4V5);
+
+            if (pwr_error == NO_ERROR)
+                i2c_control->status_word |= ENABLE_4V5_STSBIT;
+            else
+                i2c_control->state = SLAVE_I2C_PWR4V5_ERROR;
+        }
+        else
+        {
+            GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+            i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
+        }
+    }
+
+    if (bit_mask & BUTTON_MODE_MASK)
+    {
+        if (control_byte & BUTTON_MODE_MASK)
+        {
+           button->button_mode = BUTTON_USER;
+           i2c_control->status_word |= BUTTON_MODE_STSBIT;
+        }
+        else
+        {
+           button->button_mode = BUTTON_DEFAULT;
+           button->button_pressed_counter = 0;
+           i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
+        }
     }
 }
 
@@ -331,9 +349,10 @@ void slave_i2c_handler(void)
             {
                 case CMD_GENERAL_CONTROL:
                 {
-                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                    if((i2c_state->rx_data_ctr -1) == TWO_BYTES_EXPECTED)
                     {
-                        slave_i2c_check_control_byte(i2c_state->rx_buf[1]);
+                        slave_i2c_check_control_byte(i2c_state->rx_buf[1], \
+                        i2c_state->rx_buf[2]);
                     }
                     DBG("ACK\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -478,6 +497,35 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
+                case CMD_CARD_FORCE_MODE:
+                {
+                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                    {
+                        card_mode_override = i2c_state->rx_buf[1];
+
+                        ee_var = EE_WriteVariable(CARD_VIRT_ADDR, card_mode_override);
+
+//#if DBG_ENABLE
+                        switch(ee_var)
+                        {
+                            case VAR_FLASH_COMPLETE: DBG("CARD: OK\r\n"); break;
+                            case VAR_PAGE_FULL: DBG("CARD: Pg full\r\n"); break;
+                            case VAR_NO_VALID_PAGE: DBG("CARD: No Pg\r\n"); break;
+                            default:
+                                break;
+                        }
+//#endif
+
+                        DBG("CARD: ");
+                        DBG((const char*)(i2c_state->rx_buf + 1));
+                        DBG("\r\n");
+                    }
+                    DBG("ACK\r\n");
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
                 case CMD_GET_STATUS_WORD:
                 {
                     /* prepare data to be sent to the master */
@@ -569,7 +617,7 @@ void slave_i2c_handler(void)
 
         /* Reading 20B of FW version via U-Boot has 2 steps
          * -> dont clear the TX counter when the first step is performed */
-        if (!(i2c_state->rx_buf[CMD_INDEX] == CMD_GET_FW_VERSION))
+        if (i2c_state->rx_buf[CMD_INDEX] != CMD_GET_FW_VERSION)
         {
             i2c_state->tx_data_ctr = 0;
             i2c_state->rx_data_ctr = 0;
