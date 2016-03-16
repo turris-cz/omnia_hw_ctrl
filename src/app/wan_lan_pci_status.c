@@ -108,7 +108,7 @@ static void wan_lan_pci_io_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-    wan_sfp_set_tx_status(DISABLE);
+    wan_sfp_set_tx_status(ENABLE);
 }
 
 /*******************************************************************************
