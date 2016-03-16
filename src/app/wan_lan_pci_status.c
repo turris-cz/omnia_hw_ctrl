@@ -58,7 +58,7 @@ static void wan_lan_pci_io_config(void)
     /* SFP_DIS output pin */
     GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
@@ -108,7 +108,7 @@ static void wan_lan_pci_io_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-    wan_sfp_set_tx_status(ENABLE);
+    wan_sfp_set_tx_status(DISABLE);
 }
 
 /*******************************************************************************
