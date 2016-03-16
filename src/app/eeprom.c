@@ -557,7 +557,7 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   }
   else
   {
-    DBG("NO VALID PAGE \r\n");
+    DBG("NO VALID PAGE\r\n");
     return NO_VALID_PAGE;       /* No valid Page */
   }
 

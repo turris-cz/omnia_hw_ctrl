@@ -86,12 +86,11 @@ enum status_word_bits {
  * -----------------
  *      0   |   LIGHT_RST   : 1 - do light reset, 0 - no reset
  *      1   |   HARD_RST    : 1 - do hard reset, 0 - no reset
- *      2   |   FACTORY_RST : 1 - do factory reset, 0 - no reset (not used)
- *      3   |   SFP_DIS     : 1 - SFP TX disabled; 0 - SFP TX enabled
- *      4   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
- *      5   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
- *      6   |   ENABLE_4V5  : 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF
- *      7   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)
+ *      2   |   SFP_DIS     : 1 - SFP TX disabled; 0 - SFP TX enabled
+ *      3   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
+ *      4   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
+ *      5   |   ENABLE_4V5  : 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF
+ *      6   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)
 */
 
 /*

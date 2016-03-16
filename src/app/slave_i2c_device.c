@@ -51,18 +51,17 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
-    CMD_CARD_FORCE_MODE                 = 0x0D, /* 0 - force PCIe, 1 - force mSATA */
+    CMD_CARD_FORCE_MODE                 = 0x0D, /* 0 - force PCIe, 1 - force mSATA, 0xAA - default */
 };
 
 enum i2c_control_byte_mask {
     LIGHT_RST_MASK                      = 0x01,
     HARD_RST_MASK                       = 0x02,
-    FACTORY_RST_MASK                    = 0x04,
-    SFP_DIS_MASK                        = 0x08,
-    USB30_PWRON_MASK                    = 0x10,
-    USB31_PWRON_MASK                    = 0x20,
-    ENABLE_4V5_MASK                     = 0x40,
-    BUTTON_MODE_MASK                    = 0x80,
+    SFP_DIS_MASK                        = 0x04,
+    USB30_PWRON_MASK                    = 0x08,
+    USB31_PWRON_MASK                    = 0x10,
+    ENABLE_4V5_MASK                     = 0x20,
+    BUTTON_MODE_MASK                    = 0x40,
 };
 
 enum expected_bytes_in_cmd {
@@ -187,6 +186,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        /* reset of CPU */
         GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         return;
     }
@@ -194,12 +194,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     if ((control_byte & HARD_RST_MASK) && (bit_mask & HARD_RST_MASK))
     {
         i2c_control->state = SLAVE_I2C_HARD_RST;
-        return;
-    }
-
-    if (control_byte & FACTORY_RST_MASK)
-    {
-        /* not used */
         return;
     }
 
