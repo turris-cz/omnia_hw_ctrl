@@ -181,10 +181,13 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
     if ((control_byte & LIGHT_RST_MASK) && (bit_mask & LIGHT_RST_MASK))
     {
-        i2c_control->state = SLAVE_I2C_LIGHT_RST;
+        /* confirm received byte of I2C and reset */
+        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+        /* release SCL line */
+        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
         /* set CFG_CTRL pin to high state ASAP */
         GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
+        GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         return;
     }
 
@@ -210,15 +213,15 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         {
             wan_sfp_set_tx_status(ENABLE);
         }
-    }
 
-    if(wan_sfp_get_tx_status())
-    {
-        i2c_control->status_word |= SFP_DIS_STSBIT;
-    }
-    else
-    {
-        i2c_control->status_word &= (~SFP_DIS_STSBIT);
+        if(wan_sfp_get_tx_status())
+        {
+            i2c_control->status_word |= SFP_DIS_STSBIT;
+        }
+        else
+        {
+            i2c_control->status_word &= (~SFP_DIS_STSBIT);
+        }
     }
 
     if (bit_mask & USB30_PWRON_MASK)

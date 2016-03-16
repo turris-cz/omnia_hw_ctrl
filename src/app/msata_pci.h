@@ -31,13 +31,13 @@
 #define MSATAIND_PIN_EXTIPINSOURCE          EXTI_PinSource14
 #define MSATAIND_PIN_EXTILINE               EXTI_Line14
 
-enum card_force_modes {
+typedef enum card_force_modes {
     CARD_DEFAULT        = 0xAA,
     CARD_FORCE_PCI      = 0x00,
     CARD_FORCE_MSATA    = 0x01
-};
+} card_mode_t;
 
-extern uint16_t card_mode_override;
+extern card_mode_t card_mode_override;
 
 /*******************************************************************************
   * @function   msata_pci_indication_config

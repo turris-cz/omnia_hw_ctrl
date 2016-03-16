@@ -12,7 +12,7 @@
 #include "msata_pci.h"
 #include "led_driver.h"
 
-uint16_t card_mode_override;
+card_mode_t card_mode_override;
 
 /*******************************************************************************
   * @function   msata_pci_io_config
