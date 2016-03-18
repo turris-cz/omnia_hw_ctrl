@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:creation-date>2016-02-12T15:11:59.023365256</meta:creation-date><meta:editing-duration>PT18M24S</meta:editing-duration><meta:editing-cycles>17</meta:editing-cycles><meta:generator>LibreOffice/4.2.8.2$Linux_X86_64 LibreOffice_project/420m0$Build-2</meta:generator><meta:initial-creator>Jirka </meta:initial-creator><dc:date>2016-03-11T16:03:26.081877445</dc:date><dc:creator>Jirka </dc:creator><meta:document-statistic meta:table-count="0" meta:image-count="3" meta:object-count="0" meta:page-count="6" meta:paragraph-count="205" meta:word-count="1220" meta:character-count="6910" meta:non-whitespace-character-count="5002"/></office:meta>
+ <office:meta><meta:creation-date>2016-02-12T15:11:59.023365256</meta:creation-date><meta:editing-duration>PT18M24S</meta:editing-duration><meta:editing-cycles>18</meta:editing-cycles><meta:generator>LibreOffice/4.2.8.2$Linux_X86_64 LibreOffice_project/420m0$Build-2</meta:generator><meta:initial-creator>Jirka </meta:initial-creator><dc:date>2016-03-18T12:56:35.598454085</dc:date><dc:creator>Jirka </dc:creator><meta:document-statistic meta:table-count="0" meta:image-count="3" meta:object-count="0" meta:page-count="7" meta:paragraph-count="244" meta:word-count="1456" meta:character-count="8294" meta:non-whitespace-character-count="6050"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="ViewAreaTop" config:type="long">150813</config:config-item>
+   <config:config-item config:name="ViewAreaTop" config:type="long">189662</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
    <config:config-item config:name="ViewAreaWidth" config:type="long">22359</config:config-item>
    <config:config-item config:name="ViewAreaHeight" config:type="long">16914</config:config-item>
@@ -13,12 +13,12 @@
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">6020</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">159997</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">8782</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">198162</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleTop" config:type="long">150813</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">189662</config:config-item>
      <config:config-item config:name="VisibleRight" config:type="long">22357</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">167725</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">206574</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -81,9 +81,9 @@
    <config:config-item config:name="ConsiderTextWrapOnObjPos" config:type="boolean">false</config:config-item>
    <config:config-item config:name="CurrentDatabaseCommandType" config:type="int">0</config:config-item>
    <config:config-item config:name="RedlineProtectionKey" config:type="base64Binary"/>
-   <config:config-item config:name="Rsid" config:type="int">835365</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">1020951</config:config-item>
    <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">jAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAsgAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKRHVwbGV4Ok5vbmUAUGFnZVNpemU6QTQAABIAQ09NUEFUX0RVUExFWF9NT0RFCgBEVVBMRVhfT0ZG</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">jAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAsgAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6QTQARHVwbGV4Ok5vbmUAABIAQ09NUEFUX0RVUExFWF9NT0RFCgBEVVBMRVhfT0ZG</config:config-item>
    <config:config-item config:name="AlignTabStopPosition" config:type="boolean">true</config:config-item>
    <config:config-item config:name="ProtectForm" config:type="boolean">false</config:config-item>
    <config:config-item config:name="InvertBorderSpacing" config:type="boolean">false</config:config-item>
@@ -110,7 +110,9 @@
  </office:settings>
  <office:scripts>
   <office:script script:language="ooo:Basic">
-   <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink"/>
+   <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <ooo:library-embedded ooo:name="Standard"/>
+   </ooo:libraries>
   </office:script>
  </office:scripts>
  <office:font-face-decls>
@@ -658,43 +660,107 @@
   <style:style style:name="P77" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:text-properties officeooo:rsid="000cb6b8" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P78" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
+  <style:style style:name="P78" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties officeooo:rsid="000cb6b8" officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P79" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
    <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
-  <style:style style:name="P79" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
+  <style:style style:name="P80" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
    <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00100cff" officeooo:paragraph-rsid="0007c981" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
-  <style:style style:name="P80" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
+  <style:style style:name="P81" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
    <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P81" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L5">
+  <style:style style:name="P82" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L5">
    <style:text-properties officeooo:rsid="00110b24" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P82" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
+  <style:style style:name="P83" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
    <style:text-properties fo:color="#ff3333" fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" officeooo:rsid="0030bf50" officeooo:paragraph-rsid="0007c981" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
   </style:style>
-  <style:style style:name="P83" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L6">
+  <style:style style:name="P84" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L6">
    <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P84" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L7">
+  <style:style style:name="P85" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L7">
    <style:text-properties officeooo:rsid="0012b148" officeooo:paragraph-rsid="0007c981"/>
-  </style:style>
-  <style:style style:name="P85" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
-   <style:text-properties officeooo:rsid="002d849f" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
   <style:style style:name="P86" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b15a5"/>
+   <style:text-properties officeooo:rsid="002d849f" officeooo:paragraph-rsid="0007c981"/>
   </style:style>
   <style:style style:name="P87" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b15a5"/>
+  </style:style>
+  <style:style style:name="P88" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000f9417"/>
+  </style:style>
+  <style:style style:name="P89" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
    <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000b82fb" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
-  <style:style style:name="P88" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+  <style:style style:name="P90" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P91" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P92" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="000b15a5" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P93" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P94" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="000b82fb" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P95" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="000f9417" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P96" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
    <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="000b82fb" officeooo:paragraph-rsid="000b82fb" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-size-complex="10pt" style:font-style-complex="italic" style:font-weight-complex="normal"/>
   </style:style>
-  <style:style style:name="P89" style:family="paragraph" style:parent-style-name="Heading_20_1">
+  <style:style style:name="P97" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="000b82fb" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-size-complex="10pt" style:font-style-complex="italic" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P98" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L8">
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="000f9417" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-size-complex="10pt" style:font-style-complex="italic" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P99" style:family="paragraph" style:parent-style-name="Standard">
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="002d849f" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P100" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="000eb586" officeooo:paragraph-rsid="0007c981" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="P101" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="000eb586" officeooo:paragraph-rsid="000eb586" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="P102" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="000f1d04" officeooo:paragraph-rsid="000f1d04" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="P103" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="001cff47" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P104" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" officeooo:rsid="000b82fb" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P105" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="001d126c" officeooo:paragraph-rsid="000b82fb" style:font-size-asian="10pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="10pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P106" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:margin-left="0.9055in" fo:margin-right="0in" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="001d126c" officeooo:paragraph-rsid="000f9417" style:font-size-asian="10pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="10pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P107" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:text-properties officeooo:paragraph-rsid="0007c981"/>
   </style:style>
-  <style:style style:name="P90" style:family="paragraph" style:parent-style-name="Heading_20_1">
+  <style:style style:name="P108" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties officeooo:paragraph-rsid="0007c981"/>
+  </style:style>
+  <style:style style:name="P109" style:family="paragraph" style:parent-style-name="Heading_20_1">
    <style:text-properties fo:font-weight="bold" officeooo:rsid="0011200c" officeooo:paragraph-rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T1" style:family="text">
@@ -713,265 +779,292 @@
    <style:text-properties fo:font-weight="bold" officeooo:rsid="0012b148" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T6" style:family="text">
-   <style:text-properties officeooo:rsid="0004c240"/>
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0007c981" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T7" style:family="text">
-   <style:text-properties officeooo:rsid="003edb5a"/>
+   <style:text-properties officeooo:rsid="0004c240"/>
   </style:style>
   <style:style style:name="T8" style:family="text">
-   <style:text-properties officeooo:rsid="0012b148"/>
+   <style:text-properties officeooo:rsid="003edb5a"/>
   </style:style>
   <style:style style:name="T9" style:family="text">
-   <style:text-properties officeooo:rsid="001cff47"/>
+   <style:text-properties officeooo:rsid="0012b148"/>
   </style:style>
   <style:style style:name="T10" style:family="text">
-   <style:text-properties officeooo:rsid="0011200c"/>
+   <style:text-properties officeooo:rsid="001cff47"/>
   </style:style>
   <style:style style:name="T11" style:family="text">
-   <style:text-properties officeooo:rsid="002c59c6"/>
+   <style:text-properties officeooo:rsid="0011200c"/>
   </style:style>
   <style:style style:name="T12" style:family="text">
-   <style:text-properties officeooo:rsid="001d126c"/>
+   <style:text-properties officeooo:rsid="002c59c6"/>
   </style:style>
   <style:style style:name="T13" style:family="text">
-   <style:text-properties officeooo:rsid="002b6bf1"/>
+   <style:text-properties officeooo:rsid="001d126c"/>
   </style:style>
   <style:style style:name="T14" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US"/>
+   <style:text-properties officeooo:rsid="002b6bf1"/>
   </style:style>
   <style:style style:name="T15" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001f98c1"/>
+   <style:text-properties fo:language="en" fo:country="US"/>
   </style:style>
   <style:style style:name="T16" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002c59c6"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001f98c1"/>
   </style:style>
   <style:style style:name="T17" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0020e1a4"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002c59c6"/>
   </style:style>
   <style:style style:name="T18" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003da210"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0020e1a4"/>
   </style:style>
   <style:style style:name="T19" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001d126c"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003da210"/>
   </style:style>
   <style:style style:name="T20" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0023ca5c"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001d126c"/>
   </style:style>
   <style:style style:name="T21" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003dc3b1"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0023ca5c"/>
   </style:style>
   <style:style style:name="T22" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001cff47"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003dc3b1"/>
   </style:style>
   <style:style style:name="T23" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0024928f"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="001cff47"/>
   </style:style>
   <style:style style:name="T24" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003bb963"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0024928f"/>
   </style:style>
   <style:style style:name="T25" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0024cd52"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="003bb963"/>
   </style:style>
   <style:style style:name="T26" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002edb1a"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0024cd52"/>
   </style:style>
   <style:style style:name="T27" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0034d44a"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002edb1a"/>
   </style:style>
   <style:style style:name="T28" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" officeooo:rsid="002edb1a" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="0034d44a"/>
   </style:style>
   <style:style style:name="T29" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" officeooo:rsid="001d126c" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" officeooo:rsid="002edb1a" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T30" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001d126c" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" officeooo:rsid="001d126c" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T31" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f"/>
+   <style:text-properties fo:language="en" fo:country="US" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001d126c" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T32" style:family="text">
-   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="000c8f20"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="002d849f"/>
   </style:style>
   <style:style style:name="T33" style:family="text">
-   <style:text-properties officeooo:rsid="001f98c1"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="000c8f20"/>
   </style:style>
   <style:style style:name="T34" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:language="en" fo:country="US" officeooo:rsid="000f1d04"/>
   </style:style>
   <style:style style:name="T35" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties officeooo:rsid="001f98c1"/>
   </style:style>
   <style:style style:name="T36" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001cff47" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T37" style:family="text">
-   <style:text-properties fo:font-size="10pt" fo:font-style="italic" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001d126c" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T38" style:family="text">
-   <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="001cff47" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T39" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-size="10pt" fo:language="en" fo:country="US" officeooo:rsid="000f1d04" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T40" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="002d849f" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-size="10pt" fo:font-style="italic" style:font-size-asian="10pt" style:font-style-asian="italic" style:font-size-complex="10pt" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T41" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000b15a5" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T42" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000b82fb" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T43" style:family="text">
-   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="002d849f" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T44" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="normal" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-style-complex="italic" style:font-weight-complex="normal"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000b15a5" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T45" style:family="text">
-   <style:text-properties fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="000b15a5" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-style-complex="italic" style:font-weight-complex="normal"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000b82fb" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T46" style:family="text">
-   <style:text-properties officeooo:rsid="0020e1a4"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000f1d04" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T47" style:family="text">
-   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="0020e1a4" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="000f9417" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T48" style:family="text">
-   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="003da210" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T49" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="00269971"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="normal" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-style-complex="italic" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T50" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="0024cd52"/>
+   <style:text-properties fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="000b15a5" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-style-complex="italic" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T51" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="002edb1a"/>
+   <style:text-properties officeooo:rsid="0020e1a4"/>
   </style:style>
   <style:style style:name="T52" style:family="text">
-   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="003556c8"/>
+   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="0020e1a4" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
   <style:style style:name="T53" style:family="text">
-   <style:text-properties officeooo:rsid="003bb963"/>
+   <style:text-properties fo:font-size="9pt" fo:language="en" fo:country="US" officeooo:rsid="003da210" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
   <style:style style:name="T54" style:family="text">
-   <style:text-properties officeooo:rsid="0024cd52"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="00269971"/>
   </style:style>
   <style:style style:name="T55" style:family="text">
-   <style:text-properties fo:font-size="12pt" fo:language="en" fo:country="US" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="0024cd52"/>
   </style:style>
   <style:style style:name="T56" style:family="text">
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="001d126c" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="002edb1a"/>
   </style:style>
   <style:style style:name="T57" style:family="text">
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:language="cs" fo:country="CZ" officeooo:rsid="003556c8"/>
   </style:style>
   <style:style style:name="T58" style:family="text">
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="002c59c6" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties officeooo:rsid="003bb963"/>
   </style:style>
   <style:style style:name="T59" style:family="text">
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="000b15a5" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties officeooo:rsid="0024cd52"/>
   </style:style>
   <style:style style:name="T60" style:family="text">
-   <style:text-properties fo:font-size="12pt" officeooo:rsid="000b82fb" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:font-size="12pt" fo:language="en" fo:country="US" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T61" style:family="text">
-   <style:text-properties officeooo:rsid="003610be"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="001d126c" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T62" style:family="text">
-   <style:text-properties officeooo:rsid="002edb1a"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="003bb963" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T63" style:family="text">
-   <style:text-properties officeooo:rsid="0034d44a"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="002c59c6" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T64" style:family="text">
-   <style:text-properties officeooo:rsid="003556c8"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="000b15a5" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T65" style:family="text">
-   <style:text-properties officeooo:rsid="0007c981"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="000b82fb" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T66" style:family="text">
-   <style:text-properties fo:color="#c0c0c0"/>
+   <style:text-properties fo:font-size="12pt" officeooo:rsid="000f9417" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
   </style:style>
   <style:style style:name="T67" style:family="text">
-   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier 10 Pitch"/>
+   <style:text-properties officeooo:rsid="003610be"/>
   </style:style>
   <style:style style:name="T68" style:family="text">
-   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier New"/>
+   <style:text-properties officeooo:rsid="002edb1a"/>
   </style:style>
   <style:style style:name="T69" style:family="text">
-   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties officeooo:rsid="0034d44a"/>
   </style:style>
   <style:style style:name="T70" style:family="text">
-   <style:text-properties fo:color="#008000"/>
+   <style:text-properties officeooo:rsid="003556c8"/>
   </style:style>
   <style:style style:name="T71" style:family="text">
-   <style:text-properties fo:color="#008000" officeooo:rsid="000b15a5"/>
+   <style:text-properties officeooo:rsid="0007c981"/>
   </style:style>
   <style:style style:name="T72" style:family="text">
-   <style:text-properties fo:color="#008000" style:font-name="Courier 10 Pitch"/>
+   <style:text-properties fo:color="#c0c0c0"/>
   </style:style>
   <style:style style:name="T73" style:family="text">
-   <style:text-properties fo:color="#008000" style:font-name="Courier New"/>
+   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier 10 Pitch"/>
   </style:style>
   <style:style style:name="T74" style:family="text">
-   <style:text-properties fo:color="#008000" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier New"/>
   </style:style>
   <style:style style:name="T75" style:family="text">
-   <style:text-properties style:font-name="Courier New"/>
+   <style:text-properties fo:color="#c0c0c0" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T76" style:family="text">
-   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="002c0b9b" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties fo:color="#008000"/>
   </style:style>
   <style:style style:name="T77" style:family="text">
-   <style:text-properties style:font-name="Courier New" officeooo:rsid="00096516"/>
+   <style:text-properties fo:color="#008000" officeooo:rsid="000b15a5"/>
   </style:style>
   <style:style style:name="T78" style:family="text">
-   <style:text-properties officeooo:rsid="00096516"/>
+   <style:text-properties fo:color="#008000" style:font-name="Courier 10 Pitch"/>
   </style:style>
   <style:style style:name="T79" style:family="text">
-   <style:text-properties fo:color="#000000"/>
+   <style:text-properties fo:color="#008000" style:font-name="Courier New"/>
   </style:style>
   <style:style style:name="T80" style:family="text">
-   <style:text-properties fo:color="#000000" officeooo:rsid="000b15a5"/>
+   <style:text-properties fo:color="#008000" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
   <style:style style:name="T81" style:family="text">
-   <style:text-properties fo:color="#000000" officeooo:rsid="000b82fb"/>
+   <style:text-properties style:font-name="Courier New"/>
   </style:style>
   <style:style style:name="T82" style:family="text">
-   <style:text-properties officeooo:rsid="000b15a5"/>
+   <style:text-properties style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="002c0b9b" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
   </style:style>
   <style:style style:name="T83" style:family="text">
-   <style:text-properties officeooo:rsid="000b82fb"/>
+   <style:text-properties style:font-name="Courier New" officeooo:rsid="00096516"/>
   </style:style>
   <style:style style:name="T84" style:family="text">
-   <style:text-properties fo:font-style="normal" fo:font-weight="normal" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties officeooo:rsid="00096516"/>
   </style:style>
   <style:style style:name="T85" style:family="text">
-   <style:text-properties fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000b15a5" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties fo:color="#000000"/>
   </style:style>
   <style:style style:name="T86" style:family="text">
-   <style:text-properties fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000cbf25" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties fo:color="#000000" officeooo:rsid="000b15a5"/>
   </style:style>
   <style:style style:name="T87" style:family="text">
-   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties fo:color="#000000" officeooo:rsid="000b82fb"/>
   </style:style>
   <style:style style:name="T88" style:family="text">
-   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="00096516" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties officeooo:rsid="000b15a5"/>
   </style:style>
   <style:style style:name="T89" style:family="text">
-   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="000baa65" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+   <style:text-properties officeooo:rsid="000b82fb"/>
   </style:style>
   <style:style style:name="T90" style:family="text">
-   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+   <style:text-properties fo:font-style="normal" fo:font-weight="normal" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T91" style:family="text">
-   <style:text-properties officeooo:rsid="002c0b9b"/>
+   <style:text-properties fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000b15a5" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T92" style:family="text">
+   <style:text-properties fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000cbf25" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T93" style:family="text">
+   <style:text-properties fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000f9417" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T94" style:family="text">
+   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="T95" style:family="text">
+   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="00096516" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="T96" style:family="text">
+   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="9pt" officeooo:rsid="000baa65" style:font-size-asian="9pt" style:font-size-complex="9pt"/>
+  </style:style>
+  <style:style style:name="T97" style:family="text">
+   <style:text-properties style:use-window-font-color="true" style:font-name="Courier New" fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="T98" style:family="text">
+   <style:text-properties officeooo:rsid="002c0b9b"/>
+  </style:style>
+  <style:style style:name="T99" style:family="text">
    <style:text-properties officeooo:rsid="000cbf25"/>
+  </style:style>
+  <style:style style:name="T100" style:family="text">
+   <style:text-properties officeooo:rsid="000f1d04"/>
+  </style:style>
+  <style:style style:name="T101" style:family="text">
+   <style:text-properties officeooo:rsid="000f9417"/>
   </style:style>
   <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Graphics">
    <style:graphic-properties style:protect="size position" style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0in, 0in, 0in, 0in)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
@@ -1429,7 +1522,7 @@
  <office:master-styles>
   <style:master-page style:name="Standard" style:page-layout-name="pm1">
    <style:header>
-    <text:p text:style-name="P1"><draw:frame draw:style-name="fr1" draw:name="graphics1" text:anchor-type="paragraph" svg:x="0in" svg:y="0in" svg:width="2.7244in" svg:height="0.3543in" draw:z-index="5"><draw:image>
+    <text:p text:style-name="P1"><draw:frame draw:style-name="fr1" draw:name="graphics1" text:anchor-type="paragraph" svg:x="0in" svg:y="0in" svg:width="2.7244in" svg:height="0.3543in" draw:z-index="6"><draw:image>
        <office:binary-data>VkNMTVRGAQAxAAAAAQAAAAEAGwAAAAAAAAAAAAAAAAABAAAAAQAAAAEAAAABAAAAARQtAADh
         BQAAiwAAAIgAAQACAAAAAQCEAAEABQAAAAAAAAAAhQABAAUAAACTOAAAAW8AAgB0BQAAAQCO
         AJcXAADtAwAAdRcAAOsDAABVFwAA5gMAADcXAADeAwAAGhcAANMDAAD/FgAAxQMAAOcWAAC1
@@ -1948,7 +2041,7 @@
      </draw:frame></text:p>
    </style:header>
    <style:footer>
-    <text:p text:style-name="P2"><draw:frame draw:style-name="fr2" draw:name="graphics2" text:anchor-type="paragraph" svg:x="0.2362in" svg:y="0.5665in" svg:width="7.7953in" svg:height="0.8508in" draw:z-index="11"><draw:image>
+    <text:p text:style-name="P2"><draw:frame draw:style-name="fr2" draw:name="graphics2" text:anchor-type="paragraph" svg:x="0.2362in" svg:y="0.5665in" svg:width="7.7953in" svg:height="0.8508in" draw:z-index="13"><draw:image>
        <office:binary-data>VkNMTVRGAQAxAAAAAQAAAAEAGwAAAAAAAAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAVhNAAB9
         CAAA6QIAAIgAAQACAAAAAQCEAAEABQAAAAAAAAAAhQABAAUAAACTOAAAAW8AAgCOAQAAAQAh
         ALkcAABpAAAAuBwAAHgAAACzHAAAhgAAAKwcAACSAAAApBwAAJ0AAACZHAAApgAAAIwcAACs
@@ -3893,7 +3986,7 @@
        </office:binary-data>
       </draw:image>
      </draw:frame><text:span text:style-name="T1">CZ.NIC</text:span>, z. s. p. o.<text:tab/>IČ 67985726 <text:tab/>T<text:tab/>+420 222 745 111<text:tab/>kontakt@nic.cz<text:tab/></text:p>
-    <text:p text:style-name="P3"><text:span text:style-name="T2">Milešovská</text:span> <text:span text:style-name="T2">5</text:span>, 1<text:span text:style-name="T2">3</text:span>0 00 Prague <text:span text:style-name="T2">3</text:span><text:tab/>DIČ CZ67985726<text:tab/>M<text:tab/>+420 731 657 660<text:tab/>www.nic.cz<text:tab/><text:span text:style-name="T1"><text:page-number text:select-page="current">6</text:page-number></text:span><text:span text:style-name="T1">/</text:span><text:span text:style-name="T1"><text:page-count>6</text:page-count></text:span></text:p>
+    <text:p text:style-name="P3"><text:span text:style-name="T2">Milešovská</text:span> <text:span text:style-name="T2">5</text:span>, 1<text:span text:style-name="T2">3</text:span>0 00 Prague <text:span text:style-name="T2">3</text:span><text:tab/>DIČ CZ67985726<text:tab/>M<text:tab/>+420 731 657 660<text:tab/>www.nic.cz<text:tab/><text:span text:style-name="T1"><text:page-number text:select-page="current">7</text:page-number></text:span><text:span text:style-name="T1">/</text:span><text:span text:style-name="T1"><text:page-count>7</text:page-count></text:span></text:p>
     <text:p text:style-name="P4"/>
     <text:p text:style-name="P5">CZ.NIC is an interest association of legal entities, recorded in the Associations register maintained by the Municipal court in Prague, File ref.: L 58624.</text:p>
    </style:footer>
@@ -3918,20 +4011,20 @@
     <text:sequence-decl text:display-outline-level="0" text:name="Text"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
    </text:sequence-decls>
-   <text:p text:style-name="P73"><text:span text:style-name="T7">Turris Omnia - d</text:span>escription of I2C communication between MCU and <text:span text:style-name="T65">main</text:span> CPU </text:p>
+   <text:p text:style-name="P73"><text:span text:style-name="T8">Turris Omnia - d</text:span>escription of I2C communication between MCU and <text:span text:style-name="T71">main</text:span> CPU </text:p>
    <text:p text:style-name="P16"/>
    <text:h text:style-name="P74" text:outline-level="1"><text:span text:style-name="T1">A</text:span><text:span text:style-name="T4">d</text:span><text:span text:style-name="T1">dre</text:span><text:span text:style-name="T4">s</text:span><text:span text:style-name="T1">s, </text:span><text:span text:style-name="T4">timing</text:span></text:h>
-   <text:list xml:id="list765870843325939337" text:style-name="L1">
+   <text:list xml:id="list3927503316602193888" text:style-name="L1">
     <text:list-item>
-     <text:p text:style-name="P76"><text:span text:style-name="T8">c</text:span>urrent I2C address of MCU</text:p>
+     <text:p text:style-name="P76"><text:span text:style-name="T9">c</text:span>urrent I2C address of MCU</text:p>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P77">0x<text:span text:style-name="T9">2A</text:span></text:p>
+       <text:p text:style-name="P77">0x<text:span text:style-name="T10">2A</text:span></text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P77">I2C <text:span text:style-name="T10">timing</text:span> / <text:span text:style-name="T10">speed</text:span> </text:p>
+     <text:p text:style-name="P77">I2C <text:span text:style-name="T11">timing</text:span> / <text:span text:style-name="T11">speed</text:span> </text:p>
      <text:list>
       <text:list-item>
        <text:p text:style-name="P77">100kHz </text:p>
@@ -3940,390 +4033,504 @@
     </text:list-item>
    </text:list>
    <text:p text:style-name="P16"/>
-   <text:h text:style-name="P75" text:outline-level="1">Commands <text:span text:style-name="T65">(= register addresses)</text:span></text:h>
+   <text:h text:style-name="P75" text:outline-level="1">Commands <text:span text:style-name="T71">(= register addresses)</text:span></text:h>
+   <text:p text:style-name="P70"><text:span text:style-name="T6"/></text:p>
    <text:p text:style-name="P44"/>
-   <text:p text:style-name="P45">enum i2c_commands {</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_GET_STATUS_WORD <text:s text:c="16"/>= 0x01, /* slave sends status word back */</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_GENERAL_CONTROL <text:s text:c="16"/>= 0x02,</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_LED_MODE <text:s text:c="23"/>= 0x03, /* default/user */</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_LED_STATE <text:s text:c="22"/>= 0x04, /* LED on/off */</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_LED_COLOUR <text:s text:c="21"/>= 0x05, /* LED number + RED + GREEN + BLUE */</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_USER_VOLTAGE <text:s text:c="19"/>= 0x06,</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_SET_BRIGHTNESS <text:s text:c="17"/>= 0x07,</text:p>
-   <text:p text:style-name="P45"><text:s text:c="4"/>CMD_GET_BRIGHTNESS <text:s text:c="17"/>= 0x08,</text:p>
-   <text:p text:style-name="P45"><text:s/><text:span text:style-name="T79"><text:s text:c="3"/></text:span><text:span text:style-name="T80">CMD_GET_RESET<text:tab/><text:tab/><text:tab/><text:tab/> = 0x09,</text:span></text:p>
-   <text:p text:style-name="P45"><text:span text:style-name="T80"><text:s text:c="4"/></text:span><text:span text:style-name="T81">CMD_GET_FW_VERSION<text:tab/><text:tab/><text:tab/> = 0x0A,</text:span></text:p>
-   <text:p text:style-name="P54"><text:s text:c="4"/>CMD_WATCHDOG<text:tab/><text:tab/><text:tab/><text:tab/> = 0x0B</text:p>
-   <text:p text:style-name="P45">};</text:p>
+   <text:p text:style-name="P101">enum i2c_commands {</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_GET_STATUS_WORD <text:s text:c="16"/>= 0x01, /* slave sends status word back */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_GENERAL_CONTROL <text:s text:c="16"/>= 0x02,</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_LED_MODE <text:s text:c="23"/>= 0x03, /* default/user */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_LED_STATE <text:s text:c="22"/>= 0x04, /* LED on/off */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_LED_COLOUR <text:s text:c="21"/>= 0x05, /* LED number + RED + GREEN + BLUE */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_USER_VOLTAGE <text:s text:c="19"/>= 0x06,</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_SET_BRIGHTNESS <text:s text:c="17"/>= 0x07,</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_GET_BRIGHTNESS <text:s text:c="17"/>= 0x08,</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_GET_RESET <text:s text:c="22"/>= 0x09,</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_GET_FW_VERSION <text:s text:c="17"/>= 0x0A, /* 20B hash number - accessible only from U-Boot */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_WATCHDOG_STATE <text:s text:c="17"/>= 0x0B, /* 0 - STOP, 1 - RUN -&gt; must be stopped in less than 2 mins after reset */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_WATCHDOG_STATUS <text:s text:c="16"/>= 0x0C, /* 0 - DISABLE, 1 - ENABLE -&gt; permanently */</text:p>
+   <text:p text:style-name="P101"><text:s text:c="4"/>CMD_CARD_FORCE_MODE <text:s text:c="16"/>= 0x0D, /* 0 - force PCIe, 1 - force mSATA, 0xAA - default */</text:p>
+   <text:p text:style-name="P100">};</text:p>
    <text:p text:style-name="P16"/>
-   <text:h text:style-name="P75" text:outline-level="1">Communication</text:h>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:p text:style-name="P16"/>
+   <text:h text:style-name="P75" text:outline-level="1"><text:soft-page-break/>Communication</text:h>
    <text:p text:style-name="P69"/>
-   <text:p text:style-name="P70"><draw:frame draw:style-name="fr3" draw:name="Image1" text:anchor-type="paragraph" svg:width="6.6929in" svg:height="1.8953in" draw:z-index="12"><draw:image>
-      <office:binary-data>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
+   <text:p text:style-name="P70"><draw:frame draw:style-name="fr3" draw:name="Image1" text:anchor-type="paragraph" svg:width="6.6929in" svg:height="2.3161in" draw:z-index="14"><draw:image>
+      <office:binary-data>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
+       GAAAAABABfwfUFZ0E+FjzngAAAAASUVORK5CYII=
       </office:binary-data>
      </draw:image>
     </draw:frame></text:p>
-   <text:p text:style-name="P70"/>
-   <text:p text:style-name="P70"/>
-   <text:p text:style-name="P70"/>
-   <text:h text:style-name="P74" text:outline-level="1"><text:soft-page-break/><text:span text:style-name="T1">Dat</text:span><text:span text:style-name="T5">a types</text:span></text:h>
-   <text:list xml:id="list4644524173513978032" text:style-name="L2">
+   <text:h text:style-name="P74" text:outline-level="1"><text:span text:style-name="T1">Dat</text:span><text:span text:style-name="T5">a types</text:span></text:h>
+   <text:list xml:id="list6464541786389010815" text:style-name="L2">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P78">status_word</text:p>
+       <text:p text:style-name="P79">status_word</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4345,66 +4552,65 @@
    <text:p text:style-name="P46"><text:s/>* <text:s text:c="4"/>10 <text:s text:c="2"/>| <text:s text:c="2"/>ENABLE_4V5 <text:s text:c="5"/>: 1 - 4.5V power is enabled, 0 - 4.5V power is disabled</text:p>
    <text:p text:style-name="P46"><text:s/>* <text:s text:c="4"/>11 <text:s text:c="2"/>| <text:s text:c="2"/>BUTTON_MODE <text:s text:c="4"/>: 1 - user mode, 0 - default mode (brightness settings)</text:p>
    <text:p text:style-name="P46"><text:s/>* <text:s text:c="4"/>12 <text:s text:c="2"/>| <text:s text:c="2"/>BUTTON_PRESSED <text:s/>: 1 - button pressed in user mode, 0 - button not pressed</text:p>
-   <text:p text:style-name="P55"><text:span text:style-name="T87">* <text:s/></text:span><text:span text:style-name="T89">13..1</text:span><text:span text:style-name="T87">5 <text:s text:c="2"/></text:span><text:span text:style-name="T88">|</text:span><text:span text:style-name="T87"> <text:s text:c="2"/>BUTTON_COUNT <text:s text:c="3"/>: number of pressing of the button (max. 7) - valid in user mode</text:span></text:p>
+   <text:p text:style-name="P55"><text:span text:style-name="T94">* <text:s/></text:span><text:span text:style-name="T96">13..1</text:span><text:span text:style-name="T94">5 <text:s text:c="2"/></text:span><text:span text:style-name="T95">|</text:span><text:span text:style-name="T94"> <text:s text:c="2"/>BUTTON_COUNT <text:s text:c="3"/>: number of pressing of the button (max. 7) - valid in user mode</text:span></text:p>
    <text:p text:style-name="P46"/>
    <text:p text:style-name="P46">*/</text:p>
    <text:p text:style-name="P19"/>
    <text:p text:style-name="P19"/>
    <text:p text:style-name="P20"><text:tab/>Example of reading status word from Linux:</text:p>
    <text:p text:style-name="P20"/>
-   <text:p text:style-name="P20"><text:tab/>„i2cget <text:span text:style-name="T11">1</text:span> 0x2<text:span text:style-name="T12">A</text:span> 1 w“</text:p>
+   <text:p text:style-name="P20"><text:tab/>„i2cget <text:span text:style-name="T12">1</text:span> 0x2<text:span text:style-name="T13">A</text:span> 1 w“</text:p>
    <text:p text:style-name="P20"/>
    <text:p text:style-name="P21"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T11"><text:tab/>1</text:span> – i2cbus number</text:p>
-   <text:p text:style-name="P21"><text:tab/>0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/>1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:soft-page-break/><text:tab/>0x2A – I2C address of the slave</text:p>
    <text:p text:style-name="P21"><text:tab/>1 – „address of register“ = command</text:p>
    <text:p text:style-name="P21"><text:tab/>w – word data type</text:p>
    <text:p text:style-name="P20"/>
-   <text:list xml:id="list8993170295954502044" text:style-name="L3">
+   <text:list xml:id="list6393350359880639332" text:style-name="L3">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P79">control_byte</text:p>
+       <text:p text:style-name="P80">control_byte</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
    </text:list>
    <text:p text:style-name="P19"/>
-   <text:p text:style-name="P47">/*</text:p>
-   <text:p text:style-name="P47"><text:s/>* Bit meanings in control_byte:</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s/>Bit Nr. | <text:s text:c="2"/>Meanings</text:p>
-   <text:p text:style-name="P47"><text:s/>* -----------------</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>0 <text:s text:c="2"/>| <text:s text:c="2"/>LIGHT_RST <text:s text:c="2"/>: 1 - do light reset, 0 - no reset</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>1 <text:s text:c="2"/>| <text:s text:c="2"/>HARD_RST <text:s text:c="3"/>: 1 - do hard reset, 0 - no reset</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>2 <text:s text:c="2"/>| <text:s text:c="2"/>FACTORY_RST : 1 - do factory reset, 0 - no reset <text:span text:style-name="T78">(not used)</text:span></text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>3 <text:s text:c="2"/>| <text:s text:c="2"/>SFP_DIS <text:s text:c="4"/>: 1 - SFP TX disabled; 0 - SFP TX enabled</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>4 <text:s text:c="2"/>| <text:s text:c="2"/>USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>5 <text:s text:c="2"/>| <text:s text:c="2"/>USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>6 <text:s text:c="2"/>| <text:s text:c="2"/>ENABLE_4V5 <text:s/>: 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF</text:p>
-   <text:p text:style-name="P47"><text:s/>* <text:s text:c="5"/>7 <text:s text:c="2"/>| <text:s text:c="2"/><text:span text:style-name="T13">BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)</text:span></text:p>
-   <text:p text:style-name="P47">*/</text:p>
+   <text:p text:style-name="P102">/*</text:p>
+   <text:p text:style-name="P102"><text:s/>* Bit meanings in control_byte:</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s/>Bit Nr. | <text:s text:c="2"/>Meanings</text:p>
+   <text:p text:style-name="P102"><text:s/>* -----------------</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>0 <text:s text:c="2"/>| <text:s text:c="2"/>LIGHT_RST <text:s text:c="2"/>: 1 - do light reset, 0 - no reset</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>1 <text:s text:c="2"/>| <text:s text:c="2"/>HARD_RST <text:s text:c="3"/>: 1 - do hard reset, 0 - no reset</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>2 <text:s text:c="2"/>| <text:s text:c="2"/>SFP_DIS <text:s text:c="4"/>: 1 - SFP TX disabled; 0 - SFP TX enabled</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>3 <text:s text:c="2"/>| <text:s text:c="2"/>USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>4 <text:s text:c="2"/>| <text:s text:c="2"/>USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>5 <text:s text:c="2"/>| <text:s text:c="2"/>ENABLE_4V5 <text:s/>: 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF</text:p>
+   <text:p text:style-name="P102"><text:s/>* <text:s text:c="5"/>6 <text:s text:c="2"/>| <text:s text:c="2"/>BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)</text:p>
+   <text:p text:style-name="P102">*/</text:p>
    <text:p text:style-name="P33"/>
    <text:p text:style-name="P12"><text:tab/></text:p>
-   <text:p text:style-name="P35"><text:soft-page-break/><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of control byte (perform light reset)</text:span><text:span text:style-name="T14">:</text:span></text:p>
+   <text:p text:style-name="P35"><text:span text:style-name="T15"><text:tab/>Example of setting </text:span><text:span text:style-name="T16">of control byte (perform light reset)</text:span><text:span text:style-name="T15">:</text:span></text:p>
    <text:p text:style-name="P34"/>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A </text:span><text:span text:style-name="T15">2</text:span><text:span text:style-name="T14"> </text:span><text:span text:style-name="T15">1</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T15"> 0x2A </text:span><text:span text:style-name="T16">2</text:span><text:span text:style-name="T15"> </text:span><text:span text:style-name="T34">0x0101</text:span><text:span text:style-name="T15"> </text:span><text:span text:style-name="T34">w</text:span><text:span text:style-name="T15">”</text:span></text:p>
    <text:p text:style-name="P34"/>
    <text:p text:style-name="P21"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/>2</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P22"><text:tab/><text:span text:style-name="T33">1</text:span> – <text:span text:style-name="T33">do light reset</text:span></text:p>
-   <text:p text:style-name="P20"><text:span text:style-name="T35"><text:tab/>b</text:span><text:span text:style-name="T34"> – </text:span><text:span text:style-name="T35">byte</text:span><text:span text:style-name="T34"> data type</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/>2</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P22"><text:tab/><text:span text:style-name="T100">0x0101</text:span> – <text:span text:style-name="T35">do light reset – the lower byte is a mask (set particular bit to “1” to use a value defined in <text:tab/><text:tab/>the higher byte)</text:span></text:p>
+   <text:p text:style-name="P20"><text:span text:style-name="T37"><text:tab/></text:span><text:span text:style-name="T39">w</text:span><text:span text:style-name="T36"> – </text:span><text:span text:style-name="T39">word</text:span><text:span text:style-name="T36"> data type</text:span></text:p>
    <text:p text:style-name="P23"/>
    <text:p text:style-name="P36"/>
-   <text:list xml:id="list5288861172924668605" text:style-name="L4">
+   <text:list xml:id="list6259667368900084913" text:style-name="L4">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P80"><text:span text:style-name="T39">led_mode_byte </text:span>– default or user led mode</text:p>
+       <text:p text:style-name="P81"><text:span text:style-name="T42">led_mode_byte </text:span>– default or user led mode</text:p>
       </text:list-item>
      </text:list>
-     <text:p text:style-name="P82">! Note: Order of the LEDs is reversed! LED0 is USER_LED2 and LED11 is POWER_LED</text:p>
+     <text:p text:style-name="P83">! Note: Order of the LEDs is reversed! LED0 is USER_LED2 and LED11 is POWER_LED</text:p>
     </text:list-item>
    </text:list>
    <text:p text:style-name="P49">/*</text:p>
@@ -4415,23 +4621,23 @@
    <text:p text:style-name="P49"><text:s/>* <text:s text:c="5"/>4 <text:s text:c="2"/>| <text:s text:c="2"/>LED mode <text:s text:c="3"/>: 1 - USER mode, 0 - default mode</text:p>
    <text:p text:style-name="P49"><text:s/>* <text:s text:c="2"/>5..7 <text:s text:c="2"/>| <text:s text:c="2"/>dont care</text:p>
    <text:p text:style-name="P49">*/</text:p>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED mode</text:span><text:span text:style-name="T15"> (</text:span><text:span text:style-name="T17">user mode on LED1</text:span><text:span text:style-name="T18">0</text:span><text:span text:style-name="T17"> = </text:span><text:span text:style-name="T18">LAN1</text:span><text:span text:style-name="T15">)</text:span><text:span text:style-name="T14">:</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>Example of setting </text:span><text:span text:style-name="T16">of </text:span><text:span text:style-name="T18">LED mode</text:span><text:span text:style-name="T16"> (</text:span><text:span text:style-name="T18">user mode on LED1</text:span><text:span text:style-name="T19">0</text:span><text:span text:style-name="T18"> = </text:span><text:span text:style-name="T19">LAN1</text:span><text:span text:style-name="T16">)</text:span><text:span text:style-name="T15">:</text:span></text:p>
    <text:p text:style-name="P34"/>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A </text:span><text:span text:style-name="T17">3</text:span><text:span text:style-name="T14"> </text:span><text:span text:style-name="T17">0x1</text:span><text:span text:style-name="T18">A</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T15"> 0x2A </text:span><text:span text:style-name="T18">3</text:span><text:span text:style-name="T15"> </text:span><text:span text:style-name="T18">0x1</text:span><text:span text:style-name="T19">A</text:span><text:span text:style-name="T15"> b”</text:span></text:p>
    <text:p text:style-name="P38"/>
    <text:p text:style-name="P21"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/>3</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P22"><text:tab/><text:span text:style-name="T46">0x1A</text:span> – <text:span text:style-name="T46">LED1 set to user mode</text:span></text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/>3</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P22"><text:tab/><text:span text:style-name="T51">0x1A</text:span> – <text:span text:style-name="T51">LED1 set to user mode</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T20"><text:tab/>b</text:span><text:span text:style-name="T15"> – </text:span><text:span text:style-name="T20">byte</text:span><text:span text:style-name="T15"> data type</text:span></text:p>
    <text:p text:style-name="P36"/>
-   <text:p text:style-name="P16"/>
-   <text:list xml:id="list1860347174904787373" text:style-name="L5">
+   <text:p text:style-name="P16"><text:soft-page-break/></text:p>
+   <text:list xml:id="list773933773177404005" text:style-name="L5">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P81"><text:span text:style-name="T39">led_state_byte</text:span> – <text:span text:style-name="T8">LED can be set to OFF/ON state</text:span></text:p>
+       <text:p text:style-name="P82"><text:span text:style-name="T42">led_state_byte</text:span> – <text:span text:style-name="T9">LED can be set to OFF/ON state</text:span></text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4446,24 +4652,24 @@
    <text:p text:style-name="P50"><text:s/>* <text:s text:c="2"/>5..7 <text:s text:c="2"/>| <text:s text:c="2"/>dont care</text:p>
    <text:p text:style-name="P50">*/</text:p>
    <text:p text:style-name="P11"><text:tab/></text:p>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED state</text:span><text:span text:style-name="T15"> (</text:span><text:span text:style-name="T17">LED1</text:span><text:span text:style-name="T18">0</text:span><text:span text:style-name="T17"> set to ON</text:span><text:span text:style-name="T15">)</text:span><text:span text:style-name="T14">:</text:span></text:p>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T47">Note: LED1</text:span><text:span text:style-name="T48">0</text:span><text:span text:style-name="T47"> was set to user mode in previous step.</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>Example of setting </text:span><text:span text:style-name="T16">of </text:span><text:span text:style-name="T18">LED state</text:span><text:span text:style-name="T16"> (</text:span><text:span text:style-name="T18">LED1</text:span><text:span text:style-name="T19">0</text:span><text:span text:style-name="T18"> set to ON</text:span><text:span text:style-name="T16">)</text:span><text:span text:style-name="T15">:</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/></text:span><text:span text:style-name="T52">Note: LED1</text:span><text:span text:style-name="T53">0</text:span><text:span text:style-name="T52"> was set to user mode in previous step.</text:span></text:p>
    <text:p text:style-name="P34"/>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A </text:span><text:span text:style-name="T17">4</text:span><text:span text:style-name="T14"> </text:span><text:span text:style-name="T17">0x1</text:span><text:span text:style-name="T18">A</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T15"> 0x2A </text:span><text:span text:style-name="T18">4</text:span><text:span text:style-name="T15"> </text:span><text:span text:style-name="T18">0x1</text:span><text:span text:style-name="T19">A</text:span><text:span text:style-name="T15"> b”</text:span></text:p>
    <text:p text:style-name="P34"/>
    <text:p text:style-name="P21"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/>4</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P22"><text:soft-page-break/><text:tab/><text:span text:style-name="T46">0x1A</text:span> – <text:span text:style-name="T46">LED1 set to ON</text:span></text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/>4</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P22"><text:tab/><text:span text:style-name="T51">0x1A</text:span> – <text:span text:style-name="T51">LED1 set to ON</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T20"><text:tab/>b</text:span><text:span text:style-name="T15"> – </text:span><text:span text:style-name="T20">byte</text:span><text:span text:style-name="T15"> data type</text:span></text:p>
    <text:p text:style-name="P37"/>
    <text:p text:style-name="P37"/>
-   <text:list xml:id="list2410490409168669793" text:style-name="L6">
+   <text:list xml:id="list2354769427925023326" text:style-name="L6">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P83"><text:span text:style-name="T39">led_colour</text:span> – set colour for LEDs </text:p>
+       <text:p text:style-name="P84"><text:span text:style-name="T42">led_colour</text:span> – set colour for LEDs </text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
@@ -4480,25 +4686,25 @@
    <text:p text:style-name="P51"><text:s/>* <text:s/>4.B <text:s text:c="4"/>| <text:s/>24..31 | <text:s text:c="2"/>blue colour [0..255]</text:p>
    <text:p text:style-name="P51">*/</text:p>
    <text:p text:style-name="P39"/>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/>Example of setting </text:span><text:span text:style-name="T15">of </text:span><text:span text:style-name="T17">LED</text:span><text:span text:style-name="T20">1</text:span><text:span text:style-name="T21">0</text:span><text:span text:style-name="T17"> </text:span><text:span text:style-name="T20">colour – </text:span><text:span text:style-name="T49">green</text:span><text:span text:style-name="T20"> colour = 0x</text:span><text:span text:style-name="T49">00</text:span><text:span text:style-name="T20">FF</text:span><text:span text:style-name="T49">00</text:span><text:span text:style-name="T14">:</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/>Example of setting </text:span><text:span text:style-name="T16">of </text:span><text:span text:style-name="T18">LED</text:span><text:span text:style-name="T21">1</text:span><text:span text:style-name="T22">0</text:span><text:span text:style-name="T18"> </text:span><text:span text:style-name="T21">colour – </text:span><text:span text:style-name="T54">green</text:span><text:span text:style-name="T21"> colour = 0x</text:span><text:span text:style-name="T54">00</text:span><text:span text:style-name="T21">FF</text:span><text:span text:style-name="T54">00</text:span><text:span text:style-name="T15">:</text:span></text:p>
    <text:p text:style-name="P11"><text:tab/><text:tab/></text:p>
    <text:p text:style-name="P13"><text:tab/>“i2cset 1 0x2a 5 0x0A 0x00 0xFF 0x00 i”</text:p>
    <text:p text:style-name="P21"><text:tab/><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/><text:tab/>5</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T53">0x0A - LED10</text:span></text:p>
-   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T46">0x00 0xFF 0 x00</text:span> – <text:span text:style-name="T46">red colour = 0x00, green = 0xFF, blue = 0x00</text:span></text:p>
-   <text:p text:style-name="P22"><text:span text:style-name="T14"><text:tab/><text:tab/>i</text:span><text:span text:style-name="T22"> – </text:span><text:span text:style-name="T32">block</text:span><text:span text:style-name="T22"> data type</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/><text:tab/>5</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T58">0x0A - LED10</text:span></text:p>
+   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T51">0x00 0xFF 0 x00</text:span> – <text:span text:style-name="T51">red colour = 0x00, green = 0xFF, blue = 0x00</text:span></text:p>
+   <text:p text:style-name="P22"><text:span text:style-name="T15"><text:tab/><text:tab/>i</text:span><text:span text:style-name="T23"> – </text:span><text:span text:style-name="T33">block</text:span><text:span text:style-name="T23"> data type</text:span></text:p>
    <text:p text:style-name="P24"><text:tab/></text:p>
-   <text:list xml:id="list2896142127271247036" text:style-name="L7">
+   <text:list xml:id="list5996743286059949559" text:style-name="L7">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P84"><text:span text:style-name="T39">brightness_</text:span><text:span text:style-name="T40">byte</text:span> – brightness settings for LEDs</text:p>
+       <text:p text:style-name="P85"><text:span text:style-name="T42">brightness_</text:span><text:span text:style-name="T43">byte</text:span> – brightness settings for LEDs</text:p>
        <text:list>
         <text:list-item>
-         <text:p text:style-name="P84">value in <text:span text:style-name="T14">range 0..100 [%] </text:span></text:p>
+         <text:p text:style-name="P85">value in <text:span text:style-name="T15">range 0..100 [%] </text:span></text:p>
         </text:list-item>
        </text:list>
       </text:list-item>
@@ -4506,37 +4712,37 @@
     </text:list-item>
    </text:list>
    <text:p text:style-name="P39"/>
-   <text:p text:style-name="P34"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">a) </text:span><text:span text:style-name="T14">Example of setting to </text:span><text:span text:style-name="T50">20</text:span><text:span text:style-name="T14">% brightness:</text:span></text:p>
-   <text:p text:style-name="P34"/>
-   <text:p text:style-name="P65"><text:span text:style-name="T14"><text:tab/>“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T14"> 0x2A 7 </text:span><text:span text:style-name="T50">20</text:span><text:span text:style-name="T14"> b”</text:span></text:p>
+   <text:p text:style-name="P34"><text:span text:style-name="T15"><text:tab/></text:span><text:span text:style-name="T25">a) </text:span><text:span text:style-name="T15">Example of setting to </text:span><text:span text:style-name="T55">20</text:span><text:span text:style-name="T15">% brightness:</text:span></text:p>
+   <text:p text:style-name="P34"><text:soft-page-break/></text:p>
+   <text:p text:style-name="P65"><text:span text:style-name="T15"><text:tab/>“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T15"> 0x2A 7 </text:span><text:span text:style-name="T55">20</text:span><text:span text:style-name="T15"> b”</text:span></text:p>
    <text:p text:style-name="P56"/>
    <text:p text:style-name="P57"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P57"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P57"><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P57"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P57"><text:span text:style-name="T12"><text:tab/>7</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P60"><text:tab/><text:span text:style-name="T54">2</text:span>0 – brightness <text:span text:style-name="T25">[%]</text:span></text:p>
-   <text:p text:style-name="P57"><text:span text:style-name="T19"><text:tab/>b</text:span><text:span text:style-name="T14"> – </text:span><text:span text:style-name="T19">byte</text:span><text:span text:style-name="T14"> data type</text:span></text:p>
+   <text:p text:style-name="P57"><text:span text:style-name="T13"><text:tab/>7</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P60"><text:tab/><text:span text:style-name="T59">2</text:span>0 – brightness <text:span text:style-name="T26">[%]</text:span></text:p>
+   <text:p text:style-name="P57"><text:span text:style-name="T20"><text:tab/>b</text:span><text:span text:style-name="T15"> – </text:span><text:span text:style-name="T20">byte</text:span><text:span text:style-name="T15"> data type</text:span></text:p>
    <text:p text:style-name="P57"/>
-   <text:p text:style-name="P66"><text:span text:style-name="T14"><text:tab/></text:span><text:span text:style-name="T24">b) </text:span><text:span text:style-name="T55">Reading of brightness:</text:span></text:p>
-   <text:p text:style-name="P68"><text:span text:style-name="T19">“i2c</text:span><text:span text:style-name="T24">get</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">8</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
+   <text:p text:style-name="P66"><text:span text:style-name="T15"><text:tab/></text:span><text:span text:style-name="T25">b) </text:span><text:span text:style-name="T60">Reading of brightness:</text:span></text:p>
+   <text:p text:style-name="P68"><text:span text:style-name="T20">“i2c</text:span><text:span text:style-name="T25">get</text:span><text:span text:style-name="T20"> </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T20"> 0x2A </text:span><text:span text:style-name="T25">8</text:span><text:span text:style-name="T20"> b”</text:span></text:p>
    <text:p text:style-name="P57"><text:tab/></text:p>
    <text:p text:style-name="P57"><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P57"><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P57"><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P57"><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P57"><text:span text:style-name="T12"><text:tab/>8</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P57"><text:span text:style-name="T13"><text:tab/>8</text:span> – „address of register“ = command</text:p>
    <text:p text:style-name="P62"><text:tab/>b – byte data type</text:p>
    <text:p text:style-name="P39"/>
    <text:p text:style-name="P39"/>
-   <text:list xml:id="list3501955028544000419" text:style-name="L8">
+   <text:list xml:id="list7831028115674472060" text:style-name="L8">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P85"><text:soft-page-break/><text:span text:style-name="T39">user_voltage_byte</text:span> – voltage setup on user r<text:span text:style-name="T61">e</text:span>gulator</text:p>
+       <text:p text:style-name="P86"><text:span text:style-name="T42">user_voltage_byte</text:span> – voltage setup on user r<text:span text:style-name="T67">e</text:span>gulator</text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
    </text:list>
-   <text:p text:style-name="P41"><text:tab/><text:span text:style-name="T37">enum voltage_values {</text:span></text:p>
+   <text:p text:style-name="P41"><text:tab/><text:span text:style-name="T40">enum voltage_values {</text:span></text:p>
    <text:p text:style-name="P32"><text:s text:c="4"/><text:tab/><text:tab/>VOLTAGE_33 = 1,</text:p>
    <text:p text:style-name="P32"><text:s text:c="3"/><text:tab/><text:tab/>VOLTAGE_36 = 2,</text:p>
    <text:p text:style-name="P32"><text:s text:c="4"/><text:tab/><text:tab/>VOLTAGE_45 = 3,</text:p>
@@ -4545,65 +4751,85 @@
    <text:p text:style-name="P40"><text:tab/></text:p>
    <text:p text:style-name="P40"><text:tab/>Example of setting 3.3V on user regulator:</text:p>
    <text:p text:style-name="P40"><text:tab/></text:p>
-   <text:p text:style-name="P40"><text:span text:style-name="T26"><text:tab/></text:span><text:span text:style-name="T27">1</text:span><text:span text:style-name="T26">.step: enable regulator (using </text:span><text:span text:style-name="T28">control_byte</text:span><text:span text:style-name="T26">)</text:span></text:p>
-   <text:p text:style-name="P40"><text:span text:style-name="T26"><text:tab/><text:tab/></text:span><text:span text:style-name="T19">“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T15">2</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T26">0x40</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
+   <text:p text:style-name="P40"><text:span text:style-name="T27"><text:tab/></text:span><text:span text:style-name="T28">1</text:span><text:span text:style-name="T27">.step: enable regulator (using </text:span><text:span text:style-name="T29">control_byte</text:span><text:span text:style-name="T27">)</text:span></text:p>
+   <text:p text:style-name="P40"><text:span text:style-name="T27"><text:tab/><text:tab/></text:span><text:span text:style-name="T20">“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T20"> 0x2A </text:span><text:span text:style-name="T16">2</text:span><text:span text:style-name="T20"> </text:span><text:span text:style-name="T27">0x40</text:span><text:span text:style-name="T20"> b”</text:span></text:p>
    <text:p text:style-name="P40"/>
-   <text:p text:style-name="P40"><text:span text:style-name="T19"><text:tab/><text:tab/></text:span><text:span text:style-name="T36">Meanings:</text:span></text:p>
-   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P40"><text:span text:style-name="T20"><text:tab/><text:tab/></text:span><text:span text:style-name="T38">Meanings:</text:span></text:p>
+   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/><text:tab/>2</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T62">0x40</text:span> – <text:span text:style-name="T51">enable regulator</text:span></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/><text:tab/>2</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T68">0x40</text:span> – <text:span text:style-name="T56">enable regulator</text:span></text:p>
    <text:p text:style-name="P25"><text:tab/><text:tab/>b – byte data type</text:p>
    <text:p text:style-name="P25"/>
-   <text:p text:style-name="P40"><text:tab/><text:span text:style-name="T63">2.step: set desired voltage</text:span></text:p>
-   <text:p text:style-name="P40"><text:tab/><text:tab/><text:span text:style-name="T19">“i2cset </text:span><text:span text:style-name="T16">1</text:span><text:span text:style-name="T19"> 0x2A </text:span><text:span text:style-name="T24">6</text:span><text:span text:style-name="T19"> </text:span><text:span text:style-name="T52">1</text:span><text:span text:style-name="T19"> b”</text:span></text:p>
+   <text:p text:style-name="P40"><text:tab/><text:span text:style-name="T69">2.step: set desired voltage</text:span></text:p>
+   <text:p text:style-name="P40"><text:tab/><text:tab/><text:span text:style-name="T20">“i2cset </text:span><text:span text:style-name="T17">1</text:span><text:span text:style-name="T20"> 0x2A </text:span><text:span text:style-name="T25">6</text:span><text:span text:style-name="T20"> </text:span><text:span text:style-name="T57">1</text:span><text:span text:style-name="T20"> b”</text:span></text:p>
    <text:p text:style-name="P40"/>
    <text:p text:style-name="P27"><text:tab/><text:tab/>Meanings:</text:p>
-   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P21"><text:tab/><text:tab/><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P21"><text:tab/><text:tab/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P21"><text:span text:style-name="T12"><text:tab/><text:tab/>8</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T64">1</text:span> – <text:span text:style-name="T52">enum value for 3.3V</text:span></text:p>
-   <text:p text:style-name="P11"><text:span text:style-name="T38"><text:tab/><text:tab/>b – byte data type</text:span><text:tab/></text:p>
+   <text:p text:style-name="P21"><text:span text:style-name="T13"><text:tab/><text:tab/>8</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P22"><text:tab/><text:tab/><text:span text:style-name="T70">1</text:span> – <text:span text:style-name="T57">enum value for 3.3V</text:span></text:p>
+   <text:p text:style-name="P11"><text:span text:style-name="T41"><text:tab/><text:tab/>b – byte data type</text:span><text:tab/></text:p>
    <text:p text:style-name="P11"><text:tab/><text:tab/></text:p>
-   <text:p text:style-name="P11"/>
-   <text:list xml:id="list160326822218090" text:continue-numbering="true" text:style-name="L8">
+   <text:p text:style-name="P11"><text:soft-page-break/></text:p>
+   <text:list xml:id="list125636476767804" text:continue-numbering="true" text:style-name="L8">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P86"><text:span text:style-name="T41">reset_byte</text:span> – <text:span text:style-name="T82">reports reset type</text:span></text:p>
+       <text:p text:style-name="P87"><text:span text:style-name="T44">reset_byte</text:span> – <text:span text:style-name="T88">reports reset type</text:span></text:p>
       </text:list-item>
      </text:list>
     </text:list-item>
    </text:list>
    <text:p text:style-name="P42"/>
-   <text:p text:style-name="P43"><text:span text:style-name="T31"><text:tab/><text:tab/></text:span>0 - normal reset</text:p>
+   <text:p text:style-name="P43"><text:span text:style-name="T32"><text:tab/><text:tab/></text:span>0 - normal reset</text:p>
    <text:p text:style-name="P43"><text:tab/><text:tab/>1 - previous snapshot</text:p>
-   <text:p text:style-name="P67"><text:s text:c="12"/><text:tab/><text:tab/><text:span text:style-name="T82">2</text:span> - normal factory reset</text:p>
+   <text:p text:style-name="P67"><text:s text:c="12"/><text:tab/><text:tab/><text:span text:style-name="T88">2</text:span> - normal factory reset</text:p>
    <text:p text:style-name="P67"><text:tab/><text:tab/>3 - hard factory reset</text:p>
    <text:p text:style-name="P14"/>
-   <text:p text:style-name="P14"><text:tab/><text:span text:style-name="T82">Example of reading reset_byte:</text:span></text:p>
+   <text:p text:style-name="P14"><text:tab/><text:span text:style-name="T88">Example of reading reset_byte:</text:span></text:p>
    <text:p text:style-name="P14"><text:tab/><text:tab/></text:p>
-   <text:p text:style-name="P14"><text:span text:style-name="T56"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T57">get</text:span><text:span text:style-name="T56"> </text:span><text:span text:style-name="T58">1</text:span><text:span text:style-name="T56"> 0x2A </text:span><text:span text:style-name="T59">9</text:span><text:span text:style-name="T56"> b”</text:span></text:p>
+   <text:p text:style-name="P14"><text:span text:style-name="T61"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T62">get</text:span><text:span text:style-name="T61"> </text:span><text:span text:style-name="T63">1</text:span><text:span text:style-name="T61"> 0x2A </text:span><text:span text:style-name="T64">9</text:span><text:span text:style-name="T61"> b”</text:span></text:p>
    <text:p text:style-name="P58"/>
    <text:p text:style-name="P58"><text:s text:c="3"/>Meanings:</text:p>
-   <text:p text:style-name="P58"><text:span text:style-name="T11"><text:s text:c="3"/>1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P58"><text:span text:style-name="T12"><text:s text:c="3"/>1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P58"><text:s text:c="3"/>0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P58"><text:span text:style-name="T12"><text:s text:c="3"/>9</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P58"><text:span text:style-name="T13"><text:s text:c="3"/>9</text:span> – „address of register“ = command</text:p>
    <text:p text:style-name="P26"><text:tab/> <text:s text:c="13"/>b – byte data type</text:p>
    <text:p text:style-name="P26"/>
    <text:p text:style-name="P26"/>
-   <text:p text:style-name="P26"/>
-   <text:list xml:id="list160327917218583" text:continue-numbering="true" text:style-name="L8">
+   <text:list xml:id="list125637861742611" text:continue-numbering="true" text:style-name="L8">
     <text:list-item>
      <text:list>
       <text:list-item>
-       <text:p text:style-name="P87"><text:soft-page-break/><text:span text:style-name="T42">watchdog</text:span><text:span text:style-name="T41">_byt</text:span><text:span text:style-name="T42">e</text:span></text:p>
+       <text:p text:style-name="P90"><text:span text:style-name="T46">fw_version_block</text:span> – <text:span text:style-name="T101">20B hash number - accessible only from U-Boot</text:span></text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="P91"/>
+   <text:p text:style-name="P91"><text:tab/><text:tab/><text:span text:style-name="T88">Example of reading version of FW in MCU in U-Boot:</text:span></text:p>
+   <text:p text:style-name="P91"><text:tab/><text:tab/>“<text:span text:style-name="T101">i2c md 0x2a 0x0A 0x14</text:span>”</text:p>
+   <text:p text:style-name="P91"><text:tab/><text:tab/></text:p>
+   <text:p text:style-name="P99"><text:span text:style-name="T15"><text:tab/><text:tab/></text:span><text:span text:style-name="T23">Meanings:</text:span><text:span text:style-name="T12"> <text:s text:c="2"/></text:span></text:p>
+   <text:p text:style-name="P103"><text:s text:c="3"/>0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P103"><text:span text:style-name="T13"><text:s text:c="3"/>0x0A</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P93"><text:tab/> <text:s text:c="13"/><text:span text:style-name="T101">0x14</text:span> – <text:s/><text:span text:style-name="T101">20B to be read</text:span></text:p>
+   <text:p text:style-name="P26"/>
+   <text:list xml:id="list125636551864515" text:continue-numbering="true" text:style-name="L8">
+    <text:list-item>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P89"><text:span text:style-name="T45">watchdog</text:span><text:span text:style-name="T44">_</text:span><text:span text:style-name="T46">state_</text:span><text:span text:style-name="T44">byt</text:span><text:span text:style-name="T45">e</text:span></text:p>
        <text:list>
         <text:list-item>
-         <text:p text:style-name="P88"><text:span text:style-name="T92">1</text:span> – disable watchdog</text:p>
+         <text:p text:style-name="P96"><text:span text:style-name="T99">1</text:span> – <text:span text:style-name="T101">run</text:span> watchdog</text:p>
         </text:list-item>
         <text:list-item>
-         <text:p text:style-name="P88"><text:span text:style-name="T92">0</text:span> – enable watchdog</text:p>
+         <text:p text:style-name="P96"><text:span text:style-name="T99">0</text:span> – <text:span text:style-name="T101">stop</text:span> watchdog</text:p>
+        </text:list-item>
+        <text:list-item>
+         <text:p text:style-name="P98">must be stopped in less than 2 mins after reset</text:p>
         </text:list-item>
        </text:list>
       </text:list-item>
@@ -4611,18 +4837,86 @@
     </text:list-item>
    </text:list>
    <text:p text:style-name="P29"/>
-   <text:p text:style-name="P29"><text:span text:style-name="T39"><text:tab/></text:span><text:span text:style-name="T85">Example of </text:span><text:span text:style-name="T84">watchdog </text:span><text:span text:style-name="T86">disa</text:span><text:span text:style-name="T84">ble</text:span><text:span text:style-name="T85">:</text:span></text:p>
+   <text:p text:style-name="P29"><text:span text:style-name="T42"><text:tab/></text:span><text:span text:style-name="T91">Example of </text:span><text:span text:style-name="T93">setting of </text:span><text:span text:style-name="T90">watchdog </text:span><text:span text:style-name="T93">state</text:span><text:span text:style-name="T91">:</text:span></text:p>
    <text:p text:style-name="P15"><text:tab/><text:tab/></text:p>
-   <text:p text:style-name="P15"><text:span text:style-name="T56"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T60">s</text:span><text:span text:style-name="T57">et</text:span><text:span text:style-name="T56"> </text:span><text:span text:style-name="T58">1</text:span><text:span text:style-name="T56"> 0x2A </text:span><text:span text:style-name="T60">0x0b 1</text:span><text:span text:style-name="T56"> b”</text:span></text:p>
+   <text:p text:style-name="P15"><text:span text:style-name="T61"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T65">s</text:span><text:span text:style-name="T62">et</text:span><text:span text:style-name="T61"> </text:span><text:span text:style-name="T63">1</text:span><text:span text:style-name="T61"> 0x2A </text:span><text:span text:style-name="T65">0x0b </text:span><text:span text:style-name="T66">0</text:span><text:span text:style-name="T61"> b”</text:span></text:p>
    <text:p text:style-name="P59"><text:tab/></text:p>
    <text:p text:style-name="P59">Meanings:</text:p>
-   <text:p text:style-name="P59"><text:span text:style-name="T11">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P59"><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
    <text:p text:style-name="P59">0x2A – I2C address of the slave</text:p>
-   <text:p text:style-name="P59"><text:span text:style-name="T12">0x0b</text:span> – „address of register“ = command</text:p>
-   <text:p text:style-name="P61">1 – <text:span text:style-name="T92">dis</text:span>able watchdog</text:p>
+   <text:p text:style-name="P59"><text:span text:style-name="T13">0x0b</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P61"><text:span text:style-name="T101">0</text:span> – <text:span text:style-name="T101">stop</text:span> watchdog</text:p>
    <text:p text:style-name="P63">b – byte data type</text:p>
    <text:p text:style-name="P64"/>
    <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"/>
+   <text:p text:style-name="P63"><text:soft-page-break/></text:p>
+   <text:list xml:id="list125637046490648" text:continue-numbering="true" text:style-name="L8">
+    <text:list-item>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P90"><text:span text:style-name="T45">watchdog</text:span><text:span text:style-name="T44">_</text:span><text:span text:style-name="T46">st</text:span><text:span text:style-name="T47">s</text:span><text:span text:style-name="T46">_</text:span><text:span text:style-name="T44">byt</text:span><text:span text:style-name="T45">e</text:span></text:p>
+       <text:list>
+        <text:list-item>
+         <text:p text:style-name="P97"><text:span text:style-name="T99">1</text:span> – <text:span text:style-name="T101">enable</text:span> watchdog <text:span text:style-name="T101">permanently (must be stopped after reset via previous command)</text:span></text:p>
+        </text:list-item>
+        <text:list-item>
+         <text:p text:style-name="P97"><text:span text:style-name="T99">0</text:span> – <text:span text:style-name="T101">disable </text:span>watchdog <text:span text:style-name="T101">permanently</text:span></text:p>
+         <text:p text:style-name="P98"/>
+        </text:list-item>
+       </text:list>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="P94"/>
+   <text:p text:style-name="P94"><text:span text:style-name="T42"><text:tab/></text:span><text:span text:style-name="T91">Example of </text:span><text:span text:style-name="T93">disabling of </text:span><text:span text:style-name="T90">watchdog </text:span><text:span text:style-name="T93">status</text:span><text:span text:style-name="T91">:</text:span></text:p>
+   <text:p text:style-name="P88"><text:tab/><text:tab/></text:p>
+   <text:p text:style-name="P88"><text:span text:style-name="T61"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T65">s</text:span><text:span text:style-name="T62">et</text:span><text:span text:style-name="T61"> </text:span><text:span text:style-name="T63">1</text:span><text:span text:style-name="T61"> 0x2A </text:span><text:span text:style-name="T65">0x0</text:span><text:span text:style-name="T66">C</text:span><text:span text:style-name="T65"> </text:span><text:span text:style-name="T66">0</text:span><text:span text:style-name="T61"> b”</text:span></text:p>
+   <text:p text:style-name="P103"><text:tab/></text:p>
+   <text:p text:style-name="P103">Meanings:</text:p>
+   <text:p text:style-name="P103"><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P103">0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P103"><text:span text:style-name="T13">0x0C</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P104"><text:span text:style-name="T101">0</text:span> – <text:span text:style-name="T101">disable</text:span> watchdog</text:p>
+   <text:p text:style-name="P106">b – byte data type</text:p>
+   <text:p text:style-name="P106"/>
+   <text:list xml:id="list125636172831843" text:continue-numbering="true" text:style-name="L8">
+    <text:list-item>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P95"><text:span text:style-name="T47">c</text:span><text:span text:style-name="T42">ard_mode_byte</text:span></text:p>
+       <text:list>
+        <text:list-item>
+         <text:p text:style-name="P97"><text:span text:style-name="T101">0</text:span> – <text:span text:style-name="T101">force PCIe card type</text:span></text:p>
+        </text:list-item>
+        <text:list-item>
+         <text:p text:style-name="P97"><text:span text:style-name="T101">1</text:span> – <text:span text:style-name="T101">force mSATA card type</text:span></text:p>
+        </text:list-item>
+        <text:list-item>
+         <text:p text:style-name="P98">0xAA – default – card type is detected by HW</text:p>
+         <text:p text:style-name="P98"/>
+        </text:list-item>
+       </text:list>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="P94"/>
+   <text:p text:style-name="P94"><text:span text:style-name="T42"><text:tab/></text:span><text:span text:style-name="T91">Example of </text:span><text:span text:style-name="T93">setting of PCIe card type</text:span><text:span text:style-name="T91">:</text:span></text:p>
+   <text:p text:style-name="P88"><text:tab/><text:tab/></text:p>
+   <text:p text:style-name="P88"><text:span text:style-name="T61"><text:tab/><text:tab/>“i2c</text:span><text:span text:style-name="T65">s</text:span><text:span text:style-name="T62">et</text:span><text:span text:style-name="T61"> </text:span><text:span text:style-name="T63">1</text:span><text:span text:style-name="T61"> 0x2A </text:span><text:span text:style-name="T65">0x0</text:span><text:span text:style-name="T66">D</text:span><text:span text:style-name="T65"> </text:span><text:span text:style-name="T66">0</text:span><text:span text:style-name="T61"> b”</text:span></text:p>
+   <text:p text:style-name="P103"><text:tab/></text:p>
+   <text:p text:style-name="P103">Meanings:</text:p>
+   <text:p text:style-name="P103"><text:span text:style-name="T12">1</text:span> – i2cbus number</text:p>
+   <text:p text:style-name="P103">0x2A – I2C address of the slave</text:p>
+   <text:p text:style-name="P103"><text:span text:style-name="T13">0x0D</text:span> – „address of register“ = command</text:p>
+   <text:p text:style-name="P104"><text:span text:style-name="T101">0</text:span> – <text:span text:style-name="T101">force PCIe card type</text:span></text:p>
+   <text:p text:style-name="P106">b – byte data type</text:p>
   </office:text>
  </office:body>
 </office:document>
