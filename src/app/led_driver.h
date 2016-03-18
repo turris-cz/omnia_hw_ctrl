@@ -13,6 +13,7 @@
 #define __LED_DRIVER_H
 
 #define LED_TIMER                 TIM3
+#define LED_EFFECT_TIMER          TIM6
 
 #define LED_COUNT                 12
 
@@ -82,6 +83,7 @@ struct led_rgb {
 };
 
 extern struct led_rgb leds[LED_COUNT];
+extern uint8_t effect_reset_finished;
 
 /*******************************************************************************
   * @function   led_driver_config
@@ -173,5 +175,22 @@ void led_driver_knight_rider_colour_effect(void);
   * @retval     None.
   *****************************************************************************/
 void led_driver_double_knight_rider_effect(void);
+
+/*******************************************************************************
+  * @function   led_driver_knight_rider_effect_handler
+  * @brief      Display knight rider effect on LEDs during startup (called in
+  *             timer interrupt).
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_knight_rider_effect_handler(void);
+
+/*******************************************************************************
+  * @function   led_driver_reset_effect
+  * @brief      Enable/Disable knight rider effect after reset.
+  * @param      colour: colour in RGB range.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_reset_effect(FunctionalState state);
 
 #endif /*__LED_DRIVER_H */

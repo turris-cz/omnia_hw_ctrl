@@ -11,6 +11,7 @@
 #include "stm32f0xx_conf.h"
 #include "led_driver.h"
 #include "delay.h"
+#include "power_control.h"
 
 /* Private define ------------------------------------------------------------*/
 #define LED_SPI                     SPI1
@@ -35,6 +36,7 @@
 #define COLOUR_DECIMATION           2
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8
+#define EFFECT_TIMEOUT              5
 
 /*******************************************************************************
 // PWM Settings (Frequency and range)
@@ -72,13 +74,24 @@ typedef enum rgb_colour {
     WHITE   = -1,
 }rgb_colour_t;
 
+typedef enum led_effect_states {
+    EFFECT_INIT,
+    EFFECT_UP,
+    EFFECT_DOWN,
+    EFFECT_LEDSON,
+    EFFECT_DEINIT
+} effect_state_t;
 
 struct led_rgb leds[LED_COUNT];
+uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
+finished and normal operation can take the LED control */
+static effect_state_t effect_state; /* states for LED effect after reset */
 
 /* values for LED brightness [%] */
 static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
 
 /* Private functions ---------------------------------------------------------*/
+static void led_driver_timer_config_knight_rider(void);
 
 /*******************************************************************************
   * @function   led_driver_spi_config
@@ -519,6 +532,7 @@ void led_driver_config(void)
     led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
 
     led_driver_timer_config();
+    led_driver_timer_config_knight_rider();
 }
 
 /*******************************************************************************
@@ -746,4 +760,147 @@ void led_driver_double_knight_rider_effect(void)
 
     led_driver_set_colour(LED_COUNT, 0xFFFFFF); //back to default colour
     led_driver_set_led_state(LED_COUNT, LED_OFF);
+}
+
+/*******************************************************************************
+  * @function   led_driver_timer_config_knight_rider
+  * @brief      Timer config for knight rider effect after reset.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+static void led_driver_timer_config_knight_rider(void)
+{
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* Clock enable */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+
+    /* Time base configuration */
+    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 400 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(LED_EFFECT_TIMER, &TIM_TimeBaseStructure);
+
+    TIM_ARRPreloadConfig(LED_EFFECT_TIMER, ENABLE);
+    /* TIM Interrupts enable */
+    TIM_ITConfig(LED_EFFECT_TIMER, TIM_IT_Update, ENABLE);
+
+    /* TIM enable counter */
+    /* TIM_Cmd(LED_EFFECT_TIMER, ENABLE); */
+
+    /* Timer is enable after reset */
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+/*******************************************************************************
+  * @function   led_driver_reset_effect
+  * @brief      Enable/Disable knight rider effect after reset.
+  * @param      colour: colour in RGB range.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_reset_effect(FunctionalState state)
+{
+    if (state == ENABLE)
+    {
+        TIM_Cmd(LED_EFFECT_TIMER, ENABLE);
+    }
+    else
+    {
+        TIM_Cmd(LED_EFFECT_TIMER, DISABLE);
+        LED_EFFECT_TIMER->CNT = 0;
+        effect_state = EFFECT_INIT;
+    }
+}
+
+/*******************************************************************************
+  * @function   led_driver_knight_rider_effect_handler
+  * @brief      Display knight rider effect on LEDs during startup (called in
+  *             timer interrupt).
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_knight_rider_effect_handler(void)
+{
+    static int8_t led;
+    static uint8_t state_timeout_cnt;
+
+    switch (effect_state)
+    {
+        case EFFECT_INIT:
+        {
+            effect_reset_finished = RESET;
+            led_driver_set_led_state(LED_COUNT, LED_OFF);
+            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+            led_driver_set_led_state(LED0, LED_ON);
+            effect_state = EFFECT_UP;
+        } break;
+
+        case EFFECT_UP:
+        {
+            led++;
+            led_driver_set_led_state(led - 1, LED_OFF);
+            led_driver_set_led_state(led, LED_ON);
+
+            if (led >= LED11)
+            {
+                effect_state = EFFECT_DOWN; /* next state */
+            }
+            else
+            {
+                effect_state = EFFECT_UP;
+            }
+        } break;
+
+        case EFFECT_DOWN:
+        {
+            led--;
+            led_driver_set_led_state(led + 1, LED_OFF);
+            led_driver_set_led_state(led, LED_ON);
+
+            if (led <= 0)
+            {
+                effect_state = EFFECT_LEDSON; /* next state */
+            }
+            else
+            {
+                effect_state = EFFECT_DOWN;
+            }
+        } break;
+
+        case EFFECT_LEDSON:
+        {
+            led_driver_set_led_state(LED_COUNT, LED_ON);
+            led_driver_set_colour(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
+            effect_state = EFFECT_DEINIT;
+        } break;
+
+        case EFFECT_DEINIT:
+        {
+            state_timeout_cnt++;
+
+            if (state_timeout_cnt >= EFFECT_TIMEOUT)
+            {
+                led_driver_set_led_state(LED_COUNT, LED_OFF);
+                led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+
+                led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
+                power_control_set_power_led(); /* power led ON */
+
+                led_driver_reset_effect(DISABLE);
+                state_timeout_cnt = 0;
+                effect_reset_finished = SET;
+            }
+            else
+            {
+                effect_state = EFFECT_DEINIT;
+            }
+
+        } break;
+    }
 }

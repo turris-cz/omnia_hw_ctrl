@@ -207,6 +207,20 @@ void I2C2_IRQHandler(void)
 }
 
 /**
+  * @brief  This function handles TIM3 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM6_IRQHandler(void)
+{
+    if (TIM_GetITStatus(LED_EFFECT_TIMER, TIM_IT_Update) != RESET)
+    {
+        led_driver_knight_rider_effect_handler();
+        TIM_ClearITPendingBit(LED_EFFECT_TIMER, TIM_IT_Update);
+    }
+}
+
+/**
   * @}
   */
 

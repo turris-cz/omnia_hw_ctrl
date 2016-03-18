@@ -198,6 +198,8 @@ static ret_value_t light_reset(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
 
+    led_driver_reset_effect(DISABLE);
+
     reset_event = power_control_first_startup();
 
     i2c_control->reset_type = reset_event;
@@ -212,6 +214,8 @@ static ret_value_t light_reset(void)
         wdg->watchdog_state = STOP;
         DBG("RST - WDG doesnt run\r\n")
     }
+
+    led_driver_reset_effect(ENABLE);
 
     return value;
 }
@@ -484,22 +488,6 @@ void app_mcu_cyclic(void)
         {
             load_settings();
 
-            next_state = LED_EFFECT;
-        }
-        break;
-
-        case LED_EFFECT:
-        {
-            led_driver_knight_rider_effect(WHITE_COLOUR);
-            led_driver_set_colour(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
-            led_driver_set_led_state(LED_COUNT, LED_ON);
-            delay(300);
-            led_driver_set_led_state(LED_COUNT, LED_OFF);
-            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
-
-            led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
-            power_control_set_power_led(); /* power led ON */
-
             next_state = INPUT_MANAGER;
         }
         break;
@@ -550,15 +538,11 @@ void app_mcu_cyclic(void)
 
         case LED_MANAGER:
         {
-            led_manager();
+            if (effect_reset_finished == SET)
+            {
+                led_manager();
+            }
             next_state = INPUT_MANAGER;
-        }
-        break;
-
-        default: /* it should never occur */
-        {
-            DBG("DEFAULT_STATE\r\n");
-            next_state = HARD_RESET;
         }
         break;
     }

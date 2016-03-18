@@ -29,13 +29,11 @@ typedef enum {
     POWER_ON,
     LIGHT_RESET,
     HARD_RESET,
-    RESET_MANAGER,
     LOAD_SETTINGS,
     ERROR_STATE,
     INPUT_MANAGER,
     I2C_MANAGER,
     LED_MANAGER,
-    LED_EFFECT,
 } states_t;
 
 /*******************************************************************************

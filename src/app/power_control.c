@@ -1044,8 +1044,10 @@ reset_type_t power_control_first_startup(void)
         delay(600);
     }
 
-    /* restore brightness */
+    /* restore brightness and colour */
     led_driver_pwm_set_brightness(user_brightness);
+    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
     return reset_type;
 }
