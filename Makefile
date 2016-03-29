@@ -95,6 +95,7 @@ SRCS  += slave_i2c_device.c
 SRCS  += debug_serial.c
 SRCS  += app.c
 SRCS  += eeprom.c
+SRCS  += pca9534_emu.c
 
 ################# STM LIB ##########################
 SRCS  += stm32f0xx_rcc.c

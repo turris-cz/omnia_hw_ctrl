@@ -35,6 +35,7 @@ static const uint8_t version[] = VERSION;
 #define I2C_GPIO_PORT                   GPIOF
 
 #define I2C_SLAVE_ADDRESS               0x55  /* address in linux: 0x2A */
+#define I2C_SLAVE_ADDRESS_EMULATOR      0x56  /* address in linux: 0x2C */
 
 #define CMD_INDEX                       0
 
@@ -52,6 +53,7 @@ enum i2c_commands {
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_CARD_FORCE_MODE                 = 0x0D, /* 0 - force PCIe, 1 - force mSATA, 0xAA - default */
+    CMD_PCA9534                         = 0x11,
 };
 
 enum i2c_control_byte_mask {
@@ -70,6 +72,13 @@ enum expected_bytes_in_cmd {
     FOUR_BYTES_EXPECTED                 = 4,
     TWENTY_BYTES_EXPECTED               = 20
 };
+
+typedef enum i2c_dir {
+    I2C_DIR_TRANSMITTER_MCU             = 0,
+    I2C_DIR_RECEIVER_MCU                = 1,
+    I2C_DIR_TRANSMITTER_EMULATOR        = 3,
+    I2C_DIR_RECEIVER_EMULATOR           = 4,
+} i2c_dir_t;
 
 struct st_i2c_status i2c_status;
 
@@ -135,6 +144,10 @@ static void slave_i2c_periph_config(void)
 
     /* Apply I2C configuration after enabling it */
     I2C_Init(I2C_PERIPH_NAME, &I2C_InitStructure);
+
+    I2C_DualAddressCmd(I2C_PERIPH_NAME, DISABLE);
+    I2C_OwnAddress2Config(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR, I2C_OA2_Mask01);
+    I2C_DualAddressCmd(I2C_PERIPH_NAME, ENABLE);
 
     I2C_SlaveByteControlCmd(I2C_PERIPH_NAME, ENABLE);
     I2C_ReloadCmd(I2C_PERIPH_NAME, ENABLE);
@@ -290,12 +303,13 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
-    static uint16_t direction;
+    static i2c_dir_t direction;
     struct led_rgb *led = leds;
     uint16_t idx;
     uint8_t led_index;
     uint32_t colour;
     eeprom_var_t ee_var;
+    uint8_t address;
 
     __disable_irq();
 
@@ -308,12 +322,32 @@ void slave_i2c_handler(void)
         /* Check if transfer direction is read (slave transmitter) */
         if ((I2C_PERIPH_NAME->ISR & I2C_ISR_DIR) == I2C_ISR_DIR)
         {
-            direction = I2C_Direction_Transmitter;
+            address = I2C_GetAddressMatched(I2C_PERIPH_NAME);
+
+            if (address == I2C_SLAVE_ADDRESS_EMULATOR)
+            {
+                direction = I2C_DIR_TRANSMITTER_EMULATOR;
+            }
+            else
+            {
+                direction = I2C_DIR_TRANSMITTER_MCU;
+            }
+
             DBG("S.TX\r\n");
         }
         else
         {
-            direction = I2C_Direction_Receiver;
+            address = I2C_GetAddressMatched(I2C_PERIPH_NAME);
+
+            if (address == I2C_SLAVE_ADDRESS_EMULATOR)
+            {
+                direction = I2C_DIR_RECEIVER_EMULATOR;
+            }
+            else
+            {
+                direction = I2C_DIR_RECEIVER_MCU;
+            }
+
             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
             DBG("S.RX\r\n");
         }
@@ -327,7 +361,7 @@ void slave_i2c_handler(void)
     /* transfer complet interrupt (TX and RX) */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
     {
-        if(direction == I2C_Direction_Receiver)
+        if(direction == I2C_DIR_RECEIVER_MCU)
         {
             i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
 
@@ -567,6 +601,12 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
+                case CMD_PCA9534:
+                {
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
                 default: /* command doesnt exist - send NACK */
                 {
                     DBG("NACK\r\n");
@@ -575,11 +615,19 @@ void slave_i2c_handler(void)
                 } break;
             }
         }
-        else /* I2C_Direction_Transmitter */
+        else
         {
-            DBG("ACKtx\r\n");
-            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-            i2c_state->data_tx_complete = 1;
+            if (direction == I2C_DIR_RECEIVER_EMULATOR)
+            {
+                 i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+
+            }
+            else /* I2C_Direction_Transmitter - MCU & EMULATOR */
+            {
+                DBG("ACKtx\r\n");
+                I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                i2c_state->data_tx_complete = 1;
+            }
         }
     }
 
