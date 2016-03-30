@@ -18,6 +18,7 @@
 #include "debounce.h"
 #include "eeprom.h"
 #include "msata_pci.h"
+#include "pca9538_emu.h"
 
 static const uint8_t version[] = VERSION;
 
@@ -508,7 +509,6 @@ void slave_i2c_handler(void)
 
                         ee_var = EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
 
-//#if DBG_ENABLE
                         switch(ee_var)
                         {
                             case VAR_FLASH_COMPLETE: DBG("WDT: OK\r\n"); break;
@@ -517,7 +517,7 @@ void slave_i2c_handler(void)
                             default:
                                 break;
                         }
-//#endif
+
                         DBG("WDT: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
                         DBG("\r\n");
@@ -536,7 +536,6 @@ void slave_i2c_handler(void)
 
                         ee_var = EE_WriteVariable(CARD_VIRT_ADDR, card_mode_override);
 
-//#if DBG_ENABLE
                         switch(ee_var)
                         {
                             case VAR_FLASH_COMPLETE: DBG("CARD: OK\r\n"); break;
@@ -545,7 +544,6 @@ void slave_i2c_handler(void)
                             default:
                                 break;
                         }
-//#endif
 
                         DBG("CARD: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
@@ -601,12 +599,6 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                case CMD_PCA9534:
-                {
-                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                } break;
-
                 default: /* command doesnt exist - send NACK */
                 {
                     DBG("NACK\r\n");
@@ -620,6 +612,61 @@ void slave_i2c_handler(void)
             if (direction == I2C_DIR_RECEIVER_EMULATOR)
             {
                  i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
+
+                 switch(i2c_state->rx_buf[CMD_INDEX])
+                 {
+                    case INPUT_PORT_REG:
+                    {
+                        i2c_state->tx_buf[0] = pca9538_read_input();
+                        DBG("EMU_IN\r\n");
+
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case OUTPUT_PORT_REG:
+                    {
+                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                        {
+                            pca9538_write_output(i2c_state->rx_buf[1]);
+                            DBG("EMU_OUT\r\n");
+                        }
+
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case POLARITY_INV_REG:
+                    {
+                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                        {
+                            pca9538_set_polarity_inv(i2c_state->rx_buf[1]);
+                            DBG("EMU_POL\r\n");
+                        }
+
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case CONFIG_REG:
+                    {
+                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                        {
+                            pca9538_set_config(i2c_state->rx_buf[1]);
+                            DBG("EMU_CONF\r\n");
+                        }
+
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    default: /* command doesnt exist - send NACK */
+                    {
+                        DBG("EMU_NACK\r\n");
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+                 }
 
             }
             else /* I2C_Direction_Transmitter - MCU & EMULATOR */
