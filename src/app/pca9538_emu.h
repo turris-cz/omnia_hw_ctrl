@@ -17,6 +17,14 @@ enum pca9538_commands {
     CONFIG_REG                      = 0x03,
 };
 
+struct st_pca9538 {
+    uint8_t config_reg;
+    uint8_t pol_inv_reg;
+    uint8_t input_reg;
+};
+
+extern struct st_pca9538 pca9538;
+
 /*******************************************************************************
   * @function   pca9538_set_config
   * @brief      Write byte to configuration register and configure pins.

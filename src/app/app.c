@@ -19,11 +19,11 @@
 #include "wan_lan_pci_status.h"
 #include "debug_serial.h"
 #include "eeprom.h"
+#include "pca9538_emu.h"
 
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 #define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
-#define RESET_TYPE_STARTBIT        13
 
 /*******************************************************************************
   * @function   app_mcu_init
@@ -97,6 +97,7 @@ void app_mcu_init(void)
     led_driver_config();
     slave_i2c_config();
     debug_serial_config();
+    pca9538_reset();
 
     DBG("\r\nInit completed.\r\n");
 }
@@ -215,6 +216,8 @@ static ret_value_t light_reset(void)
         DBG("RST - WDG doesnt run\r\n")
     }
 
+    pca9538_reset(); /* set default values to emulator of PCA9538 */
+
     led_driver_reset_effect(ENABLE);
 
     return value;
@@ -229,9 +232,12 @@ static ret_value_t light_reset(void)
 static ret_value_t load_settings(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
+    struct st_pca9538 *expander = &pca9538;
 
     debounce_config(); /* start evaluation of inputs */
     i2c_control->status_word = app_get_status_word();
+
+    expander->input_reg = pca9538_read_input();
 
     return OK;
 }
@@ -377,13 +383,19 @@ static ret_value_t ic2_manager(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
     ret_value_t value = OK;
+    struct st_pca9538 *expander = &pca9538;
+    static uint8_t last_input_port;
 
-    if (i2c_control->status_word != last_status_word)
+    expander->input_reg = pca9538_read_input();
+
+    if ( (i2c_control->status_word != last_status_word) ||
+        (expander->input_reg != last_input_port) )
         SET_INTERRUPT_TO_CPU;
     else
         RESET_INTERRUPT_TO_CPU;
 
     last_status_word = i2c_control->status_word;
+    last_input_port = expander->input_reg;
 
     switch(i2c_control->state)
     {

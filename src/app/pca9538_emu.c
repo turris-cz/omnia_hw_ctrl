@@ -37,12 +37,7 @@ typedef enum pca9538_pin_config {
     PIN3_SFP_DIS                    = 0x03
 } pin_config_t;
 
-struct pca9538_st{
-    uint8_t config_reg;
-    uint8_t pol_inv_reg;
-};
-
-static struct pca9538_st pca9538;
+struct st_pca9538 pca9538;
 
 /*******************************************************************************
   * @function   pca9538_read_input
@@ -53,7 +48,7 @@ static struct pca9538_st pca9538;
 uint8_t pca9538_read_input(void)
 {
     uint8_t input_port = 0, input = 0;
-    struct pca9538_st *expander = &pca9538;
+    struct st_pca9538 *expander = &pca9538;
 
     input = wan_sfp_connector_detection();
 
@@ -112,7 +107,7 @@ uint8_t pca9538_read_input(void)
 void pca9538_write_output(uint8_t output_reg)
 {
     uint8_t pin_value, config_reg_masked, mask = 0x01;
-    struct pca9538_st *expander = &pca9538;
+    struct st_pca9538 *expander = &pca9538;
     pin_config_t pin;
 
     for (pin = 0; pin < REGISTER_LENGTH; pin++)
@@ -161,7 +156,7 @@ void pca9538_write_output(uint8_t output_reg)
   *****************************************************************************/
 void pca9538_set_polarity_inv(uint8_t polarity)
 {
-    struct pca9538_st *expander = &pca9538;
+    struct st_pca9538 *expander = &pca9538;
 
     expander->pol_inv_reg = polarity;
 }
@@ -174,7 +169,7 @@ void pca9538_set_polarity_inv(uint8_t polarity)
   *****************************************************************************/
 void pca9538_set_config(uint8_t config_reg)
 {
-    struct pca9538_st *expander = &pca9538;
+    struct st_pca9538 *expander = &pca9538;
     pin_config_t pin;
     uint8_t config_reg_masked, mask = 0x01;
     GPIO_InitTypeDef  GPIO_InitStructure;

@@ -36,7 +36,7 @@ static const uint8_t version[] = VERSION;
 #define I2C_GPIO_PORT                   GPIOF
 
 #define I2C_SLAVE_ADDRESS               0x55  /* address in linux: 0x2A */
-#define I2C_SLAVE_ADDRESS_EMULATOR      0x56  /* address in linux: 0x2C */
+#define I2C_SLAVE_ADDRESS_EMULATOR      0x56  /* address in linux: 0x2B */
 
 #define CMD_INDEX                       0
 
