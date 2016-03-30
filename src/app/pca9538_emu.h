@@ -10,8 +10,6 @@
 #ifndef PCA9538_EMULATOR_H
 #define PCA9538_EMULATOR_H
 
-#define PCA9538_PIN_DEFAULT_CONFIG       0xFF /* default value for config reg */
-
 enum pca9538_commands {
     INPUT_PORT_REG                  = 0x00,
     OUTPUT_PORT_REG                 = 0x01,
@@ -50,5 +48,13 @@ void pca9538_write_output(uint8_t output_reg);
   * @retval     Input port state.
   *****************************************************************************/
 uint8_t pca9538_read_input(void);
+
+/*******************************************************************************
+  * @function   pca9538_reset
+  * @brief      Set register of emulated PCA9538 to default values.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void pca9538_reset(void);
 
 #endif /* PCA9538_EMULATOR_H */

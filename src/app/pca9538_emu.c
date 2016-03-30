@@ -14,6 +14,10 @@
 
 #define REGISTER_LENGTH             8
 
+#define PCA9538_REG_CONFIG_DEFAULT       0xFF /* default value for config reg */
+#define PCA9538_REG_POLARITY_DEFAULT     0x00 /* default value for polarity reg */
+#define PCA9538_REG_OUTPUT_DEFAULT       0xFF /* default value for output reg */
+
 enum pca9538_config_reg {
     CONFIG_OUTPUT                   = 0x00,
     CONFIG_INPUT                    = 0x01
@@ -257,4 +261,17 @@ void pca9538_set_config(uint8_t config_reg)
 
         mask <<= 1;
     }
+}
+
+/*******************************************************************************
+  * @function   pca9538_reset
+  * @brief      Set register of emulated PCA9538 to default values.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void pca9538_reset(void)
+{
+    pca9538_set_config(PCA9538_REG_CONFIG_DEFAULT); /* all pins are input */
+    pca9538_set_polarity_inv(PCA9538_REG_POLARITY_DEFAULT); /* no polarity inversion */
+    pca9538_write_output(PCA9538_REG_OUTPUT_DEFAULT);
 }
