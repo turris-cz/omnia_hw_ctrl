@@ -10,15 +10,9 @@
 
 #include "stm32f0xx_conf.h"
 #include "wan_lan_pci_status.h"
+#include "pca9538_emu.h"
 
 #define REGISTER_LENGTH             8
-
-enum pca9538_commands {
-    INPUT_PORT_REG                  = 0x00,
-    OUTPUT_PORT_REG                 = 0x01,
-    POLARITY_INV_REG                = 0x02,
-    CONFIG_REG                      = 0x03,
-};
 
 enum pca9538_config_reg {
     CONFIG_OUTPUT                   = 0x00,
@@ -47,63 +41,71 @@ struct pca9538_st{
 static struct pca9538_st pca9538;
 
 /*******************************************************************************
-  * @function   pca9534_read_input
+  * @function   pca9538_read_input
   * @brief      Read byte from input port.
   * @param      None.
   * @retval     Input port state.
   *****************************************************************************/
-uint8_t pca9534_read_input(void)
+uint8_t pca9538_read_input(void)
 {
-    uint8_t input_port = 0;
+    uint8_t input_port = 0, input = 0;
     struct pca9538_st *expander = &pca9538;
+
+    input = wan_sfp_connector_detection();
 
     /* check setting in polarity inversion register */
     if (expander->pol_inv_reg & PIN0_SFP_DET_MASK)
     {
-        input_port |= PIN0_SFP_DET_MASK & (~(wan_sfp_connector_detection()));
+        input_port |= PIN0_SFP_DET_MASK & (~input);
     }
     else
     {
-        input_port |= wan_sfp_connector_detection();
+        input_port |= input;
     }
+
+    input = wan_sfp_fault_detection();
 
     if (expander->pol_inv_reg & PIN1_SFP_FLT_MASK)
     {
-        input_port |= PIN1_SFP_FLT_MASK & (~(wan_sfp_fault_detection() << 1));
+        input_port |= PIN1_SFP_FLT_MASK & (~(input << 1));
     }
     else
     {
-        input_port |= (wan_sfp_fault_detection() << 1);
+        input_port |= input << 1;
     }
+
+    input = wan_sfp_lost_detection();
 
     if (expander->pol_inv_reg & PIN2_SFP_LOST_MASK)
     {
-        input_port |= PIN2_SFP_LOST_MASK & (~(wan_sfp_lost_detection() << 2));
+        input_port |= PIN2_SFP_LOST_MASK & (~(input << 2));
     }
     else
     {
-        input_port |= (wan_sfp_lost_detection() << 2);
+        input_port |= input << 2;
     }
+
+    input = wan_sfp_get_tx_status();
 
     if (expander->pol_inv_reg & PIN3_SFP_DIS_MASK)
     {
-        input_port |= PIN3_SFP_DIS_MASK & (~(wan_sfp_get_tx_status() << 3));
+        input_port |= PIN3_SFP_DIS_MASK & (~(input << 3));
     }
     else
     {
-        input_port |= (wan_sfp_get_tx_status() << 3);
+        input_port |= input << 3;
     }
 
     return input_port;
 }
 
 /*******************************************************************************
-  * @function   pca9534_write_output
+  * @function   pca9538_write_output
   * @brief      Write byte to output register.
   * @param      output_reg: value to be written to output register.
   * @retval     None.
   *****************************************************************************/
-void pca9534_write_output(uint8_t output_reg)
+void pca9538_write_output(uint8_t output_reg)
 {
     uint8_t pin_value, config_reg_masked, mask = 0x01;
     struct pca9538_st *expander = &pca9538;
@@ -148,12 +150,12 @@ void pca9534_write_output(uint8_t output_reg)
 }
 
 /*******************************************************************************
-  * @function   pca9534_set_polarity_inv
+  * @function   pca9538_set_polarity_inv
   * @brief      Write byte to polarity inversion register.
   * @param      polarity: value to be written to polarity inversion register.
   * @retval     None.
   *****************************************************************************/
-void pca9534_set_polarity_inv(uint8_t polarity)
+void pca9538_set_polarity_inv(uint8_t polarity)
 {
     struct pca9538_st *expander = &pca9538;
 
@@ -161,12 +163,12 @@ void pca9534_set_polarity_inv(uint8_t polarity)
 }
 
 /*******************************************************************************
-  * @function   pca9534_set_config
+  * @function   pca9538_set_config
   * @brief      Write byte to configuration register and configure pins.
   * @param      config_reg: value to be written to configuration register.
   * @retval     None.
   *****************************************************************************/
-void pca9534_set_config(uint8_t config_reg)
+void pca9538_set_config(uint8_t config_reg)
 {
     struct pca9538_st *expander = &pca9538;
     pin_config_t pin;
