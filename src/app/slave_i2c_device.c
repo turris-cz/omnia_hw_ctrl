@@ -211,26 +211,26 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         return;
     }
 
-    if (bit_mask & SFP_DIS_MASK)
-    {
-        if (control_byte & SFP_DIS_MASK)
-        {
-            wan_sfp_set_tx_status(DISABLE);
-        }
-        else
-        {
-            wan_sfp_set_tx_status(ENABLE);
-        }
+//    if (bit_mask & SFP_DIS_MASK)
+//    {
+//        if (control_byte & SFP_DIS_MASK)
+//        {
+//            wan_sfp_set_tx_status(DISABLE);
+//        }
+//        else
+//        {
+//            wan_sfp_set_tx_status(ENABLE);
+//        }
 
-        if(wan_sfp_get_tx_status())
-        {
-            i2c_control->status_word |= SFP_DIS_STSBIT;
-        }
-        else
-        {
-            i2c_control->status_word &= (~SFP_DIS_STSBIT);
-        }
-    }
+//        if(wan_sfp_get_tx_status())
+//        {
+//            i2c_control->status_word |= SFP_DIS_STSBIT;
+//        }
+//        else
+//        {
+//            i2c_control->status_word &= (~SFP_DIS_STSBIT);
+//        }
+//    }
 
     if (bit_mask & USB30_PWRON_MASK)
     {

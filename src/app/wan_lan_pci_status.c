@@ -55,25 +55,25 @@ static void wan_lan_pci_io_config(void)
     GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
     GPIO_Init(WAN_LED0_PIN_PORT, &GPIO_InitStructure);
 
-    /* SFP_DIS output pin */
-    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
+//    /* SFP_DIS output pin */
+//    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+//    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+//    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
 
-    /* SFP input pins */
-    GPIO_InitStructure.GPIO_Pin = SFP_LOS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(SFP_LOS_PIN_PORT, &GPIO_InitStructure);
+//    /* SFP input pins */
+//    GPIO_InitStructure.GPIO_Pin = SFP_LOS_PIN;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+//    GPIO_Init(SFP_LOS_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = SFP_FLT_PIN;
-    GPIO_Init(SFP_FLT_PIN_PORT, &GPIO_InitStructure);
+//    GPIO_InitStructure.GPIO_Pin = SFP_FLT_PIN;
+//    GPIO_Init(SFP_FLT_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
-    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
+//    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
+//    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
 
     /* LAN LED input pins */
     GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
@@ -108,7 +108,7 @@ static void wan_lan_pci_io_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-    wan_sfp_set_tx_status(DISABLE);
+    //wan_sfp_set_tx_status(DISABLE);
 }
 
 /*******************************************************************************

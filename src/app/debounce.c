@@ -289,9 +289,9 @@ void debounce_input_timer_handler(void)
         idx = 0;
 
     /* other inputs handled by general function debounce_check_inputs() */
-    debounce_sfp_det();
-    debounce_sfp_flt();
-    debounce_sfp_los();
+    //debounce_sfp_det();
+    //debounce_sfp_flt();
+    //debounce_sfp_los();
     debounce_card_det();
     debounce_msata_ind();
 }
