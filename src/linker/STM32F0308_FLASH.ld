@@ -10,8 +10,8 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 0x10000 /*64K*/
-     RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 0x02000 /*8K*/
+     FLASH (rx)      : ORIGIN = 0x08004000, LENGTH = 0x0A000 /*40K*/
+     RAM (xrw)       : ORIGIN = 0x200000C0, LENGTH = 0x02000 - 192 /*8K - 192 for vector table */
    }
 
    /* define stack size and heap size here */
@@ -33,6 +33,13 @@
        KEEP(*(.isr_vector)) /* Startup code */
        . = ALIGN(4);
      } >FLASH
+
+  	 .version_block 0x8004000 + 0xC0:
+	 {
+		. = ALIGN(4);		
+		KEEP(*(.version_section))
+		. = ALIGN(4);
+	 } >FLASH
 
      /* The program code and other data goes into FLASH */
      .text :
