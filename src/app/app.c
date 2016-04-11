@@ -65,29 +65,6 @@ void app_mcu_init(void)
             break;
     }
 
-    ee_var = EE_ReadVariable(CARD_VIRT_ADDR, &ee_data);
-
-    switch(ee_var)
-    {
-        case VAR_NOT_FOUND:
-        {
-            card_mode_override = CARD_DEFAULT;
-            DBG("Init - CARD var not found in EEPROM\r\n");
-        } break;
-
-        case VAR_FOUND:
-        {
-            card_mode_override = ee_data;
-            DBG("Init - CARD var found\r\n");
-        } break;
-
-        case VAR_NO_VALID_PAGE : DBG("Init - CARD-No valid page\r\n");
-            break;
-
-        default:
-            break;
-    }
-
     delay_systimer_config();
     /* init ports and peripheral */
     power_control_io_config();

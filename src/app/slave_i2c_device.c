@@ -53,7 +53,6 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
-    CMD_CARD_FORCE_MODE                 = 0x0D, /* 0 - force PCIe, 1 - force mSATA, 0xAA - default */
     CMD_PCA9534                         = 0x11,
 };
 
@@ -519,33 +518,6 @@ void slave_i2c_handler(void)
                         }
 
                         DBG("WDT: ");
-                        DBG((const char*)(i2c_state->rx_buf + 1));
-                        DBG("\r\n");
-                    }
-                    DBG("ACK\r\n");
-                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                    /* release SCL line */
-                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                } break;
-
-                case CMD_CARD_FORCE_MODE:
-                {
-                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-                    {
-                        card_mode_override = i2c_state->rx_buf[1];
-
-                        ee_var = EE_WriteVariable(CARD_VIRT_ADDR, card_mode_override);
-
-                        switch(ee_var)
-                        {
-                            case VAR_FLASH_COMPLETE: DBG("CARD: OK\r\n"); break;
-                            case VAR_PAGE_FULL: DBG("CARD: Pg full\r\n"); break;
-                            case VAR_NO_VALID_PAGE: DBG("CARD: No Pg\r\n"); break;
-                            default:
-                                break;
-                        }
-
-                        DBG("CARD: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
                         DBG("\r\n");
                     }

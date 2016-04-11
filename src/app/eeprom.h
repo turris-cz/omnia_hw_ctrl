@@ -69,11 +69,10 @@
 #define PAGE_FULL             ((uint8_t)0x80)
 
 /* Variables' number */
-#define NB_OF_VAR             ((uint8_t)0x02)
+#define NB_OF_VAR             ((uint8_t)0x01)
 
 enum virt_address {
     WDG_VIRT_ADDR       = 0x6666,
-    CARD_VIRT_ADDR      = 0x7777,
     NOT_USED_VIRT_ADDR  = 0x8888
 };
 
