@@ -12,11 +12,13 @@
 #include "stm32f0xx_conf.h"
 #include "app.h"
 
-#define APPLICATION_ADDRESS        0x08004000
-#define RAM_ADDRESS                0x20000000
+#define APPLICATION_ADDRESS         0x08004000
+#define RAM_ADDRESS                 0x20000000
+#define BOOTLOADER_ADDRESS          0x08000000
 
-volatile uint8_t version[20] __attribute__((section (".version_section"))) = VERSION;
+typedef void (*pFunction)(void);
 
+void start_bootloader(void);
 
 /*******************************************************************************
  * @brief  Main program.
@@ -56,4 +58,26 @@ int main(void)
     {
         app_mcu_cyclic();
     }
+}
+
+void start_bootloader(void)
+{
+    pFunction boot_entry;
+    uint32_t boot_stack;
+
+    __disable_irq();
+
+    /* Get the Bootloader stack pointer (First entry in the Bootloader vector table) */
+    boot_stack = (uint32_t) *((__IO uint32_t*)BOOTLOADER_ADDRESS);
+
+    /* Get the Bootloader entry point (Second entry in the Bootloader vector table) */
+    boot_entry = (pFunction) *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+
+    /* Set the Bootloader stack pointer */
+    __set_MSP(boot_stack);
+
+    /* Start the Bootloader */
+    boot_entry();
+
+    while(1);
 }

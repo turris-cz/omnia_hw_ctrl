@@ -64,6 +64,7 @@ enum i2c_control_byte_mask {
     USB31_PWRON_MASK                    = 0x10,
     ENABLE_4V5_MASK                     = 0x20,
     BUTTON_MODE_MASK                    = 0x40,
+    BOOTLOADER_MASK                     = 0x80
 };
 
 enum expected_bytes_in_cmd {
@@ -289,6 +290,14 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
            button->button_mode = BUTTON_DEFAULT;
            button->button_pressed_counter = 0;
            i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
+        }
+    }
+
+    if (bit_mask & BOOTLOADER_MASK)
+    {
+        if (control_byte & BOOTLOADER_MASK)
+        {
+            i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
         }
     }
 }

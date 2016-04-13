@@ -25,6 +25,9 @@ void debug_serial_config(void)
     USART_InitTypeDef USART_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, DISABLE);
+    USART_DeInit(SERIAL_PORT);
+
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);

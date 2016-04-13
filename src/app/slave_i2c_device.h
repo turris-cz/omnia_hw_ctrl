@@ -19,6 +19,7 @@ typedef enum slave_i2c_states {
     SLAVE_I2C_LIGHT_RST,
     SLAVE_I2C_HARD_RST,
     SLAVE_I2C_PWR4V5_ERROR,
+    SLAVE_I2C_GO_TO_BOOTLOADER
 }slave_i2c_states_t;
 
 struct st_i2c_status {
@@ -91,6 +92,7 @@ enum status_word_bits {
  *      4   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
  *      5   |   ENABLE_4V5  : 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF
  *      6   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)
+ *      7   |   BOOTLOADER  : 1 - jump to bootloader
 */
 
 /*

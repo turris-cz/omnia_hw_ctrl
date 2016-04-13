@@ -103,6 +103,9 @@ static void led_driver_spi_config(void)
 {
     SPI_InitTypeDef  SPI_InitStructure;
 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, DISABLE);
+    SPI_I2S_DeInit(LED_SPI);
+
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
     SPI_I2S_DeInit(LED_SPI);
@@ -172,6 +175,9 @@ static void led_driver_timer_config(void)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, DISABLE);
+    TIM_DeInit(LED_TIMER);
 
     /* Clock enable */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -450,6 +456,9 @@ static void led_driver_pwm_timer_config(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     TIM_OCInitTypeDef  TIM_OCInitStructure;
     uint16_t init_value;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
+    TIM_DeInit(PWM_TIMER);
 
     /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
@@ -772,6 +781,9 @@ static void led_driver_timer_config_knight_rider(void)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, DISABLE);
+    TIM_DeInit(LED_EFFECT_TIMER);
 
     /* Clock enable */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);

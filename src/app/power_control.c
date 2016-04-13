@@ -618,6 +618,9 @@ void power_control_usb_timeout_config(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, DISABLE);
+    TIM_DeInit(USB_TIMEOUT_TIMER);
+
     /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
 

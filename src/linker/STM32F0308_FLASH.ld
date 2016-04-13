@@ -34,13 +34,6 @@
        . = ALIGN(4);
      } >FLASH
 
-  	 .version_block 0x8004000 + 0xC0:
-	 {
-		. = ALIGN(4);		
-		KEEP(*(.version_section))
-		. = ALIGN(4);
-	 } >FLASH
-
      /* The program code and other data goes into FLASH */
      .text :
      {

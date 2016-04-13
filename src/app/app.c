@@ -11,7 +11,6 @@
 #include "stm32f0xx.h"
 #include "app.h"
 #include "power_control.h"
-#include "delay.h"
 #include "debounce.h"
 #include "led_driver.h"
 #include "msata_pci.h"
@@ -24,6 +23,8 @@
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 #define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+
+extern void start_bootloader(void);
 
 /*******************************************************************************
   * @function   app_mcu_init
@@ -376,10 +377,11 @@ static ret_value_t ic2_manager(void)
 
     switch(i2c_control->state)
     {
-        case SLAVE_I2C_LIGHT_RST:       value = GO_TO_LIGHT_RESET; break;
-        case SLAVE_I2C_HARD_RST:        value = GO_TO_HARD_RESET; break;
-        case SLAVE_I2C_PWR4V5_ERROR:    value = GO_TO_4V5_ERROR; break;
-        default:                        value = OK; break;
+        case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
+        case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
+        case SLAVE_I2C_PWR4V5_ERROR:        value = GO_TO_4V5_ERROR; break;
+        case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
+        default:                            value = OK; break;
     }
 
     i2c_control->state = SLAVE_I2C_OK;
@@ -518,8 +520,9 @@ void app_mcu_cyclic(void)
             switch(val)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
-                case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-                case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
+                case GO_TO_HARD_RESET:  next_state = HARD_RESET; break;
+                case GO_TO_4V5_ERROR:   next_state = ERROR_STATE; break;
+                case GO_TO_BOOTLOADER:  next_state = BOOTLOADER; break;
                 default: next_state = LED_MANAGER; break;
             }
         }
@@ -534,5 +537,10 @@ void app_mcu_cyclic(void)
             next_state = INPUT_MANAGER;
         }
         break;
+
+        case BOOTLOADER:
+        {
+            start_bootloader();
+        } break;
     }
 }
