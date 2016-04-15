@@ -47,6 +47,8 @@ int main(void)
     RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | \
         RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOF, DISABLE);
 
+    RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, DISABLE);
+
     /* Remap SRAM */
     SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
 
@@ -54,9 +56,17 @@ int main(void)
 
     app_mcu_init();
 
+    uint32_t cnt = 0;
     while(1)
     {
         app_mcu_cyclic();
+//        delay(10);
+//        cnt++;
+//        if (cnt >= 7000)
+//        {
+//            cnt = 0;
+//            start_bootloader();
+//        }
     }
 }
 
@@ -68,13 +78,20 @@ void start_bootloader(void)
     __disable_irq();
 
     /* Get the Bootloader stack pointer (First entry in the Bootloader vector table) */
-    boot_stack = (uint32_t) *((__IO uint32_t*)BOOTLOADER_ADDRESS);
+    boot_stack = (uint32_t) *((volatile uint32_t*)BOOTLOADER_ADDRESS);
 
     /* Get the Bootloader entry point (Second entry in the Bootloader vector table) */
-    boot_entry = (pFunction) *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+    boot_entry = (pFunction) *(volatile uint32_t*) (BOOTLOADER_ADDRESS + 4);
 
     /* Set the Bootloader stack pointer */
     __set_MSP(boot_stack);
+
+        /* ISB = instruction synchronization barrier. It flushes the pipeline of
+     * the processor, so that all instructions following the ISB are fetched
+     * from cache or memory again, after the ISB instruction has been completed.
+     * Must be called after changing stack pointer according to the documentation.
+    */
+    __ISB();
 
     /* Start the Bootloader */
     boot_entry();

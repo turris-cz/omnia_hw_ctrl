@@ -38,8 +38,8 @@
 /* Define the size of the sectors to be used */
 #define PAGE_SIZE             ((uint32_t)0x0400)  /* Page size = 1KByte */
 
-#define EEPROM_START_ADDRESS  ((uint32_t)0x0800C800) /* EEPROM emulation start address:
-                                                        from sector2, after 50KByte of used
+#define EEPROM_START_ADDRESS  ((uint32_t)0x0800F000) /* EEPROM emulation start address:
+                                                        from sector2, after 60KByte of used
                                                         Flash memory */
 
 /* Pages 0 and 1 base and end addresses */
