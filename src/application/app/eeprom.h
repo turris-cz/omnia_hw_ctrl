@@ -69,11 +69,11 @@
 #define PAGE_FULL             ((uint8_t)0x80)
 
 /* Variables' number */
-#define NB_OF_VAR             ((uint8_t)0x01)
+#define NB_OF_VAR             ((uint8_t)0x02)
 
 enum virt_address {
-    WDG_VIRT_ADDR       = 0x6666,
-    NOT_USED_VIRT_ADDR  = 0x8888
+    WDG_VIRT_ADDR           = 0x6666,
+    RESET_VIRT_ADDR         = 0x8888
 };
 
 typedef enum eeprom_var {

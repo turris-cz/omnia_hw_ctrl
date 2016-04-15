@@ -13,6 +13,8 @@
 #include "delay.h"
 #include "led_driver.h"
 #include "boot_i2c.h"
+#include "eeprom.h"
+#include "debug_serial.h"
 
 
 #define LED_INDICATION_DELAY       500
@@ -25,6 +27,11 @@ typedef void (*pFunction)(void);
 
 void start_application(void);
 
+enum boot_requests {
+    BOOTLOADER_REQ                      = 0xAA,
+    FLASH_ERROR                         = 0x55,
+    FLASH_OK                            = 0x88
+};
 
 /*******************************************************************************
  * @brief  Main program.
@@ -35,6 +42,9 @@ int boot_main(void)
 {
     SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_Flash);
 
+    eeprom_var_t ee_var;
+    uint16_t ee_data;
+
     /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
@@ -43,6 +53,9 @@ int boot_main(void)
     delay_systimer_config();
     led_driver_config();
     slave_i2c_config();
+
+    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    EE_Init(); /* EEPROM Init */
 
     __enable_irq();
 
@@ -70,11 +83,58 @@ int boot_main(void)
 
     slave_i2c_process_data();
 
-    start_application();
+    ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
 
+    switch(ee_var)
+    {
+        /* power on reset - first boot - everything is flashed;
+           request for reflashing has never ocurred */
+        case VAR_NOT_FOUND:
+        {
+            start_application();
+
+            DBG("POR1\r\n");
+        } break;
+
+        case VAR_FOUND:
+        {
+            if (ee_data == BOOTLOADER_REQ)
+            {
+                //TODO - smazat pak po naflashovani BOOTLOADER_REQ nebo nastavit na FLASH_OK
+                //kdyz neprijde request do 30s, skocit do aplikace
+                delay(10000);
+                start_application();
+                DBG("Boot\r\n");
+            }
+            else
+            {
+                /* application was flashed correctly */
+                if (ee_data == FLASH_OK)
+                {
+                    /* power on reset */
+                    start_application();
+                    DBG("POR2\r\n");
+                }
+                else /* error - reset */
+                {
+                    //wait 30s for flash request and then reset
+                    //TODO - turn on power
+                }
+            }
+        } break;
+
+        case VAR_NO_VALID_PAGE : DBG("Boot-No valid page\r\n");
+            break;
+
+        default:
+            break;
+    }
 
     while(1)
     {
+
+
+
     }
 }
 

@@ -155,8 +155,9 @@ BOOTSRCS  += boot_stm32f0xx_it.c
 BOOTSRCS  += system_stm32f0xx.c
 BOOTSRCS  += led_driver.c
 BOOTSRCS  += delay.c
-#BOOTSRCS  += power_control.c
+BOOTSRCS  += power_control.c
 BOOTSRCS  += debug_serial.c
+BOOTSRCS  += eeprom.c
 
 BOOTSRCS  += stm32f0xx_rcc.c
 BOOTSRCS  += stm32f0xx_gpio.c

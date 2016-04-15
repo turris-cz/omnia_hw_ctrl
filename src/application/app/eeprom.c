@@ -42,7 +42,7 @@
 static uint16_t DataVar = 0;
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
-static uint16_t VirtAddVarTab[NB_OF_VAR] = {WDG_VIRT_ADDR};
+static uint16_t VirtAddVarTab[NB_OF_VAR] = {WDG_VIRT_ADDR, RESET_VIRT_ADDR};
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

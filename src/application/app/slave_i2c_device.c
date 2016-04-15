@@ -81,6 +81,12 @@ typedef enum i2c_dir {
     I2C_DIR_RECEIVER_EMULATOR           = 4,
 } i2c_dir_t;
 
+enum boot_requests {
+    BOOTLOADER_REQ                      = 0xAA,
+    FLASH_ERROR                         = 0x55,
+    FLASH_OK                            = 0x88
+};
+
 struct st_i2c_status i2c_status;
 
 /*******************************************************************************
@@ -189,6 +195,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
     error_type_t pwr_error = NO_ERROR;
+    eeprom_var_t ee_var;
 
     i2c_control->state = SLAVE_I2C_OK;
 
@@ -297,6 +304,17 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & BOOTLOADER_MASK)
         {
+            ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
+
+            switch(ee_var)
+            {
+                case VAR_FLASH_COMPLETE:    DBG("RST: OK\r\n"); break;
+                case VAR_PAGE_FULL:         DBG("RST: Pg full\r\n"); break;
+                case VAR_NO_VALID_PAGE:     DBG("RST: No Pg\r\n"); break;
+                default:
+                    break;
+            }
+
             i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
         }
     }
