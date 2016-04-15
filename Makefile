@@ -223,7 +223,7 @@ $(BOOT_NAME).elf: $(BOOT_OBJS)
 	@$(AS) $(AFLAGS) $< -o $@
 
 clean:
-	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin
+	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
 
 cleanapp:
 	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map
