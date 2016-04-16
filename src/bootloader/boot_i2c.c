@@ -215,13 +215,13 @@ void slave_i2c_handler(void)
 
         i2c_state->data_rx_complete = 1;
 
-        if (i2c_state->data_tx_complete) /* data have been sent to master */
-        {
-            i2c_state->data_tx_complete = 0;
-            i2c_state->tx_data_ctr = 0;
-        }
+//        if (i2c_state->data_tx_complete) /* data have been sent to master */
+//        {
+//            i2c_state->data_tx_complete = 0;
+//            i2c_state->tx_data_ctr = 0;
+//        }
 
-        i2c_state->rx_data_ctr = 0;
+
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
         DBG("STOP\r\n");
@@ -241,12 +241,14 @@ static void clear_rxbuf(void)
     }
 }
 
-void slave_i2c_process_data(void)
+uint32_t slave_i2c_process_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t address, idx, data_length = I2C_DATA_PACKET_SIZE / 4;
     uint8_t data[I2C_DATA_PACKET_SIZE];
-    uint32_t flash_status;
+    uint32_t flash_status = 0;
+    static uint32_t flash_address = APPLICATION_ADDRESS;
+    static uint16_t flash_erase_sts;
 
     //TODO: nastavit spravnou adresu flashovani po pozadavku
 
@@ -263,10 +265,24 @@ void slave_i2c_process_data(void)
             data[idx] = i2c_state->rx_buf[idx + DATA_START_BYTE_IDX];
         }
 
-        flash_status = flash_new_data((uint32_t*)data, data_length);
+        if (!flash_erase_sts) /* enter the flash sequence, erase pages */
+        {
+            flash_erase(flash_address);
+            flash_erase_sts = 1;
+        }
+
+        //flash_status = flash_new_data((uint32_t*)data, data_length);
+        flash_status = flash_write(&flash_address, (uint32_t*)data, data_length);
 
         clear_rxbuf();
 
+        i2c_state->data_rx_complete = 0;
+        i2c_state->rx_data_ctr = 0;
+
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, ENABLE);
+
+
     }
+
+    return flash_status;
 }

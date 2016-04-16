@@ -12,7 +12,7 @@
 #include "stm32f0xx_conf.h"
 #include "app.h"
 
-#define APPLICATION_ADDRESS         0x08004000
+#define APPLICATION_ADDRESS         0x08005000
 #define RAM_ADDRESS                 0x20000000
 #define BOOTLOADER_ADDRESS          0x08000000
 

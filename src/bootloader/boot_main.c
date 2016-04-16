@@ -16,10 +16,11 @@
 #include "eeprom.h"
 #include "debug_serial.h"
 
+#include "flash.h"
+#include "power_control.h"
 
 #define LED_INDICATION_DELAY       500
 
-#define APPLICATION_ADDRESS         0x08004000
 #define RAM_ADDRESS                 0x20000000
 #define BOOTLOADER_ADDRESS          0x08000000
 
@@ -59,13 +60,14 @@ int boot_main(void)
 
     __enable_irq();
 
-    led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
-    led_driver_set_led_state(LED_COUNT, LED_ON);
+    led_driver_set_colour(LED11, GREEN_COLOUR);
+    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_driver_set_led_state(LED11, LED_ON);
 
     int dummy, i;
     unsigned long int log = 0;
 
-    for (i = 1; i < 21; i++)
+    for (i = 1; i < 11; i++)
     {
         dummy += 1000;
         delay(LED_INDICATION_DELAY);
@@ -73,15 +75,15 @@ int boot_main(void)
 
         if (i%2)
         {
-            led_driver_set_led_state(LED_COUNT, LED_OFF);
+            led_driver_set_led_state(LED11, LED_OFF);
         }
         else
         {
-            led_driver_set_led_state(LED_COUNT, LED_ON);
+            led_driver_set_led_state(LED11, LED_ON);
         }
     }
 
-    slave_i2c_process_data();
+    flash_config();
 
     ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
 
@@ -102,7 +104,13 @@ int boot_main(void)
             {
                 //TODO - smazat pak po naflashovani BOOTLOADER_REQ nebo nastavit na FLASH_OK
                 //kdyz neprijde request do 30s, skocit do aplikace
-                delay(10000);
+                power_control_io_config();
+                power_control_set_startup_condition();
+                power_control_disable_regulators();
+                delay(100);
+
+                power_control_enable_regulators();
+                power_control_first_startup();
                 start_application();
                 DBG("Boot\r\n");
             }
@@ -130,11 +138,17 @@ int boot_main(void)
             break;
     }
 
+    uint32_t flash_status;
+
     while(1)
     {
+        flash_status = slave_i2c_process_data();
 
-
-
+        if (flash_status == 3)
+        {
+            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_OK);
+            start_application();
+        }
     }
 }
 

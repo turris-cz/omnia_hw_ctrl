@@ -24,9 +24,6 @@ typedef enum slave_i2c_states {
 }slave_i2c_states_t;
 
 struct st_i2c_status {
-    uint16_t status_word;
-    uint8_t reset_type;
-    slave_i2c_states_t state;             // reported in main state machine
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
@@ -53,7 +50,7 @@ void slave_i2c_config(void);
   *****************************************************************************/
 void slave_i2c_handler(void);
 
-void slave_i2c_process_data(void);
+uint32_t slave_i2c_process_data(void);
 
 #endif /* BOOT_I2C_H */
 

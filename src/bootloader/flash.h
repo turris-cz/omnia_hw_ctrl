@@ -9,13 +9,13 @@
 #ifndef __FLASH_H
 #define __FLASH_H
 
-#define USER_FLASH_LAST_PAGE_ADDRESS  0x0800D800
-#define USER_FLASH_END_ADDRESS        0x0800DFFF /* 64 KBytes */
+#define USER_FLASH_LAST_PAGE_ADDRESS  0x0800EC00
+#define USER_FLASH_END_ADDRESS        0x0800EFFF /* 64-4-20 = 40 KBytes */
 #define FLASH_PAGE_SIZE               0x400      /* 1 Kbytes */
 
 /* define the address from where user application will be loaded,
    the application address should be a start sector address */
-#define APPLICATION_ADDRESS     (uint32_t)0x08004000
+#define APPLICATION_ADDRESS     (uint32_t)0x08005000
 
 /* Get the number of Sector from where the user program will be loaded */
 #define  FLASH_PAGE_NUMBER      (uint32_t)((APPLICATION_ADDRESS - 0x08000000) >> 12)
@@ -27,11 +27,21 @@
 /* define the user application size */
 #define USER_FLASH_SIZE   (USER_FLASH_END_ADDRESS - APPLICATION_ADDRESS + 1)
 
-#endif /* __FLASH_H */
-
 
 void flash_config(void);
 uint32_t flash_erase(uint32_t start_sector);
+
+/*******************************************************************************
+  * @brief  This function writes a data buffer in flash (data are 32-bit aligned).
+  * @note   After writing data buffer, the flash content is checked.
+  * @param  FlashAddress: start address for writing data buffer
+  * @param  Data: pointer on data buffer
+  * @param  DataLength: length of data buffer (unit is 32-bit word)
+  * @retval 0: Data successfully written to Flash memory
+  *         1: Error occurred while writing data in Flash memory
+  *         2: Written Data in flash memory is different from expected one
+  *****************************************************************************/
+uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data ,uint16_t data_length);
 
 /*******************************************************************************
   * @brief  This function write incoming data to application address.
@@ -42,3 +52,5 @@ uint32_t flash_erase(uint32_t start_sector);
   *         2: Written Data in flash memory is different from expected one
   *****************************************************************************/
 uint32_t flash_new_data(uint32_t* data, uint16_t data_length);
+
+#endif /* __FLASH_H */

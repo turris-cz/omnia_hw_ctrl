@@ -28,9 +28,10 @@
 #include "delay.h"
 #include "msata_pci.h"
 #include "wan_lan_pci_status.h"
-#include "slave_i2c_device.h"
 #include "power_control.h"
 #include "debug_serial.h"
+
+#include "boot_i2c.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -152,10 +153,10 @@ void SysTick_Handler(void)
   */
 void TIM16_IRQHandler(void)
 {
-    if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
+   // if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
     {
         //debounce_input_timer_handler();
-        TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
+   //     TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
     }
 }
 
@@ -181,9 +182,9 @@ void TIM3_IRQHandler(void)
   */
 void TIM17_IRQHandler(void)
 {
-    struct st_i2c_status *i2c_control = &i2c_status;
+    //struct st_i2c_status *i2c_control = &i2c_status;
 
-    if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
+   // if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
     {
        // power_control_usb(USB3_PORT0, USB_ON);
        // power_control_usb(USB3_PORT1, USB_ON);
@@ -192,7 +193,7 @@ void TIM17_IRQHandler(void)
 
       //  power_control_usb_timeout_disable();
 
-        TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
+   //     TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
     }
 }
 

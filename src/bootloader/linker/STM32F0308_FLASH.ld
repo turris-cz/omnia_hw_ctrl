@@ -10,7 +10,7 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 0x04000 /*16K*/
+     FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 0x05000 /*20K*/
      RAM (xrw)       : ORIGIN = 0x200000C0, LENGTH = 0x02000 - 192 /*8K - 192B for vector table */
    }
 
