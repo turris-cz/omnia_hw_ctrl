@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    main.c
+ * @file    boot_main.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
+ * @date    15-April-2016
  * @brief   Main program body
  ******************************************************************************
  ******************************************************************************
@@ -53,7 +53,7 @@ int boot_main(void)
     /* peripheral initialization*/
     delay_systimer_config();
     led_driver_config();
-    slave_i2c_config();
+    boot_i2c_config();
 
     FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
@@ -111,7 +111,7 @@ int boot_main(void)
 
                 power_control_enable_regulators();
                 power_control_first_startup();
-                start_application();
+                //start_application();
                 DBG("Boot\r\n");
             }
             else
@@ -142,7 +142,7 @@ int boot_main(void)
 
     while(1)
     {
-        flash_status = slave_i2c_process_data();
+        flash_status = boot_i2c_flash_data();
 
         if (flash_status == 3)
         {

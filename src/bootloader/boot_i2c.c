@@ -46,11 +46,6 @@ static const uint8_t version[] = VERSION;
 #define HIGH_ADDR_BYTE_IDX            0
 #define DATA_START_BYTE_IDX           2
 
-enum i2c_commands {
-    CMD_UPGRADE_FW                      = 0x24
-};
-
-
 enum expected_bytes_in_cmd {
     ONE_BYTE_EXPECTED                   = 1,
     TWO_BYTES_EXPECTED                  = 2,
@@ -61,12 +56,12 @@ enum expected_bytes_in_cmd {
 struct st_i2c_status i2c_status;
 
 /*******************************************************************************
-  * @function   slave_i2c_config
+  * @function   boot_i2c_config
   * @brief      Configuration of pins for I2C.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_io_config(void)
+static void boot_i2c_io_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -98,12 +93,12 @@ static void slave_i2c_io_config(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_periph_config
+  * @function   boot_i2c_periph_config
   * @brief      Configuration of I2C peripheral as a slave.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void slave_i2c_periph_config(void)
+static void boot_i2c_periph_config(void)
 {
     I2C_InitTypeDef  I2C_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -139,24 +134,24 @@ static void slave_i2c_periph_config(void)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_config
+  * @function   boot_i2c_config
   * @brief      Configuration of I2C peripheral and its timeout.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_config(void)
+void boot_i2c_config(void)
 {
-    slave_i2c_io_config();
-    slave_i2c_periph_config();
+    boot_i2c_io_config();
+    boot_i2c_periph_config();
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_handler
+  * @function   boot_i2c_handler
   * @brief      Interrupt handler for I2C communication.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_handler(void)
+void boot_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
@@ -219,7 +214,6 @@ void slave_i2c_handler(void)
         {
             DBG("ACKtx\r\n");
             I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-            i2c_state->data_tx_complete = 1;
         }
     }
 
@@ -246,6 +240,12 @@ void slave_i2c_handler(void)
   // __enable_irq();
 }
 
+/*******************************************************************************
+  * @function   clear_rxbuf
+  * @brief      Delete RX buffer.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
 static void clear_rxbuf(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
@@ -257,12 +257,18 @@ static void clear_rxbuf(void)
     }
 }
 
-uint32_t slave_i2c_process_data(void)
+/*******************************************************************************
+  * @function   boot_i2c_flash_data
+  * @brief      Flash received data.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+flash_i2c_states_t boot_i2c_flash_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t address, idx, data_length = I2C_DATA_PACKET_SIZE / 4;
     uint8_t data[I2C_DATA_PACKET_SIZE];
-    uint32_t flash_status = 0;
+    static flash_i2c_states_t flash_status = FLASH_CMD_NOT_RECEIVED;
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint16_t flash_erase_sts;
 
@@ -271,6 +277,8 @@ uint32_t slave_i2c_process_data(void)
     if (i2c_state->data_rx_complete)
     {
         memset(data, 0, sizeof(data)); //TODO - check sizeof
+
+        flash_status = FLASH_CMD_RECEIVED;
 
         address = (i2c_state->rx_buf[HIGH_ADDR_BYTE_IDX] << 8) | \
                             (i2c_state->rx_buf[LOW_ADDR_BYTE_IDX]);
@@ -287,8 +295,7 @@ uint32_t slave_i2c_process_data(void)
             flash_erase_sts = 1;
         }
 
-        //flash_status = flash_new_data((uint32_t*)data, data_length);
-        flash_status = flash_write(&flash_address, (uint32_t*)data, data_length);
+        flash_write(&flash_address, (uint32_t*)data, data_length);
 
         clear_rxbuf();
 

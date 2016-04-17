@@ -158,6 +158,7 @@ BOOTSRCS  += delay.c
 BOOTSRCS  += power_control.c
 BOOTSRCS  += debug_serial.c
 BOOTSRCS  += eeprom.c
+BOOTSRCS  += bootloader.c
 
 BOOTSRCS  += stm32f0xx_rcc.c
 BOOTSRCS  += stm32f0xx_gpio.c

@@ -204,7 +204,7 @@ void TIM17_IRQHandler(void)
   */
 void I2C2_IRQHandler(void)
 {
-    slave_i2c_handler();
+    boot_i2c_handler();
 }
 
 /**
