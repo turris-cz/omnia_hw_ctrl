@@ -78,7 +78,7 @@ uint32_t flash_erase(uint32_t start_sector)
   *         1: Error occurred while writing data in Flash memory
   *         2: Written Data in flash memory is different from expected one
   *****************************************************************************/
-uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data ,uint16_t data_length)
+uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data, uint16_t data_length)
 {
   uint32_t i = 0;
 
@@ -107,19 +107,13 @@ uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data ,uint16_t 
 }
 
 /*******************************************************************************
-  * @brief  This function write incoming data to application address.
-  * @param  data: incoming data
-  * @param  data_lenght: legth of incoming data
-  * @retval 0: Data successfully written to Flash memory
-  *         1: Error occurred while writing data in Flash memory
-  *         2: Written Data in flash memory is different from expected one
+  * @brief  This function reads data from flash, byte after byte
+  * @param  flash_address: start of selected flash area to be read
+  * @param  data: data from flash
+  * @retval None.
   *****************************************************************************/
-uint32_t flash_new_data(uint32_t* data, uint16_t data_length)
+void flash_read(volatile uint32_t *flash_address, uint8_t *data)
 {
-    static uint32_t flash_address = APPLICATION_ADDRESS;
-    uint32_t flash_status;
-
-    flash_status = flash_write(&flash_address, data, data_length);
-
-    return flash_status;
+   *data = *(uint8_t*)*flash_address;
+    (*flash_address)++;
 }

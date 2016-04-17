@@ -160,6 +160,9 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     static uint16_t direction;
+    static uint32_t flash_address = APPLICATION_ADDRESS;
+    static uint8_t data;
+
 
    // __disable_irq();
 
@@ -174,6 +177,8 @@ void slave_i2c_handler(void)
         {
             direction = I2C_Direction_Transmitter;
 
+            flash_read(&flash_address, &data);
+
             DBG("S.TX\r\n");
         }
         else
@@ -187,7 +192,17 @@ void slave_i2c_handler(void)
     /* transmit interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
-        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
+        I2C_SendData(I2C_PERIPH_NAME, data);
+        i2c_state->tx_data_ctr++;
+
+        if (i2c_state->tx_data_ctr < I2C_DATA_PACKET_SIZE)
+        {
+            flash_read(&flash_address, &data);
+        }
+        else
+        {
+            i2c_state->tx_data_ctr = 0; //TODO: jeste vynulovat po skonceni flashovani - jak to poznat?
+        }
         DBG("send\r\n");
     }
     /* transfer complet interrupt (TX and RX) */
@@ -221,9 +236,10 @@ void slave_i2c_handler(void)
 //            i2c_state->tx_data_ctr = 0;
 //        }
 
-
-
-        I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+        if (i2c_state->data_rx_complete)
+        {
+            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
+        }
         DBG("STOP\r\n");
     }
 

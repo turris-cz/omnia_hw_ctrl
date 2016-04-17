@@ -27,8 +27,19 @@
 /* define the user application size */
 #define USER_FLASH_SIZE   (USER_FLASH_END_ADDRESS - APPLICATION_ADDRESS + 1)
 
-
+/*******************************************************************************
+  * @brief  Unlocks Flash for write access
+  * @param  None
+  * @retval None
+  *****************************************************************************/
 void flash_config(void);
+
+/*******************************************************************************
+  * @brief  This function does an erase of all user flash area
+  * @param  start_sector: start of user flash area
+  * @retval 0: user flash area successfully erased
+  *         1: error occurred
+  *****************************************************************************/
 uint32_t flash_erase(uint32_t start_sector);
 
 /*******************************************************************************
@@ -44,13 +55,11 @@ uint32_t flash_erase(uint32_t start_sector);
 uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data ,uint16_t data_length);
 
 /*******************************************************************************
-  * @brief  This function write incoming data to application address.
-  * @param  data: incoming data
-  * @param  data_lenght: legth of incoming data
-  * @retval 0: Data successfully written to Flash memory
-  *         1: Error occurred while writing data in Flash memory
-  *         2: Written Data in flash memory is different from expected one
+  * @brief  This function reads data from flash, byte after byte
+  * @param  flash_address: start of selected flash area to be read
+  * @param  data: data from flash
+  * @retval None.
   *****************************************************************************/
-uint32_t flash_new_data(uint32_t* data, uint16_t data_length);
+void flash_read(volatile uint32_t *flash_address, uint8_t *data);
 
 #endif /* __FLASH_H */
