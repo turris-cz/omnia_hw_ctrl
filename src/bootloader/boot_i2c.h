@@ -20,7 +20,9 @@
 
 typedef enum flash_i2c_states {
     FLASH_CMD_RECEIVED,
-    FLASH_CMD_NOT_RECEIVED
+    FLASH_CMD_NOT_RECEIVED,
+    FLASH_WRITE_OK,
+    FLASH_WRITE_ERROR
 }flash_i2c_states_t;
 
 struct st_i2c_status {

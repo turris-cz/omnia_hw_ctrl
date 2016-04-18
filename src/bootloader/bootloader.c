@@ -10,6 +10,9 @@
 #include "boot_i2c.h"
 #include "power_control.h"
 #include "delay.h"
+#include "eeprom.h"
+#include "debug_serial.h"
+#include "bootloader.h"
 
 #define DELAY_TIMEOUT       5
 #define MAX_TIMEOUT         (20*1000) /* 20 sec */
@@ -31,6 +34,67 @@ typedef enum bootloader_return_val {
     GO_TO_APPLICATION
 } boot_value_t;
 
+static boot_value_t reset_manager(void)
+{
+    eeprom_var_t ee_var;
+    uint16_t ee_data;
+    boot_value_t retval = GO_TO_RESET_MANAGER;
+
+    ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
+
+    switch(ee_var)
+    {
+        /* power on reset - first boot - everything is flashed;
+           request for reflashing has never ocurred */
+        case VAR_NOT_FOUND:
+        {
+            retval = GO_TO_APPLICATION;
+
+            DBG("POR1\r\n");
+        } break;
+
+        case VAR_FOUND:
+        {
+            switch (ee_data)
+            {
+                case BOOTLOADER_REQ:
+                {
+                    //kdyz neprijde request do 30s, skocit do aplikace
+    //                power_control_io_config();
+    //                power_control_set_startup_condition();
+    //                power_control_disable_regulators();
+    //                delay(100);
+
+    //                power_control_enable_regulators();
+    //                power_control_first_startup();
+    //                start_application();
+
+                    retval = GO_TO_FLASH;
+                    DBG("Boot\r\n");
+                } break;
+
+                case FLASH_NOT_CONFIRMED: /* error */
+                {
+                    retval = GO_TO_POWER_ON;
+                    DBG("ERROR\r\n");
+                } break;
+
+                case FLASH_CONFIRMED: /* application was flashed correctly */
+                {
+                    retval = GO_TO_APPLICATION;
+                    DBG("POR2\r\n");
+                } break;
+            }
+        }
+        case VAR_NO_VALID_PAGE : DBG("Boot-No valid page\r\n");
+            break;
+
+        default:
+            break;
+    }
+
+    return retval;
+}
 
 void bootloader(void)
 {
@@ -44,12 +108,14 @@ void bootloader(void)
     {
         case RESET_MANAGER:
         {
-            //val = reset_manager();
+            val = reset_manager();
+
             switch (val)
             {
                 case GO_TO_POWER_ON:            next_state = POWER_ON; break;
                 case GO_TO_APPLICATION:         next_state = START_APPLICATION; break;
-                default: next_state = TIMEOUT_MANAGER; break;
+                case GO_TO_FLASH:               next_state = FLASH_MANAGER; break;
+                default:                        next_state = TIMEOUT_MANAGER; break;
             }
         } break;
 
@@ -63,7 +129,7 @@ void bootloader(void)
             power_control_first_startup();
 
             next_state = FLASH_MANAGER;
-            skip_timeout = 1;
+            skip_timeout = 1; /* dont leave bootloader */
         } break;
 
         case TIMEOUT_MANAGER:
@@ -83,6 +149,7 @@ void bootloader(void)
             {
                 next_state = START_APPLICATION;
                 delay_cnt = 0;
+                EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
             }
             else
             {
@@ -93,22 +160,42 @@ void bootloader(void)
         case FLASH_MANAGER:
         {
             flash_sts = boot_i2c_flash_data();
-            //TODO: ukonceni z flashovani - go to application
-            if(flash_sts == FLASH_CMD_RECEIVED)
-            {
-                next_state = FLASH_MANAGER;
-                skip_timeout = 1;
-            }
-            else
-            {
-                next_state = TIMEOUT_MANAGER;
-            }
 
+            switch(flash_sts)
+            {
+                case FLASH_CMD_RECEIVED: /* flashing has just started */
+                {
+                    next_state = FLASH_MANAGER;
+                    skip_timeout = 1;
+                } break;
+
+                case FLASH_CMD_NOT_RECEIVED: /* nothing has received */
+                {
+                    next_state = TIMEOUT_MANAGER;
+                } break;
+
+                case FLASH_WRITE_OK: /* flashing was successfull */
+                {
+                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+                    next_state = START_APPLICATION;
+                } break;
+
+                case FLASH_WRITE_ERROR: /* flashing was corrupted */
+                {
+                    /* flag FLASH_NOT_CONFIRMED is already set */
+
+                    //EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
+                    //skip_timeout = 0; /* enable timeout */
+                    //next_state = TIMEOUT_MANAGER;
+
+                    NVIC_SystemReset();
+                } break;
+            }
         } break;
 
         case START_APPLICATION:
         {
-
+            start_application();
         } break;
     }
 }

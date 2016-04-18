@@ -23,6 +23,7 @@
 
 #include "flash.h"
 #include "boot_i2c.h"
+#include "bootloader.h"
 #include <string.h>
 
 static const uint8_t version[] = VERSION;
@@ -272,7 +273,8 @@ flash_i2c_states_t boot_i2c_flash_data(void)
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint16_t flash_erase_sts;
 
-    //TODO: nastavit spravnou adresu flashovani po pozadavku
+    //TODO: nastavit spravnou adresu flashovani po dokonceni flashovani a
+    //vymazat flash_erase_sts
 
     if (i2c_state->data_rx_complete)
     {
@@ -291,6 +293,7 @@ flash_i2c_states_t boot_i2c_flash_data(void)
 
         if (!flash_erase_sts) /* enter the flash sequence, erase pages */
         {
+            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
             flash_erase(flash_address);
             flash_erase_sts = 1;
         }
