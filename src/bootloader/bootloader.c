@@ -13,6 +13,8 @@
 #include "eeprom.h"
 #include "debug_serial.h"
 #include "bootloader.h"
+#include "led_driver.h"
+#include "flash.h"
 
 #define DELAY_TIMEOUT       5
 #define MAX_TIMEOUT         (20*1000) /* 20 sec */
@@ -33,6 +35,69 @@ typedef enum bootloader_return_val {
     GO_TO_FLASH,
     GO_TO_APPLICATION
 } boot_value_t;
+
+typedef void (*pFunction)(void);
+
+/*******************************************************************************
+  * @function   bootloader_init
+  * @brief      Init of bootloader
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
+void bootloader_init(void)
+{
+     /* system initialization */
+    SystemInit();
+    SystemCoreClockUpdate(); /* set HSI and PLL */
+
+    /* peripheral initialization*/
+    delay_systimer_config();
+    led_driver_config();
+    boot_i2c_config();
+
+    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    EE_Init(); /* EEPROM Init */
+    flash_config();
+
+    __enable_irq();
+
+    led_driver_set_colour(LED11, GREEN_COLOUR);
+    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_driver_set_led_state(LED11, LED_ON);
+}
+
+/*******************************************************************************
+  * @function   bootloader_init
+  * @brief      Init of bootloader
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
+static void start_application(void)
+{
+    pFunction app_entry;
+    uint32_t app_stack;
+
+    __disable_irq();
+
+    /* Get the application stack pointer (First entry in the application vector table) */
+    app_stack = (uint32_t) *((volatile uint32_t*)APPLICATION_ADDRESS);
+
+    /* Get the application entry point (Second entry in the application vector table) */
+    app_entry = (pFunction) *(volatile uint32_t*) (APPLICATION_ADDRESS + 4);
+
+    /* Set the application stack pointer */
+    __set_MSP(app_stack);
+
+    /* ISB = instruction synchronization barrier. It flushes the pipeline of
+     * the processor, so that all instructions following the ISB are fetched
+     * from cache or memory again, after the ISB instruction has been completed.
+     * Must be called after changing stack pointer according to the documentation.
+    */
+    __ISB();
+
+    /* Start the application */
+    app_entry();
+}
 
 static boot_value_t reset_manager(void)
 {
@@ -112,10 +177,10 @@ void bootloader(void)
 
             switch (val)
             {
-                case GO_TO_POWER_ON:            next_state = POWER_ON; break;
-                case GO_TO_APPLICATION:         next_state = START_APPLICATION; break;
-                case GO_TO_FLASH:               next_state = FLASH_MANAGER; break;
-                default:                        next_state = TIMEOUT_MANAGER; break;
+                case GO_TO_POWER_ON:    next_state = POWER_ON; break;
+                case GO_TO_APPLICATION: next_state = START_APPLICATION; break;
+                case GO_TO_FLASH:       next_state = FLASH_MANAGER; break;
+                default:                next_state = TIMEOUT_MANAGER; break;
             }
         } break;
 

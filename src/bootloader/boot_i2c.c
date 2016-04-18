@@ -292,8 +292,8 @@ flash_i2c_states_t boot_i2c_flash_data(void)
         }
 
         if (!flash_erase_sts) /* enter the flash sequence, erase pages */
-        {
-            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
+        {   //TODO - pak odkomentovat
+            //EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
             flash_erase(flash_address);
             flash_erase_sts = 1;
         }

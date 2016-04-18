@@ -17,4 +17,12 @@ enum eeprom_flags {
     FLASH_CONFIRMED                     = 0x88
 };
 
+/*******************************************************************************
+  * @function   bootloader_init
+  * @brief      Init of bootloader
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
+void bootloader_init(void);
+
 #endif /* BOOTLOADER_H */

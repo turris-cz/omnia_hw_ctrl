@@ -18,20 +18,18 @@
 
 #include "flash.h"
 #include "power_control.h"
+#include "bootloader.h"
 
 #define LED_INDICATION_DELAY       500
-
-#define RAM_ADDRESS                 0x20000000
-#define BOOTLOADER_ADDRESS          0x08000000
 
 typedef void (*pFunction)(void);
 
 void start_application(void);
 
 enum boot_requests {
-    BOOTLOADER_REQ                      = 0xAA,
-    FLASH_ERROR                         = 0x55,
-    FLASH_OK                            = 0x88
+    //BOOTLOADER_REQ                      = 0xAA,
+    FLASH_ERROR                 = 0x55,
+    FLASH_OK                     = 0x88
 };
 
 /*******************************************************************************
@@ -46,23 +44,22 @@ int boot_main(void)
     eeprom_var_t ee_var;
     uint16_t ee_data;
 
-    /* system initialization */
-    SystemInit();
-    SystemCoreClockUpdate(); /* set HSI and PLL */
+//    /* system initialization */
+//    SystemInit();
+//    SystemCoreClockUpdate(); /* set HSI and PLL */
 
-    /* peripheral initialization*/
-    delay_systimer_config();
-    led_driver_config();
-    boot_i2c_config();
+//    /* peripheral initialization*/
+//    delay_systimer_config();
+//    led_driver_config();
+//    boot_i2c_config();
 
-    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
-    EE_Init(); /* EEPROM Init */
+//    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+//    EE_Init(); /* EEPROM Init */
 
-    __enable_irq();
+//    __enable_irq();
 
-    led_driver_set_colour(LED11, GREEN_COLOUR);
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_led_state(LED11, LED_ON);
+    bootloader_init();
+
 
     int dummy, i;
     unsigned long int log = 0;
@@ -83,7 +80,7 @@ int boot_main(void)
         }
     }
 
-    flash_config();
+    //flash_config();
 
     ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
 
@@ -111,7 +108,7 @@ int boot_main(void)
 
                 power_control_enable_regulators();
                 power_control_first_startup();
-                //start_application();
+                start_application();
                 DBG("Boot\r\n");
             }
             else
