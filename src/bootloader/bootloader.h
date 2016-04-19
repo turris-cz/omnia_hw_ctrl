@@ -25,4 +25,12 @@ enum eeprom_flags {
   *****************************************************************************/
 void bootloader_init(void);
 
+/*******************************************************************************
+  * @function   bootloader
+  * @brief      Main bootloader state machine.
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
+void bootloader(void);
+
 #endif /* BOOTLOADER_H */

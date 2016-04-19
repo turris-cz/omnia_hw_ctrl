@@ -43,18 +43,19 @@ static const uint8_t version[] = VERSION;
 
 #define I2C_SLAVE_ADDRESS               0x58  /* address in linux: 0x2C */
 
-#define LOW_ADDR_BYTE_IDX             1
-#define HIGH_ADDR_BYTE_IDX            0
-#define DATA_START_BYTE_IDX           2
+#define LOW_ADDR_BYTE_IDX               1
+#define HIGH_ADDR_BYTE_IDX              0
+#define DATA_START_BYTE_IDX             2
 
-enum expected_bytes_in_cmd {
-    ONE_BYTE_EXPECTED                   = 1,
-    TWO_BYTES_EXPECTED                  = 2,
-    FOUR_BYTES_EXPECTED                 = 4,
-    TWENTY_BYTES_EXPECTED               = 20
-};
+#define FILE_CMP_OK                     0xBB
+#define FILE_CMP_ERROR                  0xDD
+#define ADDR_CMP                        0xFFFF
+
+#define ONE_BYTE_EXPECTED               1
 
 struct st_i2c_status i2c_status;
+
+static uint16_t flash_erase_sts; /* indicates start of flashing */
 
 /*******************************************************************************
   * @function   boot_i2c_config
@@ -159,8 +160,10 @@ void boot_i2c_handler(void)
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint8_t data;
 
-
-   // __disable_irq();
+    if (!flash_erase_sts) /* we are at the beginning again */
+    {
+        flash_address = APPLICATION_ADDRESS;
+    }
 
     /* address match interrupt */
     if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
@@ -197,7 +200,7 @@ void boot_i2c_handler(void)
         }
         else
         {
-            i2c_state->tx_data_ctr = 0; //TODO: jeste vynulovat po skonceni flashovani - jak to poznat?
+            i2c_state->tx_data_ctr = 0;
         }
         DBG("send\r\n");
     }
@@ -223,22 +226,15 @@ void boot_i2c_handler(void)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
-        i2c_state->data_rx_complete = 1;
 
-//        if (i2c_state->data_tx_complete) /* data have been sent to master */
-//        {
-//            i2c_state->data_tx_complete = 0;
-//            i2c_state->tx_data_ctr = 0;
-//        }
-
-        if (i2c_state->data_rx_complete)
+        if (direction == I2C_Direction_Receiver)
         {
+            i2c_state->data_rx_complete = 1;
             I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, DISABLE);
         }
         DBG("STOP\r\n");
     }
 
-  // __enable_irq();
 }
 
 /*******************************************************************************
@@ -271,14 +267,10 @@ flash_i2c_states_t boot_i2c_flash_data(void)
     uint8_t data[I2C_DATA_PACKET_SIZE];
     static flash_i2c_states_t flash_status = FLASH_CMD_NOT_RECEIVED;
     static uint32_t flash_address = APPLICATION_ADDRESS;
-    static uint16_t flash_erase_sts;
-
-    //TODO: nastavit spravnou adresu flashovani po dokonceni flashovani a
-    //vymazat flash_erase_sts
 
     if (i2c_state->data_rx_complete)
     {
-        memset(data, 0, sizeof(data)); //TODO - check sizeof
+        memset(data, 0, sizeof(data));
 
         flash_status = FLASH_CMD_RECEIVED;
 
@@ -292,13 +284,34 @@ flash_i2c_states_t boot_i2c_flash_data(void)
         }
 
         if (!flash_erase_sts) /* enter the flash sequence, erase pages */
-        {   //TODO - pak odkomentovat
-            //EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
+        {
+            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
             flash_erase(flash_address);
             flash_erase_sts = 1;
+            DBG("FL_NOT_CONF\r\n");
         }
 
-        flash_write(&flash_address, (uint32_t*)data, data_length);
+        if (address == ADDR_CMP) /* flashing is complete */
+        {
+            if (data[0] == FILE_CMP_OK)
+            {
+                flash_status = FLASH_WRITE_OK;
+                DBG("WRITE_OK\n\r");
+            }
+            else
+            {
+                flash_status = FLASH_WRITE_ERROR;
+                DBG("WRITE ERR\n\r");
+            }
+
+            flash_address = APPLICATION_ADDRESS;
+            flash_erase_sts = 0;
+            i2c_state->tx_data_ctr = 0;
+        }
+        else /* write incoming data */
+        {
+            flash_write(&flash_address, (uint32_t*)data, data_length);
+        }
 
         clear_rxbuf();
 
@@ -306,8 +319,6 @@ flash_i2c_states_t boot_i2c_flash_data(void)
         i2c_state->rx_data_ctr = 0;
 
         I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, ENABLE);
-
-
     }
 
     return flash_status;

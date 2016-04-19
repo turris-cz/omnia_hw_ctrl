@@ -15,9 +15,10 @@
 #include "bootloader.h"
 #include "led_driver.h"
 #include "flash.h"
+#include "debounce.h"
 
 #define DELAY_TIMEOUT       5
-#define MAX_TIMEOUT         (20*1000) /* 20 sec */
+#define MAX_TIMEOUT         (10*1000) /* 10 sec */
 #define MAX_TIMEOUT_CNT     (MAX_TIMEOUT/DELAY_TIMEOUT)
 
 typedef enum bootloader_states {
@@ -58,17 +59,19 @@ void bootloader_init(void)
     FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
     flash_config();
-
+    TIM_DeInit(DEBOUNCE_TIMER);
+    TIM_DeInit(USB_TIMEOUT_TIMER);
     __enable_irq();
 
-    led_driver_set_colour(LED11, GREEN_COLOUR);
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_led_state(LED11, LED_ON);
+    led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
+    led_driver_reset_effect(ENABLE);
+    debug_serial_config();
+    DBG("Init\r\n");
 }
 
 /*******************************************************************************
   * @function   bootloader_init
-  * @brief      Init of bootloader
+  * @brief      Init of bootloader.
   * @param      None
   * @retval     None
   *****************************************************************************/
@@ -99,6 +102,12 @@ static void start_application(void)
     app_entry();
 }
 
+/*******************************************************************************
+  * @function   reset_manager
+  * @brief      Determine a reset reason and following reaction.
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
 static boot_value_t reset_manager(void)
 {
     eeprom_var_t ee_var;
@@ -115,7 +124,7 @@ static boot_value_t reset_manager(void)
         {
             retval = GO_TO_APPLICATION;
 
-            DBG("POR1\r\n");
+            DBG("R1\r\n");
         } break;
 
         case VAR_FOUND:
@@ -124,33 +133,24 @@ static boot_value_t reset_manager(void)
             {
                 case BOOTLOADER_REQ:
                 {
-                    //kdyz neprijde request do 30s, skocit do aplikace
-    //                power_control_io_config();
-    //                power_control_set_startup_condition();
-    //                power_control_disable_regulators();
-    //                delay(100);
-
-    //                power_control_enable_regulators();
-    //                power_control_first_startup();
-    //                start_application();
-
                     retval = GO_TO_FLASH;
-                    DBG("Boot\r\n");
+                    DBG("req\r\n");
                 } break;
 
                 case FLASH_NOT_CONFIRMED: /* error */
                 {
                     retval = GO_TO_POWER_ON;
-                    DBG("ERROR\r\n");
+                    DBG("ERR\r\n");
                 } break;
 
                 case FLASH_CONFIRMED: /* application was flashed correctly */
                 {
                     retval = GO_TO_APPLICATION;
-                    DBG("POR2\r\n");
+                    DBG("R2\r\n");
                 } break;
             }
-        }
+        } break;
+
         case VAR_NO_VALID_PAGE : DBG("Boot-No valid page\r\n");
             break;
 
@@ -161,13 +161,19 @@ static boot_value_t reset_manager(void)
     return retval;
 }
 
+/*******************************************************************************
+  * @function   bootloader
+  * @brief      Main bootloader state machine.
+  * @param      None
+  * @retval     None
+  *****************************************************************************/
 void bootloader(void)
 {
     static boot_state_t next_state = RESET_MANAGER;
     static boot_value_t val = GO_TO_RESET_MANAGER;
     static flash_i2c_states_t flash_sts = FLASH_CMD_NOT_RECEIVED;
     static uint16_t delay_cnt;
-    static uint8_t skip_timeout;
+    static uint8_t skip_timeout; /* 0 - leave bootloader after timeout, 1 - stay in bootloader */
 
     switch(next_state)
     {
@@ -186,6 +192,7 @@ void bootloader(void)
 
         case POWER_ON:
         {
+            power_control_io_config();
             power_control_set_startup_condition();
             power_control_disable_regulators();
             delay(100);
@@ -202,7 +209,6 @@ void bootloader(void)
             if (skip_timeout)
             {
                 delay_cnt = 0;
-               // skip_timeout = 0;
             }
             else
             {
@@ -212,9 +218,10 @@ void bootloader(void)
 
             if(delay_cnt > MAX_TIMEOUT_CNT)
             {
+                EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
+                DBG("F_CONF_T\r\n");
                 next_state = START_APPLICATION;
                 delay_cnt = 0;
-                EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
             }
             else
             {
@@ -242,17 +249,13 @@ void bootloader(void)
                 case FLASH_WRITE_OK: /* flashing was successfull */
                 {
                     EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-                    next_state = START_APPLICATION;
+                    DBG("F_CONF\r\n");
+                    NVIC_SystemReset();
                 } break;
 
                 case FLASH_WRITE_ERROR: /* flashing was corrupted */
                 {
                     /* flag FLASH_NOT_CONFIRMED is already set */
-
-                    //EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
-                    //skip_timeout = 0; /* enable timeout */
-                    //next_state = TIMEOUT_MANAGER;
-
                     NVIC_SystemReset();
                 } break;
             }

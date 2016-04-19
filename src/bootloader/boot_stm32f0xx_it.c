@@ -153,10 +153,10 @@ void SysTick_Handler(void)
   */
 void TIM16_IRQHandler(void)
 {
-   // if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
+    if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
     {
         //debounce_input_timer_handler();
-   //     TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
+        TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
     }
 }
 
@@ -182,19 +182,8 @@ void TIM3_IRQHandler(void)
   */
 void TIM17_IRQHandler(void)
 {
-    //struct st_i2c_status *i2c_control = &i2c_status;
-
-   // if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
-    {
-       // power_control_usb(USB3_PORT0, USB_ON);
-       // power_control_usb(USB3_PORT1, USB_ON);
-
-        //i2c_control->status_word |= USB30_PWRON_STSBIT | USB31_PWRON_STSBIT;
-
-      //  power_control_usb_timeout_disable();
-
-   //     TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
-    }
+    if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
+        TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
 }
 
 /**
@@ -207,6 +196,7 @@ void I2C2_IRQHandler(void)
     boot_i2c_handler();
 }
 
+#define LED_BLINK_TIMEOUT   8
 /**
   * @brief  This function handles TIM3 global interrupt request.
   * @param  None
@@ -214,9 +204,33 @@ void I2C2_IRQHandler(void)
   */
 void TIM6_IRQHandler(void)
 {
+    static uint8_t led_blink;
+    static uint8_t timeout;
+
     if (TIM_GetITStatus(LED_EFFECT_TIMER, TIM_IT_Update) != RESET)
     {
-        //led_driver_knight_rider_effect_handler();
+        timeout++;
+
+        if (timeout >= LED_BLINK_TIMEOUT)
+        {
+            timeout = 0;
+
+            switch(led_blink)
+            {
+                case 0:
+                {
+                    led_driver_set_led_state(LED_COUNT, LED_ON);
+                    led_blink++;
+                } break;
+
+                case 1:
+                {
+                    led_driver_set_led_state(LED_COUNT, LED_OFF);
+                    led_blink = 0;
+                }break;
+            }
+        }
+
         TIM_ClearITPendingBit(LED_EFFECT_TIMER, TIM_IT_Update);
     }
 }
