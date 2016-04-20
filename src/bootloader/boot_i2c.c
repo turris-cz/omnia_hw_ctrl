@@ -176,8 +176,6 @@ void boot_i2c_handler(void)
         {
             direction = I2C_Direction_Transmitter;
 
-            flash_read(&flash_address, &data);
-
             DBG("S.TX\r\n");
         }
         else
@@ -191,17 +189,15 @@ void boot_i2c_handler(void)
     /* transmit interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
+        flash_read(&flash_address, &data);
         I2C_SendData(I2C_PERIPH_NAME, data);
         i2c_state->tx_data_ctr++;
 
-        if (i2c_state->tx_data_ctr < I2C_DATA_PACKET_SIZE)
-        {
-            flash_read(&flash_address, &data);
-        }
-        else
+        if (i2c_state->tx_data_ctr >= I2C_DATA_PACKET_SIZE)
         {
             i2c_state->tx_data_ctr = 0;
         }
+
         DBG("send\r\n");
     }
     /* transfer complet interrupt (TX and RX) */
