@@ -148,6 +148,9 @@ static boot_value_t reset_manager(void)
                     retval = GO_TO_APPLICATION;
                     DBG("R2\r\n");
                 } break;
+
+                /* flag has not been saved correctly */
+                default: retval = GO_TO_POWER_ON; break;
             }
         } break;
 

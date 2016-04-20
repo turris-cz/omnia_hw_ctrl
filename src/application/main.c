@@ -56,17 +56,9 @@ int main(void)
 
     app_mcu_init();
 
-    uint32_t cnt = 0;
     while(1)
     {
         app_mcu_cyclic();
-//        delay(10);
-//        cnt++;
-//        if (cnt >= 7000)
-//        {
-//            cnt = 0;
-//            start_bootloader();
-//        }
     }
 }
 
