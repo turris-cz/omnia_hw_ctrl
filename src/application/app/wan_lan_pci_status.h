@@ -13,44 +13,30 @@
 #include "stm32f0xx_conf.h"
 
 /* PCIe status LED */
-#define PCI_LED2_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
-#define PCI_LED2_PIN_PORT                   GPIOC
-#define PCI_LED2_PIN                        GPIO_Pin_1
+#define PCI_PLED0_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOF
+#define PCI_PLED0_PIN_PORT                  GPIOF
+#define PCI_PLED0_PIN                       GPIO_Pin_5
 
-#define PCI_LED1_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
-#define PCI_LED1_PIN_PORT                   GPIOC
-#define PCI_LED1_PIN                        GPIO_Pin_2
+#define PCI_LLED1_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOC
+#define PCI_LLED1_PIN_PORT                  GPIOC
+#define PCI_LLED1_PIN                       GPIO_Pin_2
+
+#define PCI_PLED1_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOA
+#define PCI_PLED1_PIN_PORT                  GPIOA
+#define PCI_PLED1_PIN                       GPIO_Pin_10
+
+#define PCI_LLED2_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOC
+#define PCI_LLED2_PIN_PORT                  GPIOC
+#define PCI_LLED2_PIN                       GPIO_Pin_1
+
+#define PCI_PLED2_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOF
+#define PCI_PLED2_PIN_PORT                  GPIOF
+#define PCI_PLED2_PIN                       GPIO_Pin_4
 
 /* WAN LED */
 #define WAN_LED0_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOF
 #define WAN_LED0_PIN_PORT                   GPIOF
 #define WAN_LED0_PIN                        GPIO_Pin_0
-
-/* SFP status */
-#define SFP_DIS_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOD
-#define SFP_DIS_PIN_PORT                    GPIOD
-#define SFP_DIS_PIN                         GPIO_Pin_2
-
-#define SFP_LOS_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOF
-#define SFP_LOS_PIN_PORT                    GPIOF
-#define SFP_LOS_PIN                         GPIO_Pin_4
-#define SFP_LOS_PIN_EXTIPORT                EXTI_PortSourceGPIOF
-#define SFP_LOS_PIN_EXTIPINSOURCE           EXTI_PinSource4
-#define SFP_LOS_PIN_EXTILINE                EXTI_Line4
-
-#define SFP_FLT_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOF
-#define SFP_FLT_PIN_PORT                    GPIOF
-#define SFP_FLT_PIN                         GPIO_Pin_5
-#define SFP_FLT_PIN_EXTIPORT                EXTI_PortSourceGPIOF
-#define SFP_FLT_PIN_EXTIPINSOURCE           EXTI_PinSource5
-#define SFP_FLT_PIN_EXTILINE                EXTI_Line5
-
-#define SFP_DET_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOA
-#define SFP_DET_PIN_PORT                    GPIOA
-#define SFP_DET_PIN                         GPIO_Pin_10
-#define SFP_DET_PIN_EXTIPORT                EXTI_PortSourceGPIOA
-#define SFP_DET_PIN_EXTIPINSOURCE           EXTI_PinSource10
-#define SFP_DET_PIN_EXTILINE                EXTI_Line10
 
 /* LAN LED */
 #define LAN_LED_PORT                        GPIOA

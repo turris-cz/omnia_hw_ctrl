@@ -10,9 +10,10 @@
 
 #include "stm32f0xx_conf.h"
 #include "wan_lan_pci_status.h"
+#include "msata_pci.h"
 #include "pca9538_emu.h"
 
-#define REGISTER_LENGTH             8
+#define REGISTER_LENGTH               8
 
 #define PCA9538_REG_CONFIG_DEFAULT       0xFF /* default value for config reg */
 #define PCA9538_REG_POLARITY_DEFAULT     0x00 /* default value for polarity reg */
@@ -24,18 +25,26 @@ enum pca9538_config_reg {
 };
 
 enum pca9538_pin_mask {
-    PIN0_SFP_DET_MASK               = 0x01,
-    PIN1_SFP_FLT_MASK               = 0x02,
-    PIN2_SFP_LOST_MASK              = 0x04,
-    PIN3_SFP_DIS_MASK               = 0x08
+    PIN0_MASK                       = 0x01, /* MSATALED */
+    PIN1_MASK                       = 0x02, /* PCI_PLED0 */
+    PIN2_MASK                       = 0x04, /* PCI_LLED1 */
+    PIN3_MASK                       = 0x08, /* PCI_PLED1 */
+    PIN4_MASK                       = 0x10, /* PCI_LLED2 */
+    PIN5_MASK                       = 0x20, /* PCI_PLED1 */
+    PIN6_MASK                       = 0x40, /* not used */
+    PIN7_MASK                       = 0x80  /* not used */
 };
 
-typedef enum pca9538_pin_config {
-    PIN0_SFP_DET                    = 0x00,
-    PIN1_SFP_FLT                    = 0x01,
-    PIN2_SFP_LOST                   = 0x02,
-    PIN3_SFP_DIS                    = 0x03
-} pin_config_t;
+enum pca9538_pin_number {
+    PIN0                            = 0x00,
+    PIN1                            = 0x01,
+    PIN2                            = 0x02,
+    PIN3                            = 0x03,
+    PIN4                            = 0x04,
+    PIN5                            = 0x05,
+    PIN6                            = 0x06,
+    PIN7                            = 0x07
+};
 
 struct st_pca9538 pca9538;
 
@@ -47,52 +56,101 @@ struct st_pca9538 pca9538;
   *****************************************************************************/
 uint8_t pca9538_read_input(void)
 {
-    uint8_t input_port = 0, input = 0;
+    uint8_t input_port = 0, input = 0, pin;
     struct st_pca9538 *expander = &pca9538;
 
-    input = wan_sfp_connector_detection();
+    for(pin = PIN0; pin < REGISTER_LENGTH; pin++)
+    {
+        switch(pin)
+        {
+            case PIN0:
+            {
+                input = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
 
-    /* check setting in polarity inversion register */
-    if (expander->pol_inv_reg & PIN0_SFP_DET_MASK)
-    {
-        input_port |= PIN0_SFP_DET_MASK & (~input);
-    }
-    else
-    {
-        input_port |= input;
-    }
+                /* check setting in polarity inversion register */
+                if (expander->pol_inv_reg & PIN0_MASK)
+                {
+                    input_port |= PIN0_MASK & (~input);
+                }
+                else
+                {
+                    input_port |= input;
+                }
+            } break;
 
-    input = wan_sfp_fault_detection();
+            case PIN1:
+            {
+                input = GPIO_ReadInputDataBit(PCI_PLED0_PIN_PORT, PCI_PLED0_PIN);
 
-    if (expander->pol_inv_reg & PIN1_SFP_FLT_MASK)
-    {
-        input_port |= PIN1_SFP_FLT_MASK & (~(input << 1));
-    }
-    else
-    {
-        input_port |= input << 1;
-    }
+                if (expander->pol_inv_reg & PIN1_MASK)
+                {
+                    input_port |= PIN1_MASK & (~(input << PIN1));
+                }
+                else
+                {
+                    input_port |= (input << PIN1);
+                }
+            } break;
 
-    input = wan_sfp_lost_detection();
+            case PIN2:
+            {
+                input = GPIO_ReadInputDataBit(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN);
 
-    if (expander->pol_inv_reg & PIN2_SFP_LOST_MASK)
-    {
-        input_port |= PIN2_SFP_LOST_MASK & (~(input << 2));
-    }
-    else
-    {
-        input_port |= input << 2;
-    }
+                if (expander->pol_inv_reg & PIN2_MASK)
+                {
+                    input_port |= PIN2_MASK & (~(input << PIN2));
+                }
+                else
+                {
+                    input_port |= (input << PIN2);
+                }
+            } break;
 
-    input = wan_sfp_get_tx_status();
+            case PIN3:
+            {
+                input = GPIO_ReadInputDataBit(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN);
 
-    if (expander->pol_inv_reg & PIN3_SFP_DIS_MASK)
-    {
-        input_port |= PIN3_SFP_DIS_MASK & (~(input << 3));
-    }
-    else
-    {
-        input_port |= input << 3;
+                if (expander->pol_inv_reg & PIN3_MASK)
+                {
+                    input_port |= PIN3_MASK & (~(input << PIN3));
+                }
+                else
+                {
+                    input_port |= (input << PIN3);
+                }
+            } break;
+
+            case PIN4:
+            {
+                input = GPIO_ReadInputDataBit(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN);
+
+                if (expander->pol_inv_reg & PIN4_MASK)
+                {
+                    input_port |= PIN4_MASK & (~(input << PIN4));
+                }
+                else
+                {
+                    input_port |= (input << PIN4);
+                }
+            } break;
+
+            case PIN5:
+            {
+                input = GPIO_ReadInputDataBit(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN);
+
+                if (expander->pol_inv_reg & PIN5_MASK)
+                {
+                    input_port |= PIN5_MASK & (~(input << PIN5));
+                }
+                else
+                {
+                    input_port |= (input << PIN5);
+                }
+            } break;
+
+            default:
+                break;
+        }
     }
 
     return input_port;
@@ -106,46 +164,8 @@ uint8_t pca9538_read_input(void)
   *****************************************************************************/
 void pca9538_write_output(uint8_t output_reg)
 {
-    uint8_t pin_value, config_reg_masked, mask = 0x01;
-    struct st_pca9538 *expander = &pca9538;
-    pin_config_t pin;
-
-    for (pin = 0; pin < REGISTER_LENGTH; pin++)
-    {
-        config_reg_masked = expander->config_reg & mask;
-        /* only output pins can be written */
-        if((config_reg_masked) == CONFIG_OUTPUT)
-        {
-            pin_value = mask & output_reg;
-
-            switch(pin)
-            {
-                case PIN0_SFP_DET:
-                {
-                    GPIO_WriteBit(SFP_DET_PIN_PORT, SFP_DET_PIN, pin_value);
-                } break;
-
-                case PIN1_SFP_FLT:
-                {
-                    GPIO_WriteBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN, pin_value);
-                } break;
-
-                case PIN2_SFP_LOST:
-                {
-                    GPIO_WriteBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN, pin_value);
-                } break;
-
-                case PIN3_SFP_DIS:
-                {
-                    GPIO_WriteBit(SFP_DIS_PIN_PORT, SFP_DIS_PIN, pin_value);
-                } break;
-
-                default:
-                    break;
-            }
-        }
-        mask <<= 1;
-    }
+    /* no write posibility at the moment */
+    return;
 }
 
 /*******************************************************************************
@@ -170,13 +190,13 @@ void pca9538_set_polarity_inv(uint8_t polarity)
 void pca9538_set_config(uint8_t config_reg)
 {
     struct st_pca9538 *expander = &pca9538;
-    pin_config_t pin;
+    uint8_t pin;
     uint8_t config_reg_masked, mask = 0x01;
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     expander->config_reg = config_reg;
 
-    for (pin = 0; pin < REGISTER_LENGTH; pin++)
+    for (pin = PIN0; pin < REGISTER_LENGTH; pin++)
     {
         config_reg_masked = config_reg & mask;
 
@@ -187,35 +207,7 @@ void pca9538_set_config(uint8_t config_reg)
             GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
             GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
-            switch(pin)
-            {
-                case PIN0_SFP_DET:
-                {
-                    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
-                    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
-                } break;
-
-                case PIN1_SFP_FLT:
-                {
-                    GPIO_InitStructure.GPIO_Pin = SFP_FLT_PIN;
-                    GPIO_Init(SFP_FLT_PIN_PORT, &GPIO_InitStructure);
-                } break;
-
-                case PIN2_SFP_LOST:
-                {
-                    GPIO_InitStructure.GPIO_Pin = SFP_LOS_PIN;
-                    GPIO_Init(SFP_LOS_PIN_PORT, &GPIO_InitStructure);
-                } break;
-
-                case PIN3_SFP_DIS:
-                {
-                    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-                    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
-                } break;
-
-                default:
-                    break;
-            }
+            /* no output pins used at the moment */
         }
         else /* pin configured as input */
         {
@@ -225,28 +217,40 @@ void pca9538_set_config(uint8_t config_reg)
 
             switch(pin)
             {
-                case PIN0_SFP_DET:
+                case PIN0:
                 {
-                    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
-                    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
+                    GPIO_InitStructure.GPIO_Pin = MSATALED_PIN;
+                    GPIO_Init(MSATALED_PIN_PORT, &GPIO_InitStructure);
                 } break;
 
-                case PIN1_SFP_FLT:
+                case PIN1:
                 {
-                    GPIO_InitStructure.GPIO_Pin = SFP_FLT_PIN;
-                    GPIO_Init(SFP_FLT_PIN_PORT, &GPIO_InitStructure);
+                    GPIO_InitStructure.GPIO_Pin = PCI_PLED0_PIN;
+                    GPIO_Init(PCI_PLED0_PIN_PORT, &GPIO_InitStructure);
                 } break;
 
-                case PIN2_SFP_LOST:
+                case PIN2:
                 {
-                    GPIO_InitStructure.GPIO_Pin = SFP_LOS_PIN;
-                    GPIO_Init(SFP_LOS_PIN_PORT, &GPIO_InitStructure);
+                    GPIO_InitStructure.GPIO_Pin = PCI_LLED1_PIN;
+                    GPIO_Init(PCI_LLED1_PIN_PORT, &GPIO_InitStructure);
                 } break;
 
-                case PIN3_SFP_DIS:
+                case PIN3:
                 {
-                    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-                    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
+                    GPIO_InitStructure.GPIO_Pin = PCI_PLED1_PIN;
+                    GPIO_Init(PCI_PLED1_PIN_PORT, &GPIO_InitStructure);
+                } break;
+
+                case PIN4:
+                {
+                    GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
+                    GPIO_Init(PCI_LLED2_PIN_PORT, &GPIO_InitStructure);
+                } break;
+
+                case PIN5:
+                {
+                    GPIO_InitStructure.GPIO_Pin = PCI_PLED2_PIN;
+                    GPIO_Init(PCI_PLED2_PIN_PORT, &GPIO_InitStructure);
                 } break;
 
                 default:
@@ -268,5 +272,4 @@ void pca9538_reset(void)
 {
     pca9538_set_config(PCA9538_REG_CONFIG_DEFAULT); /* all pins are input */
     pca9538_set_polarity_inv(PCA9538_REG_POLARITY_DEFAULT); /* no polarity inversion */
-    pca9538_write_output(PCA9538_REG_OUTPUT_DEFAULT);
 }
