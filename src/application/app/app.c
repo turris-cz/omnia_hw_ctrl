@@ -90,23 +90,6 @@ static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
-    if (wan_sfp_connector_detection())
-    {
-        status_word |= SFP_DET_STSBIT;
-        //wan_sfp_set_tx_status(ENABLE);
-    }
-
-    if(wan_sfp_get_tx_status())
-        status_word |= SFP_DIS_STSBIT;
-    else
-        status_word &= (~SFP_DIS_STSBIT);
-
-    if (wan_sfp_lost_detection())
-        status_word |= SFP_LOS_STSBIT;
-
-    if (wan_sfp_fault_detection())
-        status_word |= SFP_FLT_STSBIT;
-
     if (msata_pci_card_detection())
         status_word |= CARD_DET_STSBIT;
 
@@ -322,21 +305,6 @@ static ret_value_t input_manager(void)
     }
 
     /* these flags are automatically cleared in debounce function */
-//    if(input_state->sfp_det == ACTIVATED)
-//        i2c_control->status_word |= SFP_DET_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_DET_STSBIT);
-
-//    if(input_state->sfp_los == ACTIVATED)
-//        i2c_control->status_word |= SFP_LOS_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_LOS_STSBIT);
-
-//    if(input_state->sfp_flt == ACTIVATED)
-//        i2c_control->status_word |= SFP_FLT_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_FLT_STSBIT);
-
     if(input_state->card_det == ACTIVATED)
         i2c_control->status_word |= CARD_DET_STSBIT;
     else

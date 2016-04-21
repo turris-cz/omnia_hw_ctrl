@@ -37,10 +37,6 @@ struct st_i2c_status {
 extern struct st_i2c_status i2c_status;
 
 enum status_word_bits {
-    SFP_DET_STSBIT         = 0x0001,
-    SFP_LOS_STSBIT         = 0x0002,
-    SFP_FLT_STSBIT         = 0x0004,
-    SFP_DIS_STSBIT         = 0x0008,
     CARD_DET_STSBIT        = 0x0010,
     MSATA_IND_STSBIT       = 0x0020,
     USB30_OVC_STSBIT       = 0x0040,
@@ -57,10 +53,10 @@ enum status_word_bits {
  * Bit meanings in status_word:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   SFP_DET         : 1 - SFP detected, 0 - SFP not detected
- *      1   |   SFP_LOS         : 1 - SFP receiver lost signal, 0 - no lost
- *      2   |   SFP_FLT         : 1 - SFP trasmitter fault, 0 - no TX fault
- *      3   |   SFP_DIS         : 1 - SFP TX disabled; 0 - SFP TX enabled
+ *      0   |   dont care
+ *      1   |   dont care
+ *      2   |   dont care
+ *      3   |   dont care
  *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
  *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
  *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent
