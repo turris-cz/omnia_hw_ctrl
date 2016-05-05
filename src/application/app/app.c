@@ -427,7 +427,7 @@ void app_mcu_cyclic(void)
 
         case HARD_RESET:
         {
-            next_state = POWER_ON;
+            NVIC_SystemReset();
         }
         break;
 
