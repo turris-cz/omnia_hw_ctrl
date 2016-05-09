@@ -58,7 +58,7 @@ void delay(volatile uint32_t nTime)
   *****************************************************************************/
 void delay_timing_decrement(void)
 {
-    static uint32_t wdg_cnt = 0;
+    static uint32_t wdg_cnt;
 
     if (timingdelay != 0x00)
     {
@@ -66,7 +66,7 @@ void delay_timing_decrement(void)
     }
 
 #if WATCHDOG_ENABLE
-    if (watchdog.watchdog_sts == RUN)
+    if (watchdog.watchdog_state == RUN)
     {
         wdg_cnt++;
 
