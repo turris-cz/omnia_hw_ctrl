@@ -53,6 +53,7 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
+    CMD_GET_WATCHDOG_STATE		= 0x0D,
     CMD_PCA9534                         = 0x11,
 };
 
@@ -582,6 +583,17 @@ void slave_i2c_handler(void)
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
+
+                case CMD_GET_WATCHDOG_STATE:
+                {
+                    i2c_state->tx_buf[0] = wdg->watchdog_state;
+                    DBG("WDT GET\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
+
 
                 /* U-Boot divides reading more than 16B in several steps
                     - transmit bytes step by step
