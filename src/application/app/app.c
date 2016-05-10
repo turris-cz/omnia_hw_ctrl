@@ -159,13 +159,15 @@ static ret_value_t light_reset(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
 
+    wdg->watchdog_state = INIT;
+
     led_driver_reset_effect(DISABLE);
 
     reset_event = power_control_first_startup();
 
     i2c_control->reset_type = reset_event;
 
-    if(wdg->watchdog_sts == WDG_ENABLE)
+    if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
     {
         wdg->watchdog_state = RUN;
         DBG("RST - WDG runs\r\n");

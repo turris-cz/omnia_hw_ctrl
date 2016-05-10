@@ -14,7 +14,8 @@
 
 typedef enum watchdog_state {
     STOP                 = 0,
-    RUN                  = 1
+    RUN                  = 1,
+    INIT                 = 2
 } watchdog_state_t;
 
 enum watchdog_status {
