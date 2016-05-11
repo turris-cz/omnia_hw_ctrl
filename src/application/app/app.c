@@ -315,6 +315,33 @@ static ret_value_t input_manager(void)
 }
 
 /*******************************************************************************
+  * @function   enable_4v5
+  * @brief      Enable 4V5 power regulator.
+  * @param      None.
+  * @retval     val: next_state.
+  *****************************************************************************/
+static ret_value_t enable_4v5(void)
+{
+    error_type_t pwr_error = NO_ERROR;
+    ret_value_t val = OK;
+    struct st_i2c_status *i2c_control = &i2c_status;
+
+    pwr_error = power_control_start_regulator(REG_4V5);
+
+    if (pwr_error == NO_ERROR)
+    {
+        i2c_control->status_word |= ENABLE_4V5_STSBIT;
+        val = OK;
+    }
+    else /* error */
+    {
+        val = GO_TO_4V5_ERROR;
+    }
+
+    return val;
+}
+
+/*******************************************************************************
   * @function   ic2_manager
   * @brief      Handle I2C communication.
   * @param      None.
@@ -337,7 +364,7 @@ static ret_value_t ic2_manager(void)
     {
         case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
         case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
-        case SLAVE_I2C_PWR4V5_ERROR:        value = GO_TO_4V5_ERROR; break;
+        case SLAVE_I2C_PWR4V5_ENABLE:       value = enable_4v5(); break;
         case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
         default:                            value = OK; break;
     }

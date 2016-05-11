@@ -127,28 +127,6 @@ typedef enum reset_states {
     RST_LED11,
 } reset_state_t;
 
-enum PSET_values {
-    PSET_MINUS_10P  = 0x8,
-    PSET_MINUS_7P5  = 0x9,
-    PSET_MINUS_5P   = 0xA,
-    PSET_MINUS_2P5  = 0xB,
-    PSET_PLUS_2P5   = 0xC,
-    PSET_PLUS_5P    = 0xD,
-    PSET_PLUS_7P5   = 0xE,
-    PSET_PLUS_10P   = 0xF,
-};
-
-enum VSET_values {
-    VSET_1V0        = 0x8,
-    VSET_1V2        = 0x9,
-    VSET_1V5        = 0xA,
-    VSET_1V8        = 0xB,
-    VSET_2V5        = 0xC,
-    VSET_3V0        = 0xD,
-    VSET_3V3        = 0xE,
-    VSET_5V0        = 0xF,
-};
-
 /*******************************************************************************
   * @function   power_control_prog4v5_config
   * @brief      Configuration for programming possibility of 4V5 power source.
@@ -1077,8 +1055,6 @@ void power_control_set_power_led(void)
   *****************************************************************************/
 static void power_control_set_voltage33(void)
 {
-     __disable_irq();
-
      /* start condition */
      SET_LOGIC_HIGH();
 
@@ -1107,9 +1083,6 @@ static void power_control_set_voltage33(void)
 
      /* stop condition */
      SET_LOGIC_HIGH();
-
-     __enable_irq();
-     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -1120,8 +1093,6 @@ static void power_control_set_voltage33(void)
   *****************************************************************************/
 static void power_control_set_voltage36(void)
 {
-     __disable_irq();
-
      /* start condition */
      SET_LOGIC_HIGH();
 
@@ -1150,9 +1121,6 @@ static void power_control_set_voltage36(void)
 
      /* stop condition */
      SET_LOGIC_HIGH();
-
-     __enable_irq();
-     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -1163,8 +1131,6 @@ static void power_control_set_voltage36(void)
   *****************************************************************************/
 static void power_control_set_voltage51(void)
 {
-     __disable_irq();
-
      /* start condition */
      SET_LOGIC_HIGH();
 
@@ -1193,9 +1159,6 @@ static void power_control_set_voltage51(void)
 
      /* stop condition */
      SET_LOGIC_HIGH();
-
-     __enable_irq();
-     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -1206,8 +1169,6 @@ static void power_control_set_voltage51(void)
   *****************************************************************************/
 static void power_control_set_voltage45(void)
 {
-     __disable_irq();
-
      /* start condition */
      SET_LOGIC_HIGH();
 
@@ -1236,9 +1197,6 @@ static void power_control_set_voltage45(void)
 
      /* stop condition */
      SET_LOGIC_HIGH();
-
-     __enable_irq();
-     delay(1); /* delay at least 10us before the next sequence */
 }
 
 /*******************************************************************************
@@ -1249,6 +1207,7 @@ static void power_control_set_voltage45(void)
   *****************************************************************************/
 void power_control_set_voltage(voltage_value_t voltage)
 {
+    /* delay at least 10us before the next sequence */
     switch (voltage)
     {
         case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */

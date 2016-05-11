@@ -53,7 +53,7 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
-    CMD_GET_WATCHDOG_STATE		= 0x0D,
+    CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_PCA9534                         = 0x11,
 };
 
@@ -195,7 +195,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
-    error_type_t pwr_error = NO_ERROR;
     eeprom_var_t ee_var;
 
     i2c_control->state = SLAVE_I2C_OK;
@@ -272,12 +271,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & ENABLE_4V5_MASK)
         {
-            pwr_error = power_control_start_regulator(REG_4V5);
-
-            if (pwr_error == NO_ERROR)
-                i2c_control->status_word |= ENABLE_4V5_STSBIT;
-            else
-                i2c_control->state = SLAVE_I2C_PWR4V5_ERROR;
+            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
         }
         else
         {
@@ -592,8 +586,6 @@ void slave_i2c_handler(void)
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
-
-
 
                 /* U-Boot divides reading more than 16B in several steps
                     - transmit bytes step by step
