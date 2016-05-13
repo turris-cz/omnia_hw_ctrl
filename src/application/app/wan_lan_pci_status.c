@@ -187,7 +187,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN0_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN0_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -200,7 +201,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN1_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C1_MASK)
+                rgb_leds[LAN1_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -213,7 +215,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN2_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN2_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -226,7 +229,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN3_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C1_MASK)
+                rgb_leds[LAN3_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -239,7 +243,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN4_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN4_LED].led_state_default = LED_OFF;
         }
     }
 }
