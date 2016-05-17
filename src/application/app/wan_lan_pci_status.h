@@ -38,6 +38,11 @@
 #define WAN_LED0_PIN_PORT                   GPIOF
 #define WAN_LED0_PIN                        GPIO_Pin_0
 
+//TODO - delete on new version of board
+    #define SFP_DIS_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOD
+    #define SFP_DIS_PIN_PORT                    GPIOD
+    #define SFP_DIS_PIN                         GPIO_Pin_2
+
 /* LAN LED */
 #define LAN_LED_PORT                        GPIOA
 #define R0_P0_LED_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOA
@@ -76,46 +81,6 @@
   * @retval     None.
   *****************************************************************************/
 void wan_lan_pci_config(void);
-
-/*******************************************************************************
-  * @function   wan_sfp_connector_detection
-  * @brief      Detect inserted SFP+ connector.
-  * @param      None.
-  * @retval     1 - SFP detected, 0 - SFP not detected.
-  *****************************************************************************/
-__inline__ uint8_t wan_sfp_connector_detection(void);
-
-/*******************************************************************************
-  * @function   wan_sfp_fault_detection
-  * @brief      Detect a SFP fault.
-  * @param      None.
-  * @retval     1 - SFP TX fault, 0 - SFP no TX fault.
-  *****************************************************************************/
-__inline__ uint8_t wan_sfp_fault_detection(void);
-
-/*******************************************************************************
-  * @function   wan_sfp_lost_detection
-  * @brief      Detect a lost communication.
-  * @param      None.
-  * @retval     1 - SFP lost, 0 - no SFP lost
-  *****************************************************************************/
-__inline__ uint8_t wan_sfp_lost_detection(void);
-
-/*******************************************************************************
-  * @function   wan_sfp_lost_detection
-  * @brief      Detect a state of SFP transmitter.
-  * @param      None.
-  * @retval     1 - SFP TX disable, 0 - SFP TX enable.
-  *****************************************************************************/
-__inline__ uint8_t wan_sfp_get_tx_status(void);
-
-/******************************************************************************
-  * @function   wan_sfp_set_tx_status
-  * @brief      Enable/Disable SFP transmitting.
-  * @param      sfp_status: ENABLE or DISABLE.
-  * @retval     None.
-  *****************************************************************************/
-void wan_sfp_set_tx_status(FunctionalState sfp_status);
 
 /*******************************************************************************
   * @function   wan_led_activity

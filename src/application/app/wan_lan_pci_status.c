@@ -38,8 +38,17 @@ static void wan_lan_pci_io_config(void)
                           | PCI_PLED1_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
                           | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
                           | C0_P3_LED_PIN_PERIPH_CLOCK | C1_LED_PIN_PERIPH_CLOCK
-                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK,
-                          ENABLE);
+                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
+                          | SFP_DIS_PIN_PERIPH_CLOCK, ENABLE);
+
+    //TODO - delete for new board
+    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
 
     /* PCIe LED pins */
     GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
