@@ -48,7 +48,7 @@ static void wan_lan_pci_io_config(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+    GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
 
     /* PCIe LED pins */
     GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
