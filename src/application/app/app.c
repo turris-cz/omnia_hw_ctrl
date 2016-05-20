@@ -18,7 +18,6 @@
 #include "wan_lan_pci_status.h"
 #include "debug_serial.h"
 #include "eeprom.h"
-#include "pca9538_emu.h"
 
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)

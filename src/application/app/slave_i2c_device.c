@@ -18,7 +18,6 @@
 #include "debounce.h"
 #include "eeprom.h"
 #include "msata_pci.h"
-#include "pca9538_emu.h"
 
 static const uint8_t version[] = VERSION;
 
@@ -54,7 +53,6 @@ enum i2c_commands {
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
-    CMD_PCA9534                         = 0x11,
 };
 
 enum i2c_control_byte_mask {
@@ -618,48 +616,80 @@ void slave_i2c_handler(void)
 
                  switch(i2c_state->rx_buf[CMD_INDEX])
                  {
-                    case INPUT_PORT_REG:
-                    {
-                        i2c_state->tx_buf[0] = pca9538_read_input();
-                        DBG("EMU_IN\r\n");
-
-                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                    } break;
-
-                    case OUTPUT_PORT_REG:
+                    case CMD_LED_MODE:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_write_output(i2c_state->rx_buf[1]);
-                            DBG("EMU_OUT\r\n");
-                        }
+                            led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
+                            (i2c_state->rx_buf[1] & 0x10) >> 4);
 
+                            DBG("set LED mode - LED index : ");
+                            DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                            DBG("\r\nLED mode: ");
+                            DBG((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
-                    case POLARITY_INV_REG:
+                    case CMD_LED_STATE:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_set_polarity_inv(i2c_state->rx_buf[1]);
-                            DBG("EMU_POL\r\n");
-                        }
+                            led_driver_set_led_state(i2c_state->rx_buf[1] & 0x0F, \
+                            (i2c_state->rx_buf[1] & 0x10) >> 4);
 
+                            DBG("set LED state - LED index : ");
+                            DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                            DBG("\r\nLED state: ");
+                            DBG((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
-                    case CONFIG_REG:
+                    case CMD_LED_COLOUR:
+                    {
+                        if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
+                        {
+                            led_index = i2c_state->rx_buf[1] & 0x0F;
+                            /* colour = Red + Green + Blue */
+                            colour = (i2c_state->rx_buf[2] << 16) | \
+                            (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
+
+                            led_driver_set_colour(led_index, colour);
+
+                            DBG("set LED colour - LED index : ")
+                            DBG((const char*)&led_index);
+                            DBG("\r\nRED: ");
+                            DBG((const char*)(i2c_state->rx_buf + 2));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case CMD_SET_BRIGHTNESS:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_set_config(i2c_state->rx_buf[1]);
-                            DBG("EMU_CONF\r\n");
-                        }
+                            led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
 
+                            DBG("brightness: ");
+                            DBG((const char*)(i2c_state->rx_buf + 1));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
@@ -670,7 +700,6 @@ void slave_i2c_handler(void)
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
                  }
-
             }
             else /* I2C_Direction_Transmitter - MCU & EMULATOR */
             {
