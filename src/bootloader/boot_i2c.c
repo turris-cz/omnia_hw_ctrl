@@ -19,8 +19,6 @@
 #include "debounce.h"
 #include "eeprom.h"
 #include "msata_pci.h"
-#include "pca9538_emu.h"
-
 #include "flash.h"
 #include "boot_i2c.h"
 #include "bootloader.h"
