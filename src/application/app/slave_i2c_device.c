@@ -639,7 +639,7 @@ void slave_i2c_handler(void)
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            led_driver_set_led_state(i2c_state->rx_buf[1] & 0x0F, \
+                            led_driver_set_led_state_user(i2c_state->rx_buf[1] & 0x0F, \
                             (i2c_state->rx_buf[1] & 0x10) >> 4);
 
                             DBG("set LED state - LED index : ");
