@@ -49,7 +49,7 @@
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
 #define PWM_TIM_PERIODE             2000
-#define PWM_TIM_PRESCALE            8
+#define PWM_TIM_PRESCALE            6
 
 /*--------------------------------------------------------------
 // PWM Setting (Polarity)
@@ -103,6 +103,9 @@ static void led_driver_spi_config(void)
 {
     SPI_InitTypeDef  SPI_InitStructure;
 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, DISABLE);
+    SPI_I2S_DeInit(LED_SPI);
+
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
     SPI_I2S_DeInit(LED_SPI);
@@ -112,7 +115,7 @@ static void led_driver_spi_config(void)
     SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
     SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
     SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_Init(LED_SPI, &SPI_InitStructure);
 
@@ -172,6 +175,9 @@ static void led_driver_timer_config(void)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, DISABLE);
+    TIM_DeInit(LED_TIMER);
 
     /* Clock enable */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -451,6 +457,9 @@ static void led_driver_pwm_timer_config(void)
     TIM_OCInitTypeDef  TIM_OCInitStructure;
     uint16_t init_value;
 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
+    TIM_DeInit(PWM_TIMER);
+
     /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
 
@@ -654,6 +663,23 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
 }
 
 /*******************************************************************************
+  * @function   led_driver_set_led_state
+  * @brief      Set state of the LED(s)i from user/I2C - LED_ON / LED_OFF
+  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @parame     led_state: LED_OFF / LED_ON
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state)
+{
+    struct led_rgb *rgb_leds = leds + led_index;
+    
+    if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+        rgb_leds->led_state_user = led_state;
+    else
+        led_driver_set_led_state(led_index, led_state);
+}
+
+/*******************************************************************************
   * @function   led_driver_knight_rider_effect
   * @brief      Display knight rider effect on LEDs.
   * @param      colour: colour in RGB range.
@@ -772,6 +798,9 @@ static void led_driver_timer_config_knight_rider(void)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, DISABLE);
+    TIM_DeInit(LED_EFFECT_TIMER);
 
     /* Clock enable */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);

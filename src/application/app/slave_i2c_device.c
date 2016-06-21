@@ -18,7 +18,6 @@
 #include "debounce.h"
 #include "eeprom.h"
 #include "msata_pci.h"
-#include "pca9538_emu.h"
 
 static const uint8_t version[] = VERSION;
 
@@ -53,7 +52,7 @@ enum i2c_commands {
     CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
-    CMD_PCA9534                         = 0x11,
+    CMD_GET_WATCHDOG_STATE              = 0x0D,
 };
 
 enum i2c_control_byte_mask {
@@ -64,6 +63,7 @@ enum i2c_control_byte_mask {
     USB31_PWRON_MASK                    = 0x10,
     ENABLE_4V5_MASK                     = 0x20,
     BUTTON_MODE_MASK                    = 0x40,
+    BOOTLOADER_MASK                     = 0x80
 };
 
 enum expected_bytes_in_cmd {
@@ -79,6 +79,12 @@ typedef enum i2c_dir {
     I2C_DIR_TRANSMITTER_EMULATOR        = 3,
     I2C_DIR_RECEIVER_EMULATOR           = 4,
 } i2c_dir_t;
+
+enum boot_requests {
+    BOOTLOADER_REQ                      = 0xAA,
+    FLASH_ERROR                         = 0x55,
+    FLASH_OK                            = 0x88
+};
 
 struct st_i2c_status i2c_status;
 
@@ -187,7 +193,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     struct button_def *button = &button_front;
-    error_type_t pwr_error = NO_ERROR;
+    eeprom_var_t ee_var;
 
     i2c_control->state = SLAVE_I2C_OK;
 
@@ -263,12 +269,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & ENABLE_4V5_MASK)
         {
-            pwr_error = power_control_start_regulator(REG_4V5);
-
-            if (pwr_error == NO_ERROR)
-                i2c_control->status_word |= ENABLE_4V5_STSBIT;
-            else
-                i2c_control->state = SLAVE_I2C_PWR4V5_ERROR;
+            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
         }
         else
         {
@@ -289,6 +290,25 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
            button->button_mode = BUTTON_DEFAULT;
            button->button_pressed_counter = 0;
            i2c_control->status_word &= (~BUTTON_MODE_STSBIT);
+        }
+    }
+
+    if (bit_mask & BOOTLOADER_MASK)
+    {
+        if (control_byte & BOOTLOADER_MASK)
+        {
+            ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
+
+            switch(ee_var)
+            {
+                case VAR_FLASH_COMPLETE:    DBG("RST: OK\r\n"); break;
+                case VAR_PAGE_FULL:         DBG("RST: Pg full\r\n"); break;
+                case VAR_NO_VALID_PAGE:     DBG("RST: No Pg\r\n"); break;
+                default:
+                    break;
+            }
+
+            i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
         }
     }
 }
@@ -414,8 +434,8 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        led_driver_set_led_state(i2c_state->rx_buf[1] & 0x0F, \
-                        (i2c_state->rx_buf[1] & 0x10) >> 4);
+                        led_driver_set_led_state_user(i2c_state->rx_buf[1] &
+                                     0x0F, (i2c_state->rx_buf[1] & 0x10) >> 4);
 
                         DBG("set LED state - LED index : ");
                         DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
@@ -556,6 +576,15 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
+                case CMD_GET_WATCHDOG_STATE:
+                {
+                    i2c_state->tx_buf[0] = wdg->watchdog_state;
+                    DBG("WDT GET\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
                 /* U-Boot divides reading more than 16B in several steps
                     - transmit bytes step by step
                     - set 1B to NBYTES register */
@@ -587,48 +616,80 @@ void slave_i2c_handler(void)
 
                  switch(i2c_state->rx_buf[CMD_INDEX])
                  {
-                    case INPUT_PORT_REG:
-                    {
-                        i2c_state->tx_buf[0] = pca9538_read_input();
-                        DBG("EMU_IN\r\n");
-
-                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-                    } break;
-
-                    case OUTPUT_PORT_REG:
+                    case CMD_LED_MODE:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_write_output(i2c_state->rx_buf[1]);
-                            DBG("EMU_OUT\r\n");
-                        }
+                            led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
+                            (i2c_state->rx_buf[1] & 0x10) >> 4);
 
+                            DBG("set LED mode - LED index : ");
+                            DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                            DBG("\r\nLED mode: ");
+                            DBG((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
-                    case POLARITY_INV_REG:
+                    case CMD_LED_STATE:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_set_polarity_inv(i2c_state->rx_buf[1]);
-                            DBG("EMU_POL\r\n");
-                        }
+                            led_driver_set_led_state(i2c_state->rx_buf[1] & 0x0F, \
+                            (i2c_state->rx_buf[1] & 0x10) >> 4);
 
+                            DBG("set LED state - LED index : ");
+                            DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                            DBG("\r\nLED state: ");
+                            DBG((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
-                    case CONFIG_REG:
+                    case CMD_LED_COLOUR:
+                    {
+                        if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
+                        {
+                            led_index = i2c_state->rx_buf[1] & 0x0F;
+                            /* colour = Red + Green + Blue */
+                            colour = (i2c_state->rx_buf[2] << 16) | \
+                            (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
+
+                            led_driver_set_colour(led_index, colour);
+
+                            DBG("set LED colour - LED index : ")
+                            DBG((const char*)&led_index);
+                            DBG("\r\nRED: ");
+                            DBG((const char*)(i2c_state->rx_buf + 2));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case CMD_SET_BRIGHTNESS:
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            pca9538_set_config(i2c_state->rx_buf[1]);
-                            DBG("EMU_CONF\r\n");
-                        }
+                            led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
 
+                            DBG("brightness: ");
+                            DBG((const char*)(i2c_state->rx_buf + 1));
+                            DBG("\r\n");
+                        }
+                        DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                        /* release SCL line */
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
@@ -639,7 +700,6 @@ void slave_i2c_handler(void)
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
                  }
-
             }
             else /* I2C_Direction_Transmitter - MCU & EMULATOR */
             {

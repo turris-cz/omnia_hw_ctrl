@@ -10,6 +10,8 @@
 #ifndef __APP_H
 #define __APP_H
 
+#include "delay.h"
+
 typedef enum {
     GO_TO_VTT_ERROR      = -8,
     GO_TO_1V2_ERROR      = -7,
@@ -22,7 +24,7 @@ typedef enum {
     OK                   = 0,
     GO_TO_LIGHT_RESET    = 1,
     GO_TO_HARD_RESET     = 2,
-    GO_TO_FACTORY_RESET  = 3,
+    GO_TO_BOOTLOADER     = 3,
 }ret_value_t;
 
 typedef enum {
@@ -34,6 +36,7 @@ typedef enum {
     INPUT_MANAGER,
     I2C_MANAGER,
     LED_MANAGER,
+    BOOTLOADER
 } states_t;
 
 /*******************************************************************************

@@ -11,6 +11,7 @@
 #include "stm32f0xx_conf.h"
 #include "msata_pci.h"
 #include "led_driver.h"
+#include "wan_lan_pci_status.h"
 
 /*******************************************************************************
   * @function   msata_pci_io_config
@@ -58,20 +59,21 @@ void msata_pci_indication_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-    uint8_t msata_pci_activity;
+    uint8_t msata_pci_activity, pci_pled0;
     struct led_rgb *rgb_leds = leds;
 
     msata_pci_activity = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
+    pci_pled0 = GPIO_ReadInputDataBit(PCI_PLED0_PIN_PORT, PCI_PLED0_PIN);
 
     if (rgb_leds[MSATA_PCI_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if (msata_pci_activity)
+        if (!msata_pci_activity || !pci_pled0)
         {
-            rgb_leds[MSATA_PCI_LED].led_state_default = LED_OFF;
+            rgb_leds[MSATA_PCI_LED].led_state_default = LED_ON;
         }
         else
         {
-            rgb_leds[MSATA_PCI_LED].led_state_default = LED_ON;
+            rgb_leds[MSATA_PCI_LED].led_state_default = LED_OFF;
         }
     }
 }

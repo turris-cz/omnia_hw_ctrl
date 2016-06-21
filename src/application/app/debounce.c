@@ -37,9 +37,6 @@ enum input_mask {
     BUTTON_MASK                     = 0x8000,
 };
 
-#define MAX_SFP_DET_STATES          5
-#define MAX_SFP_FLT_STATES          5
-#define MAX_SFP_LOS_STATES          5
 #define MAX_CARD_DET_STATES         5
 #define MAX_MSATA_IND_STATES        5
 
@@ -60,6 +57,9 @@ static void debounce_timer_config(void)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, DISABLE);
+    TIM_DeInit(DEBOUNCE_TIMER);
 
     /* Clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
@@ -82,117 +82,6 @@ static void debounce_timer_config(void)
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x03;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-}
-
-/*******************************************************************************
-  * @function   debounce_sfp_det
-  * @brief      Debounce of SFP_DET input. Called in debounce timer interrupt.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_sfp_det(void)
-{
-    static uint16_t counter;
-    uint8_t state;
-    struct input_sig *input_state = &debounce_input_signal;
-
-    state = !(wan_sfp_connector_detection());
-
-    if (state) /* signal released */
-    {
-        if (counter > 0)
-            counter--;
-    }
-    else /* signal falls to low */
-    {
-        if (counter < MAX_SFP_DET_STATES)
-            counter++;
-    }
-
-    if (counter == 0)
-        input_state->sfp_det = DEACTIVATED;
-    else
-    {
-        if(counter >= MAX_SFP_DET_STATES)
-        {
-            input_state->sfp_det = ACTIVATED;
-            counter = MAX_SFP_DET_STATES;
-        }
-    }
-}
-
-/*******************************************************************************
-  * @function   debounce_sfp_flt
-  * @brief      Debounce of SFP_FLT input. Called in debounce timer interrupt.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_sfp_flt(void)
-{
-    static uint16_t counter;
-    uint8_t state;
-    struct input_sig *input_state = &debounce_input_signal;
-
-    state = !(wan_sfp_fault_detection());
-
-    if (state) /* signal released */
-    {
-        if (counter > 0)
-            counter--;
-    }
-    else /* signal falls to low */
-    {
-        if (counter < MAX_SFP_FLT_STATES)
-            counter++;
-    }
-
-    if (counter == 0)
-        input_state->sfp_flt = DEACTIVATED;
-    else
-    {
-        if(counter >= MAX_SFP_FLT_STATES)
-        {
-            input_state->sfp_flt = ACTIVATED;
-            counter = MAX_SFP_FLT_STATES;
-        }
-    }
-}
-
-/*******************************************************************************
-  * @function   debounce_sfp_los
-  * @brief      Debounce of SFP_LOS input. Called in debounce timer interrupt.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_sfp_los(void)
-{
-    static uint16_t counter;
-    uint8_t state;
-    struct input_sig *input_state = &debounce_input_signal;
-
-    state = !(wan_sfp_lost_detection());
-
-    if (state) /* signal released */
-    {
-        if (counter > 0)
-            counter--;
-    }
-    else /* signal falls to low */
-    {
-        if (counter < MAX_SFP_LOS_STATES)
-            counter++;
-    }
-
-    if (counter == 0)
-        input_state->sfp_los = DEACTIVATED;
-    else
-    {
-        if(counter >= MAX_SFP_LOS_STATES)
-        {
-            input_state->sfp_los = ACTIVATED;
-            counter = MAX_SFP_LOS_STATES;
-        }
-    }
 }
 
 /*******************************************************************************
@@ -289,9 +178,6 @@ void debounce_input_timer_handler(void)
         idx = 0;
 
     /* other inputs handled by general function debounce_check_inputs() */
-    //debounce_sfp_det();
-    //debounce_sfp_flt();
-    //debounce_sfp_los();
     debounce_card_det();
     debounce_msata_ind();
 }

@@ -1,27 +1,31 @@
 /**
  ******************************************************************************
- * @file    main.c
+ * @file    boot_main.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
+ * @date    15-April-2016
  * @brief   Main program body
  ******************************************************************************
  ******************************************************************************
  **/
 
 /* Includes ------------------------------------------------------------------*/
-#include "app.h"
+#include "stm32f0xx.h"
+#include "bootloader.h"
+
 
 /*******************************************************************************
  * @brief  Main program.
  * @param  None
  * @retval None
  ******************************************************************************/
-int main(void)
+int boot_main(void)
 {
-    app_mcu_init();
+    SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_Flash);
+
+    bootloader_init();
 
     while(1)
     {
-        app_mcu_cyclic();
+        bootloader();
     }
 }

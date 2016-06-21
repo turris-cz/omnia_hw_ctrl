@@ -32,48 +32,45 @@ static void wan_lan_pci_io_config(void)
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     /* GPIO Periph clock enable */
-    RCC_AHBPeriphClockCmd(PCI_LED2_PIN_PERIPH_CLOCK
-                          | PCI_LED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
-                          | SFP_DIS_PIN_PERIPH_CLOCK
-                          | SFP_LOS_PIN_PERIPH_CLOCK | SFP_FLT_PIN_PERIPH_CLOCK
-                          | SFP_DET_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
+    RCC_AHBPeriphClockCmd(PCI_LLED2_PIN_PERIPH_CLOCK
+                          | PCI_LLED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
+                          | PCI_PLED2_PIN_PERIPH_CLOCK | PCI_PLED0_PIN_PERIPH_CLOCK
+                          | PCI_PLED1_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
                           | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
                           | C0_P3_LED_PIN_PERIPH_CLOCK | C1_LED_PIN_PERIPH_CLOCK
-                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK,
-                          ENABLE);
+                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
+                          | SFP_DIS_PIN_PERIPH_CLOCK, ENABLE);
+
+    //TODO - delete for new board
+    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
 
     /* PCIe LED pins */
-    GPIO_InitStructure.GPIO_Pin = PCI_LED2_PIN;
+    GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(PCI_LED2_PIN_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(PCI_LLED2_PIN_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = PCI_LED1_PIN;
-    GPIO_Init(PCI_LED1_PIN_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = PCI_LLED1_PIN;
+    GPIO_Init(PCI_LLED1_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PCI_PLED0_PIN;
+    GPIO_Init(PCI_PLED0_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PCI_PLED1_PIN;
+    GPIO_Init(PCI_PLED1_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PCI_PLED2_PIN;
+    GPIO_Init(PCI_PLED2_PIN_PORT, &GPIO_InitStructure);
 
     /* WAN LED pins */
     GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
     GPIO_Init(WAN_LED0_PIN_PORT, &GPIO_InitStructure);
-
-//    /* SFP_DIS output pin */
-//    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-//    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
-//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-//    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
-
-//    /* SFP input pins */
-//    GPIO_InitStructure.GPIO_Pin = SFP_LOS_PIN;
-//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-//    GPIO_Init(SFP_LOS_PIN_PORT, &GPIO_InitStructure);
-
-//    GPIO_InitStructure.GPIO_Pin = SFP_FLT_PIN;
-//    GPIO_Init(SFP_FLT_PIN_PORT, &GPIO_InitStructure);
-
-//    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
-//    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
 
     /* LAN LED input pins */
     GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
@@ -108,74 +105,6 @@ static void wan_lan_pci_io_config(void)
 void wan_lan_pci_config(void)
 {
     wan_lan_pci_io_config();
-    //wan_sfp_set_tx_status(DISABLE);
-}
-
-/*******************************************************************************
-  * @function   wan_sfp_connector_detection
-  * @brief      Detect inserted SFP+ connector.
-  * @param      None.
-  * @retval     1 - SFP detected, 0 - SFP not detected.
-  *****************************************************************************/
-inline uint8_t wan_sfp_connector_detection(void)
-{
-    /* inverted due to the HW connection
-    HW connection: 1 = SFP not detected, 0 = SFP detected */
-    return (!(GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN)));
-}
-
-/*******************************************************************************
-  * @function   wan_sfp_fault_detection
-  * @brief      Detect a SFP fault.
-  * @param      None.
-  * @retval     1 - SFP TX fault, 0 - SFP no TX fault.
-  *****************************************************************************/
-inline uint8_t wan_sfp_fault_detection(void)
-{
-    /* HW connection: 0 = SFP no TX fault, 1 = SFP TX fault */
-    return (GPIO_ReadInputDataBit(SFP_FLT_PIN_PORT, SFP_FLT_PIN));
-}
-
-/*******************************************************************************
-  * @function   wan_sfp_lost_detection
-  * @brief      Detect a lost communication.
-  * @param      None.
-  * @retval     1 - SFP lost, 0 - no SFP lost.
-  *****************************************************************************/
-inline uint8_t wan_sfp_lost_detection(void)
-{
-    /* HW connection: 0 = no SFP lost (normal operation), 1 = SFP lost */
-    return (GPIO_ReadInputDataBit(SFP_LOS_PIN_PORT, SFP_LOS_PIN));
-}
-
-/*******************************************************************************
-  * @function   wan_sfp_set_tx_status
-  * @brief      Enable/Disable SFP transmitting.
-  * @param      sfp_status: ENABLE or DISABLE.
-  * @retval     None.
-  *****************************************************************************/
-void wan_sfp_set_tx_status(FunctionalState sfp_status)
-{
-    if (sfp_status == ENABLE)
-    {
-        GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
-    }
-    else
-    {
-        GPIO_SetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
-    }
-}
-
-/*******************************************************************************
-  * @function   wan_sfp_get_tx_status
-  * @brief      Detect a state of SFP transmitter.
-  * @param      None.
-  * @retval     1 - SFP TX disable, 0 - SFP TX enable.
-  *****************************************************************************/
-inline uint8_t wan_sfp_get_tx_status(void)
-{
-    /* HW connection: 0 = TX enable, 1 = TX disable */
-    return (GPIO_ReadInputDataBit(SFP_DIS_PIN_PORT, SFP_DIS_PIN));
 }
 
 /*******************************************************************************
@@ -191,29 +120,15 @@ void wan_led_activity(void)
 
     if (rgb_leds[WAN_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if (wan_sfp_connector_detection())
+        led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+
+        if (led0_status == 0)
         {
-            if (wan_sfp_lost_detection())
-            {
-                rgb_leds[WAN_LED].led_state_default = LED_OFF;
-            }
-            else
-            {
-                rgb_leds[WAN_LED].led_state_default = LED_ON;
-            }
+            rgb_leds[WAN_LED].led_state_default = LED_ON;
         }
         else
         {
-            led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
-
-            if (led0_status == 0)
-            {
-                rgb_leds[WAN_LED].led_state_default = LED_ON;
-            }
-            else
-            {
-                rgb_leds[WAN_LED].led_state_default = LED_OFF;
-            }
+            rgb_leds[WAN_LED].led_state_default = LED_OFF;
         }
     }
 }
@@ -226,15 +141,17 @@ void wan_led_activity(void)
   *****************************************************************************/
 void pci_led_activity(void)
 {
-    uint8_t pcie_led1, pcie_led2;
+    uint8_t pcie_led1, pcie_pled1, pcie_led2, pcie_pled2;
     struct led_rgb *rgb_leds = leds;
 
-    pcie_led2 = GPIO_ReadInputDataBit(PCI_LED2_PIN_PORT, PCI_LED2_PIN);
-    pcie_led1 = GPIO_ReadInputDataBit(PCI_LED1_PIN_PORT, PCI_LED1_PIN);
+    pcie_led2 = GPIO_ReadInputDataBit(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN);
+    pcie_led1 = GPIO_ReadInputDataBit(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN);
+    pcie_pled1 = GPIO_ReadInputDataBit(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN);
+    pcie_pled2 = GPIO_ReadInputDataBit(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN);
 
     if (rgb_leds[PCI2_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if(pcie_led2 == 0)
+        if((pcie_led2 == 0) || (pcie_pled2 == 0))
         {
             rgb_leds[PCI2_LED].led_state_default = LED_ON;
         }
@@ -246,7 +163,7 @@ void pci_led_activity(void)
 
     if (rgb_leds[PCI1_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if (pcie_led1 == 0)
+        if ((pcie_led1 == 0) || (pcie_pled1 == 0))
         {
             rgb_leds[PCI1_LED].led_state_default = LED_ON;
         }
@@ -279,7 +196,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN0_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN0_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -292,7 +210,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN1_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C1_MASK)
+                rgb_leds[LAN1_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -305,7 +224,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN2_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN2_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -318,7 +238,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN3_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C1_MASK)
+                rgb_leds[LAN3_LED].led_state_default = LED_OFF;
         }
     }
 
@@ -331,7 +252,8 @@ void lan_led_activity(void)
         }
         else
         {
-            rgb_leds[LAN4_LED].led_state_default = LED_OFF;
+            if (lan_led & LAN_C0_MASK)
+                rgb_leds[LAN4_LED].led_state_default = LED_OFF;
         }
     }
 }

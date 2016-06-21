@@ -11,7 +11,6 @@
 #include "stm32f0xx.h"
 #include "app.h"
 #include "power_control.h"
-#include "delay.h"
 #include "debounce.h"
 #include "led_driver.h"
 #include "msata_pci.h"
@@ -19,11 +18,12 @@
 #include "wan_lan_pci_status.h"
 #include "debug_serial.h"
 #include "eeprom.h"
-#include "pca9538_emu.h"
 
 #define MAX_ERROR_COUNT            5
 #define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
 #define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+
+extern void start_bootloader(void);
 
 /*******************************************************************************
   * @function   app_mcu_init
@@ -74,7 +74,6 @@ void app_mcu_init(void)
     led_driver_config();
     slave_i2c_config();
     debug_serial_config();
-    pca9538_reset();
 
     DBG("\r\nInit completed.\r\n");
 }
@@ -88,23 +87,6 @@ void app_mcu_init(void)
 static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
-
-    if (wan_sfp_connector_detection())
-    {
-        status_word |= SFP_DET_STSBIT;
-        //wan_sfp_set_tx_status(ENABLE);
-    }
-
-    if(wan_sfp_get_tx_status())
-        status_word |= SFP_DIS_STSBIT;
-    else
-        status_word &= (~SFP_DIS_STSBIT);
-
-    if (wan_sfp_lost_detection())
-        status_word |= SFP_LOS_STSBIT;
-
-    if (wan_sfp_fault_detection())
-        status_word |= SFP_FLT_STSBIT;
 
     if (msata_pci_card_detection())
         status_word |= CARD_DET_STSBIT;
@@ -176,13 +158,15 @@ static ret_value_t light_reset(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
 
+    wdg->watchdog_state = INIT;
+
     led_driver_reset_effect(DISABLE);
 
     reset_event = power_control_first_startup();
 
     i2c_control->reset_type = reset_event;
 
-    if(wdg->watchdog_sts == WDG_ENABLE)
+    if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
     {
         wdg->watchdog_state = RUN;
         DBG("RST - WDG runs\r\n");
@@ -192,8 +176,6 @@ static ret_value_t light_reset(void)
         wdg->watchdog_state = STOP;
         DBG("RST - WDG doesnt run\r\n")
     }
-
-    pca9538_reset(); /* set default values to emulator of PCA9538 */
 
     led_driver_reset_effect(ENABLE);
 
@@ -209,12 +191,9 @@ static ret_value_t light_reset(void)
 static ret_value_t load_settings(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
-    struct st_pca9538 *expander = &pca9538;
 
     debounce_config(); /* start evaluation of inputs */
     i2c_control->status_word = app_get_status_word();
-
-    expander->input_reg = pca9538_read_input();
 
     return OK;
 }
@@ -321,21 +300,6 @@ static ret_value_t input_manager(void)
     }
 
     /* these flags are automatically cleared in debounce function */
-//    if(input_state->sfp_det == ACTIVATED)
-//        i2c_control->status_word |= SFP_DET_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_DET_STSBIT);
-
-//    if(input_state->sfp_los == ACTIVATED)
-//        i2c_control->status_word |= SFP_LOS_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_LOS_STSBIT);
-
-//    if(input_state->sfp_flt == ACTIVATED)
-//        i2c_control->status_word |= SFP_FLT_STSBIT;
-//    else
-//        i2c_control->status_word &= (~SFP_FLT_STSBIT);
-
     if(input_state->card_det == ACTIVATED)
         i2c_control->status_word |= CARD_DET_STSBIT;
     else
@@ -350,6 +314,33 @@ static ret_value_t input_manager(void)
 }
 
 /*******************************************************************************
+  * @function   enable_4v5
+  * @brief      Enable 4V5 power regulator.
+  * @param      None.
+  * @retval     val: next_state.
+  *****************************************************************************/
+static ret_value_t enable_4v5(void)
+{
+    error_type_t pwr_error = NO_ERROR;
+    ret_value_t val = OK;
+    struct st_i2c_status *i2c_control = &i2c_status;
+
+    pwr_error = power_control_start_regulator(REG_4V5);
+
+    if (pwr_error == NO_ERROR)
+    {
+        i2c_control->status_word |= ENABLE_4V5_STSBIT;
+        val = OK;
+    }
+    else /* error */
+    {
+        val = GO_TO_4V5_ERROR;
+    }
+
+    return val;
+}
+
+/*******************************************************************************
   * @function   ic2_manager
   * @brief      Handle I2C communication.
   * @param      None.
@@ -360,26 +351,21 @@ static ret_value_t ic2_manager(void)
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
     ret_value_t value = OK;
-    struct st_pca9538 *expander = &pca9538;
-    static uint8_t last_input_port;
 
-    expander->input_reg = pca9538_read_input();
-
-    if ( (i2c_control->status_word != last_status_word) ||
-        (expander->input_reg != last_input_port) )
+    if (i2c_control->status_word != last_status_word)
         SET_INTERRUPT_TO_CPU;
     else
         RESET_INTERRUPT_TO_CPU;
 
     last_status_word = i2c_control->status_word;
-    last_input_port = expander->input_reg;
 
     switch(i2c_control->state)
     {
-        case SLAVE_I2C_LIGHT_RST:       value = GO_TO_LIGHT_RESET; break;
-        case SLAVE_I2C_HARD_RST:        value = GO_TO_HARD_RESET; break;
-        case SLAVE_I2C_PWR4V5_ERROR:    value = GO_TO_4V5_ERROR; break;
-        default:                        value = OK; break;
+        case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
+        case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
+        case SLAVE_I2C_PWR4V5_ENABLE:       value = enable_4v5(); break;
+        case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
+        default:                            value = OK; break;
     }
 
     i2c_control->state = SLAVE_I2C_OK;
@@ -469,7 +455,7 @@ void app_mcu_cyclic(void)
 
         case HARD_RESET:
         {
-            next_state = POWER_ON;
+            NVIC_SystemReset();
         }
         break;
 
@@ -518,8 +504,9 @@ void app_mcu_cyclic(void)
             switch(val)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
-                case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-                case GO_TO_4V5_ERROR: next_state = ERROR_STATE; break;
+                case GO_TO_HARD_RESET:  next_state = HARD_RESET; break;
+                case GO_TO_4V5_ERROR:   next_state = ERROR_STATE; break;
+                case GO_TO_BOOTLOADER:  next_state = BOOTLOADER; break;
                 default: next_state = LED_MANAGER; break;
             }
         }
@@ -534,5 +521,10 @@ void app_mcu_cyclic(void)
             next_state = INPUT_MANAGER;
         }
         break;
+
+        case BOOTLOADER:
+        {
+            start_bootloader();
+        } break;
     }
 }
