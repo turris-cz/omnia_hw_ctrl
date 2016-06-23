@@ -378,7 +378,7 @@ void slave_i2c_handler(void)
         I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
         DBG("send\r\n");
     }
-    /* transfer complet interrupt (TX and RX) */
+    /* transfer complete interrupt (TX and RX) */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
     {
         if(direction == I2C_DIR_RECEIVER_MCU)
@@ -690,6 +690,15 @@ void slave_i2c_handler(void)
                         DBG("ACK\r\n");
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         /* release SCL line */
+                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    } break;
+
+                    case CMD_GET_BRIGHTNESS:
+                    {
+                        i2c_state->tx_buf[0] = led->brightness;
+                        DBG("brig\r\n");
+
+                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                         I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                     } break;
 
