@@ -663,6 +663,35 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
 }
 
 /*******************************************************************************
+  * @function   led_driver_set_led_state
+  * @brief      Set state of the LED(s)i from user/I2C - LED_ON / LED_OFF
+  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @parame     led_state: LED_OFF / LED_ON
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state)
+{
+    struct led_rgb *rgb_leds;
+    int8_t idx;
+    
+    if (led_index >= LED_COUNT) { /* all LED */
+        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++) {
+            rgb_leds = leds + idx;
+            if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                rgb_leds->led_state_user = led_state;
+            else
+                led_driver_set_led_state(led_index, led_state);
+        }
+    } else {
+        rgb_leds = leds + led_index;
+        if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+            rgb_leds->led_state_user = led_state;
+        else
+            led_driver_set_led_state(led_index, led_state);
+    }
+}
+
+/*******************************************************************************
   * @function   led_driver_knight_rider_effect
   * @brief      Display knight rider effect on LEDs.
   * @param      colour: colour in RGB range.

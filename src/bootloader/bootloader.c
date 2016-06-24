@@ -223,8 +223,7 @@ void bootloader(void)
             {
                 EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
                 DBG("F_CONF_T\r\n");
-                next_state = START_APPLICATION;
-                delay_cnt = 0;
+		NVIC_SystemReset();
             }
             else
             {
