@@ -53,7 +53,7 @@ static void wan_lan_pci_io_config(void)
     /* PCIe LED pins */
     GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(PCI_LLED2_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PCI_LLED1_PIN;
@@ -74,6 +74,8 @@ static void wan_lan_pci_io_config(void)
 
     /* LAN LED input pins */
     GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(R0_P0_LED_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = R1_P1_LED_PIN;
