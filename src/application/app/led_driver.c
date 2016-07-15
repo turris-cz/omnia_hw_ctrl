@@ -218,36 +218,18 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-            {
-                rgb_leds->led_rgb_default.red = colour >> 16;
-                rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
-                rgb_leds->led_rgb_default.blue = colour & 0xFF;
-            }
-            else /* LED_USER_MODE */
-            {
-                rgb_leds->led_rgb_user.red = colour >> 16;
-                rgb_leds->led_rgb_user.green = (colour >> 8) & 0xFF;
-                rgb_leds->led_rgb_user.blue = colour & 0xFF;
-            }
+            rgb_leds->led_rgb_default.red = colour >> 16;
+            rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_rgb_default.blue = colour & 0xFF;
         }
     }
     else /* individual LED */
     {
         rgb_leds += led_index;
 
-        if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-        {
-            rgb_leds->led_rgb_default.red = colour >> 16;
-            rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_default.blue = colour & 0xFF;
-        }
-        else /* LED_USER_MODE */
-        {
-            rgb_leds->led_rgb_user.red = colour >> 16;
-            rgb_leds->led_rgb_user.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_user.blue = colour & 0xFF;
-        }
+        rgb_leds->led_rgb_default.red = colour >> 16;
+        rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
+        rgb_leds->led_rgb_default.blue = colour & 0xFF;
     }
 }
 
@@ -293,11 +275,11 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                         }
                     }
                 }
-                else /* LED_USER_MODE */
+                else /* LED_USER_MODE has the same colour profile as default mode now */
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user.red > current_colour_level)
+                        if (rgb_leds->led_rgb_default.red > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -320,11 +302,11 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                         }
                     }
                 }
-                else /* LED_USER_MODE */
+                else /* LED_USER_MODE has the same colour profile as default mode now */
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user.green > current_colour_level)
+                        if (rgb_leds->led_rgb_default.green > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -347,11 +329,11 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                         }
                     }
                 }
-                else /* LED_USER_MODE */
+                else /* LED_USER_MODE has the same colour profile as default mode now */
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_user.blue > current_colour_level)
+                        if (rgb_leds->led_rgb_default.blue > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -673,7 +655,7 @@ void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t le
 {
     struct led_rgb *rgb_leds;
     int8_t idx;
-    
+
     if (led_index >= LED_COUNT) { /* all LED */
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++) {
             rgb_leds = leds + idx;

@@ -75,7 +75,6 @@ typedef struct led_rgb_data {
 
 struct led_rgb {
     led_rgb_data_t          led_rgb_default;    /* colour data */
-    led_rgb_data_t          led_rgb_user;       /* user data */
     led_state_t             led_state_default;  /* LED ON/OFF default mode */
     led_state_t             led_state_user;     /* LED ON/OFF user mode */
     led_mode_t              led_mode;           /* default / user mode */
