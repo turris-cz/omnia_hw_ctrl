@@ -223,7 +223,11 @@ void bootloader(void)
             {
                 EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
                 DBG("F_CONF_T\r\n");
-		NVIC_SystemReset();
+                /* shutdown regulators before reset, otherwise power supply can
+                 * stay there and causes wrong detection of mmc during boot */
+                power_control_disable_regulators();
+                delay(100);
+                NVIC_SystemReset();
             }
             else
             {
