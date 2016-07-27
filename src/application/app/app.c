@@ -383,8 +383,6 @@ static ret_value_t led_manager(void)
 {
     wan_led_activity();
     lan_led_activity();
-    pci_led_activity();
-    msata_pci_activity();
 
     return OK;
 }
