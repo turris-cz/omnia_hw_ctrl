@@ -85,7 +85,6 @@ typedef enum led_effect_states {
 struct led_rgb leds[LED_COUNT];
 uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
 finished and normal operation can take the LED control */
-static effect_state_t effect_state; /* states for LED effect after reset */
 
 /* values for LED brightness [%] */
 static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
@@ -837,7 +836,6 @@ void led_driver_reset_effect(FunctionalState state)
     {
         TIM_Cmd(LED_EFFECT_TIMER, DISABLE);
         LED_EFFECT_TIMER->CNT = 0;
-        effect_state = EFFECT_INIT;
     }
 }
 
@@ -852,6 +850,7 @@ void led_driver_knight_rider_effect_handler(void)
 {
     static int8_t led;
     static uint8_t state_timeout_cnt;
+    static effect_state_t effect_state; /* states for LED effect after reset */
 
     switch (effect_state)
     {
@@ -859,7 +858,7 @@ void led_driver_knight_rider_effect_handler(void)
         {
             effect_reset_finished = RESET;
             led_driver_set_led_state(LED_COUNT, LED_OFF);
-            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);            
             led_driver_set_led_state(LED0, LED_ON);
             effect_state = EFFECT_UP;
         } break;
@@ -867,6 +866,7 @@ void led_driver_knight_rider_effect_handler(void)
         case EFFECT_UP:
         {
             led++;
+            led_driver_set_led_state(LED11, LED_OFF);
             led_driver_set_led_state(led - 1, LED_OFF);
             led_driver_set_led_state(led, LED_ON);
 
@@ -913,11 +913,10 @@ void led_driver_knight_rider_effect_handler(void)
                 led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
                 led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
-                power_control_set_power_led(); /* power led ON */
-
                 led_driver_reset_effect(DISABLE);
                 state_timeout_cnt = 0;
                 effect_reset_finished = SET;
+                effect_state = EFFECT_INIT;
             }
             else
             {
