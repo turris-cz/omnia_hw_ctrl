@@ -281,6 +281,14 @@ error_type_t power_control_start_regulator(reg_type_t regulator);
 void power_control_set_power_led(void);
 
 /*******************************************************************************
+  * @function   power_led_activity
+  * @brief      Set on power LED.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_led_activity(void);
+
+/*******************************************************************************
   * @function   power_control_usb_timeout_enable
   * @brief      Enable USB recovery timeout.
   * @param      None.

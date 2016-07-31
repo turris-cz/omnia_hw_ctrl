@@ -1048,6 +1048,22 @@ void power_control_set_power_led(void)
 }
 
 /*******************************************************************************
+  * @function   power_led_activity
+  * @brief      Set on power LED.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_led_activity(void)
+{
+    struct led_rgb *rgb_leds = leds;
+
+    if (rgb_leds[POWER_LED].led_mode == LED_DEFAULT_MODE)
+    {
+        rgb_leds[POWER_LED].led_state_default = LED_ON;
+    }
+}
+
+/*******************************************************************************
   * @function   power_control_set_voltage33
   * @brief      Set 3.3V voltage to the user regulator.
   * @param      None.
