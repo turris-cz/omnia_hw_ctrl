@@ -53,10 +53,10 @@ void boot_i2c_handler(void);
 /*******************************************************************************
   * @function   boot_i2c_flash_data
   * @brief      Flash received data.
-  * @param      None.
+  * @param      reset_cmd: reset command from operating system received.
   * @retval     None.
   *****************************************************************************/
-flash_i2c_states_t boot_i2c_flash_data(void);
+flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_cmd);
 
 #endif /* BOOT_I2C_H */
 

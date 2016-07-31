@@ -177,6 +177,8 @@ void bootloader(void)
     static flash_i2c_states_t flash_sts = FLASH_CMD_NOT_RECEIVED;
     static uint16_t delay_cnt;
     static uint8_t skip_timeout; /* 0 - leave bootloader after timeout, 1 - stay in bootloader */
+    uint8_t reset_cmd = 0;
+    static uint8_t flash_confirmed;
 
     switch(next_state)
     {
@@ -237,7 +239,7 @@ void bootloader(void)
 
         case FLASH_MANAGER:
         {
-            flash_sts = boot_i2c_flash_data();
+            flash_sts = boot_i2c_flash_data(&reset_cmd);
 
             switch(flash_sts)
             {
@@ -245,6 +247,14 @@ void bootloader(void)
                 {
                     next_state = FLASH_MANAGER;
                     skip_timeout = 1;
+
+                    if (reset_cmd) /* you may do reset now */
+                    {
+                        power_control_disable_regulators();
+                        delay(100);
+                        NVIC_SystemReset();
+                    }
+
                 } break;
 
                 case FLASH_CMD_NOT_RECEIVED: /* nothing has received */
@@ -254,16 +264,31 @@ void bootloader(void)
 
                 case FLASH_WRITE_OK: /* flashing was successfull */
                 {
-                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+                    if (!flash_confirmed)
+                    {
+                        EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+                        flash_confirmed = 1;
+                    }
                     DBG("F_CONF\r\n");
-                    NVIC_SystemReset();
+                   // NVIC_SystemReset();
                 } break;
 
                 case FLASH_WRITE_ERROR: /* flashing was corrupted */
                 {
                     /* flag FLASH_NOT_CONFIRMED is already set */
-                    NVIC_SystemReset();
+
+                   // NVIC_SystemReset();
                 } break;
+
+//                case FLASH_CMD_RESET: /* you may do reset now */
+//                {
+//                    if (reset_cmd)
+//                    {
+//                        power_control_disable_regulators();
+//                        delay(100);
+//                        NVIC_SystemReset();
+//                    }
+//                } break;
             }
         } break;
 
