@@ -253,10 +253,10 @@ static void clear_rxbuf(void)
 /*******************************************************************************
   * @function   boot_i2c_flash_data
   * @brief      Flash received data.
-  * @param      reset_cmd: reset command from operating system received.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_cmd)
+flash_i2c_states_t boot_i2c_flash_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t rx_cmd, idx, data_length = I2C_DATA_PACKET_SIZE / 4;
@@ -287,58 +287,27 @@ flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_cmd)
             DBG("FL_NOT_CONF\r\n");
         }
 
-        switch(rx_cmd)
+        if (rx_cmd == ADDR_CMP) /* flashing is complete, linux send result of comparison */
         {
-            case ADDR_CMP: /* flashing is complete, linux send result of comparison */
+            if (data[0] == FILE_CMP_OK)
             {
-                if (data[0] == FILE_CMP_OK)
-                {
-                    flash_status = FLASH_WRITE_OK;
-                    DBG("WRITE_OK\n\r");
-                }
-                else
-                {
-                    flash_status = FLASH_WRITE_ERROR;
-                    DBG("WRITE ERR\n\r");
-                }
-
-                flash_address = APPLICATION_ADDRESS;
-                flash_erase_sts = 0;
-                i2c_state->tx_data_ctr = 0;
-            } break;
-
-            case RESET_CMP: /* do a reset */
+                flash_status = FLASH_WRITE_OK;
+                DBG("WRITE_OK\n\r");
+            }
+            else
             {
-                *reset_cmd = RESET_COMMAND;
-            } break;
+                flash_status = FLASH_WRITE_ERROR;
+                DBG("WRITE ERR\n\r");
+            }
 
-            default: /* write incoming data */
-            {
-                flash_write(&flash_address, (uint32_t*)data, data_length);
-            } break;
+            flash_address = APPLICATION_ADDRESS;
+            flash_erase_sts = 0;
+            i2c_state->tx_data_ctr = 0;
         }
-
-//        if (address == ADDR_CMP) /* flashing is complete */
-//        {
-//            if (data[0] == FILE_CMP_OK)
-//            {
-//                flash_status = FLASH_WRITE_OK;
-//                DBG("WRITE_OK\n\r");
-//            }
-//            else
-//            {
-//                flash_status = FLASH_WRITE_ERROR;
-//                DBG("WRITE ERR\n\r");
-//            }
-
-//            flash_address = APPLICATION_ADDRESS;
-//            flash_erase_sts = 0;
-//            i2c_state->tx_data_ctr = 0;
-//        }
-//        else /* write incoming data */
-//        {
-//            flash_write(&flash_address, (uint32_t*)data, data_length);
-//        }
+        else /* write incoming data */
+        {
+            flash_write(&flash_address, (uint32_t*)data, data_length);
+        }
 
         clear_rxbuf();
 

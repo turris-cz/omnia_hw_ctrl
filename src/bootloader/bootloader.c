@@ -18,7 +18,7 @@
 #include "debounce.h"
 
 #define DELAY_TIMEOUT       5
-#define MAX_TIMEOUT         (10*1000) /* 10 sec */
+#define MAX_TIMEOUT         (60*1000) /* 60 sec */
 #define MAX_TIMEOUT_CNT     (MAX_TIMEOUT/DELAY_TIMEOUT)
 
 typedef enum bootloader_states {
@@ -177,7 +177,6 @@ void bootloader(void)
     static flash_i2c_states_t flash_sts = FLASH_CMD_NOT_RECEIVED;
     static uint16_t delay_cnt;
     static uint8_t skip_timeout; /* 0 - leave bootloader after timeout, 1 - stay in bootloader */
-    uint8_t reset_cmd = 0;
     static uint8_t flash_confirmed;
 
     switch(next_state)
@@ -223,13 +222,17 @@ void bootloader(void)
 
             if(delay_cnt > MAX_TIMEOUT_CNT)
             {
-                EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED); /* old, but valid FW */
-                DBG("F_CONF_T\r\n");
+                if (flash_sts != FLASH_WRITE_ERROR) /* we have new or old, but valid FW */
+                {
+                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+
                 /* shutdown regulators before reset, otherwise power supply can
                  * stay there and causes wrong detection of mmc during boot */
-                power_control_disable_regulators();
-                delay(100);
-                NVIC_SystemReset();
+                    power_control_disable_regulators();
+                    delay(100);
+                    NVIC_SystemReset();
+                }
+                DBG("F_CONF_T\r\n");
             }
             else
             {
@@ -239,7 +242,7 @@ void bootloader(void)
 
         case FLASH_MANAGER:
         {
-            flash_sts = boot_i2c_flash_data(&reset_cmd);
+            flash_sts = boot_i2c_flash_data();
 
             switch(flash_sts)
             {
@@ -247,14 +250,7 @@ void bootloader(void)
                 {
                     next_state = FLASH_MANAGER;
                     skip_timeout = 1;
-
-                    if (reset_cmd) /* you may do reset now */
-                    {
-                        power_control_disable_regulators();
-                        delay(100);
-                        NVIC_SystemReset();
-                    }
-
+                    delay_cnt = 0;
                 } break;
 
                 case FLASH_CMD_NOT_RECEIVED: /* nothing has received */
@@ -269,26 +265,18 @@ void bootloader(void)
                         EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
                         flash_confirmed = 1;
                     }
+
+                    skip_timeout = 0;
+                    next_state = TIMEOUT_MANAGER;
                     DBG("F_CONF\r\n");
-                   // NVIC_SystemReset();
                 } break;
 
                 case FLASH_WRITE_ERROR: /* flashing was corrupted */
                 {
                     /* flag FLASH_NOT_CONFIRMED is already set */
-
-                   // NVIC_SystemReset();
+                    next_state = FLASH_MANAGER;
+                    skip_timeout = 1;
                 } break;
-
-//                case FLASH_CMD_RESET: /* you may do reset now */
-//                {
-//                    if (reset_cmd)
-//                    {
-//                        power_control_disable_regulators();
-//                        delay(100);
-//                        NVIC_SystemReset();
-//                    }
-//                } break;
             }
         } break;
 
