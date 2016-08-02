@@ -38,10 +38,10 @@
 #define WAN_LED0_PIN_PORT                   GPIOF
 #define WAN_LED0_PIN                        GPIO_Pin_0
 
-//TODO - delete on new version of board
-    #define SFP_DIS_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOD
-    #define SFP_DIS_PIN_PORT                    GPIOD
-    #define SFP_DIS_PIN                         GPIO_Pin_2
+
+#define SFP_DIS_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOD
+#define SFP_DIS_PIN_PORT                    GPIOD
+#define SFP_DIS_PIN                         GPIO_Pin_2
 
 /* LAN LED */
 #define LAN_LED_PORT                        GPIOA

@@ -41,7 +41,7 @@ static void wan_lan_pci_io_config(void)
                           | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
                           | SFP_DIS_PIN_PERIPH_CLOCK, ENABLE);
 
-    //TODO - delete for new board
+    /* for compatibility with older versions of board */
     GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
