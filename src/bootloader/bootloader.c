@@ -179,6 +179,7 @@ void bootloader(void)
     static uint16_t delay_cnt;
     static uint8_t skip_timeout; /* 0 - leave bootloader after timeout, 1 - stay in bootloader */
     static uint8_t flash_confirmed;
+    uint8_t reset_enable = 0;
 
     switch(next_state)
     {
@@ -237,7 +238,29 @@ void bootloader(void)
 
         case FLASH_MANAGER:
         {
-            flash_sts = boot_i2c_flash_data();
+            flash_sts = boot_i2c_flash_data(&reset_enable);
+
+            /* prevent from jump to NOT correctly flashed application */
+            if (reset_enable == 1)
+            {
+                if (skip_timeout == 0)
+                {
+                    /* app was correctly flashed or router lost power supply */
+                    if(flash_sts == FLASH_WRITE_OK || flash_sts == FLASH_CMD_NOT_RECEIVED)
+                    {
+                        next_state = RESET_TO_APPLICATION;
+                        break;
+                    }
+                    else /* app was not correctly flashed and/or router lost power supply after wrong flashing */
+                    {
+                        reset_enable = 0;
+                    }
+                }
+                else
+                {
+                    reset_enable = 0;
+                }
+            }
 
             switch(flash_sts)
             {
