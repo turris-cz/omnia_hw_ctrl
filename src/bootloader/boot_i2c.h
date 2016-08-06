@@ -16,7 +16,6 @@
 #define I2C_ADRESS_FIELD_SIZE               2
 #define I2C_DATA_PACKET_SIZE                128
 #define MAX_RX_BUFFER_SIZE                  (I2C_ADRESS_FIELD_SIZE + I2C_DATA_PACKET_SIZE)
-#define MAX_TX_BUFFER_SIZE                  20
 
 typedef enum flash_i2c_states {
     FLASH_CMD_RECEIVED,
@@ -24,6 +23,12 @@ typedef enum flash_i2c_states {
     FLASH_WRITE_OK,
     FLASH_WRITE_ERROR
 }flash_i2c_states_t;
+
+typedef enum get_version_states {
+    GET_VERSION_INIT,
+    GET_VERSION_RECEIVER,
+    GET_VERSION_TRANSMITTER,
+} get_version_states_t;
 
 struct st_i2c_status {
     uint8_t rx_data_ctr;                  // RX data counter

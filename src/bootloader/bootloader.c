@@ -26,7 +26,8 @@ typedef enum bootloader_states {
     RESET_MANAGER,
     TIMEOUT_MANAGER,
     FLASH_MANAGER,
-    START_APPLICATION
+    START_APPLICATION,
+    RESET_TO_APPLICATION
 } boot_state_t;
 
 typedef enum bootloader_return_val {
@@ -205,7 +206,7 @@ void bootloader(void)
             power_control_first_startup();
 
             next_state = FLASH_MANAGER;
-            skip_timeout = 1; /* dont leave bootloader */
+            skip_timeout = 1; /* emergency case - dont leave bootloader */
         } break;
 
         case TIMEOUT_MANAGER:
@@ -222,15 +223,9 @@ void bootloader(void)
 
             if(delay_cnt > MAX_TIMEOUT_CNT)
             {
-                if (flash_sts != FLASH_WRITE_ERROR) /* we have new or old, but valid FW */
+                if (flash_sts != FLASH_WRITE_ERROR)
                 {
-                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-
-                /* shutdown regulators before reset, otherwise power supply can
-                 * stay there and causes wrong detection of mmc during boot */
-                    power_control_disable_regulators();
-                    delay(100);
-                    NVIC_SystemReset();
+                    next_state = RESET_TO_APPLICATION;
                 }
                 DBG("F_CONF_T\r\n");
             }
@@ -283,6 +278,17 @@ void bootloader(void)
         case START_APPLICATION:
         {
             start_application();
+        } break;
+
+        case RESET_TO_APPLICATION:
+        {
+            /* we have new or old, but valid FW */
+            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+            /* shutdown regulators before reset, otherwise power supply can
+            * stay there and causes wrong detection of mmc during boot */
+            power_control_disable_regulators();
+            delay(100);
+            NVIC_SystemReset();
         } break;
     }
 }
