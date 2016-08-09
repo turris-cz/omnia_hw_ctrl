@@ -155,7 +155,11 @@ static boot_value_t reset_manager(void)
             }
         } break;
 
-        case VAR_NO_VALID_PAGE : DBG("Boot-No valid page\r\n");
+        case VAR_NO_VALID_PAGE :
+        {
+            retval = GO_TO_POWER_ON;
+            DBG("Boot-No valid page\r\n");
+        }
             break;
 
         default:
@@ -238,29 +242,7 @@ void bootloader(void)
 
         case FLASH_MANAGER:
         {
-            flash_sts = boot_i2c_flash_data(&reset_enable);
-
-            /* prevent from jump to NOT correctly flashed application */
-            if (reset_enable == 1)
-            {
-                if (skip_timeout == 0)
-                {
-                    /* app was correctly flashed or router lost power supply */
-                    if(flash_sts == FLASH_WRITE_OK || flash_sts == FLASH_CMD_NOT_RECEIVED)
-                    {
-                        next_state = RESET_TO_APPLICATION;
-                        break;
-                    }
-                    else /* app was not correctly flashed and/or router lost power supply after wrong flashing */
-                    {
-                        reset_enable = 0;
-                    }
-                }
-                else
-                {
-                    reset_enable = 0;
-                }
-            }
+            flash_sts = boot_i2c_flash_data();
 
             switch(flash_sts)
             {

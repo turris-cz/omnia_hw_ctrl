@@ -49,7 +49,6 @@ static const uint8_t version[] = VERSION;
 #define FILE_CMP_ERROR                  0xDD
 #define ADDR_CMP                        0xFFFF
 #define VERSION_COMMAND                 0xFFFA
-#define RESET_COMMAND                   0xFFFB
 
 #define ONE_BYTE_EXPECTED               1
 #define TWO_BYTES_EXPECTED              2
@@ -288,10 +287,10 @@ static void clear_rxbuf(void)
 /*******************************************************************************
   * @function   boot_i2c_flash_data
   * @brief      Flash received data.
-  * @param      reset_enable: information about required reset from the system.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_enable)
+flash_i2c_states_t boot_i2c_flash_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t rx_cmd, idx, data_length = I2C_DATA_PACKET_SIZE / 4;
@@ -307,19 +306,6 @@ flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_enable)
 
         rx_cmd = (i2c_state->rx_buf[HIGH_ADDR_BYTE_IDX] << 8) | \
                             (i2c_state->rx_buf[LOW_ADDR_BYTE_IDX]);
-
-        if (rx_cmd == RESET_COMMAND)
-        {
-            *reset_enable = 1;
-            i2c_state->rx_data_ctr = 0;
-            i2c_state->tx_data_ctr = 0;
-            i2c_state->data_rx_complete = 0;
-            I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, ENABLE);
-            /* After "reset" command is received, the return from the function
-             * must be called. Otherwise flash memory will be prepared for
-             * flashing = erase memory. */
-            return FLASH_CMD_NOT_RECEIVED;
-        }
 
         /* copy data */
         for(idx = 0; idx < I2C_DATA_PACKET_SIZE; idx++)

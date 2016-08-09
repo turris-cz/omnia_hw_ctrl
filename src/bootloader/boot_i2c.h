@@ -58,10 +58,10 @@ void boot_i2c_handler(void);
 /*******************************************************************************
   * @function   boot_i2c_flash_data
   * @brief      Flash received data.
-  * @param      reset_enable: information about required reset from system.
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-flash_i2c_states_t boot_i2c_flash_data(uint8_t *reset_enable);
+flash_i2c_states_t boot_i2c_flash_data(void);
 
 #endif /* BOOT_I2C_H */
 
