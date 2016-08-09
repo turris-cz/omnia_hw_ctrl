@@ -23,8 +23,8 @@
 
 typedef enum bootloader_states {
     POWER_ON,
+    STARTUP_MANAGER,
     RESET_MANAGER,
-    TIMEOUT_MANAGER,
     FLASH_MANAGER,
     START_APPLICATION,
     RESET_TO_APPLICATION
@@ -32,8 +32,8 @@ typedef enum bootloader_states {
 
 typedef enum bootloader_return_val {
     GO_TO_POWER_ON,
+    GO_TO_STARTUP_MANAGER,
     GO_TO_RESET_MANAGER,
-    GO_TO_TIMEOUT_MANAGER,
     GO_TO_FLASH,
     GO_TO_APPLICATION
 } boot_value_t;
@@ -48,6 +48,8 @@ typedef void (*pFunction)(void);
   *****************************************************************************/
 void bootloader_init(void)
 {
+    GPIO_InitTypeDef GPIO_InitStructure;
+
      /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
@@ -67,6 +69,19 @@ void bootloader_init(void)
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
     led_driver_reset_effect(ENABLE);
     debug_serial_config();
+
+    /* pin settings for SYSRES_OUT signal */
+    RCC_AHBPeriphClockCmd(SYSRES_OUT_PIN_PERIPH_CLOCK, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
+
     DBG("Init\r\n");
 }
 
@@ -104,12 +119,12 @@ static void start_application(void)
 }
 
 /*******************************************************************************
-  * @function   reset_manager
+  * @function   startup_manager
   * @brief      Determine a reset reason and following reaction.
   * @param      None
   * @retval     None
   *****************************************************************************/
-static boot_value_t reset_manager(void)
+static boot_value_t startup_manager(void)
 {
     eeprom_var_t ee_var;
     uint16_t ee_data;
@@ -177,26 +192,37 @@ static boot_value_t reset_manager(void)
   *****************************************************************************/
 void bootloader(void)
 {
-    static boot_state_t next_state = RESET_MANAGER;
+    static boot_state_t next_state = STARTUP_MANAGER;
     static boot_value_t val = GO_TO_RESET_MANAGER;
     static flash_i2c_states_t flash_sts = FLASH_CMD_NOT_RECEIVED;
-    static uint16_t delay_cnt;
-    static uint8_t skip_timeout; /* 0 - leave bootloader after timeout, 1 - stay in bootloader */
     static uint8_t flash_confirmed;
-    uint8_t reset_enable = 0;
+    static uint8_t power_supply_failure; /* if power supply disconnection has an influence on bootloader */
+    uint8_t nreset;
 
     switch(next_state)
     {
-        case RESET_MANAGER:
+        case STARTUP_MANAGER:
         {
-            val = reset_manager();
+            val = startup_manager();
 
             switch (val)
             {
-                case GO_TO_POWER_ON:    next_state = POWER_ON; break;
-                case GO_TO_APPLICATION: next_state = START_APPLICATION; break;
-                case GO_TO_FLASH:       next_state = FLASH_MANAGER; break;
-                default:                next_state = TIMEOUT_MANAGER; break;
+                case GO_TO_POWER_ON:
+                {
+                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
+                    next_state = POWER_ON;
+                } break;
+                case GO_TO_APPLICATION:
+                {
+                    next_state = START_APPLICATION;
+                } break;
+                case GO_TO_FLASH:
+                {
+                    EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
+                    next_state = FLASH_MANAGER;
+                } break;
+
+                default: next_state = RESET_MANAGER;    break;
             }
         } break;
 
@@ -209,35 +235,8 @@ void bootloader(void)
 
             power_control_enable_regulators();
             power_control_first_startup();
-
+            power_supply_failure = 1;
             next_state = FLASH_MANAGER;
-            skip_timeout = 1; /* emergency case - dont leave bootloader */
-        } break;
-
-        case TIMEOUT_MANAGER:
-        {
-            if (skip_timeout)
-            {
-                delay_cnt = 0;
-            }
-            else
-            {
-                delay(DELAY_TIMEOUT);
-                delay_cnt++;
-            }
-
-            if(delay_cnt > MAX_TIMEOUT_CNT)
-            {
-                if (flash_sts != FLASH_WRITE_ERROR)
-                {
-                    next_state = RESET_TO_APPLICATION;
-                }
-                DBG("F_CONF_T\r\n");
-            }
-            else
-            {
-                next_state = FLASH_MANAGER;
-            }
         } break;
 
         case FLASH_MANAGER:
@@ -248,14 +247,12 @@ void bootloader(void)
             {
                 case FLASH_CMD_RECEIVED: /* flashing has just started */
                 {
-                    next_state = FLASH_MANAGER;
-                    skip_timeout = 1;
-                    delay_cnt = 0;
+                    next_state = RESET_MANAGER;
                 } break;
 
                 case FLASH_CMD_NOT_RECEIVED: /* nothing has received */
                 {
-                    next_state = TIMEOUT_MANAGER;
+                    next_state = RESET_MANAGER;
                 } break;
 
                 case FLASH_WRITE_OK: /* flashing was successfull */
@@ -266,18 +263,31 @@ void bootloader(void)
                         flash_confirmed = 1;
                     }
 
-                    skip_timeout = 0;
-                    next_state = TIMEOUT_MANAGER;
+                    next_state = RESET_MANAGER;
                     DBG("F_CONF\r\n");
                 } break;
 
                 case FLASH_WRITE_ERROR: /* flashing was corrupted */
                 {
                     /* flag FLASH_NOT_CONFIRMED is already set */
-                    next_state = FLASH_MANAGER;
-                    skip_timeout = 1;
+                    next_state = RESET_MANAGER;
                 } break;
             }
+        } break;
+
+        case RESET_MANAGER:
+        {
+            nreset = GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+
+            if(nreset == 0)
+            {
+                next_state = RESET_TO_APPLICATION;
+            }
+            else
+            {
+                next_state = FLASH_MANAGER;
+            }
+
         } break;
 
         case START_APPLICATION:
@@ -287,10 +297,16 @@ void bootloader(void)
 
         case RESET_TO_APPLICATION:
         {
-            /* we have new or old, but valid FW */
-            EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+            /* power supply wasnt disconnected and no command for flashing was received */
+            if ((power_supply_failure == 0) && (flash_sts == FLASH_CMD_NOT_RECEIVED))
+            {
+                /* we have old, but valid FW */
+                EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
+            }
+
             /* shutdown regulators before reset, otherwise power supply can
             * stay there and causes wrong detection of mmc during boot */
+            power_control_set_startup_condition();
             power_control_disable_regulators();
             delay(100);
             NVIC_SystemReset();
