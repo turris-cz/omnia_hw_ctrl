@@ -24,7 +24,8 @@
 #include "bootloader.h"
 #include <string.h>
 
-static const uint8_t version[] = VERSION;
+
+__attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
 
 #define I2C_SDA_SOURCE                  GPIO_PinSource7
 #define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -48,10 +49,8 @@ static const uint8_t version[] = VERSION;
 #define FILE_CMP_OK                     0xBB
 #define FILE_CMP_ERROR                  0xDD
 #define ADDR_CMP                        0xFFFF
-#define VERSION_COMMAND                 0xFFFA
 
 #define ONE_BYTE_EXPECTED               1
-#define TWO_BYTES_EXPECTED              2
 
 struct st_i2c_status i2c_status;
 
@@ -159,8 +158,6 @@ void boot_i2c_handler(void)
     static uint16_t direction;
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint8_t data;
-    uint16_t command;
-    static get_version_states_t get_version; /* blocking variable */
 
     if (!flash_erase_sts) /* we are at the beginning again */
     {
@@ -191,20 +188,13 @@ void boot_i2c_handler(void)
     /* transmit interrupt */
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
     {
-        if (get_version == GET_VERSION_TRANSMITTER)
-        {
-            I2C_SendData(I2C_PERIPH_NAME, version[i2c_state->tx_data_ctr++]);
-        }
-        else
-        {
-            flash_read(&flash_address, &data);
-            I2C_SendData(I2C_PERIPH_NAME, data);
-            i2c_state->tx_data_ctr++;
+        flash_read(&flash_address, &data);
+        I2C_SendData(I2C_PERIPH_NAME, data);
+        i2c_state->tx_data_ctr++;
 
-            if (i2c_state->tx_data_ctr >= I2C_DATA_PACKET_SIZE)
-            {
-                i2c_state->tx_data_ctr = 0;
-            }
+        if (i2c_state->tx_data_ctr >= I2C_DATA_PACKET_SIZE)
+        {
+            i2c_state->tx_data_ctr = 0;
         }
         DBG("send\r\n");
     }
@@ -214,17 +204,6 @@ void boot_i2c_handler(void)
         if(direction == I2C_Direction_Receiver)
         {
             i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
-
-            if ((i2c_state->rx_data_ctr) == TWO_BYTES_EXPECTED)
-            {
-                command = (i2c_state->rx_buf[HIGH_ADDR_BYTE_IDX] << 8) | \
-                                (i2c_state->rx_buf[LOW_ADDR_BYTE_IDX]);
-
-                if (command == VERSION_COMMAND)
-                {
-                    get_version = GET_VERSION_RECEIVER;
-                }
-            }
 
             DBG("ACK\r\n");
             I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -242,20 +221,6 @@ void boot_i2c_handler(void)
     else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
     {
         I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
-
-        if (get_version == GET_VERSION_RECEIVER)
-        {
-            get_version = GET_VERSION_TRANSMITTER;
-            return;
-        }
-
-        if(get_version == GET_VERSION_TRANSMITTER)
-        {
-            get_version = GET_VERSION_INIT;
-            i2c_state->rx_data_ctr = 0;
-            i2c_state->tx_data_ctr = 0;
-            return;
-        }
 
         if (direction == I2C_Direction_Receiver)
         {

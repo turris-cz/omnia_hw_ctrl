@@ -24,12 +24,6 @@ typedef enum flash_i2c_states {
     FLASH_WRITE_ERROR
 }flash_i2c_states_t;
 
-typedef enum get_version_states {
-    GET_VERSION_INIT,
-    GET_VERSION_RECEIVER,
-    GET_VERSION_TRANSMITTER,
-} get_version_states_t;
-
 struct st_i2c_status {
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter

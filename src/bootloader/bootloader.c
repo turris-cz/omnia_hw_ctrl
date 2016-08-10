@@ -17,10 +17,6 @@
 #include "flash.h"
 #include "debounce.h"
 
-#define DELAY_TIMEOUT       5
-#define MAX_TIMEOUT         (60*1000) /* 60 sec */
-#define MAX_TIMEOUT_CNT     (MAX_TIMEOUT/DELAY_TIMEOUT)
-
 typedef enum bootloader_states {
     POWER_ON,
     STARTUP_MANAGER,

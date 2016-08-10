@@ -10,8 +10,10 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 0x05000 /*20K*/
-     RAM (xrw)       : ORIGIN = 0x200000C0, LENGTH = 0x02000 - 192 /*8K - 192B for vector table */
+    VECTOR(rx):	      ORIGIN = 0x08000000, LENGTH = 0xC0 /* vector table */
+    BOOT_VERSION(rx): ORIGIN = 0x080000C0, LENGTH = 0x14 /* version of bootloader FW */
+    FLASH (rx)      : ORIGIN = 0x080000D4, LENGTH = 0x05000 - 0x14 - 0xC0 /*20K - 0x14 - 0xC0 */
+    RAM (xrw)       : ORIGIN = 0x200000C0, LENGTH = 0x02000 - 192 /*8K - 192B for vector table */
    }
 
    /* define stack size and heap size here */
@@ -32,7 +34,14 @@
        . = ALIGN(4);
        KEEP(*(.isr_vector)) /* Startup code */
        . = ALIGN(4);
-     } >FLASH
+     } >VECTOR
+
+    .boot_version :
+    {
+	. = ALIGN(4); 
+	KEEP(*(.boot_version))
+	 . = ALIGN(4);
+    } >BOOT_VERSION
 
      /* The program code and other data goes into FLASH */
      .text :
@@ -51,8 +60,8 @@
       .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
        .ARM : {
        __exidx_start = .;
-         *(.ARM.exidx*)
-         __exidx_end = .;
+	 *(.ARM.exidx*)
+	 __exidx_end = .;
        } >FLASH
 
      /* used by the startup to initialize data */
@@ -89,17 +98,17 @@
        . = ALIGN(4);
        .heap :
        {
-           _heap_start = .;
-           . = . + heap_size;
-                   _heap_end = .;
+	   _heap_start = .;
+	   . = . + heap_size;
+		   _heap_end = .;
        } > RAM
 
        /* Remove information from the standard libraries */
        /DISCARD/ :
        {
-           libc.a ( * )
-           libm.a ( * )
-           libgcc.a ( * )
+	   libc.a ( * )
+	   libm.a ( * )
+	   libgcc.a ( * )
        }
 
        .ARM.attributes 0 : { *(.ARM.attributes) }
