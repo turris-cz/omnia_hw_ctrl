@@ -59,13 +59,14 @@ enum led_names {
     LAN3_LED        = LED7,
     LAN4_LED        = LED6,
     WAN_LED         = LED5,
-    PCI1_LED        = LED4,
-    PCI2_LED        = LED3,
+    PCI1_LED        = LED3,
+    PCI2_LED        = LED4,
     MSATA_PCI_LED   = LED2,
     USER_LED1       = LED1,
     USER_LED2       = LED0
 };
-
+/* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
+editor and numbering on the case for the router */
 
 typedef struct led_rgb_data {
     uint8_t blue; /* [0..255] */
