@@ -38,6 +38,8 @@ static const uint8_t version[] = VERSION;
 #define I2C_SLAVE_ADDRESS_EMULATOR      0x56  /* address in linux: 0x2B */
 
 #define CMD_INDEX                       0
+#define NUMBER_OF_BYTES_VERSION         MAX_TX_BUFFER_SIZE
+#define BOOTLOADER_VERSION_ADDR         0x080000C0
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
@@ -49,10 +51,11 @@ enum i2c_commands {
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
     CMD_GET_RESET                       = 0x09,
-    CMD_GET_FW_VERSION                  = 0x0A, /* 20B hash number - accessible only from U-Boot */
+    CMD_GET_FW_VERSION_APP              = 0x0A, /* 20B git hash number */
     CMD_WATCHDOG_STATE                  = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
+    CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
 };
 
 enum i2c_control_byte_mask {
@@ -87,6 +90,35 @@ enum boot_requests {
 };
 
 struct st_i2c_status i2c_status;
+
+/*******************************************************************************
+  * @brief  This function reads data from flash, byte after byte
+  * @param  flash_address: start of selected flash area to be read
+  * @param  data: data from flash
+  * @retval None.
+  *****************************************************************************/
+static void flash_read(volatile uint32_t *flash_address, uint8_t *data)
+{
+   *data = *(uint8_t*)*flash_address;
+    (*flash_address)++;
+}
+
+/*******************************************************************************
+  * @brief  This function reads version of bootloader (stored in flash)
+  * @param  flash_address: start of selected flash area to be read
+  * @param  data: data from flash
+  * @retval None.
+  *****************************************************************************/
+static void read_bootloader_version(uint8_t buff[])
+{
+    uint8_t idx;
+    uint32_t boot_version_addr = BOOTLOADER_VERSION_ADDR;
+
+    for(idx = 0; idx < NUMBER_OF_BYTES_VERSION; idx++)
+    {
+        flash_read(&boot_version_addr, &(buff[idx]));
+    }
+}
 
 /*******************************************************************************
   * @function   slave_i2c_config
@@ -215,27 +247,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         i2c_control->state = SLAVE_I2C_HARD_RST;
         return;
     }
-
-//    if (bit_mask & SFP_DIS_MASK)
-//    {
-//        if (control_byte & SFP_DIS_MASK)
-//        {
-//            wan_sfp_set_tx_status(DISABLE);
-//        }
-//        else
-//        {
-//            wan_sfp_set_tx_status(ENABLE);
-//        }
-
-//        if(wan_sfp_get_tx_status())
-//        {
-//            i2c_control->status_word |= SFP_DIS_STSBIT;
-//        }
-//        else
-//        {
-//            i2c_control->status_word &= (~SFP_DIS_STSBIT);
-//        }
-//    }
 
     if (bit_mask & USB30_PWRON_MASK)
     {
@@ -585,19 +596,28 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                /* U-Boot divides reading more than 16B in several steps
-                    - transmit bytes step by step
-                    - set 1B to NBYTES register */
-                case CMD_GET_FW_VERSION:
+                /* read fw version of the current application */
+                case CMD_GET_FW_VERSION_APP:
                 {
                     for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
                     {
                         i2c_state->tx_buf[idx] = version[idx];
                     }
-                    DBG("FW\r\n");
+                    DBG("FWA\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
+                } break;
+
+                /* read fw version of the bootloader */
+                case CMD_GET_FW_VERSION_BOOT:
+                {
+                    read_bootloader_version(i2c_state->tx_buf);
+
+                    DBG("FWB\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
                 } break;
 
                 default: /* command doesnt exist - send NACK */
@@ -735,27 +755,12 @@ void slave_i2c_handler(void)
                 /* decrease button counter by the value has been sent */
                 button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
             }
-
-            /* Modification for reading MCU FW version in U-Boot via "i2c md" */
-            if (i2c_state->tx_data_ctr >= MAX_TX_BUFFER_SIZE)
-            {
-                /* MAX_TX_BUFFER_SIZE = number of bytes of FW version */
-                i2c_state->tx_data_ctr = 0;
-                i2c_state->rx_data_ctr = 0;
-                DBG("FW_READ\r\n");
-            }
         }
 
         DBG("STOP\r\n");
 
-        /* Reading 20B of FW version via U-Boot has 2 steps
-         * -> dont clear the TX counter when the first step is performed */
-        if (i2c_state->rx_buf[CMD_INDEX] != CMD_GET_FW_VERSION)
-        {
-            i2c_state->tx_data_ctr = 0;
-            i2c_state->rx_data_ctr = 0;
-            DBG("OTHER\r\n");
-        }
+        i2c_state->tx_data_ctr = 0;
+        i2c_state->rx_data_ctr = 0;
     }
 
    __enable_irq();
