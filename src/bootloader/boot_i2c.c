@@ -9,16 +9,11 @@
  **/
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_conf.h"
-
-
 #include "debug_serial.h"
 #include "led_driver.h"
-#include "wan_lan_pci_status.h"
 #include "power_control.h"
 #include "delay.h"
-#include "debounce.h"
 #include "eeprom.h"
-#include "msata_pci.h"
 #include "flash.h"
 #include "boot_i2c.h"
 #include "bootloader.h"

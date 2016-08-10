@@ -26,8 +26,6 @@
 #include "stm32f0xx_conf.h"
 #include "debounce.h"
 #include "delay.h"
-#include "msata_pci.h"
-#include "wan_lan_pci_status.h"
 #include "power_control.h"
 #include "debug_serial.h"
 
