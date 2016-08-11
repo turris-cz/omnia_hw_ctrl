@@ -22,7 +22,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx.h"
-#include "led_driver.h"
+#include "boot_led_driver.h"
 #include "stm32f0xx_conf.h"
 #include "debounce.h"
 #include "delay.h"
@@ -153,7 +153,6 @@ void TIM16_IRQHandler(void)
 {
     if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
     {
-        //debounce_input_timer_handler();
         TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
     }
 }

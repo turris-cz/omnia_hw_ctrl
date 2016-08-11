@@ -13,7 +13,7 @@
 #include "eeprom.h"
 #include "debug_serial.h"
 #include "bootloader.h"
-#include "led_driver.h"
+#include "boot_led_driver.h"
 #include "flash.h"
 #include "debounce.h"
 
@@ -192,8 +192,8 @@ void bootloader(void)
     static boot_value_t val = GO_TO_RESET_MANAGER;
     static flash_i2c_states_t flash_sts = FLASH_CMD_NOT_RECEIVED;
     static uint8_t flash_confirmed;
-    static uint8_t power_supply_failure; /* if power supply disconnection has an influence on bootloader */
-    uint8_t nreset;
+    static uint8_t power_supply_failure; /* if power supply disconnection occurred */
+    uint8_t system_reset;
 
     switch(next_state)
     {
@@ -218,7 +218,7 @@ void bootloader(void)
                     next_state = FLASH_MANAGER;
                 } break;
 
-                default: next_state = RESET_MANAGER;    break;
+                default: next_state = POWER_ON;    break;
             }
         } break;
 
@@ -273,9 +273,9 @@ void bootloader(void)
 
         case RESET_MANAGER:
         {
-            nreset = GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+            system_reset = GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
 
-            if(nreset == 0)
+            if(system_reset == 0) /* reset is active in low level */
             {
                 next_state = RESET_TO_APPLICATION;
             }
@@ -283,7 +283,6 @@ void bootloader(void)
             {
                 next_state = FLASH_MANAGER;
             }
-
         } break;
 
         case START_APPLICATION:
