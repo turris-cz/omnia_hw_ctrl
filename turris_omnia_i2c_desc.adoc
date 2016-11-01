@@ -1,0 +1,275 @@
+= Turris Omnia - description of I2C communication between MCU and main CPU
+This document describes the communication between MCU na CPU on Turris Omnia (read/write data via I2C).
+
+== Address and Timing
+* The current address of MCU is 0x2A
+* I2C speed is set to 100 kHz
+
+== Commands (= register addresses)
+* Overview of commands:
+
+[source,C]
+enum i2c_commands {
+    CMD_GET_STATUS_WORD        = 0x01, /* slave sends status word back */
+    CMD_GENERAL_CONTROL        = 0x02,
+    CMD_LED_MODE               = 0x03, /* default/user */
+    CMD_LED_STATE              = 0x04, /* LED on/off */
+    CMD_LED_COLOUR             = 0x05, /* LED number + RED + GREEN + BLUE */
+    CMD_USER_VOLTAGE           = 0x06,
+    CMD_SET_BRIGHTNESS         = 0x07,
+    CMD_GET_BRIGHTNESS         = 0x08,
+    CMD_GET_RESET              = 0x09,
+    CMD_GET_FW_VERSION_APP     = 0x0A, /* 20B git hash number */
+    CMD_WATCHDOG_STATE         = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
+    CMD_WATCHDOG_STATUS        = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
+    CMD_GET_WATCHDOG_STATE     = 0x0D,
+    CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
+};
+
+=== CMD_GET_STATUS_WORD
+* The status information is read from the MCU.
+* Read only
+* Bit overview:
+
+[source,C]
+/* 
+ * Bit meanings in status_word: 
+ *  Bit Nr. |   Meanings 
+ * ----------------- 
+ *      0   |   don't care 
+ *      1   |   don't care 
+ *      2   |   don't care 
+ *      3   |   don't care 
+ *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card 
+ *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted 
+ *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent 
+ *      7   |   USB31_OVC       : 1 - USB3-port1 overcurrent, 0 - no overcurrent 
+ *      8   |   USB30_PWRON     : 1 - USB3-port0 power ON, 0 - USB-port0 power off 
+ *      9   |   USB31_PWRON     : 1 - USB3-port1 power ON, 0 - USB-port1 power off 
+ *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled 
+ *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings) 
+ *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed 
+ * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode 
+*/
+
+* Example of a reading of the status word from Linux:
+** "i2cget 1 0x2A 1 w"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 1 -> "address of the register" = command
+*** w -> word data type
+
+
+=== CMD_GENERAL_CONTROL
+* Different HW related settings (disabling USB, changing behaviour of the front button, etc.)
+* Write only
+* Bit overview:
+
+[source,C]
+/* 
+ * Bit meanings in control_byte: 
+ *  Bit Nr. |   Meanings 
+ * ----------------- 
+ *      0   |   LIGHT_RST   : 1 - do light reset, 0 - no reset 
+ *      1   |   HARD_RST    : 1 - do hard reset, 0 - no reset 
+ *      2   |   don't care
+ *      3   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off 
+ *      4   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off 
+ *      5   |   ENABLE_4V5  : 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF 
+ *      6   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings) 
+ *      7   |   BOOTLOADER  : 1 - jump to bootloader 
+*/
+
+* Example of a setting of the control byte (do a light reset):
+** "i2cset 1 0x2A 2 0x0101 w"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 2 -> "address of the register" = command
+*** 0x0101 -> do light reset – the lower byte is a mask (set particular bit to "1" to use a value defined in the higher byte)
+*** w -> word data type
+
+
+=== CMD_LED_MODE
+* We distinguish between two modes: default (HW) mode or user mode.
+* Write only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in led_mode_byte:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
+ *      4   |   LED mode    : 1 - USER mode, 0 - default mode
+ *   5..7   |   don't care
+*/
+
+* Example of a setting of the LED mode (user mode on LED10 = LAN1):
+** "i2cset 1 0x2A 3 0x1A b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 3 -> "address of the register" = command
+*** 0x1A -> LED1 set to user mode
+***	b -> byte data type
+
+NOTE: LED numbers are reversed. LED11 (the first LED from the left) is POWER_LED and LED0 (the last LED on the right) is USER_LED2.
+
+
+=== CMD_LED_STATE
+* LEDs can be set to ON or OFF
+* Write only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in led_state_byte:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
+ *      4   |   LED mode    : 1 - LED ON, 0 - LED OFF
+ *   5..7   |   dont care
+*/
+
+* Example of a setting of the LED10 state to ON (LED10 was set to user mode in previous step):
+** "i2cset 1 0x2A 4 0x1A b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 4 -> "address of the register" = command
+*** 0x1A -> LED1 set to ON
+***	b -> byte data type
+
+
+=== CMD_LED_COLOUR
+* Colour settings for LEDs in RGB format
+* Write only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in led_colour:
+ * Byte Nr. |  Bit Nr. |   Meanings
+ * -----------------
+ *  1.B     |  0..3   |   LED number [0..11] (or in case setting of all LED at once->LED number=12)
+ *  1.B     |  4..7   |   dont care
+ *  2.B     |  8..15  |   red colour [0..255]
+ *  3.B     |  16..23 |   green colour [0..255]
+ *  4.B     |  24..31 |   blue colour [0..255]
+*/
+
+* Example of a colour settings for LED10 – green colour = 0x00FF00:
+** "i2cset 1 0x2a 5 0x0A 0x00 0xFF 0x00 i"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 5 -> "address of the register" = command
+*** 0x0A -> LED10
+*** 0x00 0xFF 0 x00 -> red colour = 0x00, green = 0xFF, blue = 0x00
+***	i -> block data type
+
+
+=== CMD_SET_BRIGHTNESS
+* Sets brightness in range 0-100%
+* Write only
+
+* Example of a 20% brightness settings
+** "i2cset 1 0x2A 7 20 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 7 -> "address of the register" = command
+*** 20 -> brightness
+***	b -> byte data type
+
+
+=== CMD_GET_BRIGHTNESS
+* Reads brightness
+* Read only
+
+* Example of a brightness reading
+** "i2cget 1 0x2A 8 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 8 -> "address of the register" = command
+***	b -> byte data type
+
+
+=== CMD_USER_VOLTAGE
+* There is one dc/dc regulator which is switched off by default
+** It can be used as an extra power supply for non-typical miniPCI cards.
+* It is possible to set these voltages: 3.3V, 3.6V, 4.5V, 5.1V
+* HW modification of the board is needed as well (see electric diagram)
+* Default voltage after enabling the regulator is 4.5V
+* Write only
+* The procedure has two steps
+** 1. step - enable the dc/dc regulator 
+*** "i2cset 1 0x2A 2 0x2020 w"
+**** 1 -> i2cbus number
+**** 0x2A -> I2C address of the slave
+**** 2 -> "address of the register" = command
+**** 0x2020 - enable the regulator
+**** w -> word data type
+
+** 2. step - set desired voltage
+*** "i2cset 1 0x2A 6 1 b"
+**** 1 -> i2cbus number
+**** 0x2A -> I2C address of the slave
+**** 6 -> "address of the register" = command
+**** 1 - value for 3.3V
+***** values for voltages:
+1 -> 3.3V; 
+2 -> 3.6V; 
+3 -> 4.5V; 
+4 -> 5.1V; 
+**** b -> word data type
+
+
+=== CMD_GET_RESET
+* Reports reset type to main CPU
+* The system reads this information after each reset
+* Read only
+
+* Example of a reading of the reset type
+** "i2cget 1 0x2A 9 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 9 -> "address of the register" = command
+***	b -> byte data type
+
+
+=== CMD_WATCHDOG_STATE
+* 2 states: run (= 1) / stop (= 0)
+* Watchdog must be stopped in less than 2 minutes after reset (otherwise reset appears)
+* It should "solve" a freezing of the router when the DDR training sequence fails
+
+* Example of a writing to the watchdog state
+** "i2cset 1 0x2A 0x0B 0 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x0B -> "address of the register" = command
+*** 0 -> stop the watchdog
+***	b -> byte data type
+
+* Example of a reading of the watchdog state
+** "i2cget 1 0x2A 0x0D b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x0D -> "address of the register" = command
+***	b -> byte data type
+
+
+=== CMD_WATCHDOG_STATUS
+* 2 states:
+** 0: disable the watchdog permanently (not need to stop watchdog after each reset)
+** 1: enable watchdog (must be stopped after reset via previous command)
+* Write only
+
+* Example of disabling of the watchdog
+** "i2cset 1 0x2A 0x0C 0 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x0C -> "address of the register" = command
+*** 0 -> disable the watchdog
+***	b -> byte data type
+
+
+=== CMD_GET_FW_VERSION_APP and CMD_GET_FW_VERSION_BOOT
+* reads version of bootloader and application code in MCU
+* accessible only with our script
