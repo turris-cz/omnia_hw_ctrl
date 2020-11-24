@@ -53,7 +53,7 @@ void msata_pci_activity(void);
   * @param      None.
   * @retval     1 - a card inserted, 0 - no card inserted.
   *****************************************************************************/
-__inline__ uint8_t msata_pci_card_detection(void);
+uint8_t msata_pci_card_detection(void);
 
 /*******************************************************************************
   * @function   msata_pci_type_card_detection
@@ -61,7 +61,7 @@ __inline__ uint8_t msata_pci_card_detection(void);
   * @param      None.
   * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
   *****************************************************************************/
-__inline__ uint8_t msata_pci_type_card_detection(void);
+uint8_t msata_pci_type_card_detection(void);
 
 #endif // MSATA_PCI_H
 
