@@ -9,6 +9,7 @@ CROSS_COMPILE ?= armv6m-softfloat-eabi-
 
 CC      = $(CROSS_COMPILE)gcc
 OBJCOPY = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdump
 AS      = $(CROSS_COMPILE)as
 SIZE	= $(CROSS_COMPILE)size
 
@@ -205,18 +206,20 @@ all: app boot
 app: $(APP_NAME).elf app_buildsize
 
 boot: $(BOOT_NAME).elf boot_buildsize
-						
+
 $(APP_NAME).elf: $(OBJS)
-	@echo "[Linking    ]  $@"	
+	@echo "[Linking    ]  $@"
 	@$(CC) $(CFLAGS) $(LFLAGS) $(INCLUDE) $^ -o $@
 	@$(OBJCOPY) -O ihex $(APP_NAME).elf   $(APP_NAME).hex
 	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
+	@$(OBJDUMP) -D -S $(APP_NAME).elf >$(APP_NAME).dis
 
 $(BOOT_NAME).elf: $(BOOT_OBJS)
-	@echo "[Linking    ]  $@"	
+	@echo "[Linking    ]  $@"
 	@$(CC) $(CFLAGS) $(BOOT_LFLAGS) $(BOOT_INCLUDE) $^ -o $@
 	@$(OBJCOPY) -O ihex $(BOOT_NAME).elf   $(BOOT_NAME).hex
 	@$(OBJCOPY) -O binary $(BOOT_NAME).elf $(BOOT_NAME).bin
+	@$(OBJDUMP) -D -S $(BOOT_NAME).elf >$(BOOT_NAME).dis
 
 %.o : %.c
 	@echo "[Compiling  ]  $^"
@@ -226,18 +229,18 @@ $(BOOT_NAME).elf: $(BOOT_OBJS)
 	@echo "[Assembling ]" $^
 	@$(AS) $(AFLAGS) $< -o $@
 
-clean:
-	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
+clean: cleanapp cleanboot
+	rm -rf *.o
 
 cleanapp:
-	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map
+	rm -rf $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(APP_NAME).dis
 cleanboot:
-	rm -r -f *.o $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
+	rm -rf $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map $(BOOT_NAME).dis
 
 
 #********************************
 # generating of the dependencies
-dep:	
+dep:
 	$(CC) $(DEFS) $(CFLAGS) $(INCLUDE) -MM $(APP_ROOT_DIR)/*.c $(APP_SRC_DIR)/*.c > dep.list
 
 ## insert generated dependencies
