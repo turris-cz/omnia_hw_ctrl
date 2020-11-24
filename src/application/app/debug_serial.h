@@ -14,10 +14,6 @@
 #define DBG_ENABLE      0
 
 #if DBG_ENABLE
-#define DBG(buf)        debug_print(buf);
-#else
-#define DBG(...)
-#endif
 
 /*******************************************************************************
   * @function   debug_serial_config
@@ -34,6 +30,23 @@ void debug_serial_config(void);
   * @retval     None.
   *****************************************************************************/
 void debug_print(const char *buffer);
+
+#else /* !DBG_ENABLE */
+
+static inline void debug_serial_config(void)
+{
+}
+
+static inline void debug_print(const char *buffer)
+{
+}
+
+#endif /* !DBG_ENABLE */
+
+static inline void DBG(const char *buf)
+{
+	return debug_print(buf);
+}
 
 #endif // DEBUG_SERIAL_H
 

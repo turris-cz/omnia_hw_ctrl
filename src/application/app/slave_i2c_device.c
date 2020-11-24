@@ -471,7 +471,7 @@ void slave_i2c_handler(void)
 
                         led_driver_set_colour(led_index, colour);
 
-                        DBG("set LED colour - LED index : ")
+                        DBG("set LED colour - LED index : ");
                         DBG((const char*)&led_index);
                         DBG("\r\nRED: ");
                         DBG((const char*)(i2c_state->rx_buf + 2));
@@ -685,7 +685,7 @@ void slave_i2c_handler(void)
 
                             led_driver_set_colour(led_index, colour);
 
-                            DBG("set LED colour - LED index : ")
+                            DBG("set LED colour - LED index : ");
                             DBG((const char*)&led_index);
                             DBG("\r\nRED: ");
                             DBG((const char*)(i2c_state->rx_buf + 2));

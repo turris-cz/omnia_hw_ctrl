@@ -174,7 +174,7 @@ static ret_value_t light_reset(void)
     else
     {
         wdg->watchdog_state = STOP;
-        DBG("RST - WDG doesnt run\r\n")
+        DBG("RST - WDG doesnt run\r\n");
     }
 
     led_driver_reset_effect(ENABLE);

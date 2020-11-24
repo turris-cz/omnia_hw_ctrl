@@ -7,11 +7,12 @@
  ******************************************************************************
  ******************************************************************************
  **/
-#include "string.h"
 #include "stm32f0xx_conf.h"
 #include "debug_serial.h"
 
 #define SERIAL_PORT      USART1
+
+#if DBG_ENABLE
 
 /*******************************************************************************
   * @function   debug_serial_config
@@ -21,7 +22,6 @@
   *****************************************************************************/
 void debug_serial_config(void)
 {
-#if DBG_ENABLE
     USART_InitTypeDef USART_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -51,37 +51,25 @@ void debug_serial_config(void)
     USART_Init(SERIAL_PORT, &USART_InitStructure);
 
     USART_Cmd(SERIAL_PORT, ENABLE);
-#endif
-}
-
-/*******************************************************************************
-  * @function   debug_send_data
-  * @brief      Send data over the serial port.
-  * @param      buffer: pointer to data buffer.
-  * @param      count: number of bytes
-  * @retval     None.
-  *****************************************************************************/
-static void debug_send_data(const char *buffer, uint16_t count)
-{
-    while(count--)
-    {
-        /* Loop until the end of transmission */
-        while(USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TXE) == RESET)
-            ;
-        USART_SendData(SERIAL_PORT, *buffer++);
-    }
-    while(USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TC) == RESET)
-        ;
 }
 
 /*******************************************************************************
   * @function   debug_print
-  * @brief      Send buffer over the serial port.
+  * @brief      Send data over the serial port.
   * @param      buffer: pointer to data buffer.
   * @retval     None.
   *****************************************************************************/
 void debug_print(const char *buffer)
 {
-    uint16_t count = strlen(buffer);
-    debug_send_data(buffer, count);
+    while (*buffer)
+    {
+        /* Loop until the end of transmission */
+        while (USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TXE) == RESET)
+            ;
+        USART_SendData(SERIAL_PORT, *buffer++);
+    }
+    while (USART_GetFlagStatus(SERIAL_PORT, USART_FLAG_TC) == RESET)
+        ;
 }
+
+#endif
