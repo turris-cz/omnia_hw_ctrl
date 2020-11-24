@@ -5,3 +5,5 @@
 *.elf
 *.hex
 *.list
+*.dis
+*.patch
