@@ -31,8 +31,9 @@ AFLAGS += -mlittle-endian
 ##### Compiler options
 
 CFLAGS  = -ggdb
-CFLAGS += -O0
+CFLAGS += -O2
 CFLAGS += -Wall -Wextra -Warray-bounds #-pedantic
+CFLAGS += -fno-common -ffreestanding -fno-stack-protector -fno-stack-clash-protection -fno-pie
 CFLAGS += $(AFLAGS)
 CFLAGS += -nostdlib
 CFLAGS += -ffunction-sections
@@ -48,7 +49,7 @@ CFLAGS += -fdata-sections
 LFLAGS  = -T$(LINKER_DIR)/STM32F0308_FLASH.ld
 LFLAGS +="-Wl,-Map=$(APP_NAME).map",--cref
 LFLAGS += -nostartfiles
-LFLAGS += -Xlinker --gc-sections
+LFLAGS += -Xlinker --gc-sections -no-pie
 
 BOOT_LFLAGS  = -T$(BOOT_LINKER_DIR)/STM32F0308_FLASH.ld
 BOOT_LFLAGS +="-Wl,-Map=$(BOOT_NAME).map",--cref
