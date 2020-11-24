@@ -145,6 +145,7 @@ BOOT_STARTUP_DIR = $(BOOT_ROOT_DIR)/startup
 vpath %.c $(BOOT_ROOT_DIR)
 vpath %.c $(BOOT_STM_SRC_DIR)
 vpath %.c $(BOOT_STM_CMSIS_DIR)
+vpath %.s $(BOOT_STARTUP_DIR)
 
 BOOT_INC_DIRS += $(BOOT_STM_ROOT_LIB)/inc
 BOOT_INC_DIRS += $(BOOT_STM_CMSIS_DIR)
@@ -174,7 +175,7 @@ BOOTSRCS  += stm32f0xx_spi.c
 BOOTSRCS  += stm32f0xx_flash.c
 BOOTSRCS  += stm32f0xx_usart.c
 
-BOOTASRC  = $(BOOT_STARTUP_DIR)/boot_startup_stm32f030x8.s
+BOOTASRC  = boot_startup_stm32f030x8.s
 
 BOOT_OBJS  = $(BOOTSRCS:.c=.o)
 BOOT_OBJS += $(BOOTASRC:.s=.o)
