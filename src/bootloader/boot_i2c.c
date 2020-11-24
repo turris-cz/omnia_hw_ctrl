@@ -17,7 +17,6 @@
 #include "flash.h"
 #include "boot_i2c.h"
 #include "bootloader.h"
-#include <string.h>
 
 
 __attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
@@ -260,8 +259,6 @@ flash_i2c_states_t boot_i2c_flash_data(void)
 
     if (i2c_state->data_rx_complete)
     {
-        memset(data, 0, sizeof(data));
-
         flash_status = FLASH_CMD_RECEIVED;
 
         rx_cmd = (i2c_state->rx_buf[HIGH_ADDR_BYTE_IDX] << 8) | \
