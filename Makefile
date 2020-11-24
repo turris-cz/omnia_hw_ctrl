@@ -5,7 +5,7 @@ BOOT_NAME=bootloader_mcu
 #                   SETUP TOOLS                                                #
 ################################################################################
 
-CROSS_COMPILE ?= arm-none-eabi-
+CROSS_COMPILE ?= armv6m-softfloat-eabi-
 
 CC      = $(CROSS_COMPILE)gcc
 OBJCOPY = $(CROSS_COMPILE)objcopy
