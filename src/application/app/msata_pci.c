@@ -60,22 +60,12 @@ void msata_pci_indication_config(void)
 void msata_pci_activity(void)
 {
     uint8_t msata_pci_activity, pci_pled0;
-    struct led_rgb *rgb_leds = leds;
 
     msata_pci_activity = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
     pci_pled0 = GPIO_ReadInputDataBit(PCI_PLED0_PIN_PORT, PCI_PLED0_PIN);
 
-    if (rgb_leds[MSATA_PCI_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if (!msata_pci_activity || !pci_pled0)
-        {
-            rgb_leds[MSATA_PCI_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            rgb_leds[MSATA_PCI_LED].led_state_default = LED_OFF;
-        }
-    }
+    if (!led_is_user_mode(MSATA_PCI_LED))
+        led_set_state(MSATA_PCI_LED, (!msata_pci_activity || !pci_pled0));
 }
 
 /*******************************************************************************

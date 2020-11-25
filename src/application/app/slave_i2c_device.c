@@ -335,10 +335,6 @@ void slave_i2c_handler(void)
     struct st_i2c_status *i2c_state = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
     static i2c_dir_t direction;
-    struct led_rgb *led = leds;
-    uint16_t idx;
-    uint8_t led_index;
-    uint32_t colour;
     eeprom_var_t ee_var;
     uint8_t address;
 
@@ -426,8 +422,14 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
-                        (i2c_state->rx_buf[1] & 0x10) >> 4);
+                        int led, mode;
+
+                        led = i2c_state->rx_buf[1] & 0x0F;
+                        mode = (i2c_state->rx_buf[1] >> 4) & 1;
+                        if (led < LED_COUNT)
+                            led_set_user_mode(led, mode);
+                        else
+                            led_set_user_mode_all(mode);
 
                         DBG("set LED mode - LED index : ");
                         DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
@@ -445,8 +447,15 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        led_driver_set_led_state_user(i2c_state->rx_buf[1] &
-                                     0x0F, (i2c_state->rx_buf[1] & 0x10) >> 4);
+                        int led, state;
+
+                        led = i2c_state->rx_buf[1] & 0xF;
+                        state = (i2c_state->rx_buf[1] >> 4) & 1;
+
+                        if (led < LED_COUNT)
+                            led_set_state_user(led, state);
+                        else
+                            led_set_state_user_all(state);
 
                         DBG("set LED state - LED index : ");
                         DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
@@ -464,15 +473,21 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
                     {
-                        led_index = i2c_state->rx_buf[1] & 0x0F;
+                        uint32_t colour;
+                        int led;
+
+                        led = i2c_state->rx_buf[1] & 0x0F;
                         /* colour = Red + Green + Blue */
                         colour = (i2c_state->rx_buf[2] << 16) | \
                         (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
 
-                        led_driver_set_colour(led_index, colour);
+                        if (led < LED_COUNT)
+                            led_set_colour(led, colour);
+                        else
+                            led_set_colour_all(colour);
 
                         DBG("set LED colour - LED index : ");
-                        DBG((const char*)&led_index);
+                        DBG((const char*)&led);
                         DBG("\r\nRED: ");
                         DBG((const char*)(i2c_state->rx_buf + 2));
                         DBG("\r\n");
@@ -487,7 +502,7 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
+                        led_pwm_set_brightness(i2c_state->rx_buf[1]);
 
                         DBG("brightness: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
@@ -571,7 +586,7 @@ void slave_i2c_handler(void)
 
                 case CMD_GET_BRIGHTNESS:
                 {
-                    i2c_state->tx_buf[0] = led->brightness;
+                    i2c_state->tx_buf[0] = led_pwm_get_brightness();
                     DBG("brig\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -599,6 +614,8 @@ void slave_i2c_handler(void)
                 /* read fw version of the current application */
                 case CMD_GET_FW_VERSION_APP:
                 {
+                    int idx;
+
                     for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
                     {
                         i2c_state->tx_buf[idx] = version[idx];
@@ -640,8 +657,14 @@ void slave_i2c_handler(void)
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
-                            (i2c_state->rx_buf[1] & 0x10) >> 4);
+                            int led, mode;
+
+                            led = i2c_state->rx_buf[1] & 0x0F;
+                            mode = (i2c_state->rx_buf[1] >> 4) & 1;
+                            if (led < LED_COUNT)
+                                led_set_user_mode(led, mode);
+                            else
+                                led_set_user_mode_all(mode);
 
                             DBG("set LED mode - LED index : ");
                             DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
@@ -659,8 +682,15 @@ void slave_i2c_handler(void)
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            led_driver_set_led_state_user(i2c_state->rx_buf[1] & 0x0F, \
-                            (i2c_state->rx_buf[1] & 0x10) >> 4);
+                            int led, state;
+
+                            led = i2c_state->rx_buf[1] & 0xF;
+                            state = (i2c_state->rx_buf[1] >> 4) & 1;
+
+                            if (led < LED_COUNT)
+                                led_set_state_user(led, state);
+                            else
+                                led_set_state_user_all(state);
 
                             DBG("set LED state - LED index : ");
                             DBG((const char*)(i2c_state->rx_buf[1] & 0x0F));
@@ -678,15 +708,21 @@ void slave_i2c_handler(void)
                     {
                         if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
                         {
-                            led_index = i2c_state->rx_buf[1] & 0x0F;
+                            uint32_t colour;
+                            int led;
+
+                            led = i2c_state->rx_buf[1] & 0x0F;
                             /* colour = Red + Green + Blue */
                             colour = (i2c_state->rx_buf[2] << 16) | \
                             (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
 
-                            led_driver_set_colour(led_index, colour);
+                            if (led < LED_COUNT)
+                                led_set_colour(led, colour);
+                            else
+                                led_set_colour_all(colour);
 
                             DBG("set LED colour - LED index : ");
-                            DBG((const char*)&led_index);
+                            DBG((const char*)&led);
                             DBG("\r\nRED: ");
                             DBG((const char*)(i2c_state->rx_buf + 2));
                             DBG("\r\n");
@@ -701,7 +737,7 @@ void slave_i2c_handler(void)
                     {
                         if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                         {
-                            led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
+                            led_pwm_set_brightness(i2c_state->rx_buf[1]);
 
                             DBG("brightness: ");
                             DBG((const char*)(i2c_state->rx_buf + 1));
@@ -715,7 +751,7 @@ void slave_i2c_handler(void)
 
                     case CMD_GET_BRIGHTNESS:
                     {
-                        i2c_state->tx_buf[0] = led->brightness;
+                        i2c_state->tx_buf[0] = led_pwm_get_brightness();
                         DBG("brig\r\n");
 
                         I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);

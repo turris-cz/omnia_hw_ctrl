@@ -117,22 +117,13 @@ void wan_lan_pci_config(void)
   *****************************************************************************/
 void wan_led_activity(void)
 {
-    uint8_t led0_status;
-    struct led_rgb *rgb_leds = leds;
+	uint8_t led0_status;
 
-    if (rgb_leds[WAN_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+	if (led_is_user_mode(WAN_LED))
+		return;
 
-        if (led0_status == 0)
-        {
-            rgb_leds[WAN_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            rgb_leds[WAN_LED].led_state_default = LED_OFF;
-        }
-    }
+	led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+	led_set_state(WAN_LED, !led0_status);
 }
 
 /*******************************************************************************
@@ -144,36 +135,17 @@ void wan_led_activity(void)
 void pci_led_activity(void)
 {
     uint8_t pcie_led1, pcie_pled1, pcie_led2, pcie_pled2;
-    struct led_rgb *rgb_leds = leds;
 
     pcie_led2 = GPIO_ReadInputDataBit(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN);
     pcie_led1 = GPIO_ReadInputDataBit(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN);
     pcie_pled1 = GPIO_ReadInputDataBit(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN);
     pcie_pled2 = GPIO_ReadInputDataBit(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN);
 
-    if (rgb_leds[PCI2_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((pcie_led2 == 0) || (pcie_pled2 == 0))
-        {
-            rgb_leds[PCI2_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            rgb_leds[PCI2_LED].led_state_default = LED_OFF;
-        }
-    }
+    if (!led_is_user_mode(PCI2_LED))
+        led_set_state(PCI2_LED, (!pcie_led2 || !pcie_pled2));
 
-    if (rgb_leds[PCI1_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if ((pcie_led1 == 0) || (pcie_pled1 == 0))
-        {
-            rgb_leds[PCI1_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            rgb_leds[PCI1_LED].led_state_default = LED_OFF;
-        }
-    }
+    if (!led_is_user_mode(PCI1_LED))
+        led_set_state(PCI1_LED, (!pcie_led1 || !pcie_pled1));
 }
 
 /*******************************************************************************
@@ -184,78 +156,23 @@ void pci_led_activity(void)
   *****************************************************************************/
 void lan_led_activity(void)
 {
-    uint16_t lan_led;
-    struct led_rgb *rgb_leds = leds;
+	uint16_t lan_led;
 
-    lan_led = GPIO_ReadInputData(LAN_LED_PORT) & LAN_LED_MASK;
+	lan_led = GPIO_ReadInputData(LAN_LED_PORT) & LAN_LED_MASK;
 
-    if (rgb_leds[LAN0_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((lan_led & LAN_R0_MASK) == 0)
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN0_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN0_LED].led_state_default = LED_OFF;
-        }
-    }
+	if (lan_led & LAN_C0_MASK) {
+		if (!led_is_user_mode(LAN0_LED))
+			led_set_state(LAN0_LED, !(lan_led & LAN_R0_MASK));
+		if (!led_is_user_mode(LAN2_LED))
+			led_set_state(LAN2_LED, !(lan_led & LAN_R1_MASK));
+		if (!led_is_user_mode(LAN4_LED))
+			led_set_state(LAN4_LED, !(lan_led & LAN_R2_MASK));
+	}
 
-    if (rgb_leds[LAN1_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((lan_led & LAN_R0_MASK) == 0)
-        {
-            if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN1_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN1_LED].led_state_default = LED_OFF;
-        }
-    }
-
-    if (rgb_leds[LAN2_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((lan_led & LAN_R1_MASK) == 0)
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN2_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN2_LED].led_state_default = LED_OFF;
-        }
-    }
-
-    if (rgb_leds[LAN3_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((lan_led & LAN_R1_MASK) == 0)
-        {
-            if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN3_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            if (lan_led & LAN_C1_MASK)
-                rgb_leds[LAN3_LED].led_state_default = LED_OFF;
-        }
-    }
-
-    if (rgb_leds[LAN4_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        if((lan_led & LAN_R2_MASK) == 0)
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN4_LED].led_state_default = LED_ON;
-        }
-        else
-        {
-            if (lan_led & LAN_C0_MASK)
-                rgb_leds[LAN4_LED].led_state_default = LED_OFF;
-        }
-    }
+	if (lan_led & LAN_C1_MASK) {
+		if (!led_is_user_mode(LAN1_LED))
+			led_set_state(LAN1_LED, !(lan_led & LAN_R0_MASK));
+		if (!led_is_user_mode(LAN3_LED))
+			led_set_state(LAN3_LED, !(lan_led & LAN_R1_MASK));
+	}
 }

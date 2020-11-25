@@ -71,7 +71,7 @@ void app_mcu_init(void)
     msata_pci_indication_config();
     wan_lan_pci_config();
     power_control_usb_timeout_config();
-    led_driver_config();
+    led_config();
     slave_i2c_config();
     debug_serial_config();
 
@@ -160,7 +160,7 @@ static ret_value_t light_reset(void)
 
     wdg->watchdog_state = INIT;
 
-    led_driver_reset_effect(DISABLE);
+    led_reset_effect(DISABLE);
 
     reset_event = power_control_first_startup();
 
@@ -177,7 +177,7 @@ static ret_value_t light_reset(void)
         DBG("RST - WDG doesnt run\r\n");
     }
 
-    led_driver_reset_effect(ENABLE);
+    led_reset_effect(ENABLE);
 
     return value;
 }
@@ -276,7 +276,7 @@ static ret_value_t input_manager(void)
     if (input_state->button_sts == ACTIVATED)
     {
         if (button->button_mode == BUTTON_DEFAULT)
-            led_driver_step_brightness();
+            led_step_brightness();
         else /* user button mode */
             button_counter_increase();
 
@@ -398,24 +398,24 @@ static ret_value_t led_manager(void)
   *****************************************************************************/
 static void error_manager(ret_value_t error_state)
 {
-    led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, RED_COLOUR);
+    led_set_user_mode_all(0);
+    led_set_state_all(0);
+    led_set_colour_all(RED_COLOUR);
 
     delay(300);
 
     switch(error_state)
     {
-        case GO_TO_5V_ERROR: led_driver_set_led_state(LED0, LED_ON); break;
-        case GO_TO_3V3_ERROR: led_driver_set_led_state(LED1, LED_ON); break;
-        case GO_TO_1V8_ERROR: led_driver_set_led_state(LED2, LED_ON); break;
-        case GO_TO_1V5_ERROR: led_driver_set_led_state(LED3, LED_ON); break;
-        case GO_TO_1V35_ERROR: led_driver_set_led_state(LED4, LED_ON); break;
-        case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
-        case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
-        case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
+        case GO_TO_5V_ERROR: led_set_state(LED0, 1); break;
+        case GO_TO_3V3_ERROR: led_set_state(LED1, 1); break;
+        case GO_TO_1V8_ERROR: led_set_state(LED2, 1); break;
+        case GO_TO_1V5_ERROR: led_set_state(LED3, 1); break;
+        case GO_TO_1V35_ERROR: led_set_state(LED4, 1); break;
+        case GO_TO_VTT_ERROR: led_set_state(LED5, 1); break;
+        case GO_TO_1V2_ERROR: led_set_state(LED6, 1); break;
+        case GO_TO_4V5_ERROR: led_set_state(LED7, 1); break;
 
-        default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
+        default: led_set_state_all(1); break;
     }
 
     delay(300);

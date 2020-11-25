@@ -168,7 +168,7 @@ void TIM3_IRQHandler(void)
 {
     if (TIM_GetITStatus(LED_TIMER, TIM_IT_Update) != RESET)
     {
-        led_driver_send_frame();
+        led_send_frame();
         TIM_ClearITPendingBit(LED_TIMER, TIM_IT_Update);
     }
 }
@@ -215,7 +215,7 @@ void TIM6_IRQHandler(void)
 {
     if (TIM_GetITStatus(LED_EFFECT_TIMER, TIM_IT_Update) != RESET)
     {
-        led_driver_knight_rider_effect_handler();
+        led_knight_rider_effect_handler();
         TIM_ClearITPendingBit(LED_EFFECT_TIMER, TIM_IT_Update);
     }
 }

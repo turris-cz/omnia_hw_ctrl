@@ -12,6 +12,8 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
+#define BIT(b)                    (1 << (b))
+
 #define LED_TIMER                 TIM3
 #define LED_EFFECT_TIMER          TIM6
 
@@ -25,16 +27,6 @@ enum colours {
     BLACK_COLOUR        = 0x000000,
     YELLOW_COLOUR       = 0xFFFF00,
 };
-
-typedef enum led_modes {
-    LED_DEFAULT_MODE   = 0,
-    LED_USER_MODE      = 1,
-}led_mode_t;
-
-typedef enum led_states {
-    LED_OFF         = 0,
-    LED_ON          = 1,
-}led_state_t;
 
 enum led_numbers {
     LED0            = 0,
@@ -68,138 +60,91 @@ enum led_names {
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
 
-typedef struct led_rgb_data {
-    uint8_t blue; /* [0..255] */
-    uint8_t green;
-    uint8_t red;
-}led_rgb_data_t;
+extern uint16_t leds_user_mode, leds_state, leds_state_user;
 
-struct led_rgb {
-    led_rgb_data_t          led_rgb_default;    /* colour data */
-    led_state_t             led_state_default;  /* LED ON/OFF default mode */
-    led_state_t             led_state_user;     /* LED ON/OFF user mode */
-    led_mode_t              led_mode;           /* default / user mode */
-    uint16_t                brightness;
-};
-
-extern struct led_rgb leds[LED_COUNT];
 extern uint8_t effect_reset_finished;
 
-/*******************************************************************************
-  * @function   led_driver_config
-  * @brief      Configure LED driver.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_config(void);
+void led_config(void);
+void led_set_colour(int led, uint32_t colour);
+void led_set_colour_all(uint32_t colour);
 
-/*******************************************************************************
-  * @function   led_driver_set_colour
-  * @brief      Save colour of LED specified in parameters to be displayed in next cycle.
-  * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
-  * @param      colour: LED colour (RGB range).
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_set_colour(const uint8_t led_index, const uint32_t colour);
+void led_send_frame(void);
 
-/*******************************************************************************
-  * @function   led_driver_send_frame
-  * @brief      Send frame to LED driver. It is called in timer interrupt.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_send_frame(void);
+void led_pwm_set_brightness(uint16_t procent_val);
+uint16_t led_pwm_get_brightness(void);
+void led_step_brightness(void);
 
-/*******************************************************************************
-  * @function   led_driver_pwm_set_brightness
-  * @brief      Set PWM value.
-  * @param      procent_val: PWM value in [%].
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_pwm_set_brightness(uint16_t procent_val);
+static inline int led_is_user_mode(int led)
+{
+	return !!(leds_user_mode & BIT(led));
+}
 
-/*******************************************************************************
-  * @function   led_driver_pwm_get_brightness
-  * @brief      Set PWM value.
-  * @param      None.
-  * @retval     procent_val: PWM value in [%].
-  *****************************************************************************/
-uint16_t led_driver_pwm_get_brightness(void);
+static inline void led_set_user_mode(int led, int enable)
+{
+	if (enable) {
+		leds_user_mode |= BIT(led);
+		leds_state |= leds_state_user & BIT(led);
+	} else {
+		leds_user_mode &= ~BIT(led);
+	}
+}
 
-/*******************************************************************************
-  * @function   led_driver_step_brightness
-  * @brief      Decrease LED brightness by 10% each step (each function call).
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_step_brightness(void);
+static inline void led_set_user_mode_all(int enable)
+{
+	if (enable) {
+		leds_user_mode = 0xfff;
+		leds_state = leds_state_user;
+	} else {
+		leds_user_mode = 0;
+		leds_state = 0;
+	}
+}
 
-/*******************************************************************************
-  * @function   led_driver_set_led_mode
-  * @brief      Set mode to LED(s) - default or user mode
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode);
+static inline int led_state(int led)
+{
+	return !!(leds_state & BIT(led));
+}
 
-/*******************************************************************************
-  * @function   led_driver_set_led_state
-  * @brief      Set state of the LED(s) - LED_ON / LED_OFF
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state);
+static inline void led_set_state(int led, int enable)
+{
+	if (enable)
+		leds_state |= BIT(led);
+	else
+		leds_state &= ~BIT(led);
+}
 
-/*******************************************************************************
-  * @function   led_driver_set_led_state
-  * @brief      Set state of the LED(s) from user/I2C - LED_ON / LED_OFF
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state);
+static inline void led_set_state_all(int enable)
+{
+	if (enable)
+		leds_state = 0xfff;
+	else
+		leds_state = 0;
+}
 
-/*******************************************************************************
-  * @function   led_driver_knight_rider_effect
-  * @brief      Display knight rider effect on LEDs.
-  * @param      colour: colour in RGB range.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_knight_rider_effect(uint32_t colour);
+static inline void led_set_state_user(int led, int enable)
+{
+	if (enable)
+		leds_state_user |= BIT(led);
+	else
+		leds_state_user &= ~BIT(led);
+	if (!led_is_user_mode(led))
+		return;
+	led_set_state(led, enable);
+}
 
-/*******************************************************************************
-  * @function   led_driver_knight_rider_colour_effect
-  * @brief      Display knight rider effect on LEDs.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_knight_rider_colour_effect(void);
+static inline void led_set_state_user_all(int enable)
+{
+	leds_state_user = 0xfff;
+	if (enable)
+		leds_state |= leds_user_mode;
+	else
+		leds_state &= ~leds_user_mode;
+}
 
-/*******************************************************************************
-  * @function   led_driver_double_knight_rider_effect
-  * @brief      Display double knight rider effect on LEDs.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_double_knight_rider_effect(void);
-
-/*******************************************************************************
-  * @function   led_driver_knight_rider_effect_handler
-  * @brief      Display knight rider effect on LEDs during startup (called in
-  *             timer interrupt).
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_knight_rider_effect_handler(void);
-
-/*******************************************************************************
-  * @function   led_driver_reset_effect
-  * @brief      Enable/Disable knight rider effect after reset.
-  * @param      colour: colour in RGB range.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_reset_effect(FunctionalState state);
+void led_knight_rider_effect(uint32_t colour);
+void led_knight_rider_colour_effect(void);
+void led_double_knight_rider_effect(void);
+void led_knight_rider_effect_handler(void);
+void led_reset_effect(FunctionalState state);
 
 #endif /*__LED_DRIVER_H */
