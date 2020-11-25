@@ -39,6 +39,7 @@ static inline void debug_serial_config(void)
 
 static inline void debug_print(const char *buffer)
 {
+	(void)buffer;
 }
 
 #endif /* !DBG_ENABLE */
