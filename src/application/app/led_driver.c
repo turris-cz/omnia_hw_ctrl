@@ -32,8 +32,8 @@
 #define LED_SPI_SS_PIN_PORT         GPIOA
 #define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
 
-#define COLOUR_LEVELS               64
-#define COLOUR_DECIMATION           2
+#define COLOUR_LEVELS               128
+#define COLOUR_DECIMATION           1
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8
 #define EFFECT_TIMEOUT              5
@@ -75,10 +75,17 @@ typedef enum led_effect_states {
 } effect_state_t;
 
 struct led {
-	uint8_t chan[3];
+	union {
+		uint8_t chan[4];
+		uint32_t chan32;
+	};
+	uint8_t level[3];
 };
 
-uint16_t leds_user_mode, leds_state, leds_state_user;
+uint16_t leds_user_mode;
+uint16_t leds_state;
+uint16_t leds_state_user;
+uint16_t leds_color_correction;
 struct led leds[LED_COUNT];
 
 static uint16_t leds_pwm_brightness;
@@ -166,7 +173,7 @@ static void led_timer_config(void)
 
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 20 - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 10 - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
@@ -184,24 +191,92 @@ static void led_timer_config(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-static void _led_set_colour(struct led *led, uint32_t colour)
+/*
+ * Lightness-luminance correction table according to CIE 1931.
+ * Red color channel goes all the way to full lightness here.
+ * Green and blue's lightness go only to 2/3 of red's lightness, because these
+ * LEDs are more luminuous.
+ */
+static const uint8_t cie1931_table_R[256] = {
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,   1,
+	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,
+	  2,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   3,
+	  3,   4,   4,   4,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   5,   6,
+	  6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   7,   8,   8,   8,   8,   9,
+	  9,   9,   9,   9,  10,  10,  10,  10,  11,  11,  11,  11,  12,  12,  12,  12,
+	 13,  13,  13,  14,  14,  14,  14,  15,  15,  15,  16,  16,  16,  17,  17,  17,
+	 18,  18,  18,  19,  19,  19,  20,  20,  21,  21,  21,  22,  22,  23,  23,  23,
+	 24,  24,  25,  25,  26,  26,  26,  27,  27,  28,  28,  29,  29,  30,  30,  31,
+	 31,  32,  32,  33,  33,  34,  34,  35,  35,  36,  37,  37,  38,  38,  39,  39,
+	 40,  41,  41,  42,  42,  43,  44,  44,  45,  46,  46,  47,  48,  48,  49,  50,
+	 50,  51,  52,  53,  53,  54,  55,  55,  56,  57,  58,  58,  59,  60,  61,  62,
+	 62,  63,  64,  65,  66,  67,  67,  68,  69,  70,  71,  72,  73,  73,  74,  75,
+	 76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,
+	 92,  93,  94,  95,  96,  97,  98,  99, 100, 102, 103, 104, 105, 106, 107, 108,
+	109, 111, 112, 113, 114, 115, 117, 118, 119, 120, 122, 123, 124, 125, 127, 128,
+};
+
+static const uint8_t cie1931_table_GB[256] = {
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,
+	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+	  1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,
+	  2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,
+	  3,   3,   3,   3,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   4,   4,
+	  4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,
+	  6,   6,   6,   6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   7,   7,   7,
+	  8,   8,   8,   8,   8,   8,   8,   9,   9,   9,   9,   9,   9,   9,  10,  10,
+	 10,  10,  10,  10,  11,  11,  11,  11,  11,  11,  12,  12,  12,  12,  12,  12,
+	 13,  13,  13,  13,  13,  14,  14,  14,  14,  14,  15,  15,  15,  15,  15,  16,
+	 16,  16,  16,  17,  17,  17,  17,  17,  18,  18,  18,  18,  19,  19,  19,  19,
+	 20,  20,  20,  20,  21,  21,  21,  21,  22,  22,  22,  22,  23,  23,  23,  24,
+	 24,  24,  24,  25,  25,  25,  26,  26,  26,  26,  27,  27,  27,  28,  28,  28,
+	 29,  29,  29,  30,  30,  30,  31,  31,  31,  32,  32,  32,  33,  33,  33,  34,
+	 34,  34,  35,  35,  35,  36,  36,  37,  37,  37,  38,  38,  38,  39,  39,  40,
+	 40,  40,  41,  41,  42,  42,  42,  43,  43,  44,  44,  45,  45,  45,  46,  46,
+};
+
+static void _led_compute_levels(struct led *led, int color_correction)
 {
 	uint8_t r, g, b;
 
-	b = colour & 0xff;
-	colour >>= 8;
-	g = colour & 0xff;
-	colour >>= 8;
-	r = colour & 0xff;
+	r = led->chan[0];
+	g = led->chan[1];
+	b = led->chan[2];
 
-	led->chan[0] = r;
-	led->chan[1] = g;
-	led->chan[2] = b;
+	if (color_correction) {
+		led->level[0] = cie1931_table_R[r];
+		led->level[1] = cie1931_table_GB[g];
+		led->level[2] = cie1931_table_GB[b];
+	} else {
+		led->level[0] = r >> COLOUR_DECIMATION;
+		led->level[1] = g >> COLOUR_DECIMATION;
+		led->level[2] = b >> COLOUR_DECIMATION;
+	}
+}
+
+void led_compute_levels(int led, int color_correction)
+{
+	_led_compute_levels(&leds[led], color_correction);
+}
+
+void led_compute_levels_all(int color_correction)
+{
+	struct led *led = leds;
+	int i;
+
+	for (i = 0, led = leds; i < LED_COUNT; ++i, ++led)
+		_led_compute_levels(led, color_correction);
+}
+
+static void _led_set_colour(struct led *led, uint32_t colour, int color_correction)
+{
+	led->chan32 = __builtin_bswap32(colour << 8);
+	_led_compute_levels(led, color_correction);
 }
 
 void led_set_colour(int led, uint32_t colour)
 {
-	_led_set_colour(&leds[led], colour);
+	_led_set_colour(&leds[led], colour, leds_color_correction & BIT(led));
 }
 
 void led_set_colour_all(uint32_t colour)
@@ -210,7 +285,7 @@ void led_set_colour_all(uint32_t colour)
 	int i;
 
 	for (i = 0, led = leds; i < LED_COUNT; ++i, ++led)
-		_led_set_colour(led, colour);
+		_led_set_colour(led, colour, leds_color_correction & BIT(i));
 }
 
 static void led_send_data16b(const uint16_t data)
@@ -229,7 +304,7 @@ static uint16_t led_prepare_data(int chan, int level)
 	int i;
 
 	for (i = 0, led = leds; i < LED_COUNT; ++i, ++led) {
-		if (led->chan[chan] > level)
+		if (led->level[chan] > level)
 			data |= BIT(i);
 	}
 
@@ -244,7 +319,7 @@ void led_send_frame(void)
 	static int level;
 	uint16_t data;
 
-	data = led_prepare_data(channel++, level << COLOUR_DECIMATION);
+	data = led_prepare_data(channel++, level);
 	if (channel == 3)
 		channel = 0;
 
@@ -350,6 +425,7 @@ static void led_init_led(void)
 	leds_user_mode = 0;
 	leds_state = 0;
 	leds_state_user = 0xfff;
+	leds_color_correction = 0xfff;
 
 	led_set_colour_all(WHITE_COLOUR);
 }

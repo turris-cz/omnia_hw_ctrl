@@ -24,6 +24,8 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS        = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE     = 0x0D,
     CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
+
+    CMD_LED_COLOR_CORRECTION   = 0x10,
 };
 
 === CMD_GET_STATUS_WORD
@@ -273,3 +275,18 @@ NOTE: LED numbers are reversed. LED11 (the first LED from the left) is POWER_LED
 === CMD_GET_FW_VERSION_APP and CMD_GET_FW_VERSION_BOOT
 * reads version of bootloader and application code in MCU
 * accessible only with our script
+
+=== CMD_LED_COLOR_CORRECTION
+* Enables/disables color correction for LEDs
+* Write only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in led_mode_byte:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
+ *      4   |   LED mode    : 1 - enable color correction, 0 - disable color correction
+ *   5..7   |   don't care
+*/

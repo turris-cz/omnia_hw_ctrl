@@ -60,19 +60,42 @@ enum led_names {
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
 
-extern uint16_t leds_user_mode, leds_state, leds_state_user;
+extern uint16_t leds_user_mode, leds_state, leds_state_user, leds_color_correction;
 
 extern uint8_t effect_reset_finished;
 
 void led_config(void);
-void led_set_colour(int led, uint32_t colour);
-void led_set_colour_all(uint32_t colour);
 
 void led_send_frame(void);
 
 void led_pwm_set_brightness(uint16_t procent_val);
 uint16_t led_pwm_get_brightness(void);
 void led_step_brightness(void);
+
+void led_set_colour(int led, uint32_t colour);
+void led_set_colour_all(uint32_t colour);
+void led_compute_levels(int led, int color_correction);
+void led_compute_levels_all(int color_correction);
+
+static inline void led_set_color_correction(int led, int enable)
+{
+	if (enable)
+		leds_color_correction |= BIT(led);
+	else
+		leds_color_correction &= ~BIT(led);
+
+	led_compute_levels(led, enable);
+}
+
+static inline void led_set_color_correction_all(int enable)
+{
+	if (enable)
+		leds_color_correction = 0xfff;
+	else
+		leds_color_correction = 0;
+
+	led_compute_levels_all(enable);
+}
 
 static inline int led_is_user_mode(int led)
 {

@@ -56,6 +56,8 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
+
+    CMD_LED_COLOR_CORRECTION            = 0x10,
 };
 
 enum i2c_control_byte_mask {
@@ -491,6 +493,25 @@ void slave_i2c_handler(void)
                         DBG("\r\nRED: ");
                         DBG((const char*)(i2c_state->rx_buf + 2));
                         DBG("\r\n");
+                    }
+                    DBG("ACK\r\n");
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
+                case CMD_LED_COLOR_CORRECTION:
+                {
+                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED) {
+                        int led, value;
+
+                        led = i2c_state->rx_buf[1] & 0xF;
+                        value = (i2c_state->rx_buf[1] >> 4) & 1;
+
+                        if (led < LED_COUNT)
+                            led_set_color_correction(led, value);
+                        else
+                            led_set_color_correction_all(value);
                     }
                     DBG("ACK\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
