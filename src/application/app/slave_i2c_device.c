@@ -8,7 +8,7 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_conf.h"
+#include "gd32f1x0_libopt.h"
 #include "slave_i2c_device.h"
 #include "debug_serial.h"
 #include "led_driver.h"
@@ -19,19 +19,19 @@
 #include "eeprom.h"
 #include "msata_pci.h"
 
-static const uint8_t version[] = VERSION;
+//static const uint8_t version[] = VERSION;
 
-#define I2C_SDA_SOURCE                  GPIO_PinSource7
-#define I2C_SCL_SOURCE                  GPIO_PinSource6
+//#define I2C_SDA_SOURCE                  GPIO_PinSource7
+//#define I2C_SCL_SOURCE                  GPIO_PinSource6
 
-#define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
-#define I2C_TIMING                      0x10800000 /* 100kHz for 48MHz system clock */
+//#define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
+//#define I2C_TIMING                      0x10800000 /* 100kHz for 48MHz system clock */
 
-#define I2C_GPIO_CLOCK                  RCC_AHBPeriph_GPIOF
-#define I2C_PERIPH_NAME                 I2C2
-#define I2C_PERIPH_CLOCK                RCC_APB1Periph_I2C2
-#define I2C_DATA_PIN                    GPIO_Pin_7 /* I2C2_SDA - GPIOF */
-#define I2C_CLK_PIN                     GPIO_Pin_6 /* I2C2_SCL - GPIOF */
+#define I2C_GPIO_CLOCK                  RCU_GPIOF
+#define I2C_PERIPH_NAME                 I2C1
+#define I2C_PERIPH_CLOCK                RCU_I2C1
+#define I2C_DATA_PIN                    GPIO_PIN_7 /* I2C1_SDA - GPIOF */
+#define I2C_CLK_PIN                     GPIO_PIN_6 /* I2C1_SCL - GPIOF */
 #define I2C_GPIO_PORT                   GPIOF
 
 #define I2C_SLAVE_ADDRESS               0x55  /* address in linux: 0x2A */
@@ -128,21 +128,22 @@ static void read_bootloader_version(uint8_t buff[])
   *****************************************************************************/
 static void slave_i2c_io_config(void)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
-
     /* I2C Peripheral Disable */
-    RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, DISABLE);
+    rcu_periph_clock_disable(I2C_PERIPH_CLOCK);
+    //RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, DISABLE);
 
     /* I2C Periph clock enable */
-    RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, ENABLE);
+    rcu_periph_clock_enable(I2C_PERIPH_CLOCK);
+    //RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, ENABLE);
 
-    RCC_AHBPeriphClockCmd(I2C_GPIO_CLOCK, ENABLE);
+    rcu_periph_clock_enable(I2C_GPIO_CLOCK);
+    //RCC_AHBPeriphClockCmd(I2C_GPIO_CLOCK, ENABLE);
 
     /* Connect PXx to I2C_SCL */
-    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SCL_SOURCE, I2C_ALTERNATE_FUNCTION);
+    //GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SCL_SOURCE, I2C_ALTERNATE_FUNCTION);
 
     /* Connect PXx to I2C_SDA */
-    GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SDA_SOURCE, I2C_ALTERNATE_FUNCTION);
+    //GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SDA_SOURCE, I2C_ALTERNATE_FUNCTION);
 
     /* Configure I2C pins: SCL */
     GPIO_InitStructure.GPIO_Pin = I2C_CLK_PIN;
