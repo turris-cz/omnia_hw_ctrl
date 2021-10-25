@@ -1,6 +1,6 @@
 /*!
-    \file  main.c
-    \brief GPIO running led
+    \file  gd32f1x0_libopt.h
+    \brief library optional for gd32f1x0
 
     \version 2016-01-15, V1.0.0, demo for GD32F1x0
     \version 2016-05-13, V2.0.0, demo for GD32F1x0
@@ -34,60 +34,36 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#include "gd32f1x0.h"
-#include "systick.h"
+#ifndef GD32F1X0_LIBOPT_H
+#define GD32F1X0_LIBOPT_H
 
-void rcu_config(void);
-void led_config(void);
+#include "gd32f1x0_adc.h"
+#include "gd32f1x0_cec.h"
+#include "gd32f1x0_crc.h"
+#include "gd32f1x0_cmp.h"
+#include "gd32f1x0_dac.h"
+#include "gd32f1x0_dbg.h"
+#include "gd32f1x0_dma.h"
+#include "gd32f1x0_exti.h"
+#include "gd32f1x0_fmc.h"
+#include "gd32f1x0_gpio.h"
+#include "gd32f1x0_syscfg.h"
+#include "gd32f1x0_i2c.h"
+#include "gd32f1x0_fwdgt.h"
+#include "gd32f1x0_pmu.h"
+#include "gd32f1x0_rcu.h"
+#include "gd32f1x0_rtc.h"
+#include "gd32f1x0_spi.h"
+#include "gd32f1x0_timer.h"
+#include "gd32f1x0_usart.h"
+#include "gd32f1x0_wwdgt.h"
+#include "gd32f1x0_misc.h"
+#include "gd32f1x0_tsi.h"
+#ifdef GD32F170_190
+#include "gd32f1x0_slcd.h"
+#include "gd32f1x0_opa.h"
+#include "gd32f1x0_ivref.h"
+#include "gd32f1x0_can.h"
+#endif /* GD32F170_190 */
 
-/*!
-    \brief      main function
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-int main(void)
-{
-    rcu_config();
-    led_config();
-    systick_config();
-
-    while(1){
-        gpio_bit_set(GPIOF, GPIO_PIN_6);
-        /* delay 200ms */
-        delay_1ms(200);
-        gpio_bit_set(GPIOF, GPIO_PIN_7);
-        /* delay 200ms */
-        delay_1ms(200);
-        /* toggle LEDs */
-        gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
-        gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
-        /* delay 200ms */
-        delay_1ms(200);
-    }
-}
-
-/*!
-    \brief      configure LEDs
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void led_config(void)
-{
-    /* configure LED GPIO port */ 
-    gpio_mode_set(GPIOF, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_bit_reset(GPIOF, GPIO_PIN_6 | GPIO_PIN_7);
-}
-
-/*!
-    \brief      clock configuration
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void rcu_config(void)
-{
-    rcu_periph_clock_enable(RCU_GPIOF);
-}
+#endif /* GD32F1X0_LIBOPT_H */

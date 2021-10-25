@@ -1,14 +1,18 @@
 /*!
-    \file  main.c
-    \brief GPIO running led
+    \file  usbd_int.h
+    \brief usb device interrupt handler header file
 
-    \version 2016-01-15, V1.0.0, demo for GD32F1x0
-    \version 2016-05-13, V2.0.0, demo for GD32F1x0
-    \version 2019-11-20, V3.0.0, demo for GD32F1x0
+    2014-12-26, V1.0.0, platform GD32F1x0(x=5)
+    2016-01-15, V2.0.0, platform GD32F1x0(x=5)
+    2016-04-30, V3.0.0, firmware update for GD32F1x0(x=5)
+    2017-06-19, V3.1.0, firmware update for GD32F1x0(x=5)
+    2019-11-20, V3.2.0, firmware update for GD32F1x0(x=5)
 */
 
 /*
     Copyright (c) 2019, GigaDevice Semiconductor Inc.
+
+    All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -34,60 +38,26 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#include "gd32f1x0.h"
-#include "systick.h"
+#ifndef USBD_INT_H
+#define USBD_INT_H
 
-void rcu_config(void);
-void led_config(void);
+#include "usbd_core.h"
+#include "usbd_std.h"
+#include "usbd_pwr.h"
 
-/*!
-    \brief      main function
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-int main(void)
+extern usbd_core_handle_struct usb_device_dev;
+
+typedef struct
 {
-    rcu_config();
-    led_config();
-    systick_config();
+    uint8_t (*SOF) (usbd_core_handle_struct *pudev); /*!< SOF ISR callback */
+}usbd_int_cb_struct;
 
-    while(1){
-        gpio_bit_set(GPIOF, GPIO_PIN_6);
-        /* delay 200ms */
-        delay_1ms(200);
-        gpio_bit_set(GPIOF, GPIO_PIN_7);
-        /* delay 200ms */
-        delay_1ms(200);
-        /* toggle LEDs */
-        gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
-        gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
-        /* delay 200ms */
-        delay_1ms(200);
-    }
-}
+extern usbd_int_cb_struct *usbd_int_fops;
 
-/*!
-    \brief      configure LEDs
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void led_config(void)
-{
-    /* configure LED GPIO port */ 
-    gpio_mode_set(GPIOF, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_bit_reset(GPIOF, GPIO_PIN_6 | GPIO_PIN_7);
-}
+/* function declarations */
+/* USB device interrupt service routine */
+void  usbd_isr (void);
+/* handle USB high priority successful transfer event */
+uint8_t  usbd_intf_hpst (usbd_core_handle_struct *pudev);
 
-/*!
-    \brief      clock configuration
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void rcu_config(void)
-{
-    rcu_periph_clock_enable(RCU_GPIOF);
-}
+#endif /* USBD_INT_H */

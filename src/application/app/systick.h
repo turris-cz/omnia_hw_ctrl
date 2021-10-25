@@ -1,6 +1,6 @@
 /*!
-    \file  main.c
-    \brief GPIO running led
+    \file  systick.h
+    \brief the header file of systick
 
     \version 2016-01-15, V1.0.0, demo for GD32F1x0
     \version 2016-05-13, V2.0.0, demo for GD32F1x0
@@ -34,60 +34,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#include "gd32f1x0.h"
-#include "systick.h"
+#ifndef SYS_TICK_H
+#define SYS_TICK_H
 
-void rcu_config(void);
-void led_config(void);
+#include <stdint.h>
 
-/*!
-    \brief      main function
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-int main(void)
-{
-    rcu_config();
-    led_config();
-    systick_config();
+/* configure systick */
+void systick_config(void);
+/* delay a time in milliseconds */
+void delay_1ms(uint32_t count);
+/* delay decrement */
+void delay_decrement(void);
 
-    while(1){
-        gpio_bit_set(GPIOF, GPIO_PIN_6);
-        /* delay 200ms */
-        delay_1ms(200);
-        gpio_bit_set(GPIOF, GPIO_PIN_7);
-        /* delay 200ms */
-        delay_1ms(200);
-        /* toggle LEDs */
-        gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
-        gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
-        /* delay 200ms */
-        delay_1ms(200);
-    }
-}
-
-/*!
-    \brief      configure LEDs
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void led_config(void)
-{
-    /* configure LED GPIO port */ 
-    gpio_mode_set(GPIOF, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_bit_reset(GPIOF, GPIO_PIN_6 | GPIO_PIN_7);
-}
-
-/*!
-    \brief      clock configuration
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void rcu_config(void)
-{
-    rcu_periph_clock_enable(RCU_GPIOF);
-}
+#endif /* SYS_TICK_H */

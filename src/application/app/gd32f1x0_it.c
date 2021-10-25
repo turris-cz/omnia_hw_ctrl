@@ -1,6 +1,6 @@
 /*!
-    \file  main.c
-    \brief GPIO running led
+    \file  gd32f1x0_it.c
+    \brief interrupt service routines
 
     \version 2016-01-15, V1.0.0, demo for GD32F1x0
     \version 2016-05-13, V2.0.0, demo for GD32F1x0
@@ -34,60 +34,104 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#include "gd32f1x0.h"
+#include "gd32f1x0_it.h"
 #include "systick.h"
 
-void rcu_config(void);
-void led_config(void);
-
 /*!
-    \brief      main function
+    \brief      this function handles NMI exception
     \param[in]  none
     \param[out] none
     \retval     none
 */
-int main(void)
+void NMI_Handler(void)
 {
-    rcu_config();
-    led_config();
-    systick_config();
-
-    while(1){
-        gpio_bit_set(GPIOF, GPIO_PIN_6);
-        /* delay 200ms */
-        delay_1ms(200);
-        gpio_bit_set(GPIOF, GPIO_PIN_7);
-        /* delay 200ms */
-        delay_1ms(200);
-        /* toggle LEDs */
-        gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
-        gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
-        /* delay 200ms */
-        delay_1ms(200);
-    }
 }
 
 /*!
-    \brief      configure LEDs
+    \brief      this function handles HardFault exception
     \param[in]  none
     \param[out] none
     \retval     none
 */
-void led_config(void)
+void HardFault_Handler(void)
 {
-    /* configure LED GPIO port */ 
-    gpio_mode_set(GPIOF, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_bit_reset(GPIOF, GPIO_PIN_6 | GPIO_PIN_7);
+    /* if Hard Fault exception occurs, go to infinite loop */
+    while (1);
 }
 
 /*!
-    \brief      clock configuration
+    \brief      this function handles MemManage exception
     \param[in]  none
     \param[out] none
     \retval     none
 */
-void rcu_config(void)
+void MemManage_Handler(void)
 {
-    rcu_periph_clock_enable(RCU_GPIOF);
+    /* if Memory Manage exception occurs, go to infinite loop */
+    while (1);
+}
+
+/*!
+    \brief      this function handles BusFault exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void BusFault_Handler(void)
+{
+    /* if Bus Fault exception occurs, go to infinite loop */
+    while (1);
+}
+
+/*!
+    \brief      this function handles UsageFault exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void UsageFault_Handler(void)
+{
+    /* if Usage Fault exception occurs, go to infinite loop */
+    while (1);
+}
+
+/*!
+    \brief      this function handles SVC exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void SVC_Handler(void)
+{
+}
+
+/*!
+    \brief      this function handles DebugMon exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void DebugMon_Handler(void)
+{
+}
+
+/*!
+    \brief      this function handles PendSV exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void PendSV_Handler(void)
+{
+}
+
+/*!
+    \brief      this function handles SysTick exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void SysTick_Handler(void)
+{
+    delay_decrement();
 }

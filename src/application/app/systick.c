@@ -1,6 +1,6 @@
 /*!
-    \file  main.c
-    \brief GPIO running led
+    \file  systick.c
+    \brief the systick configuration file
 
     \version 2016-01-15, V1.0.0, demo for GD32F1x0
     \version 2016-05-13, V2.0.0, demo for GD32F1x0
@@ -37,57 +37,47 @@ OF SUCH DAMAGE.
 #include "gd32f1x0.h"
 #include "systick.h"
 
-void rcu_config(void);
-void led_config(void);
+static volatile uint32_t delay;
 
 /*!
-    \brief      main function
+    \brief      configure systick
     \param[in]  none
     \param[out] none
     \retval     none
 */
-int main(void)
+void systick_config(void)
 {
-    rcu_config();
-    led_config();
-    systick_config();
-
-    while(1){
-        gpio_bit_set(GPIOF, GPIO_PIN_6);
-        /* delay 200ms */
-        delay_1ms(200);
-        gpio_bit_set(GPIOF, GPIO_PIN_7);
-        /* delay 200ms */
-        delay_1ms(200);
-        /* toggle LEDs */
-        gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
-        gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
-        /* delay 200ms */
-        delay_1ms(200);
+    /* setup systick timer for 1000Hz interrupts  */
+    if (SysTick_Config(SystemCoreClock / 1000)){
+        /* capture error */
+        while (1);
     }
+    /* configure the systick handler priority */
+    NVIC_SetPriority(SysTick_IRQn, 0x00);
 }
 
 /*!
-    \brief      configure LEDs
+    \brief      delay a time in milliseconds
+    \param[in]  count: count in milliseconds
+    \param[out] none
+    \retval     none
+*/
+void delay_1ms(uint32_t count)
+{
+    delay = count;
+
+    while(0 != delay);
+}
+
+/*!
+    \brief      delay decrement
     \param[in]  none
     \param[out] none
     \retval     none
 */
-void led_config(void)
+void delay_decrement(void)
 {
-    /* configure LED GPIO port */ 
-    gpio_mode_set(GPIOF, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6 | GPIO_PIN_7);
-    gpio_bit_reset(GPIOF, GPIO_PIN_6 | GPIO_PIN_7);
-}
-
-/*!
-    \brief      clock configuration
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void rcu_config(void)
-{
-    rcu_periph_clock_enable(RCU_GPIOF);
+    if (0 != delay){ 
+        delay--;
+    }
 }
