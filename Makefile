@@ -1,4 +1,4 @@
-PROJ_NAME=testGD32
+PROJ_NAME=omnia-gd32f150
 
 ################################################################################
 #                   SETUP TOOLS                                                #
@@ -104,6 +104,8 @@ SRCS  += gd32f1x0_misc.c
 SRCS  += gd32f1x0_rcu.c
 SRCS  += gd32f1x0_gpio.c
 
+
+SRCS  += wan_lan_pci_status.c
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s

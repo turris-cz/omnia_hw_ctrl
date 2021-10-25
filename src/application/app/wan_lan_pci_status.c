@@ -29,72 +29,40 @@ enum lan_led_masks {
   *****************************************************************************/
 static void wan_lan_pci_io_config(void)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
-
     /* GPIO Periph clock enable */
-    RCC_AHBPeriphClockCmd(PCI_LLED2_PIN_PERIPH_CLOCK
-                          | PCI_LLED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
-                          | PCI_PLED2_PIN_PERIPH_CLOCK | PCI_PLED0_PIN_PERIPH_CLOCK
-                          | PCI_PLED1_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
-                          | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
-                          | C0_P3_LED_PIN_PERIPH_CLOCK | C1_LED_PIN_PERIPH_CLOCK
-                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
-                          | SFP_DIS_PIN_PERIPH_CLOCK, ENABLE);
+    rcu_periph_clock_enable(PCI_PLED0_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(PCI_LLED1_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(PCI_PLED1_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(PCI_LLED2_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(PCI_PLED2_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(WAN_LED0_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(SFP_DIS_PIN_PERIPH_CLOCK);
+    rcu_periph_clock_enable(R0_P0_LED_PIN_PERIPH_CLOCK);
 
     /* for compatibility with older versions of board */
-    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+    gpio_mode_set(SFP_DIS_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, SFP_DIS_PIN);
+    gpio_output_options_set(SFP_DIS_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, SFP_DIS_PIN);
+    gpio_bit_reset(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
 
     /* PCIe LED pins */
-    GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(PCI_LLED2_PIN_PORT, &GPIO_InitStructure);
+    gpio_mode_set(PCI_LLED2_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PCI_LLED2_PIN);
+    gpio_mode_set(PCI_LLED1_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PCI_LLED1_PIN);
+    gpio_mode_set(PCI_PLED0_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PCI_PLED0_PIN);
+    gpio_mode_set(PCI_PLED1_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PCI_PLED1_PIN);
+    gpio_mode_set(PCI_PLED2_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PCI_PLED2_PIN);
 
-    GPIO_InitStructure.GPIO_Pin = PCI_LLED1_PIN;
-    GPIO_Init(PCI_LLED1_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED0_PIN;
-    GPIO_Init(PCI_PLED0_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED1_PIN;
-    GPIO_Init(PCI_PLED1_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED2_PIN;
-    GPIO_Init(PCI_PLED2_PIN_PORT, &GPIO_InitStructure);
 
     /* WAN LED pins */
-    GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
-    GPIO_Init(WAN_LED0_PIN_PORT, &GPIO_InitStructure);
+    gpio_mode_set(WAN_LED0_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, WAN_LED0_PIN);
 
     /* LAN LED input pins */
-    GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(R0_P0_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = R1_P1_LED_PIN;
-    GPIO_Init(R1_P1_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = R2_P2_LED_PIN;
-    GPIO_Init(R2_P2_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = C0_P3_LED_PIN;
-    GPIO_Init(C0_P3_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = C1_LED_PIN;
-    GPIO_Init(C1_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = C2_P4_LED_PIN;
-    GPIO_Init(C2_P4_LED_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = C3_P5_LED_PIN;
-    GPIO_Init(C3_P5_LED_PIN_PORT, &GPIO_InitStructure);
+    gpio_mode_set(R0_P0_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, R0_P0_LED_PIN);
+    gpio_mode_set(R1_P1_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, R1_P1_LED_PIN);
+    gpio_mode_set(R2_P2_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, R2_P2_LED_PIN);
+    gpio_mode_set(C0_P3_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, C0_P3_LED_PIN);
+    gpio_mode_set(C1_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, C1_LED_PIN);
+    gpio_mode_set(C2_P4_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, C2_P4_LED_PIN);
+    gpio_mode_set(C3_P5_LED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, C3_P5_LED_PIN);
 }
 
 
@@ -122,7 +90,7 @@ void wan_led_activity(void)
 
     if (rgb_leds[WAN_LED].led_mode == LED_DEFAULT_MODE)
     {
-        led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+        led0_status = (uint8_t)(gpio_input_bit_get(WAN_LED0_PIN_PORT, WAN_LED0_PIN));
 
         if (led0_status == 0)
         {
@@ -146,10 +114,10 @@ void pci_led_activity(void)
     uint8_t pcie_led1, pcie_pled1, pcie_led2, pcie_pled2;
     struct led_rgb *rgb_leds = leds;
 
-    pcie_led2 = GPIO_ReadInputDataBit(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN);
-    pcie_led1 = GPIO_ReadInputDataBit(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN);
-    pcie_pled1 = GPIO_ReadInputDataBit(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN);
-    pcie_pled2 = GPIO_ReadInputDataBit(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN);
+    pcie_led2 = (uint8_t)(gpio_input_bit_get(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN));
+    pcie_led1 = (uint8_t)(gpio_input_bit_get(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN));
+    pcie_pled1 = (uint8_t)(gpio_input_bit_get(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN));
+    pcie_pled2 = (uint8_t)(gpio_input_bit_get(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN));
 
     if (rgb_leds[PCI2_LED].led_mode == LED_DEFAULT_MODE)
     {
@@ -187,7 +155,7 @@ void lan_led_activity(void)
     uint16_t lan_led;
     struct led_rgb *rgb_leds = leds;
 
-    lan_led = GPIO_ReadInputData(LAN_LED_PORT) & LAN_LED_MASK;
+    lan_led = gpio_input_port_get(LAN_LED_PORT) & LAN_LED_MASK;
 
     if (rgb_leds[LAN0_LED].led_mode == LED_DEFAULT_MODE)
     {

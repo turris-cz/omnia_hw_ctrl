@@ -826,7 +826,7 @@ static void led_driver_timer_config_knight_rider(void)
   * @param      colour: colour in RGB range.
   * @retval     None.
   *****************************************************************************/
-void led_driver_reset_effect(FunctionalState state)
+void led_driver_reset_effect(EventStatus state)
 {
     if (state == ENABLE)
     {
