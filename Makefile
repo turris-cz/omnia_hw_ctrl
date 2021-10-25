@@ -60,18 +60,23 @@ INCLUDE = $(addprefix -I,$(INC_DIRS))
 #                   SOURCE FILES DIRECTORIES                                   #
 ################################################################################
 PROJ_ROOT_DIR	= src
-LINKER_DIR = $(PROJ_ROOT_DIR)/linker
-STM_ROOT_DIR = $(PROJ_ROOT_DIR)/GD32F1x0_Firmware_Library
-STM_STARTUP_DIR = $(STM_ROOT_DIR)/CMSIS/GD/GD32F1x0/Source/GCC
-APP_DIR = $(PROJ_ROOT_DIR)/app
 
+#APPLICATION
+APP_ROOT_DIR	= $(PROJ_ROOT_DIR)/application
+
+
+STM_ROOT_DIR = $(APP_ROOT_DIR)/GD32F1x0_Firmware_Library
+APP_SRC_DIR		= $(APP_ROOT_DIR)/app
 STM_LIB_DIR = $(STM_ROOT_DIR)/GD32F1x0_standard_peripheral/Source
 STM_DEVICE = $(STM_ROOT_DIR)/CMSIS/GD/GD32F1x0/Source
+STM_STARTUP_DIR = $(STM_ROOT_DIR)/CMSIS/GD/GD32F1x0/Source/GCC
 
-vpath %.c $(PROJ_ROOT_DIR)
+LINKER_DIR = $(APP_ROOT_DIR)/linker
+
+vpath %.c $(APP_ROOT_DIR)
+vpath %.c $(APP_SRC_DIR)
 vpath %.c $(STM_LIB_DIR)
 vpath %.c $(STM_DEVICE)
-vpath %.c $(APP_DIR)
 vpath %.s $(STM_STARTUP_DIR)
 
 ################################################################################
@@ -82,7 +87,7 @@ vpath %.s $(STM_STARTUP_DIR)
 INC_DIRS += $(STM_ROOT_DIR)/GD32F1x0_standard_peripheral/Include
 INC_DIRS += $(STM_ROOT_DIR)/CMSIS
 INC_DIRS += $(STM_ROOT_DIR)/CMSIS/GD/GD32F1x0/Include
-INC_DIRS += $(APP_DIR)
+INC_DIRS += $(APP_SRC_DIR)
 
 ################################################################################
 #                   SOURCE FILES TO COMPILE                                    #
