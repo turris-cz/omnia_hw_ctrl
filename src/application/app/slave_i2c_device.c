@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    slave_i2c_device.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    18-August-2015
+ * @date    26-October-2021
  * @brief   Driver for IC2 communication with master device (main CPU).
  ******************************************************************************
  ******************************************************************************
@@ -331,7 +331,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
             switch(ee_var)
             {
-                case VAR_FLASH_COMPLETE:    DBG("RST: OK\r\n"); break;
+                //case VAR_FLASH_COMPLETE:    DBG("RST: OK\r\n"); break;
                 case VAR_PAGE_FULL:         DBG("RST: Pg full\r\n"); break;
                 case VAR_NO_VALID_PAGE:     DBG("RST: No Pg\r\n"); break;
                 default:

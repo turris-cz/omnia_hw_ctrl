@@ -31,8 +31,7 @@
 #define __EEPROM_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx.h"
-#include "stm32f0xx_conf.h"
+#include "gd32f1x0_libopt.h"
 
 /* Exported constants --------------------------------------------------------*/
 /* Define the size of the sectors to be used */
@@ -80,7 +79,7 @@ typedef enum eeprom_var {
     VAR_NOT_FOUND       = 1,
     VAR_FOUND           = 0,
     VAR_NO_VALID_PAGE   = NO_VALID_PAGE,
-    VAR_FLASH_COMPLETE  = FLASH_COMPLETE,
+   // VAR_FLASH_COMPLETE  = FLASH_COMPLETE,
     VAR_PAGE_FULL       = PAGE_FULL
 }eeprom_var_t;
 

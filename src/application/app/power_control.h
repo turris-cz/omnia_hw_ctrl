@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    power_control.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    22-July-2015
+ * @date    26-October-2021
  * @brief   Header file for control of DC/DC converters.
  ******************************************************************************
  ******************************************************************************
@@ -10,131 +10,132 @@
 #ifndef POWER_CONTROL_H
 #define POWER_CONTROL_H
 
-#include "stm32f0xx.h"
+#include "gd32f1x0_libopt.h"
 
 #define USB_TIMEOUT_TIMER                   TIM17
 
 /* Outputs */
-#define INT_MCU_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
+#define INT_MCU_PIN_PERIPH_CLOCK            RCU_GPIOC
 #define INT_MCU_PIN_PORT                    GPIOC
-#define INT_MCU_PIN                         GPIO_Pin_0
+#define INT_MCU_PIN                         GPIO_PIN_0
 
-#define RES_RAM_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
+#define RES_RAM_PIN_PERIPH_CLOCK            RCU_GPIOC
 #define RES_RAM_PIN_PORT                    GPIOC
-#define RES_RAM_PIN                         GPIO_Pin_3
+#define RES_RAM_PIN                         GPIO_PIN_3
 
-#define ENABLE_5V_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOC
+#define ENABLE_5V_PIN_PERIPH_CLOCK          RCU_GPIOC
 #define ENABLE_5V_PIN_PORT                  GPIOC
-#define ENABLE_5V_PIN                       GPIO_Pin_4
+#define ENABLE_5V_PIN                       GPIO_PIN_4
 
-#define ENABLE_3V3_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_3V3_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_3V3_PIN_PORT                 GPIOC
-#define ENABLE_3V3_PIN                      GPIO_Pin_5
+#define ENABLE_3V3_PIN                      GPIO_PIN_5
 
-#define ENABLE_1V35_PIN_PERIPH_CLOCK        RCC_AHBPeriph_GPIOC
+#define ENABLE_1V35_PIN_PERIPH_CLOCK        RCU_GPIOC
 #define ENABLE_1V35_PIN_PORT                GPIOC
-#define ENABLE_1V35_PIN                     GPIO_Pin_6
+#define ENABLE_1V35_PIN                     GPIO_PIN_6
 
-#define ENABLE_4V5_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_4V5_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_4V5_PIN_PORT                 GPIOC
-#define ENABLE_4V5_PIN                      GPIO_Pin_7
+#define ENABLE_4V5_PIN                      GPIO_PIN_7
 
-#define ENABLE_1V8_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_1V8_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_1V8_PIN_PORT                 GPIOC
-#define ENABLE_1V8_PIN                      GPIO_Pin_8
+#define ENABLE_1V8_PIN                      GPIO_PIN_8
 
-#define ENABLE_1V5_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_1V5_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_1V5_PIN_PORT                 GPIOC
-#define ENABLE_1V5_PIN                      GPIO_Pin_9
+#define ENABLE_1V5_PIN                      GPIO_PIN_9
 
-#define ENABLE_1V2_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_1V2_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_1V2_PIN_PORT                 GPIOC
-#define ENABLE_1V2_PIN                      GPIO_Pin_10
+#define ENABLE_1V2_PIN                      GPIO_PIN_10
 
-#define ENABLE_VTT_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
+#define ENABLE_VTT_PIN_PERIPH_CLOCK         RCU_GPIOC
 #define ENABLE_VTT_PIN_PORT                 GPIOC
-#define ENABLE_VTT_PIN                      GPIO_Pin_11
+#define ENABLE_VTT_PIN                      GPIO_PIN_11
 
-#define USB30_PWRON_PIN_PERIPH_CLOCK        RCC_AHBPeriph_GPIOC
+#define USB30_PWRON_PIN_PERIPH_CLOCK        RCU_GPIOC
 #define USB30_PWRON_PIN_PORT                GPIOC
-#define USB30_PWRON_PIN                     GPIO_Pin_12
+#define USB30_PWRON_PIN                     GPIO_PIN_12
 
-#define USB31_PWRON_PIN_PERIPH_CLOCK        RCC_AHBPeriph_GPIOC
+#define USB31_PWRON_PIN_PERIPH_CLOCK        RCU_GPIOC
 #define USB31_PWRON_PIN_PORT                GPIOC
-#define USB31_PWRON_PIN                     GPIO_Pin_13
+#define USB31_PWRON_PIN                     GPIO_PIN_13
 
-#define CFG_CTRL_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
+#define CFG_CTRL_PIN_PERIPH_CLOCK           RCU_GPIOC
 #define CFG_CTRL_PIN_PORT                   GPIOC
-#define CFG_CTRL_PIN                        GPIO_Pin_15
+#define CFG_CTRL_PIN                        GPIO_PIN_15
 
-#define PRG_4V5_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOF
+#define PRG_4V5_PIN_PERIPH_CLOCK            RCU_GPIOF
 #define PRG_4V5_PIN_PORT                    GPIOF
-#define PRG_4V5_PIN                         GPIO_Pin_1
+#define PRG_4V5_PIN                         GPIO_PIN_1
 
 /* Inputs */
-#define MANRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define MANRES_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define MANRES_PIN_PORT                     GPIOB
-#define MANRES_PIN                          GPIO_Pin_0
+#define MANRES_PIN                          GPIO_PIN_0
 
-#define SYSRES_OUT_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOB
+#define SYSRES_OUT_PIN_PERIPH_CLOCK         RCU_GPIOB
 #define SYSRES_OUT_PIN_PORT                 GPIOB
-#define SYSRES_OUT_PIN                      GPIO_Pin_1
+#define SYSRES_OUT_PIN                      GPIO_PIN_1
 
-#define DGBRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define DGBRES_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define DGBRES_PIN_PORT                     GPIOB
-#define DGBRES_PIN                          GPIO_Pin_2
+#define DGBRES_PIN                          GPIO_PIN_2
 
-#define MRES_PIN_PERIPH_CLOCK               RCC_AHBPeriph_GPIOB
+#define MRES_PIN_PERIPH_CLOCK               RCU_GPIOB
 #define MRES_PIN_PORT                       GPIOB
-#define MRES_PIN                            GPIO_Pin_3
+#define MRES_PIN                            GPIO_PIN_3
 
-#define PG_5V_PIN_PERIPH_CLOCK              RCC_AHBPeriph_GPIOB
+#define PG_5V_PIN_PERIPH_CLOCK              RCU_GPIOB
 #define PG_5V_PIN_PORT                      GPIOB
-#define PG_5V_PIN                           GPIO_Pin_4
+#define PG_5V_PIN                           GPIO_PIN_4
 
-#define PG_3V3_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_3V3_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_3V3_PIN_PORT                     GPIOB
-#define PG_3V3_PIN                          GPIO_Pin_5
+#define PG_3V3_PIN                          GPIO_PIN_5
 
-#define PG_1V35_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOB
+#define PG_1V35_PIN_PERIPH_CLOCK            RCU_GPIOB
 #define PG_1V35_PIN_PORT                    GPIOB
-#define PG_1V35_PIN                         GPIO_Pin_6
+#define PG_1V35_PIN                         GPIO_PIN_6
 
-#define PG_4V5_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_4V5_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_4V5_PIN_PORT                     GPIOB
-#define PG_4V5_PIN                          GPIO_Pin_7
+#define PG_4V5_PIN                          GPIO_PIN_7
 
-#define PG_1V8_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_1V8_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_1V8_PIN_PORT                     GPIOB
-#define PG_1V8_PIN                          GPIO_Pin_8
+#define PG_1V8_PIN                          GPIO_PIN_8
 
-#define PG_1V5_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_1V5_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_1V5_PIN_PORT                     GPIOB
-#define PG_1V5_PIN                          GPIO_Pin_9
+#define PG_1V5_PIN                          GPIO_PIN_9
 
-#define PG_1V2_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_1V2_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_1V2_PIN_PORT                     GPIOB
-#define PG_1V2_PIN                          GPIO_Pin_10
+#define PG_1V2_PIN                          GPIO_PIN_10
 
-#define PG_VTT_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
+#define PG_VTT_PIN_PERIPH_CLOCK             RCU_GPIOB
 #define PG_VTT_PIN_PORT                     GPIOB
-#define PG_VTT_PIN                          GPIO_Pin_11
+#define PG_VTT_PIN                          GPIO_PIN_11
 
-#define USB30_OVC_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOB
+#define USB30_OVC_PIN_PERIPH_CLOCK          RCU_GPIOB
 #define USB30_OVC_PIN_PORT                  GPIOB
-#define USB30_OVC_PIN                       GPIO_Pin_12
+#define USB30_OVC_PIN                       GPIO_PIN_12
 
-#define USB31_OVC_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOB
+#define USB31_OVC_PIN_PERIPH_CLOCK          RCU_GPIOB
 #define USB31_OVC_PIN_PORT                  GPIOB
-#define USB31_OVC_PIN                       GPIO_Pin_13
+#define USB31_OVC_PIN                       GPIO_PIN_13
 
-#define RTC_ALARM_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOB
+#define RTC_ALARM_PIN_PERIPH_CLOCK          RCU_GPIOB
 #define RTC_ALARM_PIN_PORT                  GPIOB
-#define RTC_ALARM_PIN                       GPIO_Pin_14
+#define RTC_ALARM_PIN                       GPIO_PIN_14
 
-#define LED_BRT_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOB
+#define LED_BRT_PIN_PERIPH_CLOCK            RCU_GPIOB
 #define LED_BRT_PIN_PORT                    GPIOB
-#define LED_BRT_PIN                         GPIO_Pin_15
+#define LED_BRT_PIN                         GPIO_PIN_15
+
 
 typedef enum voltages {
     VOLTAGE_33 = 1,
