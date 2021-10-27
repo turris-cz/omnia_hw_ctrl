@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    msata_pci.h
  * @author  CZ.NIC, z.s.p.o.
- * @date    06-August-2015
+ * @date    27-October-2021
  * @brief   Header file for PCIe and mSATA driver.
  ******************************************************************************
  ******************************************************************************
@@ -10,26 +10,28 @@
 #ifndef MSATA_PCI_H
 #define MSATA_PCI_H
 
-#define CARD_DET_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOA
+#include "gd32f1x0_libopt.h"
+
+#define CARD_DET_PIN_PERIPH_CLOCK           RCU_GPIOA
 #define CARD_DET_PIN_PORT                   GPIOA
-#define CARD_DET_PIN                        GPIO_Pin_9
-#define CARD_DET_PIN_EXTIPORT               EXTI_PortSourceGPIOA
+#define CARD_DET_PIN                        GPIO_PIN_9
+/*#define CARD_DET_PIN_EXTIPORT               EXTI_PortSourceGPIOA
 #define CARD_DET_PIN_EXTIPINSOURCE          EXTI_PinSource9
 #define CARD_DET_PIN_EXTILINE               EXTI_Line9
-
-#define MSATALED_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOA
+*/
+#define MSATALED_PIN_PERIPH_CLOCK           RCU_GPIOA
 #define MSATALED_PIN_PORT                   GPIOA
-#define MSATALED_PIN                        GPIO_Pin_15
-#define MSATALED_PIN_EXTIPORT               EXTI_PortSourceGPIOA
+#define MSATALED_PIN                        GPIO_PIN_15
+/*#define MSATALED_PIN_EXTIPORT               EXTI_PortSourceGPIOA
 #define MSATALED_PIN_EXTIPINSOURCE          EXTI_PinSource15
-#define MSATALED_PIN_EXTILINE               EXTI_Line15
+#define MSATALED_PIN_EXTILINE               EXTI_Line15*/
 
-#define MSATAIND_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOC
+#define MSATAIND_PIN_PERIPH_CLOCK           RCU_GPIOC
 #define MSATAIND_PIN_PORT                   GPIOC
-#define MSATAIND_PIN                        GPIO_Pin_14
-#define MSATAIND_PIN_EXTIPORT               EXTI_PortSourceGPIOC
+#define MSATAIND_PIN                        GPIO_PIN_14
+/*#define MSATAIND_PIN_EXTIPORT               EXTI_PortSourceGPIOC
 #define MSATAIND_PIN_EXTIPINSOURCE          EXTI_PinSource14
-#define MSATAIND_PIN_EXTILINE               EXTI_Line14
+#define MSATAIND_PIN_EXTILINE               EXTI_Line14*/
 
 /*******************************************************************************
   * @function   msata_pci_indication_config
