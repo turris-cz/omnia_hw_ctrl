@@ -2,20 +2,20 @@
   ******************************************************************************
   * @file    led_driver.h
   * @author  CZ.NIC, z.s.p.o.
-  * @date    22-July-2015
+  * @date    27-October-2021
   * @brief   Header file led driver.
   ******************************************************************************
   ******************************************************************************
 **/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LED_DRIVER_H
-#define __LED_DRIVER_H
+#ifndef __LED_DRIVER_OMNIA_H
+#define __LED_DRIVER_OMNIA_H
 
 #include "gd32f1x0.h"
 
-#define LED_TIMER                 TIM3
-#define LED_EFFECT_TIMER          TIM6
+#define LED_TIMER                 TIMER2
+#define LED_EFFECT_TIMER          TIMER5
 
 #define LED_COUNT                 12
 

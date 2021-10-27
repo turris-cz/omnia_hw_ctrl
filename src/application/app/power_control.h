@@ -12,7 +12,7 @@
 
 #include "gd32f1x0_libopt.h"
 
-#define USB_TIMEOUT_TIMER                   TIM17
+#define USB_TIMEOUT_TIMER                   TIMER16
 
 /* Outputs */
 #define INT_MCU_PIN_PERIPH_CLOCK            RCU_GPIOC

@@ -107,6 +107,8 @@ SRCS  += gd32f1x0_gpio.c
 
 SRCS  += wan_lan_pci_status.c
 SRCS  += slave_i2c_device.c
+SRCS  += power_control.c
+SRCS  += msata_pci.c
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s

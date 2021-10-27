@@ -8,29 +8,28 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_conf.h"
 #include "led_driver.h"
 #include "delay.h"
 #include "power_control.h"
 
 /* Private define ------------------------------------------------------------*/
-#define LED_SPI                     SPI1
+#define LED_SPI                     SPI0
 
-#define LED_SPI_MOSI_PIN            GPIO_Pin_7
+#define LED_SPI_MOSI_PIN            GPIO_PIN_7
 #define LED_SPI_MOSI_PIN_PORT       GPIOA
-#define LED_SPI_MOSI_PIN_CLOCK      RCC_AHBPeriph_GPIOA
+#define LED_SPI_MOSI_PIN_CLOCK      RCU_GPIOA
 #define LED_SPI_MOSI_AF             GPIO_AF_0
-#define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
+//#define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
 
-#define LED_SPI_SCK_PIN             GPIO_Pin_5
+#define LED_SPI_SCK_PIN             GPIO_PIN_5
 #define LED_SPI_SCK_PIN_PORT        GPIOA
-#define LED_SPI_SCK_PIN_CLOCK       RCC_AHBPeriph_GPIOA
+#define LED_SPI_SCK_PIN_CLOCK       RCU_GPIOA
 #define LED_SPI_SCK_AF              GPIO_AF_0
-#define LED_SPI_SCK_SOURCE          GPIO_PinSource5
+//#define LED_SPI_SCK_SOURCE          GPIO_PinSource5
 
-#define LED_SPI_SS_PIN              GPIO_Pin_4
+#define LED_SPI_SS_PIN              GPIO_PIN_4
 #define LED_SPI_SS_PIN_PORT         GPIOA
-#define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
+#define LED_SPI_SS_PIN_CLOCK        RCU_GPIOA
 
 #define COLOUR_LEVELS               64
 #define COLOUR_DECIMATION           2
@@ -60,11 +59,11 @@
 //#define  PWM_TIM_POLARITY           TIM_OCPolarity_High
 #define PWM_TIM_POLARITY            TIM_OCPolarity_Low
 
-#define PWM_TIMER                   TIM15
+#define PWM_TIMER                   TIMER14
 
 /* Private macro -------------------------------------------------------------*/
-#define LATCH_HIGH                  GPIO_SetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
-#define LATCH_LOW                   GPIO_ResetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_HIGH                  gpio_bit_set(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_LOW                   gpio_bit_reset(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum rgb_colour {
@@ -100,26 +99,26 @@ static void led_driver_timer_config_knight_rider(void);
   *****************************************************************************/
 static void led_driver_spi_config(void)
 {
-    SPI_InitTypeDef  SPI_InitStructure;
+    spi_parameter_struct spi_init_struct;
+    /* deinitilize SPI and the parameters */
+    rcu_periph_clock_disable(RCU_SPI0);
+    spi_i2s_deinit(LED_SPI);
+    spi_struct_para_init(&spi_init_struct);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, DISABLE);
-    SPI_I2S_DeInit(LED_SPI);
+    rcu_periph_clock_enable(RCU_SPI0);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+    /* SPI0 parameter config */
+    spi_init_struct.trans_mode           = SPI_BIDIRECTIONAL_TRANSMIT;
+    spi_init_struct.device_mode          = SPI_MASTER;
+    spi_init_struct.frame_size           = SPI_FRAMESIZE_16BIT;
+    spi_init_struct.clock_polarity_phase = SPI_CK_PL_LOW_PH_1EDGE;
+    spi_init_struct.nss                  = SPI_NSS_SOFT;
+    spi_init_struct.prescale             = SPI_PSC_2;
+    spi_init_struct.endian               = SPI_ENDIAN_MSB;
 
-    SPI_I2S_DeInit(LED_SPI);
-    SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
-    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-    SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
-    SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
-    SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
-    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-    SPI_Init(LED_SPI, &SPI_InitStructure);
+    spi_init(LED_SPI, &spi_init_struct);
 
-    /* Enable the SPI peripheral */
-    SPI_Cmd(LED_SPI, ENABLE);
+    spi_enable(LED_SPI);
 }
 
 /*******************************************************************************
@@ -130,35 +129,17 @@ static void led_driver_spi_config(void)
   *****************************************************************************/
 static void led_driver_io_config(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    rcu_periph_clock_enable(LED_SPI_MOSI_PIN_CLOCK);
+    rcu_periph_clock_enable(LED_SPI_SCK_PIN_CLOCK);
+    rcu_periph_clock_enable(LED_SPI_SS_PIN_CLOCK);
 
-    /* Enable SCK, MOSI, and NSS GPIO clocks */
-    RCC_AHBPeriphClockCmd(LED_SPI_SCK_PIN_CLOCK | LED_SPI_MOSI_PIN_CLOCK |
-                           LED_SPI_SS_PIN_CLOCK, ENABLE);
+    /* SPI0 GPIO config: SCK/PA5, MOSI/PA7 */
+    gpio_af_set(LED_SPI_MOSI_PIN_PORT, LED_SPI_MOSI_AF, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
+    gpio_mode_set(LED_SPI_MOSI_PIN_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLDOWN, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
+    gpio_output_options_set(LED_SPI_MOSI_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
 
-    GPIO_PinAFConfig(LED_SPI_SCK_PIN_PORT, LED_SPI_SCK_SOURCE, LED_SPI_SCK_AF);
-    GPIO_PinAFConfig(LED_SPI_MOSI_PIN_PORT, LED_SPI_MOSI_SOURCE, LED_SPI_MOSI_AF);
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
-
-    /* SPI SCK pin configuration */
-    GPIO_InitStructure.GPIO_Pin = LED_SPI_SCK_PIN;
-    GPIO_Init(LED_SPI_SCK_PIN_PORT, &GPIO_InitStructure);
-
-    /* SPI MOSI pin configuration */
-    GPIO_InitStructure.GPIO_Pin =  LED_SPI_MOSI_PIN;
-    GPIO_Init(LED_SPI_MOSI_PIN_PORT, &GPIO_InitStructure);
-
-    /* NSS pin configuration */
-    GPIO_InitStructure.GPIO_Pin = LED_SPI_SS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
-    GPIO_Init(LED_SPI_SS_PIN_PORT, &GPIO_InitStructure);
+    gpio_mode_set(LED_SPI_SS_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, LED_SPI_SS_PIN);
+    gpio_output_options_set(LED_SPI_SS_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_SPI_SS_PIN);
 
     /* init state - latch holds previous data */
     LATCH_LOW;

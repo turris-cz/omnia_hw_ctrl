@@ -565,30 +565,37 @@ uint8_t power_control_get_usb_poweron(usb_ports_t usb_port)
   *****************************************************************************/
 void power_control_usb_timeout_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, DISABLE);
-    TIM_DeInit(USB_TIMEOUT_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER16);
+    timer_deinit(USB_TIMEOUT_TIMER);
 
     /* Clock enable */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER16);
+
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
     /* Time base configuration - 1sec interrupt */
-    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 6000 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(USB_TIMEOUT_TIMER, &TIM_TimeBaseStructure);
+    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    timer_initpara.prescaler         = 7199;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 9999;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(USB_TIMEOUT_TIMER, &timer_initpara);
 
-    TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(USB_TIMEOUT_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(USB_TIMEOUT_TIMER, TIMER_INT_UP);
 
-    NVIC_InitStructure.NVIC_IRQChannel = TIM17_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+
+    nvic_irq_enable(TIMER16_IRQn, 0, 5);
 }
 
 /*******************************************************************************
@@ -599,8 +606,8 @@ void power_control_usb_timeout_config(void)
   *****************************************************************************/
 void power_control_usb_timeout_enable(void)
 {
-    /* TIM enable counter */
-    TIM_Cmd(USB_TIMEOUT_TIMER, ENABLE);
+    /* enable a TIMER */
+    timer_enable(USB_TIMEOUT_TIMER);
 }
 
 /*******************************************************************************
@@ -612,8 +619,8 @@ void power_control_usb_timeout_enable(void)
 void power_control_usb_timeout_disable(void)
 {
     /* disable timer and set initial condition */
-    TIM_Cmd(USB_TIMEOUT_TIMER, DISABLE);
-    USB_TIMEOUT_TIMER->CNT = 0;
+    timer_disable(USB_TIMEOUT_TIMER);
+    TIMER_CNT(USB_TIMEOUT_TIMER) = 0;
 }
 
 /*******************************************************************************
@@ -697,7 +704,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED10, colour);
 
@@ -723,7 +730,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED9, colour);
 
@@ -749,7 +756,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED8, colour);
 
@@ -775,7 +782,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED7, colour);
 
@@ -801,7 +808,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED6, colour);
 
@@ -827,7 +834,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED5, colour);
 
@@ -853,7 +860,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED4, colour);
 
@@ -879,7 +886,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED3, colour);
 
@@ -905,7 +912,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED2, colour);
 
@@ -931,7 +938,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED1, colour);
 
@@ -957,7 +964,7 @@ reset_type_t power_control_first_startup(void)
                     idx++; /* increase colour level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    colour = (red << 16) | (green << 8);
 
                     led_driver_set_colour(LED0, colour);
 
