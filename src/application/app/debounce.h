@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    debounce.h
  * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
+ * @date    29-October-2021
  * @brief   Header file for debounce.c
  ******************************************************************************
  ******************************************************************************
@@ -10,7 +10,7 @@
 #ifndef __DEBOUNCE_H
 #define __DEBOUNCE_H
 
-#define DEBOUNCE_TIMER                  TIM16
+#define DEBOUNCE_TIMER                  TIMER15
 #define MAX_BUTTON_PRESSED_COUNTER      7
 #define MAX_BUTTON_DEBOUNCE_STATE       3
 

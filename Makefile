@@ -112,6 +112,7 @@ SRCS  += msata_pci.c
 SRCS  += led_driver.c
 SRCS  += delay.c
 SRCS  += debug_serial.c
+SRCS  += debounce.c
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s

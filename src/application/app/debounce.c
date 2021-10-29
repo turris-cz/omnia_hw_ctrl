@@ -2,14 +2,13 @@
  ******************************************************************************
  * @file    debounce.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
+ * @date    29-October-2021
  * @brief   Debounce switches and inputs from PG signals
  ******************************************************************************
  ******************************************************************************
  **/
-#include "stm32f0xx.h"
+#include "gd32f1x0.h"
 #include "debounce.h"
-#include "stm32f0xx_conf.h"
 #include "power_control.h"
 #include "delay.h"
 #include "led_driver.h"
@@ -44,8 +43,8 @@ enum input_mask {
 struct input_sig debounce_input_signal;
 struct button_def button_front;
 
-#define  DEBOUNCE_TIM_PERIODE       (300 - 1)//300 -> 5ms; 600 -> 10ms
-#define  DEBOUNCE_TIM_PRESCALER     (800 - 1)
+#define  DEBOUNCE_TIM_PERIODE       (450 - 1)//450 -> 5ms; 900 -> 10ms
+#define  DEBOUNCE_TIM_PRESCALER     (1200 - 1)
 
 /*******************************************************************************
   * @function   debounce_timer_config
@@ -55,33 +54,40 @@ struct button_def button_front;
   *****************************************************************************/
 static void debounce_timer_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, DISABLE);
-    TIM_DeInit(DEBOUNCE_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER15);
+    timer_deinit(DEBOUNCE_TIMER);
 
     /* Clock enable */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER15);
 
-    /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = DEBOUNCE_TIM_PERIODE;
-    TIM_TimeBaseStructure.TIM_Prescaler = DEBOUNCE_TIM_PRESCALER;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(DEBOUNCE_TIMER, &TIM_TimeBaseStructure);
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
-    TIM_ARRPreloadConfig(DEBOUNCE_TIMER, ENABLE);
+    /* Time base configuration - 1sec interrupt */
+    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    timer_initpara.prescaler         = DEBOUNCE_TIM_PRESCALER;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = DEBOUNCE_TIM_PERIODE;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(DEBOUNCE_TIMER, &timer_initpara);
+
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(DEBOUNCE_TIMER);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(DEBOUNCE_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(DEBOUNCE_TIMER, TIMER_INT_UP);
+    timer_enable(DEBOUNCE_TIMER);
 
-    /* TIM enable counter */
-    TIM_Cmd(DEBOUNCE_TIMER, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM16_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x03;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    nvic_irq_enable(TIMER15_IRQn, 0, 3);
 }
 
 /*******************************************************************************
@@ -171,7 +177,7 @@ void debounce_input_timer_handler(void)
 
     /* port B, pins 0-14 debounced by general function debounce_check_inputs() */
     /* only button on PB15 is debounced here, but read the whole port */
-    button->button_pin_state[idx] = ~(GPIO_ReadInputData(GPIOB));
+    button->button_pin_state[idx] = ~(gpio_input_port_get(GPIOB));
     idx++;
 
     if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
@@ -199,7 +205,7 @@ void debounce_check_inputs(void)
     /* PB0-14 ----------------------------------------------------------------
      * No debounce is used now (we need a reaction immediately) */
 
-    port_changed = ~(GPIO_ReadInputData(GPIOB)); /* read the whole port */
+    port_changed = ~(gpio_input_port_get(GPIOB)); /* read the whole port */
 
     /* PB15 ------------------------------------------------------------------
      * button debounce */
@@ -218,7 +224,7 @@ void debounce_check_inputs(void)
     {
         input_state->man_res = ACTIVATED;
         /* set CFG_CTRL pin to high state ASAP */
-        GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+        gpio_bit_set(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
     }
 
     if (port_changed & SYSRES_OUT_MASK)
@@ -234,11 +240,11 @@ void debounce_check_inputs(void)
     /* reaction: follow MRES signal */
     if (port_changed & MRES_MASK)
     {
-        GPIO_ResetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+        gpio_bit_reset(RES_RAM_PIN_PORT, RES_RAM_PIN);
     }
     else
     {
-        GPIO_SetBits(RES_RAM_PIN_PORT, RES_RAM_PIN);
+        gpio_bit_set(RES_RAM_PIN_PORT, RES_RAM_PIN);
     }
 
     if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
