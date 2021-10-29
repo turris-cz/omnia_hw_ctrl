@@ -32,6 +32,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "eeprom.h"
 #include "debug_serial.h"
+#include "gd32f1x0_libopt.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -65,6 +66,7 @@ uint16_t EE_Init(void)
   uint16_t EepromStatus = 0, ReadStatus = 0;
   int16_t x = -1;
   uint16_t  FlashStatus;
+  fmc_state_enum fmc_state;
 
   /* Get Page0 status */
   PageStatus0 = (*(__IO uint16_t*)PAGE0_BASE_ADDRESS);
@@ -78,9 +80,9 @@ uint16_t EE_Init(void)
       if (PageStatus1 == VALID_PAGE) /* Page0 erased, Page1 valid */
       {
         /* Erase Page0 */
-        FlashStatus = FLASH_ErasePage(PAGE0_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE0_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
           return FlashStatus;
         }
@@ -88,28 +90,28 @@ uint16_t EE_Init(void)
       else if (PageStatus1 == RECEIVE_DATA) /* Page0 erased, Page1 receive */
       {
         /* Erase Page0 */
-        FlashStatus = FLASH_ErasePage(PAGE0_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE0_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
         /* Mark Page1 as valid */
-        FlashStatus = FLASH_ProgramHalfWord(PAGE1_BASE_ADDRESS, VALID_PAGE);
+        fmc_state = fmc_halfword_program(PAGE1_BASE_ADDRESS, VALID_PAGE);
         /* If program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else /* First EEPROM access (Page0&1 are erased) or invalid state -> format EEPROM */
       {
         /* Erase both Page0 and Page1 and set Page0 as valid page */
-        FlashStatus = EE_Format();
+        fmc_state = EE_Format();
         /* If erase/program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       break;
@@ -129,12 +131,12 @@ uint16_t EE_Init(void)
             /* Read the last variables' updates */
             ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
             /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)
+            if (ReadStatus != 0x1)                                                      // TODO - zkontrolovat
             {
               /* Transfer the variable to the Page0 */
               EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
               /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != FLASH_COMPLETE)
+              if (EepromStatus != FLASH_COMPLETE)                                       // TODO - zkontrolovat
               {
                 return EepromStatus;
               }
@@ -142,45 +144,45 @@ uint16_t EE_Init(void)
           }
         }
         /* Mark Page0 as valid */
-        FlashStatus = FLASH_ProgramHalfWord(PAGE0_BASE_ADDRESS, VALID_PAGE);
+        fmc_state = fmc_halfword_program(PAGE0_BASE_ADDRESS, VALID_PAGE);
         /* If program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
         /* Erase Page1 */
-        FlashStatus = FLASH_ErasePage(PAGE1_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE1_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else if (PageStatus1 == ERASED) /* Page0 receive, Page1 erased */
       {
         /* Erase Page1 */
-        FlashStatus = FLASH_ErasePage(PAGE1_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE1_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
         /* Mark Page0 as valid */
-        FlashStatus = FLASH_ProgramHalfWord(PAGE0_BASE_ADDRESS, VALID_PAGE);
+        fmc_state = fmc_halfword_program(PAGE0_BASE_ADDRESS, VALID_PAGE);
         /* If program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else /* Invalid state -> format eeprom */
       {
         /* Erase both Page0 and Page1 and set Page0 as valid page */
-        FlashStatus = EE_Format();
+        fmc_state = EE_Format();
         /* If erase/program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       break;
@@ -189,21 +191,21 @@ uint16_t EE_Init(void)
       if (PageStatus1 == VALID_PAGE) /* Invalid state -> format eeprom */
       {
         /* Erase both Page0 and Page1 and set Page0 as valid page */
-        FlashStatus = EE_Format();
+        fmc_state = EE_Format();
         /* If erase/program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else if (PageStatus1 == ERASED) /* Page0 valid, Page1 erased */
       {
         /* Erase Page1 */
-        FlashStatus = FLASH_ErasePage(PAGE1_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE1_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else /* Page0 valid, Page1 receive */
@@ -220,12 +222,12 @@ uint16_t EE_Init(void)
             /* Read the last variables' updates */
             ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
             /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)
+            if (ReadStatus != 0x1)                                                      // TODO - zkontrolovat
             {
               /* Transfer the variable to the Page1 */
               EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
               /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != FLASH_COMPLETE)
+              if (EepromStatus != FLASH_COMPLETE)                                       // TODO - zkontrolovat
               {
                 return EepromStatus;
               }
@@ -233,34 +235,34 @@ uint16_t EE_Init(void)
           }
         }
         /* Mark Page1 as valid */
-        FlashStatus = FLASH_ProgramHalfWord(PAGE1_BASE_ADDRESS, VALID_PAGE);
+        fmc_state = fmc_halfword_program(PAGE1_BASE_ADDRESS, VALID_PAGE);
         /* If program operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
         /* Erase Page0 */
-        FlashStatus = FLASH_ErasePage(PAGE0_BASE_ADDRESS);
+        fmc_state = fmc_page_erase(PAGE0_BASE_ADDRESS);
         /* If erase operation was failed, a Flash error code is returned */
-        if (FlashStatus != FLASH_COMPLETE)
+        if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       break;
 
     default:  /* Any other state -> format eeprom */
       /* Erase both Page0 and Page1 and set Page0 as valid page */
-      FlashStatus = EE_Format();
+      fmc_state = EE_Format();
       /* If erase/program operation was failed, a Flash error code is returned */
-      if (FlashStatus != FLASH_COMPLETE)
+      if (fmc_state != FMC_READY)
       {
-        return FlashStatus;
+        return fmc_state;
       }
       break;
   }
 
-  return FLASH_COMPLETE;
+  return FLASH_COMPLETE;                                        // TODO - nastavit spravnou navratovou hodnotu
 }
 
 /**

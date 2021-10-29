@@ -75,11 +75,20 @@ enum virt_address {
     RESET_VIRT_ADDR         = 0x8888
 };
 
+typedef enum
+{
+  FLASH_BUSY = 1,
+  FLASH_ERROR_WRP,
+  FLASH_ERROR_PROGRAM,
+  FLASH_COMPLETE,
+  FLASH_TIMEOUT
+}FLASH_Status;
+
 typedef enum eeprom_var {
     VAR_NOT_FOUND       = 1,
     VAR_FOUND           = 0,
     VAR_NO_VALID_PAGE   = NO_VALID_PAGE,
-   // VAR_FLASH_COMPLETE  = FLASH_COMPLETE,
+    VAR_FLASH_COMPLETE  = FLASH_COMPLETE,
     VAR_PAGE_FULL       = PAGE_FULL
 }eeprom_var_t;
 
