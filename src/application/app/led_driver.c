@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    led_driver.c
  * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
+ * @date    29-October-2021
  * @brief   LED RGB driver for Turris Omnia
  ******************************************************************************
  ******************************************************************************
@@ -57,7 +57,7 @@
 // Lo => Lo-Impuls
 //-------------------------------------------------------------*/
 //#define  PWM_TIM_POLARITY           TIM_OCPolarity_High
-#define PWM_TIM_POLARITY            TIM_OCPolarity_Low
+#define PWM_TIM_POLARITY            TIMER_OC_POLARITY_LOW
 
 #define PWM_TIMER                   TIMER14
 
@@ -119,6 +119,8 @@ static void led_driver_spi_config(void)
     spi_init(LED_SPI, &spi_init_struct);
 
     spi_enable(LED_SPI);
+
+    spi_i2s_data_frame_format_config(LED_SPI, SPI_FRAMESIZE_16BIT);
 }
 
 /*******************************************************************************
@@ -153,33 +155,38 @@ static void led_driver_io_config(void)
   *****************************************************************************/
 static void led_driver_timer_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, DISABLE);
-    TIM_DeInit(LED_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER2);
+    timer_deinit(LED_TIMER);
 
     /* Clock enable */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER2);
 
-    /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 20 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
-    TIM_ARRPreloadConfig(LED_TIMER, ENABLE);
+    /* Time base configuration - 1sec interrupt */
+    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    timer_initpara.prescaler         = 20 - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 200 - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(LED_TIMER, &timer_initpara);
+
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(LED_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(LED_TIMER, TIMER_INT_UP);
 
-    /* TIM enable counter */
-    TIM_Cmd(LED_TIMER, ENABLE);
+    timer_enable(LED_TIMER);
 
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    nvic_irq_enable(TIMER2_IRQn, 0, 4);
 }
 
 /*******************************************************************************
@@ -220,10 +227,10 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
   * @retval     None.
   *****************************************************************************/
 static void led_driver_send_data16b(const uint16_t data)
-{
-    SPI_I2S_SendData16(LED_SPI, data);
+{    
+    spi_i2s_data_transmit(LED_SPI, data);
     /* wait for flag */
-    while(SPI_I2S_GetFlagStatus(LED_SPI, SPI_I2S_FLAG_BSY));
+    while(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TRANS));
 }
 
 /*******************************************************************************
@@ -392,19 +399,11 @@ void led_driver_send_frame(void)
   *****************************************************************************/
 static void led_driver_pwm_io_config(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    rcu_periph_clock_enable(RCU_GPIOA);
 
-    /* Clock Enable */
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_0);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
+    gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
 }
 
 /*******************************************************************************
@@ -415,35 +414,43 @@ static void led_driver_pwm_io_config(void)
   *****************************************************************************/
 static void led_driver_pwm_timer_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    TIM_OCInitTypeDef  TIM_OCInitStructure;
     uint16_t init_value;
+    timer_oc_parameter_struct timer_ocintpara;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
-    TIM_DeInit(PWM_TIMER);
+    rcu_periph_clock_enable(RCU_TIMER14);
 
-    /* Clock enable */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
+    timer_deinit(PWM_TIMER);
 
-    TIM_TimeBaseStructure.TIM_Period = PWM_TIM_PERIODE - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = PWM_TIM_PRESCALE - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(PWM_TIMER, &TIM_TimeBaseStructure);
+    /* TIMER0 configuration */
+    timer_initpara.prescaler         = PWM_TIM_PRESCALE - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = PWM_TIM_PERIODE - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(PWM_TIMER, &timer_initpara);
 
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    /* CH1, CH2 and CH3 configuration in PWM0 mode */
+    timer_ocintpara.ocpolarity  = PWM_TIM_POLARITY;
+    timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
+
+    timer_channel_output_config(PWM_TIMER, TIMER_CH_0, &timer_ocintpara);
+
     init_value = 0;
+    /* CH0 configuration in PWM mode1,duty cycle x% */
+    timer_channel_output_pulse_value_config(PWM_TIMER, TIMER_CH_0, init_value);
+    timer_channel_output_mode_config(PWM_TIMER, TIMER_CH_0, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(PWM_TIMER, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
 
-    TIM_OCInitStructure.TIM_Pulse = init_value;
-    TIM_OCInitStructure.TIM_OCPolarity = PWM_TIM_POLARITY;
-    TIM_OC2Init(PWM_TIMER, &TIM_OCInitStructure);
-    TIM_OC2PreloadConfig(PWM_TIMER, TIM_OCPreload_Enable);
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(PWM_TIMER);
 
-    /* Timer enable */
-    TIM_ARRPreloadConfig(PWM_TIMER, ENABLE);
-    TIM_Cmd(PWM_TIMER, ENABLE);
-    TIM_CtrlPWMOutputs(PWM_TIMER, ENABLE);
+    /* enable TIMER0 primary output */
+    timer_primary_output_config(PWM_TIMER, ENABLE);
+
+    /* auto-reload preload enable */
+    timer_enable(PWM_TIMER);
 }
 
 /*******************************************************************************
@@ -522,7 +529,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
 
     counter_val = procent_val * PWM_TIM_PERIODE / MAX_LED_BRIGHTNESS;
 
-    PWM_TIMER->CCR2 = counter_val;
+    TIMER_CH0CV(PWM_TIMER) = counter_val;
     rgb_leds->brightness = procent_val;
 }
 
@@ -770,35 +777,39 @@ void led_driver_double_knight_rider_effect(void)
   *****************************************************************************/
 static void led_driver_timer_config_knight_rider(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, DISABLE);
-    TIM_DeInit(LED_EFFECT_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER5);
+    timer_deinit(LED_EFFECT_TIMER);
 
     /* Clock enable */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER5);
 
-    /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 400 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(LED_EFFECT_TIMER, &TIM_TimeBaseStructure);
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
-    TIM_ARRPreloadConfig(LED_EFFECT_TIMER, ENABLE);
+    /* Time base configuration - 1sec interrupt */
+    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    timer_initpara.prescaler         = 600 - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 12000 - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(LED_EFFECT_TIMER, &timer_initpara);
+
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(LED_EFFECT_TIMER);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(LED_EFFECT_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(LED_EFFECT_TIMER, TIMER_INT_UP);
 
-    /* TIM enable counter */
-    /* TIM_Cmd(LED_EFFECT_TIMER, ENABLE); */
-
-    /* Timer is enable after reset */
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    nvic_irq_enable(TIMER5_DAC_IRQn, 0, 5);
 }
 
 /*******************************************************************************
@@ -811,12 +822,13 @@ void led_driver_reset_effect(EventStatus state)
 {
     if (state == ENABLE)
     {
-        TIM_Cmd(LED_EFFECT_TIMER, ENABLE);
+        timer_enable(LED_EFFECT_TIMER);
     }
     else
     {
-        TIM_Cmd(LED_EFFECT_TIMER, DISABLE);
-        LED_EFFECT_TIMER->CNT = 0;
+        timer_disable(LED_EFFECT_TIMER);
+        timer_counter_value_config(LED_EFFECT_TIMER, 0);
+
     }
 }
 
