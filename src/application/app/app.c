@@ -8,7 +8,7 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx.h"
+#include "gd32f1x0.h"
 #include "app.h"
 #include "power_control.h"
 #include "debounce.h"
@@ -20,8 +20,8 @@
 #include "eeprom.h"
 
 #define MAX_ERROR_COUNT            5
-#define SET_INTERRUPT_TO_CPU       GPIO_ResetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
-#define RESET_INTERRUPT_TO_CPU     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN)
+#define SET_INTERRUPT_TO_CPU       gpio_bit_reset(INT_MCU_PIN_PORT, INT_MCU_PIN)
+#define RESET_INTERRUPT_TO_CPU     gpio_bit_set(INT_MCU_PIN_PORT, INT_MCU_PIN)
 
 extern void start_bootloader(void);
 
@@ -106,7 +106,7 @@ static uint16_t app_get_status_word(void)
     if (power_control_get_usb_poweron(USB3_PORT1))
         status_word |= USB31_PWRON_STSBIT;
 
-    if(GPIO_ReadInputDataBit(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
+    if(gpio_input_bit_get(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
         status_word |= ENABLE_4V5_STSBIT;
 
     return status_word;

@@ -103,7 +103,11 @@ SRCS  += system_gd32f1x0.c
 SRCS  += gd32f1x0_misc.c
 SRCS  += gd32f1x0_rcu.c
 SRCS  += gd32f1x0_gpio.c
-
+SRCS  += gd32f1x0_usart.c
+SRCS  += gd32f1x0_timer.c
+SRCS  += gd32f1x0_spi.c
+SRCS  += gd32f1x0_i2c.c
+SRCS  += gd32f1x0_fmc.c
 
 SRCS  += wan_lan_pci_status.c
 SRCS  += slave_i2c_device.c
@@ -113,6 +117,7 @@ SRCS  += led_driver.c
 SRCS  += delay.c
 SRCS  += debug_serial.c
 SRCS  += debounce.c
+SRCS  += app.c
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s
