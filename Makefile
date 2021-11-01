@@ -118,6 +118,7 @@ SRCS  += delay.c
 SRCS  += debug_serial.c
 SRCS  += debounce.c
 SRCS  += app.c
+SRCS  += eeprom.c
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s

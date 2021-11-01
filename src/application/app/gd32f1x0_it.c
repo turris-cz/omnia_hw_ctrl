@@ -35,7 +35,14 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f1x0_it.h"
-#include "systick.h"
+#include "led_driver.h"
+#include "debounce.h"
+#include "delay.h"
+#include "msata_pci.h"
+#include "wan_lan_pci_status.h"
+#include "slave_i2c_device.h"
+#include "power_control.h"
+#include "debug_serial.h"
 
 /*!
     \brief      this function handles NMI exception
@@ -133,5 +140,80 @@ void PendSV_Handler(void)
 */
 void SysTick_Handler(void)
 {
-    delay_decrement();
+    delay_timing_decrement();
+}
+
+/**
+  * @brief  This function handles TIM16 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM15_IRQHandler(void)
+{
+    if (timer_interrupt_flag_get(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    {
+        debounce_input_timer_handler();
+        timer_interrupt_flag_clear(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP);
+    }
+}
+
+/**
+  * @brief  This function handles TIM3 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM2_IRQHandler(void)
+{
+    if (timer_interrupt_flag_get(LED_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    {
+        led_driver_send_frame();
+        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
+    }
+}
+
+
+/**
+  * @brief  This function handles TIM17 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM16_IRQHandler(void)
+{
+    struct st_i2c_status *i2c_control = &i2c_status;
+
+    if (timer_interrupt_flag_get(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    {
+        power_control_usb(USB3_PORT0, USB_ON);
+        power_control_usb(USB3_PORT1, USB_ON);
+
+        i2c_control->status_word |= USB30_PWRON_STSBIT | USB31_PWRON_STSBIT;
+
+        power_control_usb_timeout_disable();
+
+        timer_interrupt_flag_clear(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP);
+    }
+}
+
+/**
+  * @brief  This function handles I2C global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void I2C2_IRQHandler(void)
+{
+    slave_i2c_handler();
+}
+
+/**
+  * @brief  This function handles TIM3 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM5_IRQHandler(void)
+{
+    if (timer_interrupt_flag_get(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    {
+        led_driver_knight_rider_effect_handler();
+        timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
+    }
 }
