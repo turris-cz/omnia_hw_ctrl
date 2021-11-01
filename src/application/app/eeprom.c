@@ -47,7 +47,7 @@ static uint16_t VirtAddVarTab[NB_OF_VAR] = {WDG_VIRT_ADDR, RESET_VIRT_ADDR};
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-static FLASH_Status EE_Format(void);
+static fmc_state_enum EE_Format(void);
 static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_FindValidPage(uint8_t Operation);
@@ -84,7 +84,7 @@ uint16_t EE_Init(void)
         /* If erase operation was failed, a Flash error code is returned */
         if (fmc_state != FMC_READY)
         {
-          return FlashStatus;
+          return fmc_state;
         }
       }
       else if (PageStatus1 == RECEIVE_DATA) /* Page0 erased, Page1 receive */
@@ -131,12 +131,12 @@ uint16_t EE_Init(void)
             /* Read the last variables' updates */
             ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
             /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)                                                      // TODO - zkontrolovat
+            if (ReadStatus != 0x1)
             {
               /* Transfer the variable to the Page0 */
               EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
               /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != FLASH_COMPLETE)                                       // TODO - zkontrolovat
+              if (EepromStatus != FMC_READY)
               {
                 return EepromStatus;
               }
@@ -222,12 +222,12 @@ uint16_t EE_Init(void)
             /* Read the last variables' updates */
             ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
             /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)                                                      // TODO - zkontrolovat
+            if (ReadStatus != 0x1)
             {
               /* Transfer the variable to the Page1 */
               EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
               /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != FLASH_COMPLETE)                                       // TODO - zkontrolovat
+              if (EepromStatus != FMC_READY)                                       // TODO - zkontrolovat
               {
                 return EepromStatus;
               }
@@ -358,33 +358,34 @@ uint16_t EE_WriteVariable(uint16_t VirtAddress, uint16_t Data)
   * @retval Status of the last operation (Flash write or erase) done during
   *         EEPROM formating
   */
-static FLASH_Status EE_Format(void)
+static fmc_state_enum EE_Format(void)
 {
-  FLASH_Status FlashStatus = FLASH_COMPLETE;
+  //FLASH_Status FlashStatus = FLASH_COMPLETE;
+  fmc_state_enum fmc_state;
 
   /* Erase Page0 */
-  FlashStatus = FLASH_ErasePage(PAGE0_BASE_ADDRESS);
+  fmc_state = fmc_page_erase(PAGE0_BASE_ADDRESS);
 
   /* If erase operation was failed, a Flash error code is returned */
-  if (FlashStatus != FLASH_COMPLETE)
+  if (fmc_state != FMC_READY)
   {
-    return FlashStatus;
+    return fmc_state;
   }
 
   /* Set Page0 as valid page: Write VALID_PAGE at Page0 base address */
-  FlashStatus = FLASH_ProgramHalfWord(PAGE0_BASE_ADDRESS, VALID_PAGE);
+  fmc_state = fmc_halfword_program(PAGE0_BASE_ADDRESS, VALID_PAGE);
 
   /* If program operation was failed, a Flash error code is returned */
-  if (FlashStatus != FLASH_COMPLETE)
+  if (fmc_state != FMC_READY)
   {
-    return FlashStatus;
+    return fmc_state;
   }
 
   /* Erase Page1 */
-  FlashStatus = FLASH_ErasePage(PAGE1_BASE_ADDRESS);
+  fmc_state = fmc_page_erase(PAGE1_BASE_ADDRESS);
 
   /* Return Page1 erase operation status */
-  return FlashStatus;
+  return fmc_state;
 }
 
 /**
@@ -473,6 +474,7 @@ static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Da
   FLASH_Status FlashStatus = FLASH_COMPLETE;
   uint16_t ValidPage = PAGE0;
   uint32_t Address = 0x08010000, PageEndAddress = 0x080107FF;
+  fmc_state_enum fmc_state;
 
   /* Get valid Page for write operation */
   ValidPage = EE_FindValidPage(WRITE_IN_VALID_PAGE);
@@ -496,16 +498,16 @@ static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Da
     if ((*(__IO uint32_t*)Address) == 0xFFFFFFFF)
     {
       /* Set variable data */
-      FlashStatus = FLASH_ProgramHalfWord(Address, Data);
+      fmc_state = fmc_halfword_program(Address, Data);
       /* If program operation was failed, a Flash error code is returned */
-      if (FlashStatus != FLASH_COMPLETE)
+      if (fmc_state != FMC_READY)
       {
-        return FlashStatus;
+        return fmc_state;
       }
       /* Set variable virtual address */
-      FlashStatus = FLASH_ProgramHalfWord(Address + 2, VirtAddress);
+      fmc_state = fmc_halfword_program(Address + 2, VirtAddress);
       /* Return program operation status */
-      return FlashStatus;
+      return fmc_state;
     }
     else
     {
@@ -535,6 +537,7 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   uint32_t NewPageAddress = 0x080103FF, OldPageAddress = 0x08010000;
   uint16_t ValidPage = PAGE0, VarIdx = 0;
   uint16_t EepromStatus = 0, ReadStatus = 0;
+  fmc_state_enum fmc_state;
 
   /* Get active Page for read operation */
   ValidPage = EE_FindValidPage(READ_FROM_VALID_PAGE);
@@ -564,17 +567,17 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   }
 
   /* Set the new Page status to RECEIVE_DATA status */
-  FlashStatus = FLASH_ProgramHalfWord(NewPageAddress, RECEIVE_DATA);
+  fmc_state = fmc_halfword_program(NewPageAddress, RECEIVE_DATA);
   /* If program operation was failed, a Flash error code is returned */
-  if (FlashStatus != FLASH_COMPLETE)
+  if (fmc_state != FMC_READY)
   {
-    return FlashStatus;
+    return fmc_state;
   }
 
   /* Write the variable passed as parameter in the new active page */
   EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddress, Data);
   /* If program operation was failed, a Flash error code is returned */
-  if (EepromStatus != FLASH_COMPLETE)
+  if (EepromStatus != FMC_READY)
   {
     return EepromStatus;
   }
@@ -592,7 +595,7 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
         /* Transfer the variable to the new active page */
         EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
         /* If program operation was failed, a Flash error code is returned */
-        if (EepromStatus != FLASH_COMPLETE)
+        if (EepromStatus != FMC_READY)
         {
           return EepromStatus;
         }
@@ -601,23 +604,23 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   }
 
   /* Erase the old Page: Set old Page status to ERASED status */
-  FlashStatus = FLASH_ErasePage(OldPageAddress);
+  fmc_state = fmc_page_erase(OldPageAddress);
   /* If erase operation was failed, a Flash error code is returned */
-  if (FlashStatus != FLASH_COMPLETE)
+  if (fmc_state != FMC_READY)
   {
-    return FlashStatus;
+    return fmc_state;
   }
 
   /* Set new Page status to VALID_PAGE status */
-  FlashStatus = FLASH_ProgramHalfWord(NewPageAddress, VALID_PAGE);
+  fmc_state = fmc_halfword_program(NewPageAddress, VALID_PAGE);
   /* If program operation was failed, a Flash error code is returned */
-  if (FlashStatus != FLASH_COMPLETE)
+  if (fmc_state != FMC_READY)
   {
-    return FlashStatus;
+    return fmc_state;
   }
 
   /* Return last operation flash status */
-  return FlashStatus;
+  return fmc_state;
 }
 
 /**
