@@ -35,7 +35,7 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f1x0.h"
-#include "systick.h"
+
 
 void rcu_config(void);
 void led_config(void);

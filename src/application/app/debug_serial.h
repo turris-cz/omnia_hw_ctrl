@@ -14,9 +14,9 @@
 #define DBG_ENABLE      0
 
 #if DBG_ENABLE
-#define DBG(buf)        debug_print(buf);
+#define DBG_UART(buf)        debug_print(buf);
 #else
-#define DBG(...)
+#define DBG_UART(...)
 #endif
 
 /*******************************************************************************
