@@ -38,7 +38,7 @@ void app_mcu_init(void)
     uint16_t ee_data;
 
     SystemCoreClockUpdate(); /* set HSI and PLL */
-    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    fmc_unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
 
     ee_var = EE_ReadVariable(WDG_VIRT_ADDR, &ee_data);

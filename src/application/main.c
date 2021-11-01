@@ -35,6 +35,13 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f1x0.h"
+#include "delay.h"
+#include "power_control.h"
+#include "msata_pci.h"
+#include "wan_lan_pci_status.h"
+#include "led_driver.h"
+#include "slave_i2c_device.h"
+#include "debug_serial.h"
 
 
 void rcu_config(void);
@@ -50,20 +57,28 @@ int main(void)
 {
     rcu_config();
     led_config();
-    systick_config();
+
+    delay_systimer_config();
+    power_control_io_config();
+    msata_pci_indication_config();
+    wan_lan_pci_config();
+    power_control_usb_timeout_config();
+    led_driver_config();
+    slave_i2c_config();
+    debug_serial_config();
 
     while(1){
         gpio_bit_set(GPIOF, GPIO_PIN_6);
         /* delay 200ms */
-        delay_1ms(200);
+        delay(200);
         gpio_bit_set(GPIOF, GPIO_PIN_7);
         /* delay 200ms */
-        delay_1ms(200);
+        delay(200);
         /* toggle LEDs */
         gpio_bit_write(GPIOF, GPIO_PIN_6, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_6))));        
         gpio_bit_write(GPIOF, GPIO_PIN_7, (bit_status)((1 - gpio_output_bit_get(GPIOF, GPIO_PIN_7))));
         /* delay 200ms */
-        delay_1ms(200);
+        delay(200);
     }
 }
 
