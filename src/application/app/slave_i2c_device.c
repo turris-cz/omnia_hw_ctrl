@@ -58,6 +58,7 @@ enum i2c_commands {
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
 
     CMD_LED_COLOR_CORRECTION            = 0x10,
+    CMD_LED_SET_PATTERN                 = 0x11,
 };
 
 enum i2c_control_byte_mask {
@@ -519,6 +520,34 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
+                case CMD_LED_SET_PATTERN:
+                {
+                    if((i2c_state->rx_data_ctr -1) == 11) {
+                        int led, pattern, repeat, pos, len, pos_t;
+
+                        led = i2c_state->rx_buf[1] & 0xF;
+                        pattern = i2c_state->rx_buf[2];
+                        repeat = (i2c_state->rx_buf[3] << 8) |
+                                  i2c_state->rx_buf[4];
+                        pos = (i2c_state->rx_buf[5] << 8) |
+                               i2c_state->rx_buf[6];
+                        len = (i2c_state->rx_buf[7] << 8) |
+                               i2c_state->rx_buf[8];
+                        pos_t = (i2c_state->rx_buf[9] << 16) |
+                                (i2c_state->rx_buf[10] << 8) |
+                                 i2c_state->rx_buf[11];
+
+                        if (led < LED_COUNT)
+                            led_set_pattern(led, pattern, repeat, pos, len, pos_t);
+                        else
+                            led_set_pattern_all(pattern, repeat, pos, len, pos_t);
+                    }
+                    DBG("ACK\r\n");
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
                 case CMD_SET_BRIGHTNESS:
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
@@ -656,6 +685,31 @@ void slave_i2c_handler(void)
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
+                } break;
+
+                case 0x50:
+                {
+                    extern uint32_t last_led_timer_start, last_led_timer_end;
+                    *(uint32_t *)&i2c_state->tx_buf[0] = last_led_timer_start;
+                    *(uint32_t *)&i2c_state->tx_buf[4] = last_led_timer_end;
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, 8);
+                } break;
+
+                case 0x60:
+                {
+                    if((i2c_state->rx_data_ctr -1) == 1) {
+                        int op, port, enable;
+                        op = i2c_state->rx_buf[1] & 1;
+                        if (op) {
+                            port = (i2c_state->rx_buf[1] >> 1) & 1;
+                            enable = (i2c_state->rx_buf[1] >> 2) & 1;
+                            power_control_usb(port, enable);
+                        }
+                        i2c_state->tx_buf[0] = 0x99;
+                    }
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, 1);
                 } break;
 
                 default: /* command doesnt exist - send NACK */

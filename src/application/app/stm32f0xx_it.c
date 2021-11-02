@@ -168,7 +168,7 @@ void TIM3_IRQHandler(void)
 {
     if (TIM_GetITStatus(LED_TIMER, TIM_IT_Update) != RESET)
     {
-        led_send_frame();
+        led_timer_irq_handler();
         TIM_ClearITPendingBit(LED_TIMER, TIM_IT_Update);
     }
 }

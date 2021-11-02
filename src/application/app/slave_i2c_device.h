@@ -11,7 +11,7 @@
 #ifndef SLAVE_I2C_DEVICE_H
 #define SLAVE_I2C_DEVICE_H
 
-#define MAX_RX_BUFFER_SIZE                 10
+#define MAX_RX_BUFFER_SIZE                 16
 #define MAX_TX_BUFFER_SIZE                 20
 
 typedef enum slave_i2c_states {

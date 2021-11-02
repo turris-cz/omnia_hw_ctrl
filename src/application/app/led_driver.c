@@ -13,6 +13,9 @@
 #include "delay.h"
 #include "power_control.h"
 
+#define NULL ((void *)0)
+#define __packed                    __attribute__((packed))
+
 /* Private define ------------------------------------------------------------*/
 #define LED_SPI                     SPI1
 
@@ -34,6 +37,21 @@
 
 #define COLOUR_LEVELS               128
 #define COLOUR_DECIMATION           1
+
+/*
+ * SystemClock = 48MHz
+ * LED TIM freq = SystemClock / LED_TIM_PERIODE / LED_TIM_PRESCALE = 24 kHz
+ *
+ * LED pattern worker is called from LED TIM interrupt routine and must be
+ * executed executed 12 times per millisecond (12 kHz).
+ *
+ * LED_TIM_PERIODE and LED_TIM_PRESCALE must be such that the division of
+ * LED TIM freq by 12 kHz yields no remainder!
+ */
+#define LED_TIM_PERIODE             100
+#define LED_TIM_PRESCALE            20
+#define LED_PATTERN_PRESCALE        (48000000 / LED_TIM_PERIODE / LED_TIM_PRESCALE / 12000)
+
 #define MAX_LED_BRIGHTNESS          100
 #define MAX_BRIGHTNESS_STEPS        8
 #define EFFECT_TIMEOUT              5
@@ -74,12 +92,28 @@ typedef enum led_effect_states {
 	EFFECT_DEINIT
 } effect_state_t;
 
+struct led_pattern {
+	unsigned color : 24;
+	unsigned delta_t : 23;
+	unsigned gradual : 1;
+} __packed;
+
+struct led_pattern_info {
+	uint16_t length;
+	struct led_pattern patterns[];
+};
+
 struct led {
 	union {
 		uint8_t chan[4];
 		uint32_t chan32;
 	};
 	uint8_t level[3];
+
+	const struct led_pattern_info *pattern;
+	const struct led_pattern *start, *curr, *next, *end;
+	uint32_t delta_t;
+	uint16_t repeat;
 };
 
 uint16_t leds_user_mode;
@@ -172,8 +206,8 @@ static void led_timer_config(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
 	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 10 - 1;
+	TIM_TimeBaseStructure.TIM_Period = LED_TIM_PERIODE - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = LED_TIM_PRESCALE - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
@@ -288,6 +322,146 @@ void led_set_colour_all(uint32_t colour)
 		_led_set_colour(led, colour, leds_color_correction & BIT(i));
 }
 
+static const struct led_pattern_info rainbow_pattern = {
+	.length = 6,
+	.patterns = {
+		{ 0xff0000, 1000, 1 },
+		{ 0xffff00, 1000, 1 },
+		{ 0x00ff00, 1000, 1 },
+		{ 0x00ffff, 1000, 1 },
+		{ 0x0000ff, 1000, 1 },
+		{ 0xff00ff, 1000, 1 },
+	},
+};
+
+static const struct led_pattern_info knight_rider_pattern_red = {
+	.length = 3,
+	.patterns = {
+		{ 0xff0000, 150, 0 },
+		{ 0xff0000, 450, 1 },
+		{ 0x000000, 1, 0 },
+	},
+};
+
+static const struct led_pattern *
+next_pattern(const struct led_pattern *cur,
+	     const struct led_pattern_info *pattern)
+{
+	++cur;
+	if (cur == pattern->patterns + pattern->length)
+		cur = pattern->patterns;
+	return cur;
+}
+
+static const struct led_pattern_info knight_rider_pattern;
+
+void led_set_pattern(int l, int pattern_id, int repeat, int pos, int len,
+		     int pos_t)
+{
+	const struct led_pattern_info *pattern;
+	struct led *led = &leds[l];
+	int end;
+
+	switch (pattern_id) {
+	case 1:
+		pattern = &rainbow_pattern;
+		break;
+	case 2:
+		pattern = &knight_rider_pattern_red;
+		break;
+	case 3:
+		pattern = &knight_rider_pattern;
+		break;
+	default:
+		led->pattern = NULL;
+		led_set_colour(l, 0x000000);
+		return;
+	}
+
+	if (pos > pattern->length)
+		pos = 0;
+
+	if (len > pattern->length || len < 2)
+		len = pattern->length;
+
+	end = pos + len;
+	if (end >= pattern->length)
+		end -= pattern->length;
+
+	led->repeat = repeat;
+
+	led->start = &pattern->patterns[pos];
+	led->curr = led->start;
+	led->end = &pattern->patterns[end];
+	led->next = next_pattern(led->curr, pattern);
+
+	if (pos_t >= led->curr->delta_t)
+		pos_t = 0;
+
+	led->delta_t = led->curr->delta_t - pos_t;
+
+	led->pattern = pattern;
+	led_set_colour(l, led->curr->color);
+}
+
+static void led_pattern_update(int l, struct led *led,
+			       const struct led_pattern_info *pattern)
+{
+	led->curr = next_pattern(led->curr, pattern);
+	led->next = next_pattern(led->next, pattern);
+
+	if (led->next == led->end) {
+		if (led->repeat == 1) {
+			led_set_colour(l, led->curr->color);
+			led->pattern = NULL;
+			return;
+		} else {
+			led->next = led->start;
+		}
+	} else if (led->curr == led->end) {
+		if (led->repeat != 0)
+			--led->repeat;
+		led->curr = led->start;
+	}
+
+	led->delta_t = led->curr->delta_t;
+	led_set_colour(l, led->curr->color);
+}
+
+static uint32_t rgb_between(uint32_t ca, uint32_t cb, int n, int d)
+{
+	uint8_t a[4], b[4];
+	int i;
+
+	*(uint32_t *)a = __builtin_bswap32(ca << 8);
+	*(uint32_t *)b = __builtin_bswap32(cb << 8);
+
+	for (i = 0; i < 3; ++i)
+		a[i] += ((int)b[i] - (int)a[i]) * n / d;
+
+	return __builtin_bswap32(*(uint32_t *)a) >> 8;
+}
+
+static void led_pattern_work(int l)
+{
+	const struct led_pattern_info *pattern;
+	struct led *led;
+
+	led = &leds[l];
+	pattern = led->pattern;
+
+	if (!pattern)
+		return;
+
+	--led->delta_t;
+
+	if (!led->delta_t)
+		return led_pattern_update(l, led, pattern);
+
+	if (led->curr->gradual)
+		led_set_colour(l, rgb_between(led->curr->color, led->next->color, led->curr->delta_t - led->delta_t, led->curr->delta_t));
+}
+
 static void led_send_data16b(const uint16_t data)
 {
 	SPI_I2S_SendData16(LED_SPI, data);
@@ -313,10 +487,10 @@ static uint16_t led_prepare_data(int chan, int level)
 	return data << 2;
 }
 
-void led_send_frame(void)
+static void led_send_frame(void)
 {
 	static int channel = 0;
-	static int level;
+	static int level = 0;
 	uint16_t data;
 
 	data = led_prepare_data(channel++, level);
@@ -338,6 +512,28 @@ void led_send_frame(void)
 		if (level >= COLOUR_LEVELS)
 			level = 0;
 	}
+}
+
+uint32_t last_led_timer_start, last_led_timer_end;
+void led_timer_irq_handler(void)
+{
+	static int pattern_work_led = 0;
+	static int pattern_pres_cnt = 0;
+
+	last_led_timer_start = TIM_GetCounter(LED_TIMER);
+
+	if (++pattern_pres_cnt == LED_PATTERN_PRESCALE)
+		pattern_pres_cnt = 0;
+
+	if (!pattern_pres_cnt) {
+		led_pattern_work(pattern_work_led++);
+		if (pattern_work_led == LED_COUNT)
+			pattern_work_led = 0;
+	}
+
+	led_send_frame();
+
+	last_led_timer_end = TIM_GetCounter(LED_TIMER);
 }
 
 /*******************************************************************************
@@ -644,6 +840,15 @@ void led_reset_effect(FunctionalState state)
 	}
 }
 
+static const struct led_pattern_info knight_rider_pattern = {
+	.length = 3,
+	.patterns = {
+		{ 0xffffff, 70, 0 },
+		{ 0xffffff, 300, 1 },
+		{ 0x000000, 1, 0 },
+	},
+};
+
 /*******************************************************************************
   * @function   led_knight_rider_effect_handler
   * @brief      Display knight rider effect on LEDs during startup (called in
@@ -660,33 +865,27 @@ void led_knight_rider_effect_handler(void)
 	switch (effect_state) {
 	case EFFECT_INIT:
 		effect_reset_finished = RESET;
-		led_set_state_all(0);
-		led_set_colour_all(WHITE_COLOUR);
-		led_set_state(LED0, 1);
+		led_set_state_all(1);
+		led_set_colour_all(0x0);
+//		led_set_color_correction_all(1);
+		led_set_pattern(led, 3, 1, 0, 0, 0);
 		effect_state = EFFECT_UP;
 		break;
 
 	case EFFECT_UP:
 		led++;
-		led_set_state(LED11, 0);
-		led_set_state(led - 1, 0);
-		led_set_state(led, 1);
+		led_set_pattern(led, 3, 1, 0, 0, 0);
 
 		if (led >= LED11)
 			effect_state = EFFECT_DOWN; /* next state */
-		else
-			effect_state = EFFECT_UP;
 		break;
 
 	case EFFECT_DOWN:
 		led--;
-		led_set_state(led + 1, 0);
-		led_set_state(led, 1);
+		led_set_pattern(led, 3, 1, 0, 0, 0);
 
 		if (led <= 0)
 			effect_state = EFFECT_LEDSON; /* next state */
-		else
-			effect_state = EFFECT_DOWN;
 		break;
 
 	case EFFECT_LEDSON:
@@ -700,6 +899,7 @@ void led_knight_rider_effect_handler(void)
 
 		if (state_timeout_cnt >= EFFECT_TIMEOUT) {
 			led_set_state_all(0);
+//			led_set_color_correction_all(0);
 			led_set_colour_all(WHITE_COLOUR);
 
 			led_set_user_mode_all(0);

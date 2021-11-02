@@ -66,7 +66,7 @@ extern uint8_t effect_reset_finished;
 
 void led_config(void);
 
-void led_send_frame(void);
+void led_timer_irq_handler(void);
 
 void led_pwm_set_brightness(uint16_t procent_val);
 uint16_t led_pwm_get_brightness(void);
@@ -76,6 +76,18 @@ void led_set_colour(int led, uint32_t colour);
 void led_set_colour_all(uint32_t colour);
 void led_compute_levels(int led, int color_correction);
 void led_compute_levels_all(int color_correction);
+
+void led_set_pattern(int led, int pattern, int repeat, int pos, int len,
+		     int pos_t);
+
+static inline void led_set_pattern_all(int pattern, int repeat, int pos,
+				       int len, int pos_t)
+{
+	int i;
+
+	for (i = 0; i < LED_COUNT; ++i)
+		led_set_pattern(i, pattern, repeat, pos, len, pos_t);
+}
 
 static inline void led_set_color_correction(int led, int enable)
 {
