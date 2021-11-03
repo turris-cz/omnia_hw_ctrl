@@ -725,11 +725,23 @@ FlagStatus spi_i2s_interrupt_flag_get(uint32_t spi_periph, uint8_t interrupt)
 */
 FlagStatus spi_i2s_flag_get(uint32_t spi_periph, uint32_t flag)
 {
-    if(RESET != (SPI_STAT(spi_periph) & flag)){
+    FlagStatus flagsts = RESET;
+
+    uint32_t spiaddrstat = *(volatile uint32_t*)0x40013008;
+
+    flagsts = SPI_STAT(spi_periph) & flag;
+
+    if (RESET != flagsts) {
         return SET;
     }else{
         return RESET;
     }
+
+//    if(RESET != (SPI_STAT(spi_periph) & flag)){
+//        return SET;
+//    }else{
+//        return RESET;
+//    }
 }
 
 /*!

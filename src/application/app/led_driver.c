@@ -177,6 +177,7 @@ static void led_driver_timer_config(void)
 
 
     //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+    timer_auto_reload_shadow_enable(LED_TIMER);
 
     /* TIM Interrupts enable */
     /* clear channel 0 interrupt bit */
@@ -230,7 +231,7 @@ static void led_driver_send_data16b(const uint16_t data)
 {    
     spi_i2s_data_transmit(LED_SPI, data);
     /* wait for flag */
-    while(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TRANS));
+    while(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TBE));
 }
 
 /*******************************************************************************
@@ -403,7 +404,8 @@ static void led_driver_pwm_io_config(void)
 
     gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
     gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
-    gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
+   // gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
+    gpio_bit_set(GPIOA, GPIO_PIN_3);
 }
 
 /*******************************************************************************
@@ -449,7 +451,6 @@ static void led_driver_pwm_timer_config(void)
     /* enable TIMER0 primary output */
     timer_primary_output_config(PWM_TIMER, ENABLE);
 
-    /* auto-reload preload enable */
     timer_enable(PWM_TIMER);
 }
 
@@ -462,7 +463,7 @@ static void led_driver_pwm_timer_config(void)
 static void led_driver_pwm_config(void)
 {
     led_driver_pwm_io_config();
-    led_driver_pwm_timer_config();
+   // led_driver_pwm_timer_config();
 }
 
 /*******************************************************************************
@@ -507,10 +508,10 @@ void led_driver_config(void)
     led_driver_init_led(); /* set mode and state - default after reset */
 
     led_driver_pwm_config();
-    led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
+    //led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
 
-    led_driver_timer_config();
-    led_driver_timer_config_knight_rider();
+    //led_driver_timer_config();
+   // led_driver_timer_config_knight_rider();
 }
 
 /*******************************************************************************

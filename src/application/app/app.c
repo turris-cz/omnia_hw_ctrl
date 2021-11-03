@@ -71,7 +71,7 @@ void app_mcu_init(void)
     msata_pci_indication_config();
     wan_lan_pci_config();
     power_control_usb_timeout_config();
-    led_driver_config();
+    //led_driver_config();
     slave_i2c_config();
     debug_serial_config();
 
@@ -517,7 +517,7 @@ void app_mcu_cyclic(void)
         {
             if (effect_reset_finished == SET)
             {
-                led_manager();
+               // led_manager();
             }
             next_state = INPUT_MANAGER;
         }

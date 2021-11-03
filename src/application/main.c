@@ -11,6 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gd32f1x0.h"
 #include "app.h"
+#include "led_driver.h"
 
 #define APPLICATION_ADDRESS         0x08005000
 #define RAM_ADDRESS                 0x20000000
@@ -54,11 +55,16 @@ int main(void)
 
 //    __enable_irq();
 
-    app_mcu_init();
-
+//    app_mcu_init();
+    led_driver_config();
+    led_driver_set_colour(LED_COUNT, RED_COLOUR);
+    led_driver_set_led_state(LED_COUNT, LED_ON);
+int i = 0;
     while(1)
     {
-        app_mcu_cyclic();
+    i++;
+    led_driver_send_frame();
+      //  app_mcu_cyclic();
     }
 }
 

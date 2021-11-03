@@ -223,7 +223,7 @@ g_pfnVectors:
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
-  .word  SPI2_IRQHandler             /* Reserved                     */
+  .word  CAN1_TX_IRQHandler             /* Reserved                     */
   .word  CAN1_RX0_IRQHandler             /* Reserved                     */
   .word  CAN1_RX1_IRQHandler             /* Reserved                     */
   .word  CAN1_SCE_IRQHandler             /* Reserved                     */

@@ -143,6 +143,7 @@ void SysTick_Handler(void)
     delay_timing_decrement();
 }
 
+
 /**
   * @brief  This function handles TIM16 global interrupt request.
   * @param  None
@@ -216,4 +217,9 @@ void TIM5_IRQHandler(void)
         led_driver_knight_rider_effect_handler();
         timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
     }
+}
+
+void WWDG_IRQHandler(void)
+{
+    while(1);
 }
