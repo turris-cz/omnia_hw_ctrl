@@ -196,11 +196,11 @@ g_pfnVectors:
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
   .word  USBDWakeUp_IRQHandler             /* Reserved                     */
-  .word  CAN0_TX_IRQHandler             /* Reserved                     */
-  .word  CAN0_RX0_IRQHandler             /* Reserved                     */
-  .word  CAN0_RX1_IRQHandler             /* Reserved                     */
-  .word  CAN0_SCE_IRQHandler             /* Reserved                     */
-  .word  SLCD_IRQHandler             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
   .word  DMA_Channel5_6_IRQHandler             /* Reserved                     */
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
@@ -223,10 +223,10 @@ g_pfnVectors:
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
-  .word  CAN1_TX_IRQHandler             /* Reserved                     */
-  .word  CAN1_RX0_IRQHandler             /* Reserved                     */
-  .word  CAN1_RX1_IRQHandler             /* Reserved                     */
-  .word  CAN1_SCE_IRQHandler             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
+  .word  0             /* Reserved                     */
 
 /*******************************************************************************
 *
@@ -371,38 +371,13 @@ g_pfnVectors:
   .weak      USBDWakeUp_IRQHandler
   .thumb_set USBDWakeUp_IRQHandler,Default_Handler
 
-  .weak      CAN0_TX_IRQHandler
-  .thumb_set CAN0_TX_IRQHandler,Default_Handler
-
-  .weak      CAN0_RX0_IRQHandler
-  .thumb_set CAN0_RX0_IRQHandler,Default_Handler
-
-  .weak      CAN0_RX1_IRQHandler
-  .thumb_set CAN0_RX1_IRQHandler,Default_Handler
-
-  .weak      CAN0_SCE_IRQHandler
-  .thumb_set CAN0_SCE_IRQHandler,Default_Handler
-
-  .weak      SLCD_IRQHandler
-  .thumb_set SLCD_IRQHandler,Default_Handler
-
   .weak      DMA_Channel5_6_IRQHandler
   .thumb_set DMA_Channel5_6_IRQHandler,Default_Handler
 
   .weak      SPI2_IRQHandler
   .thumb_set SPI2_IRQHandler,Default_Handler
 
-  .weak      CAN1_TX_IRQHandler
-  .thumb_set CAN1_TX_IRQHandler,Default_Handler
 
-  .weak      CAN1_RX0_IRQHandler
-  .thumb_set CAN1_RX0_IRQHandler,Default_Handler
-
-  .weak      CAN1_RX1_IRQHandler
-  .thumb_set CAN1_RX1_IRQHandler,Default_Handler
-
-  .weak      CAN1_SCE_IRQHandler
-  .thumb_set CAN1_SCE_IRQHandler,Default_Handler
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
