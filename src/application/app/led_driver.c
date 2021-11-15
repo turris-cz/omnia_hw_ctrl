@@ -113,7 +113,7 @@ static void led_driver_spi_config(void)
     spi_init_struct.frame_size           = SPI_FRAMESIZE_16BIT;
     spi_init_struct.clock_polarity_phase = SPI_CK_PL_LOW_PH_1EDGE;
     spi_init_struct.nss                  = SPI_NSS_SOFT;
-    spi_init_struct.prescale             = SPI_PSC_2;
+    spi_init_struct.prescale             = SPI_PSC_4;
     spi_init_struct.endian               = SPI_ENDIAN_MSB;
 
     spi_init(LED_SPI, &spi_init_struct);
@@ -231,7 +231,7 @@ static void led_driver_send_data16b(const uint16_t data)
 {    
     spi_i2s_data_transmit(LED_SPI, data);
     /* wait for flag */
-    while(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TBE));
+    while(!(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TBE)));
 }
 
 /*******************************************************************************
@@ -404,8 +404,7 @@ static void led_driver_pwm_io_config(void)
 
     gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
     gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
-   // gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
-    gpio_bit_set(GPIOA, GPIO_PIN_3);
+    gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
 }
 
 /*******************************************************************************
@@ -437,13 +436,13 @@ static void led_driver_pwm_timer_config(void)
     timer_ocintpara.ocpolarity  = PWM_TIM_POLARITY;
     timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
 
-    timer_channel_output_config(PWM_TIMER, TIMER_CH_0, &timer_ocintpara);
+    timer_channel_output_config(PWM_TIMER, TIMER_CH_1, &timer_ocintpara);
 
     init_value = 0;
     /* CH0 configuration in PWM mode1,duty cycle x% */
-    timer_channel_output_pulse_value_config(PWM_TIMER, TIMER_CH_0, init_value);
-    timer_channel_output_mode_config(PWM_TIMER, TIMER_CH_0, TIMER_OC_MODE_PWM0);
-    timer_channel_output_shadow_config(PWM_TIMER, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
+    timer_channel_output_pulse_value_config(PWM_TIMER, TIMER_CH_1, init_value);
+    timer_channel_output_mode_config(PWM_TIMER, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(PWM_TIMER, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
     /* auto-reload preload enable */
     timer_auto_reload_shadow_enable(PWM_TIMER);
@@ -463,7 +462,7 @@ static void led_driver_pwm_timer_config(void)
 static void led_driver_pwm_config(void)
 {
     led_driver_pwm_io_config();
-   // led_driver_pwm_timer_config();
+    led_driver_pwm_timer_config();
 }
 
 /*******************************************************************************
@@ -508,10 +507,10 @@ void led_driver_config(void)
     led_driver_init_led(); /* set mode and state - default after reset */
 
     led_driver_pwm_config();
-    //led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
+    led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
 
-    //led_driver_timer_config();
-   // led_driver_timer_config_knight_rider();
+    led_driver_timer_config();
+    led_driver_timer_config_knight_rider();
 }
 
 /*******************************************************************************
@@ -530,7 +529,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
 
     counter_val = procent_val * PWM_TIM_PERIODE / MAX_LED_BRIGHTNESS;
 
-    TIMER_CH0CV(PWM_TIMER) = counter_val;
+    TIMER_CH1CV(PWM_TIMER) = counter_val;
     rgb_leds->brightness = procent_val;
 }
 
@@ -810,7 +809,7 @@ static void led_driver_timer_config_knight_rider(void)
     /* enable the TIMER interrupt */
     timer_interrupt_enable(LED_EFFECT_TIMER, TIMER_INT_UP);
 
-    nvic_irq_enable(TIMER5_DAC_IRQn, 0, 5);
+    nvic_irq_enable(TIMER5_DAC_IRQn, 0, 6);
 }
 
 /*******************************************************************************
