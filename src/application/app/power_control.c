@@ -135,12 +135,12 @@ typedef enum reset_states {
 static void power_control_prog4v5_config(void)
 {    
     /* pin config for programming */
-    rcu_periph_clock_enable(PRG_4V5_PIN_PERIPH_CLOCK);
+   // rcu_periph_clock_enable(PRG_4V5_PIN_PERIPH_CLOCK);
 
-    gpio_mode_set(PRG_4V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, PRG_4V5_PIN);
-    gpio_output_options_set(PRG_4V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, PRG_4V5_PIN);
+  //  gpio_mode_set(PRG_4V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, PRG_4V5_PIN);
+   // gpio_output_options_set(PRG_4V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, PRG_4V5_PIN);
 
-    PRG_PIN_LOW;
+   // PRG_PIN_LOW;
 }
 
 /*******************************************************************************
@@ -153,65 +153,72 @@ void power_control_io_config(void)
 {
     /* Output signals */
     rcu_periph_clock_enable(RES_RAM_PIN_PERIPH_CLOCK);
-    gpio_mode_set(RES_RAM_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, RES_RAM_PIN);
-    gpio_output_options_set(RES_RAM_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, RES_RAM_PIN);
+    gpio_mode_set(RES_RAM_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, RES_RAM_PIN
+                  | INT_MCU_PIN | ENABLE_5V_PIN | ENABLE_3V3_PIN | ENABLE_1V35_PIN
+                  | ENABLE_4V5_PIN | ENABLE_1V8_PIN | ENABLE_1V5_PIN | ENABLE_1V2_PIN
+                  | ENABLE_VTT_PIN | USB30_PWRON_PIN | USB31_PWRON_PIN | CFG_CTRL_PIN);
 
-    rcu_periph_clock_enable(INT_MCU_PIN_PERIPH_CLOCK);
-    gpio_mode_set(INT_MCU_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, INT_MCU_PIN);
-    gpio_output_options_set(INT_MCU_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, INT_MCU_PIN);
+    gpio_output_options_set(RES_RAM_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, RES_RAM_PIN
+                            | INT_MCU_PIN | ENABLE_5V_PIN | ENABLE_3V3_PIN | ENABLE_1V35_PIN
+                            | ENABLE_4V5_PIN | ENABLE_1V8_PIN | ENABLE_1V5_PIN | ENABLE_1V2_PIN
+                            | ENABLE_VTT_PIN | USB30_PWRON_PIN | USB31_PWRON_PIN | CFG_CTRL_PIN);
 
-    rcu_periph_clock_enable(ENABLE_5V_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_5V_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_5V_PIN);
-    gpio_output_options_set(ENABLE_5V_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_5V_PIN);
+//    rcu_periph_clock_enable(INT_MCU_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(INT_MCU_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, INT_MCU_PIN);
+//    gpio_output_options_set(INT_MCU_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, INT_MCU_PIN);
 
-    rcu_periph_clock_enable(ENABLE_3V3_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_3V3_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_3V3_PIN);
-    gpio_output_options_set(ENABLE_3V3_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_3V3_PIN);
+//    rcu_periph_clock_enable(ENABLE_5V_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_5V_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_5V_PIN);
+//    gpio_output_options_set(ENABLE_5V_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_5V_PIN);
 
-    rcu_periph_clock_enable(ENABLE_1V35_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_1V35_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V35_PIN);
-    gpio_output_options_set(ENABLE_1V35_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V35_PIN);
+//    rcu_periph_clock_enable(ENABLE_3V3_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_3V3_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_3V3_PIN);
+//    gpio_output_options_set(ENABLE_3V3_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_3V3_PIN);
 
-    rcu_periph_clock_enable(ENABLE_4V5_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_4V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_4V5_PIN);
-    gpio_output_options_set(ENABLE_4V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_4V5_PIN);
+//    rcu_periph_clock_enable(ENABLE_1V35_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_1V35_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V35_PIN);
+//    gpio_output_options_set(ENABLE_1V35_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V35_PIN);
 
-    rcu_periph_clock_enable(ENABLE_1V8_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_1V8_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V8_PIN);
-    gpio_output_options_set(ENABLE_1V8_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V8_PIN);
+//    rcu_periph_clock_enable(ENABLE_4V5_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_4V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_4V5_PIN);
+//    gpio_output_options_set(ENABLE_4V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_4V5_PIN);
 
-    rcu_periph_clock_enable(ENABLE_1V5_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_1V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V5_PIN);
-    gpio_output_options_set(ENABLE_1V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V5_PIN);
+//    rcu_periph_clock_enable(ENABLE_1V8_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_1V8_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V8_PIN);
+//    gpio_output_options_set(ENABLE_1V8_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V8_PIN);
 
-    rcu_periph_clock_enable(ENABLE_1V2_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_1V2_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V2_PIN);
-    gpio_output_options_set(ENABLE_1V2_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V2_PIN);
+//    rcu_periph_clock_enable(ENABLE_1V5_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_1V5_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V5_PIN);
+//    gpio_output_options_set(ENABLE_1V5_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V5_PIN);
 
-    rcu_periph_clock_enable(ENABLE_VTT_PIN_PERIPH_CLOCK);
-    gpio_mode_set(ENABLE_VTT_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_VTT_PIN);
-    gpio_output_options_set(ENABLE_VTT_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_VTT_PIN);
+//    rcu_periph_clock_enable(ENABLE_1V2_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_1V2_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_1V2_PIN);
+//    gpio_output_options_set(ENABLE_1V2_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_1V2_PIN);
 
-    rcu_periph_clock_enable(USB30_PWRON_PIN_PERIPH_CLOCK);
-    gpio_mode_set(USB30_PWRON_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, USB30_PWRON_PIN);
-    gpio_output_options_set(USB30_PWRON_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, USB30_PWRON_PIN);
+//    rcu_periph_clock_enable(ENABLE_VTT_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(ENABLE_VTT_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, ENABLE_VTT_PIN);
+//    gpio_output_options_set(ENABLE_VTT_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, ENABLE_VTT_PIN);
 
-    rcu_periph_clock_enable(USB31_PWRON_PIN_PERIPH_CLOCK);
-    gpio_mode_set(USB31_PWRON_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, USB31_PWRON_PIN);
-    gpio_output_options_set(USB31_PWRON_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, USB31_PWRON_PIN);
+//    rcu_periph_clock_enable(USB30_PWRON_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(USB30_PWRON_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, USB30_PWRON_PIN);
+//    gpio_output_options_set(USB30_PWRON_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, USB30_PWRON_PIN);
 
-    rcu_periph_clock_enable(CFG_CTRL_PIN_PERIPH_CLOCK);
-    gpio_mode_set(CFG_CTRL_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, CFG_CTRL_PIN);
-    gpio_output_options_set(CFG_CTRL_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, CFG_CTRL_PIN);
+//    rcu_periph_clock_enable(USB31_PWRON_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(USB31_PWRON_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, USB31_PWRON_PIN);
+//    gpio_output_options_set(USB31_PWRON_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, USB31_PWRON_PIN);
+
+//    rcu_periph_clock_enable(CFG_CTRL_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(CFG_CTRL_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, CFG_CTRL_PIN);
+//    gpio_output_options_set(CFG_CTRL_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, CFG_CTRL_PIN);
 
     /* OD */
     rcu_periph_clock_enable(SYSRES_OUT_PIN_PERIPH_CLOCK);
-    gpio_mode_set(SYSRES_OUT_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, SYSRES_OUT_PIN);
-    gpio_output_options_set(SYSRES_OUT_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, SYSRES_OUT_PIN);
+    gpio_mode_set(SYSRES_OUT_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, SYSRES_OUT_PIN | MANRES_PIN);
+    gpio_output_options_set(SYSRES_OUT_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, SYSRES_OUT_PIN | MANRES_PIN);
 
-    rcu_periph_clock_enable(MANRES_PIN_PERIPH_CLOCK);
-    gpio_mode_set(MANRES_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, MANRES_PIN);
-    gpio_output_options_set(MANRES_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, MANRES_PIN);
+//    rcu_periph_clock_enable(MANRES_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(MANRES_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, MANRES_PIN);
+//    gpio_output_options_set(MANRES_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, MANRES_PIN);
 
 
     /* Input signals */
@@ -219,43 +226,46 @@ void power_control_io_config(void)
     gpio_mode_set(MRES_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, MRES_PIN);
 
     rcu_periph_clock_enable(DGBRES_PIN_PERIPH_CLOCK);
-    gpio_mode_set(DGBRES_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, DGBRES_PIN);
+    gpio_mode_set(DGBRES_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, DGBRES_PIN | PG_5V_PIN
+                  | PG_3V3_PIN | PG_1V35_PIN | PG_4V5_PIN | PG_1V8_PIN | PG_1V5_PIN
+                  | PG_1V2_PIN | PG_VTT_PIN | USB30_OVC_PIN | USB31_OVC_PIN | RTC_ALARM_PIN
+                  | LED_BRT_PIN);
 
-    rcu_periph_clock_enable(PG_5V_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_5V_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_5V_PIN);
+//    rcu_periph_clock_enable(PG_5V_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_5V_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_5V_PIN);
 
-    rcu_periph_clock_enable(PG_3V3_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_3V3_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_3V3_PIN);
+//    rcu_periph_clock_enable(PG_3V3_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_3V3_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_3V3_PIN);
 
-    rcu_periph_clock_enable(PG_1V35_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_1V35_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V35_PIN);
+//    rcu_periph_clock_enable(PG_1V35_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_1V35_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V35_PIN);
 
-    rcu_periph_clock_enable(PG_4V5_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_4V5_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_4V5_PIN);
+//    rcu_periph_clock_enable(PG_4V5_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_4V5_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_4V5_PIN);
 
-    rcu_periph_clock_enable(PG_1V8_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_1V8_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V8_PIN);
+//    rcu_periph_clock_enable(PG_1V8_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_1V8_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V8_PIN);
 
-    rcu_periph_clock_enable(PG_1V5_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_1V5_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V5_PIN);
+//    rcu_periph_clock_enable(PG_1V5_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_1V5_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V5_PIN);
 
-    rcu_periph_clock_enable(PG_1V2_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_1V2_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V2_PIN);
+//    rcu_periph_clock_enable(PG_1V2_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_1V2_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_1V2_PIN);
 
-    rcu_periph_clock_enable(PG_VTT_PIN_PERIPH_CLOCK);
-    gpio_mode_set(PG_VTT_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_VTT_PIN);
+//    rcu_periph_clock_enable(PG_VTT_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(PG_VTT_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, PG_VTT_PIN);
 
-    rcu_periph_clock_enable(USB30_OVC_PIN_PERIPH_CLOCK);
-    gpio_mode_set(USB30_OVC_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, USB30_OVC_PIN);
+//    rcu_periph_clock_enable(USB30_OVC_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(USB30_OVC_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, USB30_OVC_PIN);
 
-    rcu_periph_clock_enable(USB31_OVC_PIN_PERIPH_CLOCK);
-    gpio_mode_set(USB31_OVC_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, USB31_OVC_PIN);
+//    rcu_periph_clock_enable(USB31_OVC_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(USB31_OVC_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, USB31_OVC_PIN);
 
-    rcu_periph_clock_enable(RTC_ALARM_PIN_PERIPH_CLOCK);
-    gpio_mode_set(RTC_ALARM_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, RTC_ALARM_PIN);
+//    rcu_periph_clock_enable(RTC_ALARM_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(RTC_ALARM_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, RTC_ALARM_PIN);
 
-    rcu_periph_clock_enable(LED_BRT_PIN_PERIPH_CLOCK);
-    gpio_mode_set(LED_BRT_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, LED_BRT_PIN);
+//    rcu_periph_clock_enable(LED_BRT_PIN_PERIPH_CLOCK);
+//    gpio_mode_set(LED_BRT_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, LED_BRT_PIN);
 
     gpio_bit_set(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
     gpio_bit_set(INT_MCU_PIN_PORT, INT_MCU_PIN);
@@ -594,7 +604,7 @@ void power_control_usb_timeout_config(void)
     /* enable the TIMER interrupt */
     timer_interrupt_enable(USB_TIMEOUT_TIMER, TIMER_INT_UP);
 
-
+timer_enable(USB_TIMEOUT_TIMER); //TODO - pak smazat tento radek - volani v kodu jinde
     nvic_irq_enable(TIMER16_IRQn, 0, 5);
 }
 

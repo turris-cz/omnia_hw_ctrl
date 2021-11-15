@@ -203,7 +203,7 @@ static void slave_i2c_periph_config(void)
     /* I2C Peripheral Enable */
     //I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
 
-    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+   // nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
     nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
 

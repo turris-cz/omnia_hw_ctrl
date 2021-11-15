@@ -55,16 +55,11 @@ int main(void)
 
 //    __enable_irq();
 
-//    app_mcu_init();
-    led_driver_config();
-    led_driver_set_colour(LED_COUNT, RED_COLOUR);
-    led_driver_set_led_state(LED_COUNT, LED_ON);
-int i = 0;
+    app_mcu_init();
+
     while(1)
     {
-    i++;
-    led_driver_send_frame();
-      //  app_mcu_cyclic();
+       app_mcu_cyclic();
     }
 }
 
