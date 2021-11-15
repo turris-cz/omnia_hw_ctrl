@@ -149,13 +149,25 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-void TIM15_IRQHandler(void)
+void TIMER15_IRQHandler(void)
 {
-    if (timer_interrupt_flag_get(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    if (timer_interrupt_flag_get(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP) == SET)
     {
         debounce_input_timer_handler();
         timer_interrupt_flag_clear(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP);
     }
+}
+
+
+/**
+  * @brief  This function handles I2C global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void I2C1_EV_IRQHandler(void)
+{
+  //  slave_i2c_handler();
+     while (1);
 }
 
 /**
@@ -163,12 +175,12 @@ void TIM15_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIM2_IRQHandler(void)
+void TIMER2_IRQHandler(void)
 {
-    if (timer_interrupt_flag_get(LED_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    if(SET == timer_interrupt_flag_get(LED_TIMER, TIMER_INT_UP))
     {
         led_driver_send_frame();
-        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
+        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_UP);
     }
 }
 
@@ -178,11 +190,11 @@ void TIM2_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIM16_IRQHandler(void)
+void TIMER16_IRQHandler(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
 
-    if (timer_interrupt_flag_get(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    if (timer_interrupt_flag_get(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP) == SET)
     {
         power_control_usb(USB3_PORT0, USB_ON);
         power_control_usb(USB3_PORT1, USB_ON);
@@ -195,31 +207,17 @@ void TIM16_IRQHandler(void)
     }
 }
 
-/**
-  * @brief  This function handles I2C global interrupt request.
-  * @param  None
-  * @retval None
-  */
-void I2C2_IRQHandler(void)
-{
-    slave_i2c_handler();
-}
 
 /**
   * @brief  This function handles TIM3 global interrupt request.
   * @param  None
   * @retval None
   */
-void TIM5_IRQHandler(void)
+void TIMER5_DAC_IRQHandler(void)
 {
-    if (timer_interrupt_flag_get(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP) != RESET)
+    if (timer_interrupt_flag_get(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP) == SET)
     {
         led_driver_knight_rider_effect_handler();
         timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
     }
-}
-
-void WWDG_IRQHandler(void)
-{
-    while(1);
 }
