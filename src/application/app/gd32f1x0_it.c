@@ -166,8 +166,7 @@ void TIMER15_IRQHandler(void)
   */
 void I2C1_EV_IRQHandler(void)
 {
-  //  slave_i2c_handler();
-     while (1);
+    slave_i2c_handler();
 }
 
 /**

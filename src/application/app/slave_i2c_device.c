@@ -152,10 +152,10 @@ static void slave_i2c_io_config(void)
    // gpio_af_set(I2C_GPIO_PORT, GPIO_AF_1, I2C_DATA_PIN);
 
     /* Configure I2C pins: SCL */
-    gpio_mode_set(I2C_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, I2C_CLK_PIN);
+    gpio_mode_set(I2C_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_CLK_PIN);
     gpio_output_options_set(I2C_GPIO_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_CLK_PIN);
 
-    gpio_mode_set(I2C_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, I2C_DATA_PIN);
+    gpio_mode_set(I2C_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_DATA_PIN);
     gpio_output_options_set(I2C_GPIO_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_DATA_PIN);
 }
 
@@ -170,18 +170,16 @@ static void slave_i2c_periph_config(void)
     i2c_deinit(I2C_PERIPH_NAME);
     i2c_disable(I2C_PERIPH_NAME);
 
-    //I2C_DeInit(I2C_PERIPH_NAME);
-    //I2C_Cmd(I2C_PERIPH_NAME, DISABLE);
-
 
     /* I2C clock configure */
     i2c_clock_config(I2C_PERIPH_NAME, 100000, I2C_DTCY_2);
     /* I2C address configure */
-    i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
 
-   // i2c_dualaddr_disable(I2C_PERIPH_NAME);
+    i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
+    i2c_dualaddr_enable(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR);
 
     i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
+    i2c_interrupt_enable(I2C1, I2C_INT_EV);
 
     /* enable I2C */
     i2c_enable(I2C_PERIPH_NAME);
@@ -205,7 +203,7 @@ static void slave_i2c_periph_config(void)
 
    // nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
-    nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
+   // nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
 
    /* NVIC_InitStructure.NVIC_IRQChannel = I2C2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
@@ -349,21 +347,139 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-//void slave_i2c_handler(void)
-//{
-//    struct st_i2c_status *i2c_state = &i2c_status;
-//    struct st_watchdog *wdg = &watchdog;
-//    static i2c_dir_t direction;
-//    struct led_rgb *led = leds;
-//    uint16_t idx;
-//    uint8_t led_index;
-//    uint32_t colour;
-//    eeprom_var_t ee_var;
-//    uint8_t address;
+void slave_i2c_handler(void)
+{
+    struct st_i2c_status *i2c_state = &i2c_status;
+    struct st_watchdog *wdg = &watchdog;
+    static i2c_dir_t direction;
+    struct led_rgb *led = leds;
+    uint16_t idx;
+    uint8_t led_index;
+    uint32_t colour;
+    eeprom_var_t ee_var;
+    uint8_t address;
+    static uint8_t number_of_tx_bytes;
 
-//    __disable_irq();
+    __disable_irq();
 
-//    /* address match interrupt */
+    /* address match interrupt */
+    if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND) == SET)
+    {
+        /* clear the ADDSEND bit */
+        i2c_interrupt_flag_clear(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND);
+        DBG_UART("ADDR\r\n");
+    }
+
+
+
+    /* transfer complete interrupt (TX and RX) */
+    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
+    {
+        i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
+
+        /* if more bytes than MAX_RX_BUFFER_SIZE received -> NACK */
+        if (i2c_state->rx_data_ctr > MAX_RX_BUFFER_SIZE)
+        {
+            i2c_state->rx_data_ctr = 0;
+            DBG_UART("NACK-MAX\r\n");
+            i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
+            //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
+            //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+            return;
+        }
+
+        /* check if the command (register) exists and send ACK */
+        switch(i2c_state->rx_buf[CMD_INDEX])
+        {
+            case CMD_GET_STATUS_WORD:
+            {
+                /* prepare data to be sent to the master */
+                i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
+                i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
+                DBG_UART("STS\r\n");
+
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                number_of_tx_bytes = 2;
+                i2c_state->rx_data_ctr = 0;
+                //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
+            } break;
+
+            case CMD_GET_RESET:
+            {
+                i2c_state->tx_buf[0] = i2c_state->reset_type;
+                DBG_UART("RST\r\n");
+                number_of_tx_bytes = 1;
+                i2c_state->rx_data_ctr = 0;
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+            } break;
+
+            case CMD_WATCHDOG_STATE:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    wdg->watchdog_state = i2c_state->rx_buf[1];
+                    DBG_UART("WDT STATE: ");
+                    DBG_UART((const char*)(i2c_state->rx_buf + 1));
+                    DBG_UART("\r\n");
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                /* release SCL line */
+                //number_of_tx_bytes = 1;
+            } break;
+
+            case CMD_WATCHDOG_STATUS:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    wdg->watchdog_sts = i2c_state->rx_buf[1];
+
+                    ee_var = EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
+
+                    switch(ee_var)
+                    {
+                        case VAR_FLASH_COMPLETE: DBG_UART("WDT: OK\r\n"); break;
+                        case VAR_PAGE_FULL: DBG_UART("WDT: Pg full\r\n"); break;
+                        case VAR_NO_VALID_PAGE: DBG_UART("WDT: No Pg\r\n"); break;
+                        default:
+                             break;
+                    }
+
+                    DBG_UART("WDT: ");
+                    DBG_UART((const char*)(i2c_state->rx_buf + 1));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                /* release SCL line */
+                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+            } break;
+
+            default:
+            {
+                DBG_UART("DEF\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
+            } break;
+        }
+    }
+
+    /* transmit interrupt */
+    else if((i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE)) && (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
+    {
+        if (number_of_tx_bytes > 0)
+        {
+            i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
+            number_of_tx_bytes--;
+
+            DBG_UART("send\r\n");
+        }
+    }
+
 //    if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
 //    {
 //        /* Clear IT pending bit */
@@ -758,7 +874,30 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 //        }
 //    }
 
-//    /* stop flag */
+    /* stop flag */
+    else if(i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_STPDET))
+    {
+        i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
+
+        if (i2c_state->data_tx_complete) /* data have been sent to master */
+        {
+            i2c_state->data_tx_complete = 0;
+
+            /* delete button status and counter bit from status_word */
+            if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+            {
+                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+                /* decrease button counter by the value has been sent */
+                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+            }
+        }
+
+        DBG_UART("STOP\r\n");
+
+        i2c_state->tx_data_ctr = 0;
+       // i2c_state->rx_data_ctr = 0;
+    }
+
 //    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
 //    {
 //        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
@@ -782,5 +921,5 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 //        i2c_state->rx_data_ctr = 0;
 //    }
 
-//   __enable_irq();
-//}
+   __enable_irq();
+}

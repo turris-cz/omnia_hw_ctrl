@@ -11,10 +11,10 @@
 #define DEBUG_SERIAL_H
 
 /* ! CAUTION ! UART pins are used for CARD and SFP detection ! */
-#define DBG_ENABLE      0
+#define DBG_ENABLE      1
 
 #if DBG_ENABLE
-#define DBG_UART(buf)        debug_print(buf);
+#define DBG_UART(buf)        debug_print(buf)
 #else
 #define DBG_UART(...)
 #endif

@@ -72,7 +72,7 @@ void app_mcu_init(void)
     wan_lan_pci_config();
     power_control_usb_timeout_config();
    led_driver_config();
-    //slave_i2c_config();
+    slave_i2c_config();
     debug_serial_config();
 
     DBG_UART("\r\nInit completed.\r\n");
@@ -174,7 +174,7 @@ static ret_value_t light_reset(void)
     else
     {
         wdg->watchdog_state = STOP;
-        DBG_UART("RST - WDG doesnt run\r\n")
+        DBG_UART("RST - WDG doesnt run\r\n");
     }
 
     led_driver_reset_effect(ENABLE);
