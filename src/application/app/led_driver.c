@@ -555,13 +555,25 @@ uint16_t led_driver_pwm_get_brightness(void)
 void led_driver_step_brightness(void)
 {
     struct led_rgb *rgb_leds = leds;
-    static uint8_t step = 1;
+    uint8_t i;
 
-    rgb_leds->brightness = brightness_value[step++];
+    if(rgb_leds->brightness == 0)
+    {
+        rgb_leds->brightness = 100;
+    }
+    else
+    {
+        for(i = 0; i < sizeof(brightness_value)/sizeof(*brightness_value); i++)
+        {
+            if (brightness_value[i] < rgb_leds->brightness)
+            {
+                rgb_leds->brightness = brightness_value[i];
+                break;
+            }
+        }
+    }
+
     led_driver_pwm_set_brightness(rgb_leds->brightness);
-
-    if (step >= MAX_BRIGHTNESS_STEPS)
-        step = 0;
 }
 
 /*******************************************************************************
