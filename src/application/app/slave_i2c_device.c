@@ -19,7 +19,7 @@
 #include "eeprom.h"
 #include "msata_pci.h"
 
-//static const uint8_t version[] = VERSION;
+static const uint8_t version[] = VERSION;
 
 //#define I2C_SDA_SOURCE                  GPIO_PinSource7
 //#define I2C_SCL_SOURCE                  GPIO_PinSource6
@@ -130,26 +130,11 @@ static void slave_i2c_io_config(void)
 {
     /* I2C Peripheral Disable */
     rcu_periph_clock_disable(I2C_PERIPH_CLOCK);
-    //RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, DISABLE);
 
     /* I2C Periph clock enable */
     rcu_periph_clock_enable(I2C_PERIPH_CLOCK);
-    //RCC_APB1PeriphClockCmd(I2C_PERIPH_CLOCK, ENABLE);
 
     rcu_periph_clock_enable(I2C_GPIO_CLOCK);
-    //RCC_AHBPeriphClockCmd(I2C_GPIO_CLOCK, ENABLE);
-
-    /* Connect PXx to I2C_SCL */
-    //GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SCL_SOURCE, I2C_ALTERNATE_FUNCTION);
-
-    /* Connect PXx to I2C_SDA */
-    //GPIO_PinAFConfig(I2C_GPIO_PORT, I2C_SDA_SOURCE, I2C_ALTERNATE_FUNCTION);
-
-
-    /* connect I2C_SCL_GPIO_PIN to I2C_SCL ??????????????????????????????? */
-   // gpio_af_set(I2C_GPIO_PORT, GPIO_AF_1, I2C_CLK_PIN);
-    /* connect I2C_SDA_GPIO_PIN to I2C_SDA */
-   // gpio_af_set(I2C_GPIO_PORT, GPIO_AF_1, I2C_DATA_PIN);
 
     /* Configure I2C pins: SCL */
     gpio_mode_set(I2C_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_CLK_PIN);
@@ -186,30 +171,9 @@ static void slave_i2c_periph_config(void)
     /* enable acknowledge */
     i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
 
-
-
-    //I2C_DualAddressCmd(I2C_PERIPH_NAME, DISABLE);
-    //I2C_OwnAddress2Config(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR, I2C_OA2_Mask01);
-    //I2C_DualAddressCmd(I2C_PERIPH_NAME, ENABLE);
-
-    //I2C_SlaveByteControlCmd(I2C_PERIPH_NAME, ENABLE);
-    //I2C_ReloadCmd(I2C_PERIPH_NAME, ENABLE);
-
-    /* Address match, transfer complete, stop and transmit interrupt */
-    //I2C_ITConfig(I2C_PERIPH_NAME, I2C_IT_ADDRI | I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_TXI, ENABLE);
-
-    /* I2C Peripheral Enable */
-    //I2C_Cmd(I2C_PERIPH_NAME, ENABLE);
-
-   // nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
    // nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
 
-   /* NVIC_InitStructure.NVIC_IRQChannel = I2C2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    */
 }
 
 /*******************************************************************************
@@ -370,8 +334,6 @@ void slave_i2c_handler(void)
         DBG_UART("ADDR\r\n");
     }
 
-
-
     /* transfer complete interrupt (TX and RX) */
     else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
     {
@@ -382,9 +344,7 @@ void slave_i2c_handler(void)
         {
             i2c_state->rx_data_ctr = 0;
             DBG_UART("NACK-MAX\r\n");
-            i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
-            //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
-            //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+            i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE); /* if I2C_ACK_DISABLE -> GD32 holds I2C bus? */
             return;
         }
 
@@ -400,9 +360,131 @@ void slave_i2c_handler(void)
 
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
                 number_of_tx_bytes = 2;
+
                 i2c_state->rx_data_ctr = 0;
-                //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
+
+                /* delete button status and counter bit from status_word */
+                if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+                {
+                    i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+                    /* decrease button counter by the value has been sent */
+                    button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+                }
+            } break;
+
+            case CMD_GENERAL_CONTROL:
+            {
+                if((i2c_state->rx_data_ctr -1) == TWO_BYTES_EXPECTED)
+                {
+                    slave_i2c_check_control_byte(i2c_state->rx_buf[2], \
+                        i2c_state->rx_buf[1]);
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            case CMD_LED_MODE:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
+                         (i2c_state->rx_buf[1] & 0x10) >> 4);
+                    DBG_UART("set LED mode - LED index : ");
+                    DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                    DBG_UART("\r\nLED mode: ");
+                    DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            case CMD_LED_STATE:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    led_driver_set_led_state_user(i2c_state->rx_buf[1] &
+                        0x0F, (i2c_state->rx_buf[1] & 0x10) >> 4);
+
+                    DBG_UART("set LED state - LED index : ");
+                    DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
+                    DBG_UART("\r\nLED state: ");
+                    DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            case CMD_LED_COLOUR:
+            {
+                if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
+                {
+                    led_index = i2c_state->rx_buf[1] & 0x0F;
+                    /* colour = Red + Green + Blue */
+                    colour = (i2c_state->rx_buf[2] << 16) | \
+                        (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
+                    led_driver_set_colour(led_index, colour);
+
+                    DBG_UART("set LED colour - LED index : ");
+                    DBG_UART((const char*)&led_index);
+                    DBG_UART("\r\nRED: ");
+                    DBG_UART((const char*)(i2c_state->rx_buf + 2));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+
+             } break;
+
+            case CMD_USER_VOLTAGE:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    power_control_set_voltage(i2c_state->rx_buf[1]);
+
+                    DBG_UART("user voltage: ");
+                    DBG_UART((const char*)(i2c_state->rx_buf + 1));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            case CMD_SET_BRIGHTNESS:
+            {
+                if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
+                {
+                    led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
+
+                    DBG_UART("brightness: ");
+                    DBG_UART((const char*)(i2c_state->rx_buf + 1));
+                    DBG_UART("\r\n");
+
+                    i2c_state->rx_data_ctr = 0;
+                }
+                DBG_UART("ACK\r\n");
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            case CMD_GET_BRIGHTNESS:
+            {
+                i2c_state->tx_buf[0] = led->brightness;
+                DBG_UART("brig\r\n");
+
+                number_of_tx_bytes = 1;
+                i2c_state->rx_data_ctr = 0;
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_GET_RESET:
@@ -412,7 +494,6 @@ void slave_i2c_handler(void)
                 number_of_tx_bytes = 1;
                 i2c_state->rx_data_ctr = 0;
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
             } break;
 
             case CMD_WATCHDOG_STATE:
@@ -427,8 +508,6 @@ void slave_i2c_handler(void)
                 }
                 DBG_UART("ACK\r\n");
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-                /* release SCL line */
-                //number_of_tx_bytes = 1;
             } break;
 
             case CMD_WATCHDOG_STATUS:
@@ -456,14 +535,49 @@ void slave_i2c_handler(void)
                 }
                 DBG_UART("ACK\r\n");
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-                /* release SCL line */
-                //I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+            } break;
+
+            case CMD_GET_WATCHDOG_STATE:
+            {
+                i2c_state->tx_buf[0] = wdg->watchdog_state;
+                DBG_UART("WDT GET\r\n");
+
+                i2c_state->rx_data_ctr = 0;
+
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+            } break;
+
+            /* read fw version of the current application */
+            case CMD_GET_FW_VERSION_APP:
+            {
+                for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
+                {
+                    i2c_state->tx_buf[idx] = version[idx];
+                }
+                DBG_UART("FWA\r\n");
+                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+
+                i2c_state->rx_data_ctr = 0;
+            } break;
+
+            /* read fw version of the bootloader */
+            case CMD_GET_FW_VERSION_BOOT:
+            {
+                read_bootloader_version(i2c_state->tx_buf);
+
+                DBG_UART("FWB\r\n");
+
+                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                i2c_state->rx_data_ctr = 0;
             } break;
 
             default:
             {
                 DBG_UART("DEF\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                i2c_state->rx_data_ctr = 0;
             } break;
         }
     }
@@ -476,431 +590,19 @@ void slave_i2c_handler(void)
             i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
             number_of_tx_bytes--;
 
+            if (number_of_tx_bytes == 0)
+            {
+                i2c_state->tx_data_ctr = 0;
+            }
+
             DBG_UART("send\r\n");
-        }
+        }       
     }
-
-//    if(I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_ADDR) == SET)
-//    {
-//        /* Clear IT pending bit */
-//        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_ADDR);
-
-//        /* Check if transfer direction is read (slave transmitter) */
-//        if ((I2C_PERIPH_NAME->ISR & I2C_ISR_DIR) == I2C_ISR_DIR)
-//        {
-//            address = I2C_GetAddressMatched(I2C_PERIPH_NAME);
-
-//            if (address == I2C_SLAVE_ADDRESS_EMULATOR)
-//            {
-//                direction = I2C_DIR_TRANSMITTER_EMULATOR;
-//            }
-//            else
-//            {
-//                direction = I2C_DIR_TRANSMITTER_MCU;
-//            }
-
-//            DBG_UART("S.TX\r\n");
-//        }
-//        else
-//        {
-//            address = I2C_GetAddressMatched(I2C_PERIPH_NAME);
-
-//            if (address == I2C_SLAVE_ADDRESS_EMULATOR)
-//            {
-//                direction = I2C_DIR_RECEIVER_EMULATOR;
-//            }
-//            else
-//            {
-//                direction = I2C_DIR_RECEIVER_MCU;
-//            }
-
-//            I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//            DBG_UART("S.RX\r\n");
-//        }
-//    }
-//    /* transmit interrupt */
-//    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TXIS) == SET)
-//    {
-//        I2C_SendData(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-//        DBG_UART("send\r\n");
-//    }
-//    /* transfer complete interrupt (TX and RX) */
-//    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_TCR) == SET)
-//    {
-//        if(direction == I2C_DIR_RECEIVER_MCU)
-//        {
-//            i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
-
-//            /* if more bytes than MAX_RX_BUFFER_SIZE received -> NACK */
-//            if (i2c_state->rx_data_ctr > MAX_RX_BUFFER_SIZE)
-//            {
-//                i2c_state->rx_data_ctr = 0;
-//                DBG_UART("NACK-MAX\r\n");
-//                I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
-//                I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                return;
-//            }
-
-//            /* check if the command (register) exists and send ACK */
-//            switch(i2c_state->rx_buf[CMD_INDEX])
-//            {
-//                case CMD_GENERAL_CONTROL:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == TWO_BYTES_EXPECTED)
-//                    {
-//                        slave_i2c_check_control_byte(i2c_state->rx_buf[1], \
-//                        i2c_state->rx_buf[2]);
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_LED_MODE:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
-//                        (i2c_state->rx_buf[1] & 0x10) >> 4);
-
-//                        DBG_UART("set LED mode - LED index : ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
-//                        DBG_UART("\r\nLED mode: ");
-//                        DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_LED_STATE:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        led_driver_set_led_state_user(i2c_state->rx_buf[1] &
-//                                     0x0F, (i2c_state->rx_buf[1] & 0x10) >> 4);
-
-//                        DBG_UART("set LED state - LED index : ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
-//                        DBG_UART("\r\nLED state: ");
-//                        DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_LED_COLOUR:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
-//                    {
-//                        led_index = i2c_state->rx_buf[1] & 0x0F;
-//                        /* colour = Red + Green + Blue */
-//                        colour = (i2c_state->rx_buf[2] << 16) | \
-//                        (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
-
-//                        led_driver_set_colour(led_index, colour);
-
-//                        DBG_UART("set LED colour - LED index : ")
-//                        DBG_UART((const char*)&led_index);
-//                        DBG_UART("\r\nRED: ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf + 2));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_SET_BRIGHTNESS:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
-
-//                        DBG_UART("brightness: ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf + 1));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_USER_VOLTAGE:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        power_control_set_voltage(i2c_state->rx_buf[1]);
-
-//                        DBG_UART("user voltage: ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf + 1));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_WATCHDOG_STATE:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        wdg->watchdog_state = i2c_state->rx_buf[1];
-
-//                        DBG_UART("WDT STATE: ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf + 1));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_WATCHDOG_STATUS:
-//                {
-//                    if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                    {
-//                        wdg->watchdog_sts = i2c_state->rx_buf[1];
-
-//                        ee_var = EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
-
-//                        switch(ee_var)
-//                        {
-//                            case VAR_FLASH_COMPLETE: DBG_UART("WDT: OK\r\n"); break;
-//                            case VAR_PAGE_FULL: DBG_UART("WDT: Pg full\r\n"); break;
-//                            case VAR_NO_VALID_PAGE: DBG_UART("WDT: No Pg\r\n"); break;
-//                            default:
-//                                break;
-//                        }
-
-//                        DBG_UART("WDT: ");
-//                        DBG_UART((const char*)(i2c_state->rx_buf + 1));
-//                        DBG_UART("\r\n");
-//                    }
-//                    DBG_UART("ACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    /* release SCL line */
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_GET_STATUS_WORD:
-//                {
-//                    /* prepare data to be sent to the master */
-//                    i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
-//                    i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-//                    DBG_UART("STS\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
-//                } break;
-
-//                case CMD_GET_BRIGHTNESS:
-//                {
-//                    i2c_state->tx_buf[0] = led->brightness;
-//                    DBG_UART("brig\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_GET_RESET:
-//                {
-//                    i2c_state->tx_buf[0] = i2c_state->reset_type;
-//                    DBG_UART("RST\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                case CMD_GET_WATCHDOG_STATE:
-//                {
-//                    i2c_state->tx_buf[0] = wdg->watchdog_state;
-//                    DBG_UART("WDT GET\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-
-//                /* read fw version of the current application */
-//                case CMD_GET_FW_VERSION_APP:
-//                {
-//                    for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
-//                    {
-//                        i2c_state->tx_buf[idx] = version[idx];
-//                    }
-//                    DBG_UART("FWA\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
-//                } break;
-
-//                /* read fw version of the bootloader */
-//                case CMD_GET_FW_VERSION_BOOT:
-//                {
-//                    read_bootloader_version(i2c_state->tx_buf);
-
-//                    DBG_UART("FWB\r\n");
-
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
-//                } break;
-
-//                default: /* command doesnt exist - send NACK */
-//                {
-//                    DBG_UART("NACK\r\n");
-//                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
-//                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                } break;
-//            }
-//        }
-//        else
-//        {
-//            if (direction == I2C_DIR_RECEIVER_EMULATOR)
-//            {
-//                 i2c_state->rx_buf[i2c_state->rx_data_ctr++] = I2C_ReceiveData(I2C_PERIPH_NAME);
-
-//                 switch(i2c_state->rx_buf[CMD_INDEX])
-//                 {
-//                    case CMD_LED_MODE:
-//                    {
-//                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                        {
-//                            led_driver_set_led_mode(i2c_state->rx_buf[1] & 0x0F, \
-//                            (i2c_state->rx_buf[1] & 0x10) >> 4);
-
-//                            DBG_UART("set LED mode - LED index : ");
-//                            DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
-//                            DBG_UART("\r\nLED mode: ");
-//                            DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
-//                            DBG_UART("\r\n");
-//                        }
-//                        DBG_UART("ACK\r\n");
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                        /* release SCL line */
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-
-//                    case CMD_LED_STATE:
-//                    {
-//                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                        {
-//                            led_driver_set_led_state_user(i2c_state->rx_buf[1] & 0x0F, \
-//                            (i2c_state->rx_buf[1] & 0x10) >> 4);
-
-//                            DBG_UART("set LED state - LED index : ");
-//                            DBG_UART((const char*)(i2c_state->rx_buf[1] & 0x0F));
-//                            DBG_UART("\r\nLED state: ");
-//                            DBG_UART((const char*)((i2c_state->rx_buf[1] & 0x0F) >> 4));
-//                            DBG_UART("\r\n");
-//                        }
-//                        DBG_UART("ACK\r\n");
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                        /* release SCL line */
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-
-//                    case CMD_LED_COLOUR:
-//                    {
-//                        if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
-//                        {
-//                            led_index = i2c_state->rx_buf[1] & 0x0F;
-//                            /* colour = Red + Green + Blue */
-//                            colour = (i2c_state->rx_buf[2] << 16) | \
-//                            (i2c_state->rx_buf[3] << 8) | i2c_state->rx_buf[4];
-
-//                            led_driver_set_colour(led_index, colour);
-
-//                            DBG_UART("set LED colour - LED index : ")
-//                            DBG_UART((const char*)&led_index);
-//                            DBG_UART("\r\nRED: ");
-//                            DBG_UART((const char*)(i2c_state->rx_buf + 2));
-//                            DBG_UART("\r\n");
-//                        }
-//                        DBG_UART("ACK\r\n");
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                        /* release SCL line */
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-
-//                    case CMD_SET_BRIGHTNESS:
-//                    {
-//                        if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
-//                        {
-//                            led_driver_pwm_set_brightness(i2c_state->rx_buf[1]);
-
-//                            DBG_UART("brightness: ");
-//                            DBG_UART((const char*)(i2c_state->rx_buf + 1));
-//                            DBG_UART("\r\n");
-//                        }
-//                        DBG_UART("ACK\r\n");
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                        /* release SCL line */
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-
-//                    case CMD_GET_BRIGHTNESS:
-//                    {
-//                        i2c_state->tx_buf[0] = led->brightness;
-//                        DBG_UART("brig\r\n");
-
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-
-//                    default: /* command doesnt exist - send NACK */
-//                    {
-//                        DBG_UART("EMU_NACK\r\n");
-//                        I2C_AcknowledgeConfig(I2C_PERIPH_NAME, DISABLE);
-//                        I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                    } break;
-//                 }
-//            }
-//            else /* I2C_Direction_Transmitter - MCU & EMULATOR */
-//            {
-//                DBG_UART("ACKtx\r\n");
-//                I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-//                i2c_state->data_tx_complete = 1;
-//            }
-//        }
-//    }
 
     /* stop flag */
-    else if(i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_STPDET))
+    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_STPDET))
     {
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
-
-        if (i2c_state->data_tx_complete) /* data have been sent to master */
-        {
-            i2c_state->data_tx_complete = 0;
-
-            /* delete button status and counter bit from status_word */
-            if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
-            {
-                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
-                /* decrease button counter by the value has been sent */
-                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
-            }
-        }
-
-        DBG_UART("STOP\r\n");
-
-        i2c_state->tx_data_ctr = 0;
-       // i2c_state->rx_data_ctr = 0;
-    }
-
-//    else if (I2C_GetITStatus(I2C_PERIPH_NAME, I2C_IT_STOPF) == SET)
-//    {
-//        I2C_ClearITPendingBit(I2C_PERIPH_NAME, I2C_IT_STOPF);
 
 //        if (i2c_state->data_tx_complete) /* data have been sent to master */
 //        {
@@ -915,11 +617,11 @@ void slave_i2c_handler(void)
 //            }
 //        }
 
-//        DBG_UART("STOP\r\n");
+        DBG_UART("STOP\r\n");
 
-//        i2c_state->tx_data_ctr = 0;
-//        i2c_state->rx_data_ctr = 0;
-//    }
+        //i2c_state->tx_data_ctr = 0;
+       // i2c_state->rx_data_ctr = 0;
+    }
 
    __enable_irq();
 }
