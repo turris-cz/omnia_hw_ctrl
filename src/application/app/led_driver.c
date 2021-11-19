@@ -432,7 +432,7 @@ static void led_driver_pwm_timer_config(void)
     timer_initpara.repetitioncounter = 0;
     timer_init(PWM_TIMER, &timer_initpara);
 
-    /* CH1, CH2 and CH3 configuration in PWM0 mode */
+    /* CH1 configuration in PWM0 mode */
     timer_ocintpara.ocpolarity  = PWM_TIM_POLARITY;
     timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
 

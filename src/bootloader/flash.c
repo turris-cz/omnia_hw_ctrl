@@ -24,7 +24,7 @@
   *
   ******************************************************************************
  */
-#include "stm32f0xx_conf.h"
+#include "gd32f1x0.h"
 #include "flash.h"
 
 /*******************************************************************************
@@ -35,10 +35,13 @@
 void flash_config(void)
 {
   /* Unlock the Program memory */
-  FLASH_Unlock();
+  fmc_unlock();
 
   /* Clear all FLASH flags */
-  FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGERR | FLASH_FLAG_BSY);
+  fmc_flag_clear(FMC_FLAG_PGERR);
+  fmc_flag_clear(FMC_FLAG_WPERR);
+  fmc_flag_clear(FMC_FLAG_END);
+  fmc_flag_clear(FMC_FLAG_BUSY);
 }
 
 /*******************************************************************************
@@ -55,7 +58,7 @@ uint32_t flash_erase(uint32_t start_sector)
 
   while (flashaddress <= (uint32_t) USER_FLASH_LAST_PAGE_ADDRESS)
   {
-    if (FLASH_ErasePage(flashaddress) == FLASH_COMPLETE)
+    if (fmc_page_erase(flashaddress) == FMC_READY)
     {
       flashaddress += FLASH_PAGE_SIZE;
     }
@@ -85,7 +88,7 @@ uint32_t flash_write(volatile uint32_t* flash_address, uint32_t* data, uint16_t 
   for (i = 0; (i < data_length) && (*flash_address <= (USER_FLASH_END_ADDRESS-4)); i++)
   {
     /* the operation will be done by word */
-    if (FLASH_ProgramWord(*flash_address, *(uint32_t*)(data+i)) == FLASH_COMPLETE)
+    if (fmc_word_program(*flash_address, *(uint32_t*)(data+i)) == FMC_READY)
     {
      /* Check the written value */
       if (*(uint32_t*)*flash_address != *(uint32_t*)(data+i))

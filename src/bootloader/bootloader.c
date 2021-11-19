@@ -44,8 +44,6 @@ typedef void (*pFunction)(void);
   *****************************************************************************/
 void bootloader_init(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-
      /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
@@ -55,11 +53,11 @@ void bootloader_init(void)
     led_driver_config();
     boot_i2c_config();
 
-    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    fmc_unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
     flash_config();
-    TIM_DeInit(DEBOUNCE_TIMER);
-    TIM_DeInit(USB_TIMEOUT_TIMER);
+    timer_deinit(DEBOUNCE_TIMER);
+    timer_deinit(USB_TIMEOUT_TIMER);
     __enable_irq();
 
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
@@ -67,18 +65,14 @@ void bootloader_init(void)
     debug_serial_config();
 
     /* pin settings for SYSRES_OUT signal */
-    RCC_AHBPeriphClockCmd(SYSRES_OUT_PIN_PERIPH_CLOCK, ENABLE);
 
-    GPIO_InitStructure.GPIO_Pin = SYSRES_OUT_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(SYSRES_OUT_PIN_PORT, &GPIO_InitStructure);
+    rcu_periph_clock_enable(SYSRES_OUT_PIN_PERIPH_CLOCK);
+    gpio_mode_set(SYSRES_OUT_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, SYSRES_OUT_PIN);
+    gpio_output_options_set(SYSRES_OUT_PIN_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, SYSRES_OUT_PIN);
 
-    GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
+    gpio_bit_set(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
 
-    DBG("Init\r\n");
+    DBG_UART("Init\r\n");
 }
 
 /*******************************************************************************
@@ -136,7 +130,7 @@ static boot_value_t startup_manager(void)
         {
             retval = GO_TO_APPLICATION;
 
-            DBG("R1\r\n");
+            DBG_UART("R1\r\n");
         } break;
 
         case VAR_FOUND:
@@ -146,19 +140,19 @@ static boot_value_t startup_manager(void)
                 case BOOTLOADER_REQ:
                 {
                     retval = GO_TO_FLASH;
-                    DBG("req\r\n");
+                    DBG_UART("req\r\n");
                 } break;
 
                 case FLASH_NOT_CONFIRMED: /* error */
                 {
                     retval = GO_TO_POWER_ON;
-                    DBG("ERR\r\n");
+                    DBG_UART("ERR\r\n");
                 } break;
 
                 case FLASH_CONFIRMED: /* application was flashed correctly */
                 {
                     retval = GO_TO_APPLICATION;
-                    DBG("R2\r\n");
+                    DBG_UART("R2\r\n");
                 } break;
 
                 /* flag has not been saved correctly */
@@ -169,7 +163,7 @@ static boot_value_t startup_manager(void)
         case VAR_NO_VALID_PAGE :
         {
             retval = GO_TO_POWER_ON;
-            DBG("Boot-No valid page\r\n");
+            DBG_UART("Boot-No valid page\r\n");
         }
             break;
 
@@ -260,7 +254,7 @@ void bootloader(void)
                     }
 
                     next_state = RESET_MANAGER;
-                    DBG("F_CONF\r\n");
+                    DBG_UART("F_CONF\r\n");
                 } break;
 
                 case FLASH_WRITE_ERROR: /* flashing was corrupted */
@@ -273,7 +267,7 @@ void bootloader(void)
 
         case RESET_MANAGER:
         {
-            system_reset = GPIO_ReadInputDataBit(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+            system_reset = gpio_input_bit_get(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
 
             if(system_reset == 0) /* reset is active in low level */
             {

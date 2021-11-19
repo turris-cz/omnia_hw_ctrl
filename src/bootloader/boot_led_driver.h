@@ -12,8 +12,10 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
-#define LED_TIMER                 TIM3
-#define LED_EFFECT_TIMER          TIM6
+#include "gd32f1x0.h"
+
+#define LED_TIMER                 TIMER2
+#define LED_EFFECT_TIMER          TIMER5
 
 #define LED_COUNT                 12
 
@@ -200,6 +202,6 @@ void led_driver_knight_rider_effect_handler(void);
   * @param      colour: colour in RGB range.
   * @retval     None.
   *****************************************************************************/
-void led_driver_reset_effect(FunctionalState state);
+void led_driver_reset_effect(EventStatus state);
 
 #endif /*__LED_DRIVER_H */

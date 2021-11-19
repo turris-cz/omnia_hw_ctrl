@@ -21,9 +21,9 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx.h"
+
 #include "boot_led_driver.h"
-#include "stm32f0xx_conf.h"
+#include "gd32f1x0_it.h"
 #include "debounce.h"
 #include "delay.h"
 #include "power_control.h"
@@ -149,11 +149,11 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-void TIM16_IRQHandler(void)
+void TIMER15_IRQHandler(void)
 {
-    if (TIM_GetITStatus(DEBOUNCE_TIMER, TIM_IT_Update) != RESET)
+    if (timer_interrupt_flag_get(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP) == SET)
     {
-        TIM_ClearITPendingBit(DEBOUNCE_TIMER, TIM_IT_Update);
+        timer_interrupt_flag_clear(DEBOUNCE_TIMER, TIMER_INT_FLAG_UP);
     }
 }
 
@@ -162,12 +162,12 @@ void TIM16_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIM3_IRQHandler(void)
+void TIMER2_IRQHandler(void)
 {
-    if (TIM_GetITStatus(LED_TIMER, TIM_IT_Update) != RESET)
+    if(SET == timer_interrupt_flag_get(LED_TIMER, TIMER_INT_UP))
     {
         led_driver_send_frame();
-        TIM_ClearITPendingBit(LED_TIMER, TIM_IT_Update);
+        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_UP);
     }
 }
 
@@ -177,10 +177,10 @@ void TIM3_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIM17_IRQHandler(void)
+void TIMER16_IRQHandler(void)
 {
-    if (TIM_GetITStatus(USB_TIMEOUT_TIMER, TIM_IT_Update) != RESET)
-        TIM_ClearITPendingBit(USB_TIMEOUT_TIMER, TIM_IT_Update);
+    if (timer_interrupt_flag_get(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP) == SET)
+        timer_interrupt_flag_clear(USB_TIMEOUT_TIMER, TIMER_INT_FLAG_UP);
 }
 
 /**
@@ -188,7 +188,7 @@ void TIM17_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void I2C2_IRQHandler(void)
+void I2C1_EV_IRQHandler(void)
 {
     boot_i2c_handler();
 }
@@ -199,12 +199,12 @@ void I2C2_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIM6_IRQHandler(void)
+void TIMER5_DAC_IRQHandler(void)
 {
     static uint8_t led_blink;
     static uint8_t timeout;
 
-    if (TIM_GetITStatus(LED_EFFECT_TIMER, TIM_IT_Update) != RESET)
+    if (timer_interrupt_flag_get(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP) == SET)
     {
         timeout++;
 
@@ -228,7 +228,7 @@ void TIM6_IRQHandler(void)
             }
         }
 
-        TIM_ClearITPendingBit(LED_EFFECT_TIMER, TIM_IT_Update);
+        timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
     }
 }
 

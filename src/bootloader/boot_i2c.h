@@ -8,7 +8,7 @@
  ******************************************************************************
  **/
 
-#include "stm32f0xx.h"
+#include "gd32f1x0.h"
 
 #ifndef BOOT_I2C_H
 #define BOOT_I2C_H

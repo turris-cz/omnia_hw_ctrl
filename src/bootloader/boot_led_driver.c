@@ -8,29 +8,28 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_conf.h"
 #include "boot_led_driver.h"
 #include "delay.h"
 #include "power_control.h"
 
 /* Private define ------------------------------------------------------------*/
-#define LED_SPI                     SPI1
+#define LED_SPI                     SPI0
 
-#define LED_SPI_MOSI_PIN            GPIO_Pin_7
+#define LED_SPI_MOSI_PIN            GPIO_PIN_7
 #define LED_SPI_MOSI_PIN_PORT       GPIOA
-#define LED_SPI_MOSI_PIN_CLOCK      RCC_AHBPeriph_GPIOA
+#define LED_SPI_MOSI_PIN_CLOCK      RCU_GPIOA
 #define LED_SPI_MOSI_AF             GPIO_AF_0
-#define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
+//#define LED_SPI_MOSI_SOURCE         GPIO_PinSource7
 
-#define LED_SPI_SCK_PIN             GPIO_Pin_5
+#define LED_SPI_SCK_PIN             GPIO_PIN_5
 #define LED_SPI_SCK_PIN_PORT        GPIOA
-#define LED_SPI_SCK_PIN_CLOCK       RCC_AHBPeriph_GPIOA
+#define LED_SPI_SCK_PIN_CLOCK       RCU_GPIOA
 #define LED_SPI_SCK_AF              GPIO_AF_0
-#define LED_SPI_SCK_SOURCE          GPIO_PinSource5
+//#define LED_SPI_SCK_SOURCE          GPIO_PinSource5
 
-#define LED_SPI_SS_PIN              GPIO_Pin_4
+#define LED_SPI_SS_PIN              GPIO_PIN_4
 #define LED_SPI_SS_PIN_PORT         GPIOA
-#define LED_SPI_SS_PIN_CLOCK        RCC_AHBPeriph_GPIOA
+#define LED_SPI_SS_PIN_CLOCK        RCU_GPIOA
 
 #define COLOUR_LEVELS               64
 #define COLOUR_DECIMATION           2
@@ -58,13 +57,13 @@
 // Lo => Lo-Impuls
 //-------------------------------------------------------------*/
 //#define  PWM_TIM_POLARITY           TIM_OCPolarity_High
-#define PWM_TIM_POLARITY            TIM_OCPolarity_Low
+#define PWM_TIM_POLARITY            TIMER_OC_POLARITY_LOW
 
-#define PWM_TIMER                   TIM15
+#define PWM_TIMER                   TIMER14
 
 /* Private macro -------------------------------------------------------------*/
-#define LATCH_HIGH                  GPIO_SetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
-#define LATCH_LOW                   GPIO_ResetBits(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_HIGH                  gpio_bit_set(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
+#define LATCH_LOW                   gpio_bit_reset(LED_SPI_SS_PIN_PORT, LED_SPI_SS_PIN)
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum rgb_colour {
@@ -100,26 +99,28 @@ static void led_driver_timer_config_knight_rider(void);
   *****************************************************************************/
 static void led_driver_spi_config(void)
 {
-    SPI_InitTypeDef  SPI_InitStructure;
+    spi_parameter_struct spi_init_struct;
+    /* deinitilize SPI and the parameters */
+    rcu_periph_clock_disable(RCU_SPI0);
+    spi_i2s_deinit(LED_SPI);
+    spi_struct_para_init(&spi_init_struct);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, DISABLE);
-    SPI_I2S_DeInit(LED_SPI);
+    rcu_periph_clock_enable(RCU_SPI0);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+    /* SPI0 parameter config */
+    spi_init_struct.trans_mode           = SPI_BIDIRECTIONAL_TRANSMIT;
+    spi_init_struct.device_mode          = SPI_MASTER;
+    spi_init_struct.frame_size           = SPI_FRAMESIZE_16BIT;
+    spi_init_struct.clock_polarity_phase = SPI_CK_PL_LOW_PH_1EDGE;
+    spi_init_struct.nss                  = SPI_NSS_SOFT;
+    spi_init_struct.prescale             = SPI_PSC_4;
+    spi_init_struct.endian               = SPI_ENDIAN_MSB;
 
-    SPI_I2S_DeInit(LED_SPI);
-    SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
-    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-    SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
-    SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
-    SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
-    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-    SPI_Init(LED_SPI, &SPI_InitStructure);
+    spi_init(LED_SPI, &spi_init_struct);
 
-    /* Enable the SPI peripheral */
-    SPI_Cmd(LED_SPI, ENABLE);
+    spi_enable(LED_SPI);
+
+    spi_i2s_data_frame_format_config(LED_SPI, SPI_FRAMESIZE_16BIT);
 }
 
 /*******************************************************************************
@@ -130,35 +131,17 @@ static void led_driver_spi_config(void)
   *****************************************************************************/
 static void led_driver_io_config(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    rcu_periph_clock_enable(LED_SPI_MOSI_PIN_CLOCK);
+    rcu_periph_clock_enable(LED_SPI_SCK_PIN_CLOCK);
+    rcu_periph_clock_enable(LED_SPI_SS_PIN_CLOCK);
 
-    /* Enable SCK, MOSI, and NSS GPIO clocks */
-    RCC_AHBPeriphClockCmd(LED_SPI_SCK_PIN_CLOCK | LED_SPI_MOSI_PIN_CLOCK |
-                           LED_SPI_SS_PIN_CLOCK, ENABLE);
+    /* SPI0 GPIO config: SCK/PA5, MOSI/PA7 */
+    gpio_af_set(LED_SPI_MOSI_PIN_PORT, LED_SPI_MOSI_AF, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
+    gpio_mode_set(LED_SPI_MOSI_PIN_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLDOWN, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
+    gpio_output_options_set(LED_SPI_MOSI_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_SPI_MOSI_PIN | LED_SPI_SCK_PIN);
 
-    GPIO_PinAFConfig(LED_SPI_SCK_PIN_PORT, LED_SPI_SCK_SOURCE, LED_SPI_SCK_AF);
-    GPIO_PinAFConfig(LED_SPI_MOSI_PIN_PORT, LED_SPI_MOSI_SOURCE, LED_SPI_MOSI_AF);
-
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
-
-    /* SPI SCK pin configuration */
-    GPIO_InitStructure.GPIO_Pin = LED_SPI_SCK_PIN;
-    GPIO_Init(LED_SPI_SCK_PIN_PORT, &GPIO_InitStructure);
-
-    /* SPI MOSI pin configuration */
-    GPIO_InitStructure.GPIO_Pin =  LED_SPI_MOSI_PIN;
-    GPIO_Init(LED_SPI_MOSI_PIN_PORT, &GPIO_InitStructure);
-
-    /* NSS pin configuration */
-    GPIO_InitStructure.GPIO_Pin = LED_SPI_SS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
-    GPIO_Init(LED_SPI_SS_PIN_PORT, &GPIO_InitStructure);
+    gpio_mode_set(LED_SPI_SS_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, LED_SPI_SS_PIN);
+    gpio_output_options_set(LED_SPI_SS_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_SPI_SS_PIN);
 
     /* init state - latch holds previous data */
     LATCH_LOW;
@@ -172,33 +155,39 @@ static void led_driver_io_config(void)
   *****************************************************************************/
 static void led_driver_timer_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, DISABLE);
-    TIM_DeInit(LED_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER2);
+    timer_deinit(LED_TIMER);
 
     /* Clock enable */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER2);
 
-    /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 200 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 20 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(LED_TIMER, &TIM_TimeBaseStructure);
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
-    TIM_ARRPreloadConfig(LED_TIMER, ENABLE);
+    /* Time base configuration - 1sec interrupt */
+    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    timer_initpara.prescaler         = 20 - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 200 - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(LED_TIMER, &timer_initpara);
+
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+    timer_auto_reload_shadow_enable(LED_TIMER);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(LED_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(LED_TIMER, TIMER_INT_UP);
 
-    /* TIM enable counter */
-    TIM_Cmd(LED_TIMER, ENABLE);
+    timer_enable(LED_TIMER);
 
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x04;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    nvic_irq_enable(TIMER2_IRQn, 0, 4);
 }
 
 /*******************************************************************************
@@ -240,9 +229,9 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
   *****************************************************************************/
 static void led_driver_send_data16b(const uint16_t data)
 {
-    SPI_I2S_SendData16(LED_SPI, data);
+    spi_i2s_data_transmit(LED_SPI, data);
     /* wait for flag */
-    while(SPI_I2S_GetFlagStatus(LED_SPI, SPI_I2S_FLAG_BSY));
+    while(!(spi_i2s_flag_get(LED_SPI, SPI_FLAG_TBE)));
 }
 
 /*******************************************************************************
@@ -411,19 +400,11 @@ void led_driver_send_frame(void)
   *****************************************************************************/
 static void led_driver_pwm_io_config(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    rcu_periph_clock_enable(RCU_GPIOA);
 
-    /* Clock Enable */
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_0);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
+    gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
 }
 
 /*******************************************************************************
@@ -434,35 +415,42 @@ static void led_driver_pwm_io_config(void)
   *****************************************************************************/
 static void led_driver_pwm_timer_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    TIM_OCInitTypeDef  TIM_OCInitStructure;
     uint16_t init_value;
+    timer_oc_parameter_struct timer_ocintpara;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
-    TIM_DeInit(PWM_TIMER);
+    rcu_periph_clock_enable(RCU_TIMER14);
 
-    /* Clock enable */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
+    timer_deinit(PWM_TIMER);
 
-    TIM_TimeBaseStructure.TIM_Period = PWM_TIM_PERIODE - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = PWM_TIM_PRESCALE - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(PWM_TIMER, &TIM_TimeBaseStructure);
+    /* TIMER0 configuration */
+    timer_initpara.prescaler         = PWM_TIM_PRESCALE - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = PWM_TIM_PERIODE - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(PWM_TIMER, &timer_initpara);
 
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    /* CH1 configuration in PWM0 mode */
+    timer_ocintpara.ocpolarity  = PWM_TIM_POLARITY;
+    timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
+
+    timer_channel_output_config(PWM_TIMER, TIMER_CH_1, &timer_ocintpara);
+
     init_value = 0;
+    /* CH0 configuration in PWM mode1,duty cycle x% */
+    timer_channel_output_pulse_value_config(PWM_TIMER, TIMER_CH_1, init_value);
+    timer_channel_output_mode_config(PWM_TIMER, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(PWM_TIMER, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
-    TIM_OCInitStructure.TIM_Pulse = init_value;
-    TIM_OCInitStructure.TIM_OCPolarity = PWM_TIM_POLARITY;
-    TIM_OC2Init(PWM_TIMER, &TIM_OCInitStructure);
-    TIM_OC2PreloadConfig(PWM_TIMER, TIM_OCPreload_Enable);
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(PWM_TIMER);
 
-    /* Timer enable */
-    TIM_ARRPreloadConfig(PWM_TIMER, ENABLE);
-    TIM_Cmd(PWM_TIMER, ENABLE);
-    TIM_CtrlPWMOutputs(PWM_TIMER, ENABLE);
+    /* enable TIMER0 primary output */
+    timer_primary_output_config(PWM_TIMER, ENABLE);
+
+    timer_enable(PWM_TIMER);
 }
 
 /*******************************************************************************
@@ -541,7 +529,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
 
     counter_val = procent_val * PWM_TIM_PERIODE / MAX_LED_BRIGHTNESS;
 
-    PWM_TIMER->CCR2 = counter_val;
+    TIMER_CH1CV(PWM_TIMER) = counter_val;
     rgb_leds->brightness = procent_val;
 }
 
@@ -789,35 +777,38 @@ void led_driver_double_knight_rider_effect(void)
   *****************************************************************************/
 static void led_driver_timer_config_knight_rider(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    timer_parameter_struct timer_initpara;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, DISABLE);
-    TIM_DeInit(LED_EFFECT_TIMER);
+    rcu_periph_clock_disable(RCU_TIMER5);
+    timer_deinit(LED_EFFECT_TIMER);
 
     /* Clock enable */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+    rcu_periph_clock_enable(RCU_TIMER5);
+
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
 
     /* Time base configuration */
-    TIM_TimeBaseStructure.TIM_Period = 8000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 400 - 1;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(LED_EFFECT_TIMER, &TIM_TimeBaseStructure);
+    timer_initpara.prescaler         = 400 - 1;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 12000 - 1;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(LED_EFFECT_TIMER, &timer_initpara);
 
-    TIM_ARRPreloadConfig(LED_EFFECT_TIMER, ENABLE);
+
+    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(LED_EFFECT_TIMER);
+
     /* TIM Interrupts enable */
-    TIM_ITConfig(LED_EFFECT_TIMER, TIM_IT_Update, ENABLE);
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(LED_EFFECT_TIMER, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(LED_EFFECT_TIMER, TIMER_INT_UP);
 
-    /* TIM enable counter */
-    /* TIM_Cmd(LED_EFFECT_TIMER, ENABLE); */
-
-    /* Timer is enable after reset */
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM6_DAC_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPriority = 0x05;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    nvic_irq_enable(TIMER5_DAC_IRQn, 0, 5);
 }
 
 /*******************************************************************************
@@ -826,16 +817,17 @@ static void led_driver_timer_config_knight_rider(void)
   * @param      colour: colour in RGB range.
   * @retval     None.
   *****************************************************************************/
-void led_driver_reset_effect(FunctionalState state)
+void led_driver_reset_effect(EventStatus state)
 {
     if (state == ENABLE)
     {
-        TIM_Cmd(LED_EFFECT_TIMER, ENABLE);
+        timer_enable(LED_EFFECT_TIMER);
     }
     else
     {
-        TIM_Cmd(LED_EFFECT_TIMER, DISABLE);
-        LED_EFFECT_TIMER->CNT = 0;
+        timer_disable(LED_EFFECT_TIMER);
+        timer_counter_value_config(LED_EFFECT_TIMER, 0);
+
     }
 }
 
