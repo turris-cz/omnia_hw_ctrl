@@ -205,28 +205,6 @@ g_pfnVectors:
   .word  0                                 /* Reserved                     */
   .word  0                                 /* Reserved                     */
   .word  SPI2_IRQHandler             /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0                                 /* Reserved                     */
-  .word  0             /* Reserved                     */
-  .word  0             /* Reserved                     */
-  .word  0             /* Reserved                     */
-  .word  0             /* Reserved                     */
 /*******************************************************************************
 *
 * Provide weak aliases for each Exception handler to the Default_Handler.

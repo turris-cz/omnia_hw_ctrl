@@ -1,4 +1,5 @@
-PROJ_NAME=omnia-gd32f150
+PROJ_NAME=omnia_hw_ctrl
+BOOT_NAME=bootloader_mcu
 
 ################################################################################
 #                   SETUP TOOLS                                                #
@@ -53,8 +54,15 @@ LFLAGS +="-Wl,-Map=$(PROJ_NAME).map",--cref
 LFLAGS += -nostartfiles
 LFLAGS += -Xlinker --gc-sections
 
+BOOT_LFLAGS  = -T$(BOOT_LINKER_DIR)/GD32F150_FLASH.ld
+BOOT_LFLAGS +="-Wl,-Map=$(BOOT_NAME).map",--cref
+BOOT_LFLAGS += -nostartfiles
+BOOT_LFLAGS += -Xlinker --gc-sections
+
 # directories to be searched for header files
 INCLUDE = $(addprefix -I,$(INC_DIRS))
+
+BOOT_INCLUDE = $(addprefix -I,$(BOOT_INC_DIRS))
 
 ################################################################################
 #                   SOURCE FILES DIRECTORIES                                   #
@@ -94,7 +102,16 @@ INC_DIRS += $(APP_SRC_DIR)
 ################################################################################
 SRCS  += main.c
 SRCS  += gd32f1x0_it.c
-
+SRCS  += wan_lan_pci_status.c
+SRCS  += slave_i2c_device.c
+SRCS  += power_control.c
+SRCS  += msata_pci.c
+SRCS  += led_driver.c
+SRCS  += delay.c
+SRCS  += debug_serial.c
+SRCS  += debounce.c
+SRCS  += app.c
+SRCS  += eeprom.c
 
 
 ################# STM LIB ##########################
@@ -109,16 +126,7 @@ SRCS  += gd32f1x0_spi.c
 SRCS  += gd32f1x0_i2c.c
 SRCS  += gd32f1x0_fmc.c
 
-SRCS  += wan_lan_pci_status.c
-SRCS  += slave_i2c_device.c
-SRCS  += power_control.c
-SRCS  += msata_pci.c
-SRCS  += led_driver.c
-SRCS  += delay.c
-SRCS  += debug_serial.c
-SRCS  += debounce.c
-SRCS  += app.c
-SRCS  += eeprom.c
+
 
 # startup file, calls main
 ASRC  = startup_gd32f1x0.s
@@ -126,39 +134,111 @@ ASRC  = startup_gd32f1x0.s
 OBJS  = $(SRCS:.c=.o)
 OBJS += $(ASRC:.s=.o)
 
+#BOOTLOADER -------------------------------------------------------------------
+BOOT_ROOT_DIR		= $(PROJ_ROOT_DIR)/bootloader
+BOOT_LINKER_DIR		= $(BOOT_ROOT_DIR)/linker
+
+BOOT_STM_ROOT_LIB  	= $(APP_ROOT_DIR)/GD32F1x0_Firmware_Library
+BOOT_STM_SRC_DIR    = $(BOOT_STM_ROOT_LIB)/GD32F1x0_standard_peripheral/Source
+
+BOOT_STM_CMSIS_DIR 	= $(APP_ROOT_DIR)/GD32F1x0_Firmware_Library/CMSIS/GD/GD32F1x0/Source
+
+BOOT_STARTUP_DIR = $(BOOT_ROOT_DIR)/startup
+
+vpath %.c $(BOOT_ROOT_DIR)
+vpath %.c $(BOOT_STM_SRC_DIR)
+vpath %.c $(BOOT_STM_CMSIS_DIR)
+
+BOOT_INC_DIRS += $(BOOT_STM_ROOT_LIB)/GD32F1x0_standard_peripheral/Include
+BOOT_INC_DIRS += $(BOOT_STM_ROOT_LIB)//CMSIS/GD/GD32F1x0/Include
+BOOT_INC_DIRS += $(BOOT_ROOT_DIR)
+BOOT_INC_DIRS += $(BOOT_STM_ROOT_LIB)/CMSIS
+
+INC_DIRS += $(STM_ROOT_DIR)/GD32F1x0_standard_peripheral/Include
+INC_DIRS += $(STM_ROOT_DIR)/CMSIS
+INC_DIRS += $(STM_ROOT_DIR)/CMSIS/GD/GD32F1x0/Include
+INC_DIRS += $(APP_SRC_DIR)
+
+BOOTSRCS  += boot_main.c
+BOOTSRCS  += boot_i2c.c
+BOOTSRCS  += flash.c
+BOOTSRCS  += boot_gd32f1x0_it.c
+BOOTSRCS  += system_gd32f1x0.c
+BOOTSRCS  += boot_led_driver.c
+BOOTSRCS  += delay.c
+BOOTSRCS  += power_control.c
+BOOTSRCS  += debug_serial.c
+BOOTSRCS  += eeprom.c
+BOOTSRCS  += bootloader.c
+
+BOOTSRCS  += gd32f1x0_misc.c
+BOOTSRCS  += gd32f1x0_rcu.c
+BOOTSRCS  += gd32f1x0_gpio.c
+BOOTSRCS  += gd32f1x0_usart.c
+BOOTSRCS  += gd32f1x0_timer.c
+BOOTSRCS  += gd32f1x0_spi.c
+BOOTSRCS  += gd32f1x0_i2c.c
+BOOTSRCS  += gd32f1x0_fmc.c
+
+BOOTASRC  = $(BOOT_STARTUP_DIR)/boot_startup_gd32f1x0.s
+
+BOOT_OBJS  = $(BOOTSRCS:.c=.o)
+BOOT_OBJS += $(BOOTASRC:.s=.o)
+
 ################################################################################
 #                         SIZE OF OUTPUT                                       #
 ################################################################################
-ELFSIZE = $(SIZE) -d $(PROJ_NAME).elf
+APP_ELFSIZE = $(SIZE) -d $(APP_NAME).elf
 
-buildsize: $(PROJ_NAME).elf
+app_buildsize: $(APP_NAME).elf
 	@echo Program Size: 
-	$(ELFSIZE)
+	$(APP_ELFSIZE)
+
+BOOT_ELFSIZE = $(SIZE) -d $(BOOT_NAME).elf
+
+boot_buildsize: $(BOOT_NAME).elf
+	@echo Program Size: 
+	$(BOOT_ELFSIZE)
 
 ################################################################################
 #                         SETUP TARGETS                                        #
 ################################################################################
 
-.PHONY: all
+.PHONY: app
 
-all: $(PROJ_NAME).elf buildsize
+all: app boot
+
+app: $(APP_NAME).elf app_buildsize
+
+boot: $(BOOT_NAME).elf boot_buildsize
 						
-$(PROJ_NAME).elf: $(OBJS)
+$(APP_NAME).elf: $(OBJS)
 	@echo "[Linking    ]  $@"	
 	@$(CC) $(CFLAGS) $(LFLAGS) $(INCLUDE) $^ -o $@
-	@$(OBJCOPY) -O ihex $(PROJ_NAME).elf   $(PROJ_NAME).hex
-	@$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
+	@$(OBJCOPY) -O ihex $(APP_NAME).elf   $(APP_NAME).hex
+	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
+
+$(BOOT_NAME).elf: $(BOOT_OBJS)
+	@echo "[Linking    ]  $@"	
+	@$(CC) $(CFLAGS) $(BOOT_LFLAGS) $(BOOT_INCLUDE) $^ -o $@
+	@$(OBJCOPY) -O ihex $(BOOT_NAME).elf   $(BOOT_NAME).hex
+	@$(OBJCOPY) -O binary $(BOOT_NAME).elf $(BOOT_NAME).bin
 
 %.o : %.c
 	@echo "[Compiling  ]  $^"
-	$(CC) -c $(DEFS) $(CFLAGS) $(INCLUDE) $< -o $@
+	$(CC) -c $(DEFS) $(CFLAGS) $(INCLUDE) $(BOOT_INCLUDE) $< -o $@
 
 %.o : %.s 
 	@echo "[Assembling ]" $^
 	@$(AS) $(AFLAGS) $< -o $@
 
 clean:
-	rm -r -f *.o $(PROJ_NAME).elf $(PROJ_NAME).hex $(PROJ_NAME).bin $(PROJ_NAME).map
+	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
+
+cleanapp:
+	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map
+cleanboot:
+	rm -r -f *.o $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
 
 #********************************
 # generating of the dependencies

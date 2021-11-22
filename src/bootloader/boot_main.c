@@ -9,7 +9,7 @@
  **/
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx.h"
+//#include "stm32f0xx.h"
 #include "bootloader.h"
 
 
@@ -20,7 +20,7 @@
  ******************************************************************************/
 int boot_main(void)
 {
-    SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_Flash);
+   // SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_Flash);
 
     bootloader_init();
 

@@ -10,8 +10,8 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 0x10000 /*40K*/
-     RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 0x02000 /*8K*/
+     FLASH (rx)      : ORIGIN = 0x08005000, LENGTH = 0x0A000 /*40K*/
+     RAM (xrw)       : ORIGIN = 0x20000110, LENGTH = 0x02000 - 0x110 /*8K - 192B for vector table */
    }
 
    /* define stack size and heap size here */
