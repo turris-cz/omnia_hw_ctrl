@@ -48,6 +48,8 @@ void bootloader_init(void)
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
 
+    timer_deinit(LED_TIMER);
+
     /* peripheral initialization*/
     delay_systimer_config();
     led_driver_config();
@@ -87,6 +89,8 @@ static void start_application(void)
     uint32_t app_stack;
 
     __disable_irq();
+    i2c_deinit(SPI0);
+    rcu_periph_clock_disable(RCU_SPI0);
 
     /* Get the application stack pointer (First entry in the application vector table) */
     app_stack = (uint32_t) *((volatile uint32_t*)APPLICATION_ADDRESS);

@@ -37,6 +37,7 @@ void app_mcu_init(void)
     eeprom_var_t ee_var;
     uint16_t ee_data;
 
+    SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
     fmc_unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */

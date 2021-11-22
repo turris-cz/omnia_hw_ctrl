@@ -1,4 +1,4 @@
-PROJ_NAME=omnia_hw_ctrl
+APP_NAME=omnia_hw_ctrl
 BOOT_NAME=bootloader_mcu
 
 ################################################################################
@@ -50,7 +50,7 @@ CFLAGS += -fdata-sections
 #    -Map:      create map file
 #    --cref:    add cross reference to  map file
 LFLAGS  = -T$(LINKER_DIR)/GD32F150_FLASH.ld
-LFLAGS +="-Wl,-Map=$(PROJ_NAME).map",--cref
+LFLAGS +="-Wl,-Map=$(APP_NAME).map",--cref
 LFLAGS += -nostartfiles
 LFLAGS += -Xlinker --gc-sections
 
