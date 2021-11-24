@@ -87,7 +87,7 @@ static void boot_i2c_periph_config(void)
     i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
 
     i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
-    i2c_interrupt_enable(I2C1, I2C_INT_EV);
+    i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_EV);
 
     /* enable I2C */
     i2c_enable(I2C_PERIPH_NAME);
@@ -121,6 +121,8 @@ void boot_i2c_handler(void)
     //static uint16_t direction;
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint8_t data;
+
+    __disable_irq();
 
     if (!flash_erase_sts) /* we are at the beginning again */
     {
@@ -164,6 +166,8 @@ void boot_i2c_handler(void)
 
         DBG_UART("STOP\r\n");
     }
+
+    __enable_irq();
 }
 
 /*******************************************************************************

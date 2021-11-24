@@ -278,7 +278,7 @@ uint16_t EE_Init(void)
 uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data)
 {
   uint16_t ValidPage = PAGE0;
-  uint16_t AddressValue = 0x5555, ReadStatus = 1;
+  uint16_t AddressValue = 0x5555, ReadStatus = VAR_NOT_FOUND;
   uint32_t Address = 0x08010000, PageStartAddress = 0x08010000;
 
   /* Get active Page for read operation */
@@ -309,7 +309,7 @@ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data)
       *Data = (*(__IO uint16_t*)(Address - 2));
 
       /* In case variable value is read, reset ReadStatus flag */
-      ReadStatus = 0;
+      ReadStatus = VAR_FOUND;
 
       break;
     }
