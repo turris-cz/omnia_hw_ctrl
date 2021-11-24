@@ -12,6 +12,8 @@
 #include "gd32f1x0.h"
 #include "app.h"
 #include "led_driver.h"
+#include "debounce.h"
+#include "power_control.h"
 
 #define APPLICATION_ADDRESS         0x08005000
 #define RAM_ADDRESS                 0x20000000
@@ -84,13 +86,33 @@ void start_bootloader(void)
     pFunction boot_entry;
     uint32_t boot_stack;
 
+    rcu_deinit();
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+
     __disable_irq();
+
+    spi_i2s_deinit(SPI0);
+    timer_deinit(LED_TIMER);
+    timer_deinit(DEBOUNCE_TIMER);
+    timer_deinit(LED_EFFECT_TIMER);
+    timer_deinit(USB_TIMEOUT_TIMER);
+    i2c_deinit(I2C1);
+    usart_deinit(USART0);
+    gpio_deinit(GPIOA);
+    gpio_deinit(GPIOB);
+    gpio_deinit(GPIOC);
+    gpio_deinit(GPIOD);
+    gpio_deinit(GPIOF);
 
     /* Get the Bootloader stack pointer (First entry in the Bootloader vector table) */
     boot_stack = (uint32_t) *((volatile uint32_t*)BOOTLOADER_ADDRESS);
 
     /* Get the Bootloader entry point (Second entry in the Bootloader vector table) */
     boot_entry = (pFunction) *(volatile uint32_t*) (BOOTLOADER_ADDRESS + 4);
+
+    SCB->VTOR = BOOTLOADER_ADDRESS;
 
     /* Set the Bootloader stack pointer */
     __set_MSP(boot_stack);

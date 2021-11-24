@@ -47,7 +47,7 @@ void bootloader_init(void)
      /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
-
+    __enable_irq();
     timer_deinit(LED_TIMER);
 
     /* peripheral initialization*/
@@ -60,7 +60,7 @@ void bootloader_init(void)
     flash_config();
     timer_deinit(DEBOUNCE_TIMER);
     timer_deinit(USB_TIMEOUT_TIMER);
-   // __enable_irq();
+
 
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
     led_driver_reset_effect(ENABLE);
