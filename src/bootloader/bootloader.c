@@ -60,7 +60,7 @@ void bootloader_init(void)
     flash_config();
     timer_deinit(DEBOUNCE_TIMER);
     timer_deinit(USB_TIMEOUT_TIMER);
-    __enable_irq();
+   // __enable_irq();
 
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
     led_driver_reset_effect(ENABLE);
@@ -88,15 +88,38 @@ static void start_application(void)
     pFunction app_entry;
     uint32_t app_stack;
 
+
+    rcu_deinit();
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+
     __disable_irq();
-    i2c_deinit(SPI0);
-    rcu_periph_clock_disable(RCU_SPI0);
+
+    spi_i2s_deinit(SPI0);
+    //rcu_deinit();
+    //rcu_periph_clock_disable(RCU_SPI0);//???
+    timer_deinit(LED_TIMER);
+    timer_deinit(DEBOUNCE_TIMER);
+    timer_deinit(LED_EFFECT_TIMER);
+    timer_deinit(USB_TIMEOUT_TIMER);
+    i2c_deinit(I2C1);
+    usart_deinit(USART0);
+    gpio_deinit(GPIOA);
+    gpio_deinit(GPIOB);
+    gpio_deinit(GPIOC);
+    gpio_deinit(GPIOD);
+    gpio_deinit(GPIOF);
+
 
     /* Get the application stack pointer (First entry in the application vector table) */
     app_stack = (uint32_t) *((volatile uint32_t*)APPLICATION_ADDRESS);
 
     /* Get the application entry point (Second entry in the application vector table) */
     app_entry = (pFunction) *(volatile uint32_t*) (APPLICATION_ADDRESS + 4);
+
+
+    SCB->VTOR = APPLICATION_ADDRESS;
 
     /* Set the application stack pointer */
     __set_MSP(app_stack);

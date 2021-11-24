@@ -166,22 +166,27 @@ static void led_driver_timer_config(void)
     /* initialize TIMER init parameter struct */
     timer_struct_para_init(&timer_initpara);
 
-    /* Time base configuration - 1sec interrupt */
-    /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
+    /* Time base configuration - 18MHz */
     timer_initpara.prescaler         = 20 - 1;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 200 - 1;
+    timer_initpara.period            = 300 - 1;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_init(LED_TIMER, &timer_initpara);
 
-
-    //???TIM_ARRPreloadConfig(USB_TIMEOUT_TIMER, ENABLE);
     timer_auto_reload_shadow_enable(LED_TIMER);
 
     /* TIM Interrupts enable */
     /* clear channel 0 interrupt bit */
     timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_CH0);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_CH1);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_CH2);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_CH3);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_CMT);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_TRG);
+    timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_BRK);
+
     /* enable the TIMER interrupt */
     timer_interrupt_enable(LED_TIMER, TIMER_INT_UP);
 

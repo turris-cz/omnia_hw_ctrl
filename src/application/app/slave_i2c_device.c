@@ -39,7 +39,7 @@ static const uint8_t version[] = VERSION;
 
 #define CMD_INDEX                       0
 #define NUMBER_OF_BYTES_VERSION         MAX_TX_BUFFER_SIZE
-#define BOOTLOADER_VERSION_ADDR         0x080000C0
+#define BOOTLOADER_VERSION_ADDR         0x08000110
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */

@@ -176,10 +176,10 @@ void I2C1_EV_IRQHandler(void)
   */
 void TIMER2_IRQHandler(void)
 {
-    if(SET == timer_interrupt_flag_get(LED_TIMER, TIMER_INT_UP))
+    if(SET == timer_interrupt_flag_get(LED_TIMER, TIMER_INT_FLAG_UP))
     {
         led_driver_send_frame();
-        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_UP);
+        timer_interrupt_flag_clear(LED_TIMER, TIMER_INT_FLAG_UP);
     }
 }
 

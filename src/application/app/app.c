@@ -39,10 +39,14 @@ void app_mcu_init(void)
 
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
+    __enable_irq();
+
     fmc_unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
 
     ee_var = EE_ReadVariable(WDG_VIRT_ADDR, &ee_data);
+
+    debug_serial_config();
 
     switch(ee_var)
     {
@@ -72,9 +76,9 @@ void app_mcu_init(void)
     msata_pci_indication_config();
     wan_lan_pci_config();
     power_control_usb_timeout_config();
-   led_driver_config();
+    led_driver_config();
     slave_i2c_config();
-    debug_serial_config();
+
 
     DBG_UART("\r\nInit completed.\r\n");
 }

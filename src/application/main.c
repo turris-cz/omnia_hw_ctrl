@@ -29,13 +29,13 @@ void start_bootloader(void);
 int main(void)
 {
     /* Copy interrupt vector table to the RAM. */
-    volatile uint32_t *vector_table = (volatile uint32_t *)RAM_ADDRESS;
-    uint32_t vector_index = 0;
+//    volatile uint32_t *vector_table = (volatile uint32_t *)RAM_ADDRESS;
+//    uint32_t vector_index = 0;
 
-    for(vector_index = 0; vector_index < 68; vector_index++)
-    {
-        vector_table[vector_index] = *(volatile uint32_t*)((uint32_t)APPLICATION_ADDRESS + (vector_index << 2));
-    }
+//    for(vector_index = 0; vector_index < 68; vector_index++)
+//    {
+//        vector_table[vector_index] = *(volatile uint32_t*)((uint32_t)APPLICATION_ADDRESS + (vector_index << 2));
+//    }
 
     /* force AHB reset */
     rcu_periph_reset_enable(RCU_GPIOARST);
@@ -43,7 +43,7 @@ int main(void)
     rcu_periph_reset_enable(RCU_GPIOCRST);
     rcu_periph_reset_enable(RCU_GPIODRST);
     rcu_periph_reset_enable(RCU_GPIOFRST);
-    rcu_periph_reset_enable(RCU_SPI0RST);
+    //rcu_periph_reset_enable(RCU_SPI0RST);
 
 //    RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | \
 //        RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOF, ENABLE);
@@ -57,9 +57,9 @@ int main(void)
     rcu_periph_reset_disable(RCU_GPIOCRST);
     rcu_periph_reset_disable(RCU_GPIODRST);
     rcu_periph_reset_disable(RCU_GPIOFRST);
-    rcu_periph_reset_disable(RCU_SPI0RST);
-    i2c_deinit(SPI0);
-    rcu_periph_clock_disable(RCU_SPI0);
+    //rcu_periph_reset_disable(RCU_SPI0RST);
+    //spi_i2s_deinit(SPI0);
+    //rcu_periph_clock_disable(RCU_SPI0);
 
 //    RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | \
 //        RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOF, DISABLE);
@@ -69,7 +69,7 @@ int main(void)
     /* Remap SRAM */
    // SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
 
-    __enable_irq();
+
 
     app_mcu_init();
 
