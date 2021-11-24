@@ -252,6 +252,7 @@ void bootloader(void)
 
             power_control_enable_regulators();
             power_control_first_startup();
+            //delay(100);
             power_supply_failure = 1;
             next_state = FLASH_MANAGER;
         } break;

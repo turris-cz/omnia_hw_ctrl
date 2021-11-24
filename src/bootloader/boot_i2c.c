@@ -121,6 +121,7 @@ void boot_i2c_handler(void)
     //static uint16_t direction;
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint8_t data;
+    static uint8_t rx_dir;
 
     __disable_irq();
 
@@ -141,6 +142,7 @@ void boot_i2c_handler(void)
     else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
+        rx_dir = 1;
     }
 
     /* transmit interrupt */
@@ -161,6 +163,9 @@ void boot_i2c_handler(void)
     else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_STPDET))
     {
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
+
+        if (rx_dir == 1)
+            i2c_state->data_rx_complete = 1;
 
         /* disable I2C interrupts ? */
 
