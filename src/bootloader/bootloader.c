@@ -47,8 +47,8 @@ void bootloader_init(void)
      /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
-    __enable_irq();
-    timer_deinit(LED_TIMER);
+
+   // timer_deinit(LED_TIMER);
 
     /* peripheral initialization*/
     delay_systimer_config();
@@ -58,9 +58,9 @@ void bootloader_init(void)
     fmc_unlock(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
     flash_config();
-    timer_deinit(DEBOUNCE_TIMER);
-    timer_deinit(USB_TIMEOUT_TIMER);
-
+   // timer_deinit(DEBOUNCE_TIMER);
+   // timer_deinit(USB_TIMEOUT_TIMER);
+    __enable_irq();
 
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
     led_driver_reset_effect(ENABLE);
@@ -89,27 +89,34 @@ static void start_application(void)
     uint32_t app_stack;
 
 
-    rcu_deinit();
-    SysTick->CTRL = 0;
-    SysTick->LOAD = 0;
-    SysTick->VAL = 0;
+     __disable_irq();
 
-    __disable_irq();
-
+    spi_disable(SPI0);
     spi_i2s_deinit(SPI0);
-    //rcu_deinit();
-    //rcu_periph_clock_disable(RCU_SPI0);//???
+    timer_disable(LED_TIMER);
     timer_deinit(LED_TIMER);
+    timer_disable(DEBOUNCE_TIMER);
     timer_deinit(DEBOUNCE_TIMER);
+    timer_disable(LED_EFFECT_TIMER);
     timer_deinit(LED_EFFECT_TIMER);
+    timer_disable(USB_TIMEOUT_TIMER);
     timer_deinit(USB_TIMEOUT_TIMER);
+    i2c_disable(I2C1);
     i2c_deinit(I2C1);
+    usart_disable(USART0);
     usart_deinit(USART0);
     gpio_deinit(GPIOA);
     gpio_deinit(GPIOB);
     gpio_deinit(GPIOC);
     gpio_deinit(GPIOD);
     gpio_deinit(GPIOF);
+
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+
+    rcu_deinit();
+
 
 
     /* Get the application stack pointer (First entry in the application vector table) */
@@ -252,7 +259,6 @@ void bootloader(void)
 
             power_control_enable_regulators();
             power_control_first_startup();
-            //delay(100);
             power_supply_failure = 1;
             next_state = FLASH_MANAGER;
         } break;
@@ -295,7 +301,7 @@ void bootloader(void)
 
         case RESET_MANAGER:
         {
-            system_reset = gpio_input_bit_get(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+            system_reset = gpio_output_bit_get(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
 
             if(system_reset == 0) /* reset is active in low level */
             {

@@ -121,9 +121,9 @@ void boot_i2c_handler(void)
     //static uint16_t direction;
     static uint32_t flash_address = APPLICATION_ADDRESS;
     static uint8_t data;
-    static uint8_t rx_dir;
+    static uint8_t rx_dir; /* direction RX */
 
-    __disable_irq();
+   // __disable_irq();
 
     if (!flash_erase_sts) /* we are at the beginning again */
     {
@@ -138,15 +138,16 @@ void boot_i2c_handler(void)
         DBG_UART("ADDR\r\n");
     }
 
-    /* transfer complete interrupt (TX and RX) */
+    /* receive interrupt */
     else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
         rx_dir = 1;
+       // i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
     }
 
     /* transmit interrupt */
-    else if((i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE)) && (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
+    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE))
     {
         flash_read(&flash_address, &data);
         i2c_data_transmit(I2C_PERIPH_NAME, data);
@@ -156,6 +157,7 @@ void boot_i2c_handler(void)
         {
             i2c_state->tx_data_ctr = 0;
         }
+
         DBG_UART("send\r\n");
     }
 
@@ -165,14 +167,20 @@ void boot_i2c_handler(void)
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
 
         if (rx_dir == 1)
+        {
             i2c_state->data_rx_complete = 1;
+            rx_dir = 0;
+
+            i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+            i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_EV);
+        }
 
         /* disable I2C interrupts ? */
 
         DBG_UART("STOP\r\n");
     }
 
-    __enable_irq();
+   // __enable_irq();
 }
 
 /*******************************************************************************
@@ -186,9 +194,9 @@ static void clear_rxbuf(void)
     struct st_i2c_status *i2c_state = &i2c_status;
     uint16_t idx;
 
-    for (idx = 0; idx < I2C_DATA_PACKET_SIZE; idx++)
+    for (idx = 0; idx < MAX_RX_BUFFER_SIZE; idx++)
     {
-        i2c_state->rx_buf[idx + DATA_START_BYTE_IDX] = 0;
+        i2c_state->rx_buf[idx] = 0;
     }
 }
 
@@ -205,9 +213,29 @@ flash_i2c_states_t boot_i2c_flash_data(void)
     uint8_t data[I2C_DATA_PACKET_SIZE];
     static flash_i2c_states_t flash_status = FLASH_CMD_NOT_RECEIVED;
     static uint32_t flash_address = APPLICATION_ADDRESS;
+    static uint8_t run_number;
+    uint8_t i;
 
     if (i2c_state->data_rx_complete)
     {
+        run_number++; /* just for debug purpose, delete it later */
+
+        switch(run_number)
+        {
+            case 1:
+            {
+                i = 1;
+            } break;
+
+
+            case 2:
+            {
+                i = 2;
+            }break;
+
+            default: i = 99; break;
+        }
+
         memset(data, 0, sizeof(data));
 
         flash_status = FLASH_CMD_RECEIVED;
@@ -255,8 +283,8 @@ flash_i2c_states_t boot_i2c_flash_data(void)
         i2c_state->data_rx_complete = 0;
         i2c_state->rx_data_ctr = 0;
 
-        //i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
-        //i2c_interrupt_enable(I2C1, I2C_INT_EV)
+        i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
+        i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_EV);
     }
 
     return flash_status;
