@@ -12,7 +12,7 @@
 #include "delay.h"
 #include "power_control.h"
 
-#define WATCHDOG_ENABLE     0
+#define WATCHDOG_ENABLE     1
 #define WATCHDOG_TIMEOUT    120000 /* ms */
 
 static volatile uint32_t timingdelay;
