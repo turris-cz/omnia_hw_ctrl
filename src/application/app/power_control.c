@@ -474,9 +474,9 @@ uint8_t power_control_get_usb_overcurrent(usb_ports_t usb_port)
 uint8_t power_control_get_usb_poweron(usb_ports_t usb_port)
 {
     if (usb_port == USB3_PORT0)
-        return (!(gpio_input_bit_get(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN)));
+        return (!(gpio_output_bit_get(USB30_PWRON_PIN_PORT, USB30_PWRON_PIN)));
     else //USB3_PORT1
-        return (!(gpio_input_bit_get(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN)));
+        return (!(gpio_output_bit_get(USB31_PWRON_PIN_PORT, USB31_PWRON_PIN)));
 }
 
 /*******************************************************************************
@@ -516,7 +516,6 @@ void power_control_usb_timeout_config(void)
     /* enable the TIMER interrupt */
     timer_interrupt_enable(USB_TIMEOUT_TIMER, TIMER_INT_UP);
 
-timer_enable(USB_TIMEOUT_TIMER); //TODO - pak smazat tento radek - volani v kodu jinde
     nvic_irq_enable(TIMER16_IRQn, 0, 5);
 }
 

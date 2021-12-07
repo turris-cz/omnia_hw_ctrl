@@ -45,13 +45,6 @@ int main(void)
     rcu_periph_reset_enable(RCU_GPIOCRST);
     rcu_periph_reset_enable(RCU_GPIODRST);
     rcu_periph_reset_enable(RCU_GPIOFRST);
-    //rcu_periph_reset_enable(RCU_SPI0RST);
-
-//    RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | \
-//        RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOF, ENABLE);
-
-//    /* Enable the SYSCFG peripheral clock*/
-//    RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
     /* release AHB reset */
     rcu_periph_reset_disable(RCU_GPIOARST);
@@ -59,18 +52,6 @@ int main(void)
     rcu_periph_reset_disable(RCU_GPIOCRST);
     rcu_periph_reset_disable(RCU_GPIODRST);
     rcu_periph_reset_disable(RCU_GPIOFRST);
-    //rcu_periph_reset_disable(RCU_SPI0RST);
-    //spi_i2s_deinit(SPI0);
-    //rcu_periph_clock_disable(RCU_SPI0);
-
-//    RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | \
-//        RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOF, DISABLE);
-
-//    RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, DISABLE);
-
-    /* Remap SRAM */
-   // SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
-
 
 
     app_mcu_init();
@@ -86,26 +67,8 @@ void start_bootloader(void)
     pFunction boot_entry;
     uint32_t boot_stack;
 
-    //rcu_deinit();
-/*    SysTick->CTRL = 0;
-    SysTick->LOAD = 0;
-    SysTick->VAL = 0;
-*/
     __disable_irq();
-/*
-    spi_i2s_deinit(SPI0);
-    timer_deinit(LED_TIMER);
-    timer_deinit(DEBOUNCE_TIMER);
-    timer_deinit(LED_EFFECT_TIMER);
-    timer_deinit(USB_TIMEOUT_TIMER);
-    i2c_deinit(I2C1);
-    usart_deinit(USART0);
-    gpio_deinit(GPIOA);
-    gpio_deinit(GPIOB);
-    gpio_deinit(GPIOC);
-    gpio_deinit(GPIOD);
-    gpio_deinit(GPIOF);
-*/
+
     /* Get the Bootloader stack pointer (First entry in the Bootloader vector table) */
     boot_stack = (uint32_t) *((volatile uint32_t*)BOOTLOADER_ADDRESS);
 

@@ -111,7 +111,7 @@ static uint16_t app_get_status_word(void)
     if (power_control_get_usb_poweron(USB3_PORT1))
         status_word |= USB31_PWRON_STSBIT;
 
-    if(gpio_input_bit_get(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
+    if(gpio_output_bit_get(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
         status_word |= ENABLE_4V5_STSBIT;
 
     return status_word;
