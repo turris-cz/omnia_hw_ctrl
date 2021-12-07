@@ -382,6 +382,8 @@ void led_driver_send_frame(void)
          /* latch enable pulse */
         LATCH_HIGH;
         __NOP();
+        __NOP();
+        __NOP();
         LATCH_LOW;
 
         level++;
