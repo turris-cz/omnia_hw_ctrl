@@ -13,7 +13,7 @@
     VECTOR(rx):	      ORIGIN = 0x08000000, LENGTH = 0x110 /* vector table */
     BOOT_VERSION(rx): ORIGIN = 0x08000110, LENGTH = 0x14 /* version of bootloader FW */
     FLASH (rx)      : ORIGIN = 0x08000124, LENGTH = 0x05000 - 0x14 - 0x110 /*20K - 0x14 - 0x126 */
-    RAM (xrw)       : ORIGIN = 0x20000110, LENGTH = 0x02000 - 0x110 /*8K - 0x126B for vector table */
+    RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 0x02000
    }
 
    /* define stack size and heap size here */
