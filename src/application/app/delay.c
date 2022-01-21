@@ -33,7 +33,7 @@ void delay_systimer_config(void)
         /* Capture error */
         while (1);
     }
-    NVIC_SetPriority(SysTick_IRQn, 2);
+    nvic_irq_enable(SysTick_IRQn, 0, 2);
 }
 
 /******************************************************************************
@@ -66,7 +66,7 @@ void delay_timing_decrement(void)
     }
 
 #if WATCHDOG_ENABLE
-    if (watchdog.watchdog_state == RUN)
+    if ((watchdog.watchdog_state == RUN)&&(watchdog.watchdog_sts == WDG_ENABLE))
     {
         wdg_cnt++;
 
