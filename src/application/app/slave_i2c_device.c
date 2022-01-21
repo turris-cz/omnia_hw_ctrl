@@ -542,6 +542,7 @@ void slave_i2c_handler(void)
                 i2c_state->tx_buf[0] = wdg->watchdog_state;
                 DBG_UART("WDT GET\r\n");
 
+                number_of_tx_bytes = 1;
                 i2c_state->rx_data_ctr = 0;
 
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
