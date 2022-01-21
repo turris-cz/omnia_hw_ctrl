@@ -166,8 +166,8 @@ static void led_driver_timer_config(void)
     /* initialize TIMER init parameter struct */
     timer_struct_para_init(&timer_initpara);
 
-    /* Time base configuration - 18MHz */
-    timer_initpara.prescaler         = 20 - 1;
+    /* Time base configuration - 4MHz */
+    timer_initpara.prescaler         = 60 - 1;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 300 - 1;
