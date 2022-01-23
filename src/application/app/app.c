@@ -171,7 +171,7 @@ static ret_value_t light_reset(void)
 
     i2c_control->reset_type = reset_event;
 
-    if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
+    if((wdg->watchdog_sts != WDG_DISABLE)&&(wdg->watchdog_state == INIT))
     {
         wdg->watchdog_state = RUN;
         DBG_UART("RST - WDG runs\r\n");
