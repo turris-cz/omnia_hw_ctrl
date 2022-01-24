@@ -166,6 +166,8 @@ static void slave_i2c_periph_config(void)
     i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
     i2c_interrupt_enable(I2C1, I2C_INT_EV);
 
+    i2c_stretch_scl_low_config(I2C_PERIPH_NAME, I2C_SCLSTRETCH_ENABLE);
+
     /* enable I2C */
     i2c_enable(I2C_PERIPH_NAME);
     /* enable acknowledge */
