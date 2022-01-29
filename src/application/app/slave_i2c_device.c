@@ -172,6 +172,7 @@ static void slave_i2c_periph_config(void)
     i2c_enable(I2C_PERIPH_NAME);
     /* enable acknowledge */
     i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+  //  i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_NEXT);
 
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
    // nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
@@ -474,6 +475,8 @@ void slave_i2c_handler(void)
                     DBG_UART("\r\n");
 
                     i2c_state->rx_data_ctr = 0;
+                  //  i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
+                //    i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_NEXT);
                 }
                 DBG_UART("ACK\r\n");
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
@@ -580,13 +583,16 @@ void slave_i2c_handler(void)
             {
                 DBG_UART("DEF\r\n");
                 i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+                //i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_CURRENT);
+                //i2c_stop_on_bus(I2C_PERIPH_NAME);
+                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
         }
     }
 
     /* transmit interrupt */
-    else if((i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE)) && (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
+    else if((i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE)) )//&& (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
     {
         if (number_of_tx_bytes > 0)
         {
@@ -599,7 +605,15 @@ void slave_i2c_handler(void)
             }
 
             DBG_UART("send\r\n");
-        }       
+        }
+
+/*      i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr]);
+        i2c_state->tx_data_ctr++;
+        if (number_of_tx_bytes <= i2c_state->tx_data_ctr)
+        {
+            i2c_state->tx_data_ctr = 0;
+            memset(i2c_state->tx_buf, 0, MAX_TX_BUFFER_SIZE);
+        }*/
     }
 
     /* stop flag */
@@ -622,7 +636,7 @@ void slave_i2c_handler(void)
 
         DBG_UART("STOP\r\n");
 
-        //i2c_state->tx_data_ctr = 0;
+       // i2c_state->tx_data_ctr = 0;
        // i2c_state->rx_data_ctr = 0;
     }
 
