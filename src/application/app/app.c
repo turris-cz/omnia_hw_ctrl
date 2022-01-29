@@ -165,6 +165,8 @@ static ret_value_t light_reset(void)
 
     wdg->watchdog_state = INIT;
 
+    i2c_deinit(I2C1);
+
     led_driver_reset_effect(DISABLE);
 
     reset_event = power_control_first_startup();
@@ -183,6 +185,8 @@ static ret_value_t light_reset(void)
     }
 
     led_driver_reset_effect(ENABLE);
+
+    slave_i2c_config();
 
     return value;
 }
