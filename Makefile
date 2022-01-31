@@ -37,7 +37,7 @@ AFLAGS += -mfloat-abi=soft
 ##### Compiler options
 
 CFLAGS  = -ggdb
-CFLAGS += -O0
+CFLAGS += -Os -fno-pie
 CFLAGS += -Wall -Wextra -Warray-bounds #-pedantic
 CFLAGS += $(AFLAGS)
 CFLAGS += -nostdlib
