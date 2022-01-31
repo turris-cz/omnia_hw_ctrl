@@ -168,7 +168,7 @@ static void led_driver_timer_config(void)
 
     /* Time base configuration - 1sec interrupt */
     /* TIMER16CLK = SystemCoreClock/7200 = 10KHz, the period is 1s(10000/10000 = 1s).*/
-    timer_initpara.prescaler         = 60 - 1;
+    timer_initpara.prescaler         = 20 - 1;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 300 - 1;
