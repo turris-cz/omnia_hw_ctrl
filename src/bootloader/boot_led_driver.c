@@ -41,13 +41,13 @@
 // PWM Settings (Frequency and range)
 //------------------------------------------------------------------------------
 // period      = range (max = 0xFFFF => 16bit)
-// Basic freq. = (APB2=48MHz) => TIM_CLK=48MHz
+// Basic freq. = (APB2=72MHz) => TIM_CLK=72MHz
 // period range    : 0 to 0xFFFF
 // prescaler range : 0 to 0xFFFF
 //
 // PWM-Frq     = TIM_CLK/(period+1)/(prescaler+1)
 *******************************************************************************/
-#define PWM_TIM_PERIODE             2000
+#define PWM_TIM_PERIODE             3000
 #define PWM_TIM_PRESCALE            6
 
 /*--------------------------------------------------------------
