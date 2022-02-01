@@ -15,7 +15,7 @@
 #include "debounce.h"
 #include "power_control.h"
 
-#define APPLICATION_ADDRESS         0x08005000
+#define APPLICATION_ADDRESS         0x08002C00
 #define RAM_ADDRESS                 0x20000000
 #define BOOTLOADER_ADDRESS          0x08000000
 
