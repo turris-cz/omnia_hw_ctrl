@@ -109,6 +109,12 @@
 	   libc.a ( * )
 	   libm.a ( * )
 	   libgcc.a ( * )
+	   *(.interp*)
+	   *(.dynsym)
+	   *(.dynstr*)
+	   *(.dynamic*)
+	   *(.gnu*)
+	   *(.rel*)
        }
 
        .ARM.attributes 0 : { *(.ARM.attributes) }
