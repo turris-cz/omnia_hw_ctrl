@@ -143,8 +143,8 @@ static void led_driver_io_config(void)
     gpio_mode_set(LED_SPI_SS_PIN_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, LED_SPI_SS_PIN);
     gpio_output_options_set(LED_SPI_SS_PIN_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_SPI_SS_PIN);
 
-    /* init state - latch holds previous data */
-    LATCH_LOW;
+    /* init state */
+    LATCH_HIGH;
 }
 
 /*******************************************************************************
@@ -354,6 +354,10 @@ void led_driver_send_frame(void)
     uint16_t data;
     static rgb_colour_t colour = RED;
 
+    /* starting sending new RGB triplet, put nSS low */
+    if (colour == RED)
+        LATCH_LOW;
+
     switch (colour)
     {
         case RED:
@@ -384,12 +388,8 @@ void led_driver_send_frame(void)
     /* blue colour were sent to driver -> enable latch to write to LEDs */
     if (colour == RED)
     {
-         /* latch enable pulse */
+        /* RGB triplet sent, put nSS high */
         LATCH_HIGH;
-        __NOP();
-        __NOP();
-        __NOP();
-        LATCH_LOW;
 
         level++;
 
