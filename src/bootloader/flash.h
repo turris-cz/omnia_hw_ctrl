@@ -15,7 +15,7 @@
 
 /* define the address from where user application will be loaded,
    the application address should be a start sector address */
-#define APPLICATION_ADDRESS     (uint32_t)0x08005000
+#define APPLICATION_ADDRESS     (uint32_t)0x08002C00
 
 /* Get the number of Sector from where the user program will be loaded */
 #define  FLASH_PAGE_NUMBER      (uint32_t)((APPLICATION_ADDRESS - 0x08000000) >> 12)

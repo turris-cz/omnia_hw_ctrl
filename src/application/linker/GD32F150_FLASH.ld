@@ -10,7 +10,7 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08005000, LENGTH = 0x0A000 /*40K*/
+     FLASH (rx)      : ORIGIN = 0x08002C00, LENGTH = 0x05400 /*21K*/
      RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 0x02000 /*8K - 192B for vector table */
    }
 
@@ -100,6 +100,12 @@
            libc.a ( * )
            libm.a ( * )
            libgcc.a ( * )
+           *(.interp*)
+           *(.dynsym)
+           *(.dynstr*)
+           *(.dynamic*)
+           *(.gnu*)
+           *(.rel*)
        }
 
        .ARM.attributes 0 : { *(.ARM.attributes) }

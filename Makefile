@@ -5,10 +5,12 @@ BOOT_NAME=bootloader_mcu
 #                   SETUP TOOLS                                                #
 ################################################################################
 
-CC      = arm-none-eabi-gcc
-OBJCOPY = arm-none-eabi-objcopy
-AS      = arm-none-eabi-as
-SIZE	= arm-none-eabi-size
+CROSS_COMPILE ?= arm-none-eabi-
+
+CC      = $(CROSS_COMPILE)gcc
+OBJCOPY = $(CROSS_COMPILE)objcopy
+AS      = $(CROSS_COMPILE)as
+SIZE	= $(CROSS_COMPILE)size
 
 ##### Preprocessor options
 FW_VERSION = "{ $(shell git rev-parse HEAD | sed 's/\(..\)/0x\1, /g' | sed -r 's/,\s+$$//') }"
@@ -35,7 +37,7 @@ AFLAGS += -mfloat-abi=soft
 ##### Compiler options
 
 CFLAGS  = -ggdb
-CFLAGS += -O0
+CFLAGS += -Os -fno-pie -ffreestanding
 CFLAGS += -Wall -Wextra -Warray-bounds #-pedantic
 CFLAGS += $(AFLAGS)
 CFLAGS += -nostdlib
