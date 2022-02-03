@@ -323,25 +323,6 @@ void slave_i2c_handler(void)
         i2c_state->handler_state = STOPPED;
     }
 
-    /* address match interrupt */
-    else if (stat0 & I2C_STAT0_ADDSEND)
-    {
-        uint16_t stat1;
-
-        /* reading stat1 after stat0 clears the ADDSEND bit */
-        stat1 = I2C_STAT1(I2C_PERIPH_NAME);
-
-        if (stat1 & I2C_STAT1_TR) {
-            DBG_UART("ADDR tx\r\n");
-            i2c_state->handler_state = TRANSMITTING;
-        } else {
-            DBG_UART("ADDR rx\r\n");
-            i2c_state->handler_state = RECEIVING;
-        }
-
-        i2c_state->rx_data_ctr = 0;
-    }
-
     /* data not empty during receiving interrupt */
     else if (i2c_state->handler_state == RECEIVING && (stat0 & I2C_STAT0_RBNE))
     {
@@ -580,6 +561,25 @@ void slave_i2c_handler(void)
 
             DBG_UART("send\r\n");
         }
+    }
+
+    /* address match interrupt */
+    else if (stat0 & I2C_STAT0_ADDSEND)
+    {
+        uint16_t stat1;
+
+        /* reading stat1 after stat0 clears the ADDSEND bit */
+        stat1 = I2C_STAT1(I2C_PERIPH_NAME);
+
+        if (stat1 & I2C_STAT1_TR) {
+            DBG_UART("ADDR tx\r\n");
+            i2c_state->handler_state = TRANSMITTING;
+        } else {
+            DBG_UART("ADDR rx\r\n");
+            i2c_state->handler_state = RECEIVING;
+        }
+
+        i2c_state->rx_data_ctr = 0;
     }
 
 end:
