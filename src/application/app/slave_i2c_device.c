@@ -306,7 +306,6 @@ void slave_i2c_handler(void)
     uint32_t colour;
     eeprom_var_t ee_var;
     uint8_t address;
-    static uint8_t number_of_tx_bytes;
 
     __disable_irq();
 
@@ -351,7 +350,7 @@ void slave_i2c_handler(void)
                 i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
                 DBG_UART("STS\r\n");
 
-                number_of_tx_bytes = 2;
+                i2c_state->tx_data_len = 2;
 
                 i2c_state->rx_data_ctr = 0;
 
@@ -461,7 +460,7 @@ void slave_i2c_handler(void)
                 i2c_state->tx_buf[0] = led->brightness;
                 DBG_UART("brig\r\n");
 
-                number_of_tx_bytes = 1;
+                i2c_state->tx_data_len = 1;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
@@ -469,7 +468,7 @@ void slave_i2c_handler(void)
             {
                 i2c_state->tx_buf[0] = i2c_state->reset_type;
                 DBG_UART("RST\r\n");
-                number_of_tx_bytes = 1;
+                i2c_state->tx_data_len = 1;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
@@ -515,7 +514,7 @@ void slave_i2c_handler(void)
                 i2c_state->tx_buf[0] = wdg->watchdog_state;
                 DBG_UART("WDT GET\r\n");
 
-                number_of_tx_bytes = 1;
+                i2c_state->tx_data_len = 1;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
@@ -527,7 +526,7 @@ void slave_i2c_handler(void)
                     i2c_state->tx_buf[idx] = version[idx];
                 }
                 DBG_UART("FWA\r\n");
-                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
+                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
 
                 i2c_state->rx_data_ctr = 0;
             } break;
@@ -539,14 +538,14 @@ void slave_i2c_handler(void)
 
                 DBG_UART("FWB\r\n");
 
-                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
+                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
             default:
             {
                 DBG_UART("DEF\r\n");
-                number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
+                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
         }
@@ -555,12 +554,12 @@ void slave_i2c_handler(void)
     /* data empty during transmitting interrupt */
     else if (stat0 & I2C_STAT0_TBE)
     {
-        if (number_of_tx_bytes > 0)
+        if (i2c_state->tx_data_len > 0)
         {
             i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
-            number_of_tx_bytes--;
+            i2c_state->tx_data_len--;
 
-            if (number_of_tx_bytes == 0)
+            if (i2c_state->tx_data_len == 0)
             {
                 i2c_state->tx_data_ctr = 0;
             }

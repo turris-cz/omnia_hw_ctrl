@@ -28,6 +28,7 @@ struct st_i2c_status {
     slave_i2c_states_t state;             // reported in main state machine
     uint8_t rx_data_ctr;                  // RX data counter
     uint8_t tx_data_ctr;                  // TX data counter
+    uint8_t tx_data_len;                  // TX buffer length
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
     uint8_t tx_buf[MAX_TX_BUFFER_SIZE];   // TX buffer
     uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
