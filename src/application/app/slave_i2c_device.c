@@ -336,8 +336,7 @@ void slave_i2c_handler(void)
         if (i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
         {
             DBG_UART("RX OVERFLOW\r\n");
-            __enable_irq();
-            return;
+            goto end;
         }
 
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = byte;
@@ -581,5 +580,6 @@ void slave_i2c_handler(void)
         i2c_state->tx_data_len = 0;
     }
 
-   __enable_irq();
+end:
+    __enable_irq();
 }
