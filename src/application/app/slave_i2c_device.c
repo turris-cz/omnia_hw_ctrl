@@ -329,16 +329,18 @@ void slave_i2c_handler(void)
     /* data not empty during receiving interrupt */
     else if (stat0 & I2C_STAT0_RBNE)
     {
-        i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
+        uint8_t byte = i2c_data_receive(I2C_PERIPH_NAME);
 
         /* if more bytes than MAX_RX_BUFFER_SIZE received -> NACK */
-        if (i2c_state->rx_data_ctr > MAX_RX_BUFFER_SIZE)
+        if (i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
         {
             i2c_state->rx_data_ctr = 0;
             DBG_UART("NACK-MAX\r\n");
             __enable_irq();
             return;
         }
+
+        i2c_state->rx_buf[i2c_state->rx_data_ctr++] = byte;
 
         /* check if the command (register) exists and send ACK */
         switch(i2c_state->rx_buf[CMD_INDEX])
