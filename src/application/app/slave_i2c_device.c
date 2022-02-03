@@ -21,12 +21,6 @@
 
 static const uint8_t version[] = VERSION;
 
-//#define I2C_SDA_SOURCE                  GPIO_PinSource7
-//#define I2C_SCL_SOURCE                  GPIO_PinSource6
-
-//#define I2C_ALTERNATE_FUNCTION          GPIO_AF_1
-//#define I2C_TIMING                      0x10800000 /* 100kHz for 48MHz system clock */
-
 #define I2C_GPIO_CLOCK                  RCU_GPIOF
 #define I2C_PERIPH_NAME                 I2C1
 #define I2C_PERIPH_CLOCK                RCU_I2C1
@@ -155,11 +149,10 @@ static void slave_i2c_periph_config(void)
     i2c_deinit(I2C_PERIPH_NAME);
     i2c_disable(I2C_PERIPH_NAME);
 
-
     /* I2C clock configure */
     i2c_clock_config(I2C_PERIPH_NAME, 100000, I2C_DTCY_2);
-    /* I2C address configure */
 
+    /* I2C address configure */
     i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
     i2c_dualaddr_enable(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR);
 
@@ -172,11 +165,8 @@ static void slave_i2c_periph_config(void)
     i2c_enable(I2C_PERIPH_NAME);
     /* enable acknowledge */
     i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-  //  i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_NEXT);
 
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
-   // nvic_irq_enable(I2C1_ER_IRQn, 0, 1);
-
 }
 
 /*******************************************************************************
@@ -208,18 +198,11 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
     if ((control_byte & LIGHT_RST_MASK) && (bit_mask & LIGHT_RST_MASK))
     {
-        /* confirm received byte of I2C and reset */
-
-        //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-        /* release SCL line */
-       // I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
-
         /* set CFG_CTRL pin to high state ASAP */
         gpio_bit_set(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
-        //GPIO_SetBits(CFG_CTRL_PIN_PORT, CFG_CTRL_PIN);
+
         /* reset of CPU */
         gpio_bit_reset(MANRES_PIN_PORT, MANRES_PIN);
-        //GPIO_ResetBits(MANRES_PIN_PORT, MANRES_PIN);
         return;
     }
 
@@ -266,7 +249,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         else
         {
             gpio_bit_reset(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-            //GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
             i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
         }
     }
@@ -469,8 +451,6 @@ void slave_i2c_handler(void)
                     DBG_UART("\r\n");
 
                     i2c_state->rx_data_ctr = 0;
-                  //  i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
-                //    i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_NEXT);
                 }
             } break;
 
@@ -564,8 +544,6 @@ void slave_i2c_handler(void)
             default:
             {
                 DBG_UART("DEF\r\n");
-                //i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_CURRENT);
-                //i2c_stop_on_bus(I2C_PERIPH_NAME);
                 number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
@@ -587,33 +565,12 @@ void slave_i2c_handler(void)
 
             DBG_UART("send\r\n");
         }
-
-/*      i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr]);
-        i2c_state->tx_data_ctr++;
-        if (number_of_tx_bytes <= i2c_state->tx_data_ctr)
-        {
-            i2c_state->tx_data_ctr = 0;
-            memset(i2c_state->tx_buf, 0, MAX_TX_BUFFER_SIZE);
-        }*/
     }
 
     /* stop flag */
     else if (stat0 & I2C_STAT0_STPDET)
     {
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
-
-//        if (i2c_state->data_tx_complete) /* data have been sent to master */
-//        {
-//            i2c_state->data_tx_complete = 0;
-
-//            /* delete button status and counter bit from status_word */
-//            if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
-//            {
-//                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
-//                /* decrease button counter by the value has been sent */
-//                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
-//            }
-//        }
 
         DBG_UART("STOP\r\n");
 
