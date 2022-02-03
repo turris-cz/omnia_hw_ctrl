@@ -336,6 +336,7 @@ void slave_i2c_handler(void)
         {
             i2c_state->rx_data_ctr = 0;
             DBG_UART("NACK-MAX\r\n");
+            __enable_irq();
             return;
         }
 
