@@ -545,7 +545,6 @@ void slave_i2c_handler(void)
             default:
             {
                 DBG_UART("DEF\r\n");
-                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
         }
