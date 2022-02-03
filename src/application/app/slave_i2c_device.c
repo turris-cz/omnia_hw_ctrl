@@ -210,8 +210,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         /* confirm received byte of I2C and reset */
 
-        i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-
         //I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
         /* release SCL line */
        // I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
@@ -356,7 +354,6 @@ void slave_i2c_handler(void)
         {
             i2c_state->rx_data_ctr = 0;
             DBG_UART("NACK-MAX\r\n");
-            i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE); /* if I2C_ACK_DISABLE -> GD32 holds I2C bus? */
             return;
         }
 
@@ -370,7 +367,6 @@ void slave_i2c_handler(void)
                 i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
                 DBG_UART("STS\r\n");
 
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
                 number_of_tx_bytes = 2;
 
                 i2c_state->rx_data_ctr = 0;
@@ -393,8 +389,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_LED_MODE:
@@ -411,8 +405,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_LED_STATE:
@@ -430,8 +422,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_LED_COLOUR:
@@ -452,9 +442,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-
              } break;
 
             case CMD_USER_VOLTAGE:
@@ -469,8 +456,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_SET_BRIGHTNESS:
@@ -487,8 +472,6 @@ void slave_i2c_handler(void)
                   //  i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
                 //    i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_NEXT);
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_GET_BRIGHTNESS:
@@ -498,7 +481,6 @@ void slave_i2c_handler(void)
 
                 number_of_tx_bytes = 1;
                 i2c_state->rx_data_ctr = 0;
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_GET_RESET:
@@ -507,7 +489,6 @@ void slave_i2c_handler(void)
                 DBG_UART("RST\r\n");
                 number_of_tx_bytes = 1;
                 i2c_state->rx_data_ctr = 0;
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_WATCHDOG_STATE:
@@ -520,8 +501,6 @@ void slave_i2c_handler(void)
                     DBG_UART("\r\n");
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_WATCHDOG_STATUS:
@@ -547,8 +526,6 @@ void slave_i2c_handler(void)
 
                     i2c_state->rx_data_ctr = 0;
                 }
-                DBG_UART("ACK\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             case CMD_GET_WATCHDOG_STATE:
@@ -558,8 +535,6 @@ void slave_i2c_handler(void)
 
                 number_of_tx_bytes = 1;
                 i2c_state->rx_data_ctr = 0;
-
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
             } break;
 
             /* read fw version of the current application */
@@ -571,7 +546,6 @@ void slave_i2c_handler(void)
                 }
                 DBG_UART("FWA\r\n");
                 number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
 
                 i2c_state->rx_data_ctr = 0;
             } break;
@@ -584,14 +558,12 @@ void slave_i2c_handler(void)
                 DBG_UART("FWB\r\n");
 
                 number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
                 i2c_state->rx_data_ctr = 0;
             } break;
 
             default:
             {
                 DBG_UART("DEF\r\n");
-                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
                 //i2c_ackpos_config(I2C_PERIPH_NAME, I2C_ACKPOS_CURRENT);
                 //i2c_stop_on_bus(I2C_PERIPH_NAME);
                 number_of_tx_bytes = MAX_TX_BUFFER_SIZE;
