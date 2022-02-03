@@ -334,7 +334,6 @@ void slave_i2c_handler(void)
         /* if more bytes than MAX_RX_BUFFER_SIZE received -> fail */
         if (i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
         {
-            i2c_state->rx_data_ctr = 0;
             DBG_UART("RX OVERFLOW\r\n");
             __enable_irq();
             return;
