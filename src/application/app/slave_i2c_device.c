@@ -323,6 +323,8 @@ void slave_i2c_handler(void)
             DBG_UART("ADDR tx\r\n");
         else
             DBG_UART("ADDR rx\r\n");
+
+        i2c_state->rx_data_ctr = 0;
     }
 
     /* data not empty during receiving interrupt */
@@ -575,8 +577,8 @@ void slave_i2c_handler(void)
 
         DBG_UART("STOP\r\n");
 
-       // i2c_state->tx_data_ctr = 0;
-       // i2c_state->rx_data_ctr = 0;
+        i2c_state->tx_data_ctr = 0;
+        i2c_state->tx_data_len = 0;
     }
 
    __enable_irq();
