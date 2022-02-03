@@ -349,9 +349,8 @@ void slave_i2c_handler(void)
                 /* prepare data to be sent to the master */
                 i2c_state->tx_buf[0] = i2c_state->status_word & 0x00FF;
                 i2c_state->tx_buf[1] = (i2c_state->status_word & 0xFF00) >> 8;
-                DBG_UART("STS\r\n");
-
                 i2c_state->tx_data_len = 2;
+                DBG_UART("STS\r\n");
 
                 i2c_state->rx_data_ctr = 0;
 
@@ -459,17 +458,17 @@ void slave_i2c_handler(void)
             case CMD_GET_BRIGHTNESS:
             {
                 i2c_state->tx_buf[0] = led->brightness;
+                i2c_state->tx_data_len = 1;
                 DBG_UART("brig\r\n");
 
-                i2c_state->tx_data_len = 1;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
             case CMD_GET_RESET:
             {
                 i2c_state->tx_buf[0] = i2c_state->reset_type;
-                DBG_UART("RST\r\n");
                 i2c_state->tx_data_len = 1;
+                DBG_UART("RST\r\n");
                 i2c_state->rx_data_ctr = 0;
             } break;
 
@@ -513,21 +512,21 @@ void slave_i2c_handler(void)
             case CMD_GET_WATCHDOG_STATE:
             {
                 i2c_state->tx_buf[0] = wdg->watchdog_state;
+                i2c_state->tx_data_len = 1;
                 DBG_UART("WDT GET\r\n");
 
-                i2c_state->tx_data_len = 1;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
             /* read fw version of the current application */
             case CMD_GET_FW_VERSION_APP:
             {
+                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
                 for (idx = 0; idx < MAX_TX_BUFFER_SIZE; idx++)
                 {
                     i2c_state->tx_buf[idx] = version[idx];
                 }
                 DBG_UART("FWA\r\n");
-                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
 
                 i2c_state->rx_data_ctr = 0;
             } break;
@@ -536,10 +535,10 @@ void slave_i2c_handler(void)
             case CMD_GET_FW_VERSION_BOOT:
             {
                 read_bootloader_version(i2c_state->tx_buf);
+                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
 
                 DBG_UART("FWB\r\n");
 
-                i2c_state->tx_data_len = MAX_TX_BUFFER_SIZE;
                 i2c_state->rx_data_ctr = 0;
             } break;
 
