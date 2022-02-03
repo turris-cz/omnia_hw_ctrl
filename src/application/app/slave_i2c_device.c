@@ -331,11 +331,11 @@ void slave_i2c_handler(void)
     {
         uint8_t byte = i2c_data_receive(I2C_PERIPH_NAME);
 
-        /* if more bytes than MAX_RX_BUFFER_SIZE received -> NACK */
+        /* if more bytes than MAX_RX_BUFFER_SIZE received -> fail */
         if (i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
         {
             i2c_state->rx_data_ctr = 0;
-            DBG_UART("NACK-MAX\r\n");
+            DBG_UART("RX OVERFLOW\r\n");
             __enable_irq();
             return;
         }
