@@ -311,8 +311,20 @@ void slave_i2c_handler(void)
 
     stat0 = I2C_STAT0(I2C_PERIPH_NAME);
 
+    /* stop flag */
+    if (i2c_state->handler_state != STOPPED && (stat0 & I2C_STAT0_STPDET))
+    {
+        i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
+
+        DBG_UART("STOP\r\n");
+
+        i2c_state->tx_data_ctr = 0;
+        i2c_state->tx_data_len = 0;
+        i2c_state->handler_state = STOPPED;
+    }
+
     /* address match interrupt */
-    if (stat0 & I2C_STAT0_ADDSEND)
+    else if (stat0 & I2C_STAT0_ADDSEND)
     {
         uint16_t stat1;
 
@@ -568,18 +580,6 @@ void slave_i2c_handler(void)
 
             DBG_UART("send\r\n");
         }
-    }
-
-    /* stop flag */
-    else if (i2c_state->handler_state != STOPPED && (stat0 & I2C_STAT0_STPDET))
-    {
-        i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
-
-        DBG_UART("STOP\r\n");
-
-        i2c_state->tx_data_ctr = 0;
-        i2c_state->tx_data_len = 0;
-        i2c_state->handler_state = STOPPED;
     }
 
 end:
