@@ -320,6 +320,7 @@ void slave_i2c_handler(void)
     struct st_watchdog *wdg = &watchdog;
     static i2c_dir_t direction;
     struct led_rgb *led = leds;
+    uint16_t stat0;
     uint16_t idx;
     uint8_t led_index;
     uint32_t colour;
@@ -329,16 +330,24 @@ void slave_i2c_handler(void)
 
     __disable_irq();
 
+    stat0 = I2C_STAT0(I2C_PERIPH_NAME);
+
     /* address match interrupt */
-    if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND) == SET)
+    if (stat0 & I2C_STAT0_ADDSEND)
     {
-        /* clear the ADDSEND bit */
-        i2c_interrupt_flag_clear(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND);
-        DBG_UART("ADDR\r\n");
+        uint16_t stat1;
+
+        /* reading stat1 after stat0 clears the ADDSEND bit */
+        stat1 = I2C_STAT1(I2C_PERIPH_NAME);
+
+        if (stat1 & I2C_STAT1_TR)
+            DBG_UART("ADDR tx\r\n");
+        else
+            DBG_UART("ADDR rx\r\n");
     }
 
-    /* transfer complete interrupt (TX and RX) */
-    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
+    /* data not empty during receiving interrupt */
+    else if (stat0 & I2C_STAT0_RBNE)
     {
         i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
 
@@ -591,8 +600,8 @@ void slave_i2c_handler(void)
         }
     }
 
-    /* transmit interrupt */
-    else if((i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE)) )//&& (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
+    /* data empty during transmitting interrupt */
+    else if (stat0 & I2C_STAT0_TBE) //&& (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
     {
         if (number_of_tx_bytes > 0)
         {
@@ -617,7 +626,7 @@ void slave_i2c_handler(void)
     }
 
     /* stop flag */
-    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_STPDET))
+    else if (stat0 & I2C_STAT0_STPDET)
     {
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
 
