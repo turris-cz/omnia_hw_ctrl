@@ -551,7 +551,7 @@ void slave_i2c_handler(void)
     }
 
     /* data empty during transmitting interrupt */
-    else if (stat0 & I2C_STAT0_TBE) //&& (!i2c_interrupt_flag_get(I2C1, I2C_INT_FLAG_AERR)))
+    else if (stat0 & I2C_STAT0_TBE)
     {
         if (number_of_tx_bytes > 0)
         {
