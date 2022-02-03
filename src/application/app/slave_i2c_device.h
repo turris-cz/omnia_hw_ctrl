@@ -32,6 +32,11 @@ struct st_i2c_status {
     uint8_t rx_buf[MAX_RX_BUFFER_SIZE];   // RX buffer
     uint8_t tx_buf[MAX_TX_BUFFER_SIZE];   // TX buffer
     uint8_t data_tx_complete         : 1; // stop flag detected - all data sent
+    enum {
+        STOPPED = 0,
+        RECEIVING,
+        TRANSMITTING,
+    } handler_state;
 };
 
 extern struct st_i2c_status i2c_status;

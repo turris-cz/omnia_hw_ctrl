@@ -319,16 +319,19 @@ void slave_i2c_handler(void)
         /* reading stat1 after stat0 clears the ADDSEND bit */
         stat1 = I2C_STAT1(I2C_PERIPH_NAME);
 
-        if (stat1 & I2C_STAT1_TR)
+        if (stat1 & I2C_STAT1_TR) {
             DBG_UART("ADDR tx\r\n");
-        else
+            i2c_state->handler_state = TRANSMITTING;
+        } else {
             DBG_UART("ADDR rx\r\n");
+            i2c_state->handler_state = RECEIVING;
+        }
 
         i2c_state->rx_data_ctr = 0;
     }
 
     /* data not empty during receiving interrupt */
-    else if (stat0 & I2C_STAT0_RBNE)
+    else if (i2c_state->handler_state == RECEIVING && (stat0 & I2C_STAT0_RBNE))
     {
         uint8_t byte = i2c_data_receive(I2C_PERIPH_NAME);
 
@@ -551,7 +554,7 @@ void slave_i2c_handler(void)
     }
 
     /* data empty during transmitting interrupt */
-    else if (stat0 & I2C_STAT0_TBE)
+    else if (i2c_state->handler_state == TRANSMITTING && (stat0 & I2C_STAT0_TBE))
     {
         if (i2c_state->tx_data_len > 0)
         {
@@ -568,7 +571,7 @@ void slave_i2c_handler(void)
     }
 
     /* stop flag */
-    else if (stat0 & I2C_STAT0_STPDET)
+    else if (i2c_state->handler_state != STOPPED && (stat0 & I2C_STAT0_STPDET))
     {
         i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
 
@@ -576,6 +579,7 @@ void slave_i2c_handler(void)
 
         i2c_state->tx_data_ctr = 0;
         i2c_state->tx_data_len = 0;
+        i2c_state->handler_state = STOPPED;
     }
 
 end:
