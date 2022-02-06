@@ -13,6 +13,10 @@
 
 #define SERIAL_PORT      USART0
 
+#if DBG_ENABLE && !defined(DBG_BAUDRATE)
+#error build system did not define DBG_BAUDRATE macro
+#endif
+
 /*******************************************************************************
   * @function   debug_serial_config
   * @brief      Configuration of UART peripheral.
@@ -44,7 +48,7 @@ void debug_serial_config(void)
 
     /* USART configure */
     usart_deinit(SERIAL_PORT);
-    usart_baudrate_set(SERIAL_PORT, 115200U);
+    usart_baudrate_set(SERIAL_PORT, DBG_BAUDRATE);
     usart_parity_config(SERIAL_PORT, USART_PM_NONE);
     usart_word_length_set(SERIAL_PORT, USART_WL_8BIT);
     usart_stop_bit_set(SERIAL_PORT, USART_STB_1BIT);
