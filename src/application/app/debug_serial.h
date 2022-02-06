@@ -11,7 +11,9 @@
 #define DEBUG_SERIAL_H
 
 /* ! CAUTION ! UART pins are used for CARD detection and PCI1 PLED pin ! */
-#define DBG_ENABLE      0
+#ifndef DBG_ENABLE
+#error build system did not define DBG_ENABLE macro
+#endif
 
 #if DBG_ENABLE
 #define DBG_UART(buf)        debug_print(buf)
