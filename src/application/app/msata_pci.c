@@ -11,6 +11,7 @@
 #include "msata_pci.h"
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
+#include "debug_serial.h"
 
 /*******************************************************************************
   * @function   msata_pci_io_config
@@ -25,7 +26,13 @@ static void msata_pci_io_config(void)
     rcu_periph_clock_enable(MSATAIND_PIN_PERIPH_CLOCK);
 
     /* Input signals */
-    gpio_mode_set(CARD_DET_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, CARD_DET_PIN);
+
+    /*
+     * CARD_DET pin is also used as MCU's UART TX pin, so only configure it as
+     * GPIO if debugging is disabled
+     */
+    if (!DBG_ENABLE)
+        gpio_mode_set(CARD_DET_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, CARD_DET_PIN);
     gpio_mode_set(MSATALED_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, MSATALED_PIN);
     gpio_mode_set(MSATAIND_PIN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, MSATAIND_PIN);
 }
