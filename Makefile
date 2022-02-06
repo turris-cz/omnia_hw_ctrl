@@ -29,6 +29,15 @@ ifeq ($(DBG_ENABLE), 1)
 		echo "Built with debug output enabled on MCU's UART pins!"; \
 		echo "MiniPCIe/mSATA card detection and PCIe1 PLED won't work"; \
 		echo -e "=======================================================\n\n"
+	ifdef DBG_BAUDRATE
+		ifeq ($(shell echo "$(DBG_BAUDRATE)" | grep -qe "[^0-9]" && echo err),err)
+			DEFS += $(error Wrong value for DBG_BAUDRATE: $(DBG_BAUDRATE))
+		else
+			DEFS += -DDBG_BAUDRATE=$(DBG_BAUDRATE)U
+		endif
+	else
+		DEFS += -DDBG_BAUDRATE=115200U
+	endif
 else
 	DEFS += -DDBG_ENABLE=0
 	DEBUG_INFO_PRINT =
