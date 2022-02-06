@@ -240,6 +240,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
+#if USER_REGULATOR_ENABLED
     if (bit_mask & ENABLE_4V5_MASK)
     {
         if (control_byte & ENABLE_4V5_MASK)
@@ -252,6 +253,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
             i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
         }
     }
+#endif
 
     if (bit_mask & BUTTON_MODE_MASK)
     {
@@ -423,6 +425,7 @@ void slave_i2c_handler(void)
                 }
              } break;
 
+#if USER_REGULATOR_ENABLED
             case CMD_USER_VOLTAGE:
             {
                 if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
@@ -436,6 +439,7 @@ void slave_i2c_handler(void)
                     i2c_state->rx_data_ctr = 0;
                 }
             } break;
+#endif
 
             case CMD_SET_BRIGHTNESS:
             {

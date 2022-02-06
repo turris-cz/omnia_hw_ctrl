@@ -13,6 +13,10 @@
 #include "led_driver.h"
 #include "debug_serial.h"
 
+#if !defined(USER_REGULATOR_ENABLED)
+#error build system did not define USER_REGULATOR_ENABLED macro
+#endif
+
 /* Private define ------------------------------------------------------------*/
 
 /* programming pin for user regulator */
@@ -126,6 +130,7 @@ typedef enum reset_states {
     RST_LED11,
 } reset_state_t;
 
+#if USER_REGULATOR_ENABLED
 /*******************************************************************************
   * @function   power_control_prog4v5_config
   * @brief      Configuration for programming possibility of 4V5 power source.
@@ -142,6 +147,7 @@ static void power_control_prog4v5_config(void)
 
     PRG_PIN_LOW;
 }
+#endif /* USER_REGULATOR_ENABLED */
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -182,7 +188,9 @@ void power_control_io_config(void)
     gpio_bit_set(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
     gpio_bit_set(INT_MCU_PIN_PORT, INT_MCU_PIN);
 
+#if USER_REGULATOR_ENABLED
     power_control_prog4v5_config();
+#endif
 }
 
 /*******************************************************************************
@@ -264,6 +272,7 @@ error_type_t power_control_start_regulator(reg_type_t regulator)
             }
         }break;
 
+#if USER_REGULATOR_ENABLED
         case REG_4V5:
         {
             gpio_bit_set(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
@@ -279,6 +288,7 @@ error_type_t power_control_start_regulator(reg_type_t regulator)
                 }
             }
         }break;
+#endif /* USER_REGULATOR_ENABLED */
 
         case REG_1V8:
         {
@@ -377,9 +387,11 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
+#if USER_REGULATOR_ENABLED
 //    value = power_control_start_regulator(REG_4V5);
 //    if (value != NO_ERROR)
 //        return value;
+#endif
 
     value = power_control_start_regulator(REG_3V3);
     if (value != NO_ERROR)
@@ -422,7 +434,9 @@ void power_control_disable_regulators(void)
     gpio_bit_reset(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
     gpio_bit_reset(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
     gpio_bit_reset(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
+#if USER_REGULATOR_ENABLED
     gpio_bit_reset(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+#endif
     gpio_bit_reset(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
 }
 
@@ -963,6 +977,7 @@ void power_led_activity(void)
     }
 }
 
+#if USER_REGULATOR_ENABLED
 /*******************************************************************************
   * @function   power_control_set_voltage33
   * @brief      Set 3.3V voltage to the user regulator.
@@ -1134,3 +1149,4 @@ void power_control_set_voltage(voltage_value_t voltage)
             break;
     }
 }
+#endif /* USER_REGULATOR_ENABLED */

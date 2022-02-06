@@ -305,6 +305,7 @@ void power_control_usb_timeout_enable(void);
   *****************************************************************************/
 void power_control_usb_timeout_disable(void);
 
+#if USER_REGULATOR_ENABLED
 /*******************************************************************************
   * @function   power_control_set_voltage
   * @brief      Set required voltage to the user regulator.
@@ -312,6 +313,7 @@ void power_control_usb_timeout_disable(void);
   * @retval     None.
   *****************************************************************************/
 void power_control_set_voltage(voltage_value_t voltage);
+#endif
 
 #endif // POWER_CONTROL_H
 
