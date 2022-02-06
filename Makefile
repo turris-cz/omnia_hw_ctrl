@@ -22,6 +22,18 @@ DEFS   += -DUSE_STDPERIPH_DRIVER
 DEFS   += -D__ASSEMBLY_
 DEFS   += -DVERSION=$(FW_VERSION)
 
+ifeq ($(DBG_ENABLE), 1)
+	DEFS += -DDBG_ENABLE=1
+	DEBUG_INFO_PRINT = \
+		@echo -e "\n\n======================================================="; \
+		echo "Built with debug output enabled on MCU's UART pins!"; \
+		echo "MiniPCIe/mSATA card detection and PCIe1 PLED won't work"; \
+		echo -e "=======================================================\n\n"
+else
+	DEFS += -DDBG_ENABLE=0
+	DEBUG_INFO_PRINT =
+endif
+
 ##### Assembler options
 
 AFLAGS  = -mcpu=cortex-m0 
@@ -202,8 +214,10 @@ boot_buildsize: $(BOOT_NAME).elf
 all: app boot
 
 app: $(APP_NAME).elf app_buildsize
+	$(DEBUG_INFO_PRINT)
 
 boot: $(BOOT_NAME).elf boot_buildsize
+	$(DEBUG_INFO_PRINT)
 						
 $(APP_NAME).elf: $(OBJS)
 	@echo "[Linking    ]  $@"	
