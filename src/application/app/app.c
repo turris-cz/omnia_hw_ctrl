@@ -358,12 +358,12 @@ static ret_value_t enable_4v5(void)
 #endif
 
 /*******************************************************************************
-  * @function   ic2_manager
+  * @function   i2c_manager
   * @brief      Handle I2C communication.
   * @param      None.
   * @retval     value: next_state.
   *****************************************************************************/
-static ret_value_t ic2_manager(void)
+static ret_value_t i2c_manager(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
     static uint16_t last_status_word;
@@ -521,7 +521,7 @@ void app_mcu_cyclic(void)
 
         case I2C_MANAGER:
         {
-            val = ic2_manager();
+            val = i2c_manager();
 
             switch(val)
             {
