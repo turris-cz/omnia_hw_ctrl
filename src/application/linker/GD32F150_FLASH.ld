@@ -10,7 +10,9 @@
    /* Specify the memory areas */
    MEMORY
    {
-     FLASH (rx)      : ORIGIN = 0x08002C00, LENGTH = 0x05400 /*21K*/
+     VECTOR(rx)      : ORIGIN = 0x08002C00, LENGTH = 0x110
+     CRCSUM(rx)      : ORIGIN = 0x08002D10, LENGTH = 0x8
+     FLASH (rx)      : ORIGIN = 0x08002D18, LENGTH = 0x052e8 /*21K*/
      RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 0x02000 /*8K - 192B for vector table */
    }
 
@@ -32,7 +34,14 @@
        . = ALIGN(4);
        KEEP(*(.isr_vector)) /* Startup code */
        . = ALIGN(4);
-     } >FLASH
+     } >VECTOR
+
+     .crcsum :
+     {
+       . = ALIGN(4);
+       KEEP(*(.crc_sum))
+       . = ALIGN(4);
+     } >CRCSUM
 
      /* The program code and other data goes into FLASH */
      .text :

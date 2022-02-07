@@ -143,6 +143,36 @@ static void start_application(void)
     app_entry();
 }
 
+int check_app_crc(void)
+{
+    uint32_t crc, *data, size, i;
+
+    data = (uint32_t *)APPLICATION_ADDRESS;
+    size = data[APPLICATION_SIZE_POS / 4];
+    crc = data[APPLICATION_CRC_POS / 4];
+
+    if (size > APPLICATION_MAX_SIZE || (size & 3)) {
+        DBG_UART("invalid stored app size\r\n");
+        return 0;
+    }
+
+    rcu_periph_clock_enable(RCU_CRC);
+
+    CRC_IDATA = 0;
+    CRC_CTL |= CRC_CTL_RST;
+
+    for (i = 0; i < size / 4; ++i)
+        CRC_DATA = (i != 0x114 / 4) ? data[i] : 0;
+
+    if (CRC_DATA == crc) {
+        DBG_UART("app crc ok\r\n");
+        return 1;
+    } else {
+        DBG_UART("app crc fail\r\n");
+        return 0;
+    }
+}
+
 /*******************************************************************************
   * @function   startup_manager
   * @brief      Determine a reset reason and following reaction.
@@ -205,6 +235,13 @@ static boot_value_t startup_manager(void)
         default:
             break;
     }
+
+    /*
+     * if EEprom variable says we should boot application but application has
+     * bad CRC, just power on
+     */
+    if (retval == GO_TO_APPLICATION && !check_app_crc())
+        retval = GO_TO_POWER_ON;
 
     return retval;
 }

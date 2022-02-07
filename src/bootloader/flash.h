@@ -19,6 +19,10 @@
 #define APPLICATION_END         (uint32_t)0x08008000
 #define APPLICATION_MAX_SIZE    (APPLICATION_END - APPLICATION_ADDRESS)
 
+/* application contains its size and crc32 */
+#define APPLICATION_SIZE_POS    0x110
+#define APPLICATION_CRC_POS     0x114
+
 /* Get the number of Sector from where the user program will be loaded */
 #define  FLASH_PAGE_NUMBER      (uint32_t)((APPLICATION_ADDRESS - 0x08000000) >> 12)
 
