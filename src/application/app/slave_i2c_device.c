@@ -156,7 +156,7 @@ static void slave_i2c_periph_config(void)
     i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
     i2c_dualaddr_enable(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR);
 
-    i2c_interrupt_enable(I2C1, I2C_INT_EV);
+    i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_EV);
 
     i2c_stretch_scl_low_config(I2C_PERIPH_NAME, I2C_SCLSTRETCH_ENABLE);
 
