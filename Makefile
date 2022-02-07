@@ -9,6 +9,7 @@ CROSS_COMPILE ?= arm-none-eabi-
 
 CC      = $(CROSS_COMPILE)gcc
 OBJCOPY = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdump
 AS      = $(CROSS_COMPILE)as
 SIZE	= $(CROSS_COMPILE)size
 
@@ -237,23 +238,31 @@ boot_buildsize: $(BOOT_NAME).elf
 
 all: app boot
 
-app: $(APP_NAME).elf app_buildsize
+app: $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).dis app_buildsize
 	$(DEBUG_INFO_PRINT)
 
-boot: $(BOOT_NAME).elf boot_buildsize
+boot: $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).dis boot_buildsize
 	$(DEBUG_INFO_PRINT)
-						
+
 $(APP_NAME).elf: $(OBJS)
-	@echo "[Linking    ]  $@"	
+	@echo "[Linking    ]  $@"
 	@$(CC) $(CFLAGS) $(LFLAGS) $(INCLUDE) $^ -o $@
-	@$(OBJCOPY) -O ihex $(APP_NAME).elf   $(APP_NAME).hex
-	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
 
 $(BOOT_NAME).elf: $(BOOT_OBJS)
-	@echo "[Linking    ]  $@"	
+	@echo "[Linking    ]  $@"
 	@$(CC) $(CFLAGS) $(BOOT_LFLAGS) $(BOOT_INCLUDE) $^ -o $@
-	@$(OBJCOPY) -O ihex $(BOOT_NAME).elf   $(BOOT_NAME).hex
-	@$(OBJCOPY) -O binary $(BOOT_NAME).elf $(BOOT_NAME).bin
+
+%.hex: %.bin
+	@echo "[HEX        ]  $@"
+	@$(OBJCOPY) -I binary -O ihex $< $@
+
+%.bin: %.elf
+	@echo "[Binary     ]  $@"
+	@$(OBJCOPY) -O binary $< $@
+
+%.dis: %.elf
+	@echo "[Disassembly]  $@"
+	@$(OBJDUMP) -D -S $< >$@
 
 %.o : %.c
 	@echo "[Compiling  ]  $^"
@@ -263,13 +272,12 @@ $(BOOT_NAME).elf: $(BOOT_OBJS)
 	@echo "[Assembling ]" $^
 	@$(AS) $(AFLAGS) $< -o $@
 
-clean:
-	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
+clean: cleanapp cleanboot
 
 cleanapp:
-	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).hex $(APP_NAME).bin $(APP_NAME).map
+	rm -r -f *.o $(APP_NAME).elf $(APP_NAME).dis $(APP_NAME).bin $(APP_NAME).hex $(APP_NAME).map
 cleanboot:
-	rm -r -f *.o $(BOOT_NAME).elf $(BOOT_NAME).hex $(BOOT_NAME).bin $(BOOT_NAME).map
+	rm -r -f *.o $(BOOT_NAME).elf $(BOOT_NAME).dis $(BOOT_NAME).bin $(BOOT_NAME).hex $(BOOT_NAME).map
 
 #********************************
 # generating of the dependencies
