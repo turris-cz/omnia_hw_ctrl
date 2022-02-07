@@ -30,20 +30,11 @@ __attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
 
 #define I2C_SLAVE_ADDRESS               0x58  /* address in linux: 0x2C */
 
-#define LOW_ADDR_BYTE_IDX               1
-#define HIGH_ADDR_BYTE_IDX              0
-#define DATA_START_BYTE_IDX             2
-
 #define FILE_CMP_OK                     0xBB
 #define FILE_CMP_ERROR                  0xDD
 #define ADDR_CMP                        0xFFFF
 
-#define ONE_BYTE_EXPECTED               1
-
 struct st_i2c_status i2c_status;
-
-static uint8_t flash_erase_sts; /* indicates start of flashing */
-static uint32_t run_number; /* number of sent bytes */
 
 /*******************************************************************************
   * @function   boot_i2c_config
@@ -87,7 +78,6 @@ static void boot_i2c_periph_config(void)
 
     i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
 
-    i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
     i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_EV);
 
     i2c_stretch_scl_low_config(I2C_PERIPH_NAME, I2C_SCLSTRETCH_ENABLE);
@@ -98,23 +88,6 @@ static void boot_i2c_periph_config(void)
     i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
 
     nvic_irq_enable(I2C1_EV_IRQn, 0, 1);
-}
-
-/*******************************************************************************
-  * @function   clear_rxbuf
-  * @brief      Delete RX buffer.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void clear_rxbuf(void)
-{
-    struct st_i2c_status *i2c_state = &i2c_status;
-    uint16_t idx;
-
-    for (idx = 0; idx < MAX_RX_BUFFER_SIZE; idx++)
-    {
-        i2c_state->rx_buf[idx] = 0;
-    }
 }
 
 /*******************************************************************************
@@ -129,6 +102,17 @@ void boot_i2c_config(void)
     boot_i2c_periph_config();
 }
 
+static uint16_t boot_i2c_get_addr(void)
+{
+    return (i2c_status.rx_addr[0] << 8) | i2c_status.rx_addr[1];
+}
+
+static uint32_t boot_i2c_is_addr_valid(uint16_t addr)
+{
+    return (addr & (I2C_DATA_PACKET_SIZE - 1)) == 0 &&
+           ((uint32_t)addr + I2C_DATA_PACKET_SIZE) <= APPLICATION_MAX_SIZE;
+}
+
 /*******************************************************************************
   * @function   boot_i2c_handler
   * @brief      Interrupt handler for I2C communication.
@@ -138,88 +122,146 @@ void boot_i2c_config(void)
 void boot_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    //static uint16_t direction;
-    static uint32_t flash_address = APPLICATION_ADDRESS;
-    static uint8_t data;
-    static uint8_t rx_dir, tx_dir; /* direction RX */
-    const uint32_t missing_byte = 129; /* first byte is missing in every data block (except of the first one) */
+    static uint8_t rx_dir, tx_dir;
+    uint16_t stat0;
 
-  //  __disable_irq();
+    __disable_irq();
 
-    if (!flash_erase_sts) /* we are at the beginning again */
+    stat0 = I2C_STAT0(I2C_PERIPH_NAME);
+
+    /* acknowledge not received interrupt */
+    if (tx_dir && (stat0 & I2C_STAT0_AERR))
     {
-        flash_address = APPLICATION_ADDRESS;
-    }
+        DBG_UART("AERR\r\n");
 
-    /* address match interrupt */
-    if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND) == SET)
-    {
-        /* clear the ADDSEND bit */
-        i2c_interrupt_flag_clear(I2C_PERIPH_NAME, I2C_INT_FLAG_ADDSEND);
-        DBG_UART("ADDR\r\n");
-    }
+        /* clear AERR */
+        I2C_STAT0(I2C_PERIPH_NAME) &= ~I2C_STAT0_AERR;
+        i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+        i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_ERR);
 
-    /* transmit interrupt */
-    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_TBE))
-    {
-        run_number++; /* number of sent bytes */
+        i2c_state->tx_ptr = NULL;
+        i2c_state->tx_data_ctr = 0;
 
-        flash_read(&flash_address, &data); /* read flash and increment address */
-
-        if ((run_number % missing_byte) == 0) /* re-send the first byte of each block again */
-                flash_address--;
-
-        i2c_data_transmit(I2C_PERIPH_NAME, data);
-
-        i2c_state->tx_data_ctr++;
-
-        if (i2c_state->tx_data_ctr >= I2C_DATA_PACKET_SIZE)
-        {
-            i2c_state->tx_data_ctr = 0;
-        }      
-
-        tx_dir = 1;
-
-        DBG_UART("send\r\n");
-    }
-
-    /* receive interrupt */
-    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_RBNE))
-    {
-        i2c_state->rx_buf[i2c_state->rx_data_ctr++] = i2c_data_receive(I2C_PERIPH_NAME);
-        rx_dir = 1;
-
-        i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
-
-       /* if(i2c_state->rx_data_ctr >= MAX_RX_BUFFER_SIZE)
-        {
-            i2c_state->rx_data_ctr = 0;
-        }*/
+        tx_dir = 0;
     }
 
     /* stop flag */
-    else if(i2c_interrupt_flag_get(I2C_PERIPH_NAME, I2C_INT_FLAG_STPDET))
+    else if (rx_dir && (stat0 & I2C_STAT0_STPDET))
     {
-        i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
-
-        if (rx_dir == 1)
-        {
-            i2c_state->data_rx_complete = 1;
-            rx_dir = 0;
-
-           // i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
-           // i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_EV);
-        }
-        else if (tx_dir == 1) // TX - clear AERR bit
-        {
-            i2c_interrupt_flag_clear(I2C_PERIPH_NAME, I2C_INT_FLAG_AERR);
-            tx_dir = 0;
-        }
-
         DBG_UART("STOP\r\n");
+
+        /* clear the STPDET bit */
+        i2c_enable(I2C_PERIPH_NAME);
+
+        i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+
+        if (i2c_state->rx_data_ctr > 2)
+        {
+            uint16_t addr = boot_i2c_get_addr();
+
+            if (boot_i2c_is_addr_valid(addr))
+            {
+                i2c_state->prog_addr = addr;
+                i2c_state->prog_len = i2c_state->rx_data_ctr - 2;
+                i2c_state->prog_state = PROG_START;
+
+                i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_DISABLE);
+                DBG_UART("prog start\r\n");
+            }
+            else if (addr == ADDR_CMP && i2c_state->rx_data_ctr == 3)
+            {
+                if (i2c_state->rx_buf[0] == FILE_CMP_OK)
+                    i2c_state->prog_state = PROG_OK;
+                else
+                    i2c_state->prog_state = PROG_ERROR;
+            }
+            else
+            {
+                DBG_UART("prog invalid address\r\n");
+            }
+        }
+        else if (i2c_state->rx_data_ctr == 2)
+        {
+            uint16_t addr = boot_i2c_get_addr();
+
+            if (boot_i2c_is_addr_valid(addr))
+            {
+                DBG_UART("recv request\r\n");
+                i2c_state->tx_ptr = (uint8_t *)(APPLICATION_ADDRESS + addr);
+            }
+        }
+
+        rx_dir = 0;
     }
 
-  //  __enable_irq();
+    /* transmit interrupt */
+    else if (tx_dir && (stat0 & I2C_STAT0_TBE))
+    {
+        if (i2c_state->tx_data_ctr < I2C_DATA_PACKET_SIZE)
+        {
+            uint8_t c = *i2c_state->tx_ptr++;
+
+            i2c_data_transmit(I2C_PERIPH_NAME, c);
+            i2c_state->tx_data_ctr++;
+
+            DBG_UART("send flash byte\r\n");
+        }
+        else
+        {
+            DBG_UART("send 0xff\r\n");
+            i2c_data_transmit(I2C_PERIPH_NAME, 0xff);
+        }
+    }
+
+    /* receive interrupt */
+    else if (rx_dir && (stat0 & I2C_STAT0_RBNE))
+    {
+        uint8_t c = i2c_data_receive(I2C_PERIPH_NAME);
+
+        if (i2c_state->prog_state != PROG_WAITING)
+            goto end;
+
+        if (i2c_state->rx_data_ctr < I2C_ADDRESS_FIELD_SIZE)
+        {
+            i2c_state->rx_addr[i2c_state->rx_data_ctr++] = c;
+
+            DBG_UART("recv addr\r\n");
+        }
+        else if (i2c_state->rx_data_ctr < MAX_RX_BUFFER_SIZE)
+        {
+            i2c_state->rx_buf[i2c_state->rx_data_ctr - 2] = c;
+            i2c_state->rx_data_ctr++;
+
+            DBG_UART("recv data\r\n");
+        }
+    }
+
+    /* address match interrupt */
+    else if (stat0 & I2C_STAT0_ADDSEND)
+    {
+        uint16_t stat1;
+
+        /* reading stat1 after stat0 clears the ADDSEND bit */
+        stat1 = I2C_STAT1(I2C_PERIPH_NAME);
+
+        if (stat1 & I2C_STAT1_TR) {
+            DBG_UART("ADDR tx\r\n");
+            tx_dir = 1;
+            i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_ERR);
+        } else {
+            DBG_UART("ADDR rx\r\n");
+            rx_dir = 1;
+            i2c_state->tx_data_ctr = 0;
+        }
+
+        /* enable RBNE/TBE interrupt */
+        i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
+
+        i2c_state->rx_data_ctr = 0;
+    }
+
+end:
+    __enable_irq();
 }
 
 
@@ -233,68 +275,44 @@ void boot_i2c_handler(void)
 flash_i2c_states_t boot_i2c_flash_data(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
-    uint16_t rx_cmd, idx, data_length = I2C_DATA_PACKET_SIZE / 4;
-    uint8_t data[I2C_DATA_PACKET_SIZE];
-    static flash_i2c_states_t flash_status = FLASH_CMD_NOT_RECEIVED;
-    static uint32_t flash_address = APPLICATION_ADDRESS;
+    static flash_i2c_states_t result;
 
-    if (i2c_state->data_rx_complete)
-    {
+    if (i2c_state->prog_state == PROG_START) {
+        uint32_t addr = APPLICATION_ADDRESS + i2c_state->prog_addr;
+
+        if ((i2c_state->prog_addr & (FLASH_PAGE_SIZE - 1)) == 0)
+        {
+            DBG_UART("erasing\r\n");
+            fmc_page_erase(addr);
+        }
+
+        DBG_UART("writing\r\n");
+        flash_write(&addr, i2c_state->rx_buf_longs, (i2c_state->prog_len + 3) / 4);
+
         __disable_irq();
 
-        memset(data, 0, sizeof(data));
-
-        flash_status = FLASH_CMD_RECEIVED;
-
-        rx_cmd = (i2c_state->rx_buf[HIGH_ADDR_BYTE_IDX] << 8) | \
-                            (i2c_state->rx_buf[LOW_ADDR_BYTE_IDX]);
-
-        /* copy data */
-        for(idx = 0; idx < I2C_DATA_PACKET_SIZE; idx++)
-        {
-            data[idx] = i2c_state->rx_buf[idx + DATA_START_BYTE_IDX];
-        }
-
-        if (!flash_erase_sts) /* enter the flash sequence, erase pages */
-        {
-            flash_erase(flash_address);
-            flash_erase_sts = 1;
-            DBG_UART("FL_NOT_CONF\r\n");
-        }
-
-        if (rx_cmd == ADDR_CMP) /* flashing is complete, linux send result of comparison */
-        {
-            if (data[0] == FILE_CMP_OK)
-            {
-                flash_status = FLASH_WRITE_OK;
-                DBG_UART("WRITE_OK\n\r");
-            }
-            else
-            {
-                flash_status = FLASH_WRITE_ERROR;
-                DBG_UART("WRITE ERR\n\r");
-            }
-
-            flash_address = APPLICATION_ADDRESS;
-            flash_erase_sts = 0;
-            i2c_state->tx_data_ctr = 0;
-            run_number = 0;
-        }
-        else /* write incoming data */
-        {
-            flash_write(&flash_address, (uint32_t*)data, data_length);
-        }
-
-        clear_rxbuf();
-
-        i2c_state->data_rx_complete = 0;
-        i2c_state->rx_data_ctr = 0;
+        i2c_state->prog_state = PROG_WAITING;
+        i2c_ack_config(I2C_PERIPH_NAME, I2C_ACK_ENABLE);
+        DBG_UART("prog waiting\r\n");
 
         __enable_irq();
 
-       // i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
-       // i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_EV);
+        result = FLASH_CMD_RECEIVED;
+    }
+    else if (i2c_state->prog_state == PROG_OK)
+    {
+        result = FLASH_WRITE_OK;
+        i2c_state->prog_state = PROG_WAITING;
+    }
+    else if (i2c_state->prog_state == PROG_ERROR)
+    {
+        result = FLASH_WRITE_ERROR;
+        i2c_state->prog_state = PROG_WAITING;
+    }
+    else
+    {
+        result = FLASH_CMD_NOT_RECEIVED;
     }
 
-    return flash_status;
+    return result;
 }
