@@ -641,6 +641,13 @@ void slave_i2c_handler(void)
         } else {
             DBG_UART("ADDR rx\r\n");
             i2c_state->handler_state = RECEIVING;
+
+            /*
+             * in case there was no STOP for previous TX transaction,
+             * reset tx buffer
+             */
+            i2c_state->tx_data_ctr = 0;
+            i2c_state->tx_data_len = 0;
         }
 
         /* enable RBNE/TBE interrupt */
