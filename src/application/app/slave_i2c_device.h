@@ -36,6 +36,7 @@ struct st_i2c_status {
         STOPPED = 0,
         RECEIVING,
         TRANSMITTING,
+        TRANSMITTED,
     } handler_state;
 };
 

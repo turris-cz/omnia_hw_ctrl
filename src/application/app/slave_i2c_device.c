@@ -156,7 +156,6 @@ static void slave_i2c_periph_config(void)
     i2c_mode_addr_config(I2C_PERIPH_NAME, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, I2C_SLAVE_ADDRESS);
     i2c_dualaddr_enable(I2C_PERIPH_NAME, I2C_SLAVE_ADDRESS_EMULATOR);
 
-    i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
     i2c_interrupt_enable(I2C1, I2C_INT_EV);
 
     i2c_stretch_scl_low_config(I2C_PERIPH_NAME, I2C_SCLSTRETCH_ENABLE);
@@ -290,6 +289,15 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     }
 }
 
+static void slave_i2c_handler_set_stopped(void)
+{
+    i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_ERR);
+    i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+    i2c_status.tx_data_ctr = 0;
+    i2c_status.tx_data_len = 0;
+    i2c_status.handler_state = STOPPED;
+}
+
 /*******************************************************************************
   * @function   slave_i2c_handler
   * @brief      Interrupt handler for I2C communication.
@@ -300,7 +308,6 @@ void slave_i2c_handler(void)
 {
     struct st_i2c_status *i2c_state = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
-    static i2c_dir_t direction;
     struct led_rgb *led = leds;
     uint16_t stat0;
     uint16_t idx;
@@ -313,16 +320,47 @@ void slave_i2c_handler(void)
 
     stat0 = I2C_STAT0(I2C_PERIPH_NAME);
 
+    /********* error handling *********/
+
+    /* over-run / under-run interrupt */
+    if (stat0 & I2C_STAT0_OUERR) {
+        DBG_UART("OUERR\r\n");
+
+        /* clear */
+        I2C_STAT0(I2C_PERIPH_NAME) &= ~I2C_STAT0_OUERR;
+    }
+
+    /* bus error interrupt */
+    if (stat0 & I2C_STAT0_BERR) {
+        DBG_UART("BERR\r\n");
+
+        /* clear & stop */
+        I2C_STAT0(I2C_PERIPH_NAME) &= ~I2C_STAT0_BERR;
+        slave_i2c_handler_set_stopped();
+    }
+
+
+
+    /********* communication handling *********/
+
+    /* acknowledge not received interrupt */
+    if (stat0 & I2C_STAT0_AERR) {
+        DBG_UART("AERR\r\n");
+
+        /* clear AERR */
+        I2C_STAT0(I2C_PERIPH_NAME) &= ~I2C_STAT0_AERR;
+
+        slave_i2c_handler_set_stopped();
+    }
+
     /* stop flag */
-    if (i2c_state->handler_state != STOPPED && (stat0 & I2C_STAT0_STPDET))
+    else if (i2c_state->handler_state != STOPPED && (stat0 & I2C_STAT0_STPDET))
     {
-        i2c_enable(I2C_PERIPH_NAME); /* clear the STPDET bit */
+        /* this also clears STPDET bit */
+        i2c_enable(I2C_PERIPH_NAME);
 
         DBG_UART("STOP\r\n");
-
-        i2c_state->tx_data_ctr = 0;
-        i2c_state->tx_data_len = 0;
-        i2c_state->handler_state = STOPPED;
+        slave_i2c_handler_set_stopped();
     }
 
     /* data not empty during receiving interrupt */
@@ -557,14 +595,30 @@ void slave_i2c_handler(void)
         {
             i2c_data_transmit(I2C_PERIPH_NAME, i2c_state->tx_buf[i2c_state->tx_data_ctr++]);
             i2c_state->tx_data_len--;
-
-            if (i2c_state->tx_data_len == 0)
-            {
-                i2c_state->tx_data_ctr = 0;
-            }
-
             DBG_UART("send\r\n");
         }
+
+        if (i2c_state->tx_data_len == 0)
+        {
+            i2c_state->tx_data_ctr = 0;
+            i2c_state->handler_state = TRANSMITTED;
+
+            /* all bytes transmitted, disable TBE interrupt */
+            DBG_UART("no more bytes to send, disabling TBE\r\n");
+            i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+        }
+    }
+
+    /* byte transmission completed interrupt */
+    else if (i2c_state->handler_state == TRANSMITTED && (stat0 & I2C_STAT0_BTC))
+    {
+        /*
+         * There is no sensible way on GD32 to make the master time out if
+         * we have no more bytes to send, thus we send 0xff if master
+         * does a wrong request.
+         */
+        i2c_data_transmit(I2C_PERIPH_NAME, 0xff);
+        DBG_UART("no bytes to send, sending 0xff (BTC)\r\n");
     }
 
     /* address match interrupt */
@@ -578,10 +632,19 @@ void slave_i2c_handler(void)
         if (stat1 & I2C_STAT1_TR) {
             DBG_UART("ADDR tx\r\n");
             i2c_state->handler_state = TRANSMITTING;
+
+            /*
+             * enable ERR interrupt to be able to determine when master stops
+             * a receiving transaction
+             */
+            i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_ERR);
         } else {
             DBG_UART("ADDR rx\r\n");
             i2c_state->handler_state = RECEIVING;
         }
+
+        /* enable RBNE/TBE interrupt */
+        i2c_interrupt_enable(I2C_PERIPH_NAME, I2C_INT_BUF);
 
         i2c_state->rx_data_ctr = 0;
     }
