@@ -47,6 +47,7 @@ void bootloader_init(void)
      /* system initialization */
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
 
    // timer_deinit(LED_TIMER);
 

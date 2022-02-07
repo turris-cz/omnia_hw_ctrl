@@ -39,6 +39,7 @@ void app_mcu_init(void)
 
     SystemInit();
     SystemCoreClockUpdate(); /* set HSI and PLL */
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
     __enable_irq();
 
     fmc_unlock(); /* Unlock the Flash Program Erase controller */
