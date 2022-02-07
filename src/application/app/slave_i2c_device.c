@@ -350,6 +350,21 @@ void slave_i2c_handler(void)
         /* clear AERR */
         I2C_STAT0(I2C_PERIPH_NAME) &= ~I2C_STAT0_AERR;
 
+        if (i2c_state->handler_state == TRANSMITTED &&
+            i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+        {
+            /*
+             * if we managed to send status word successfuly, delete button
+             * status from status word and decrease button counter by the
+             * value we transmitted
+             */
+
+            i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+            button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+
+            DBG_UART("status word sent successfuly\r\n");
+        }
+
         slave_i2c_handler_set_stopped();
     }
 
@@ -389,14 +404,6 @@ void slave_i2c_handler(void)
                 DBG_UART("STS\r\n");
 
                 i2c_state->rx_data_ctr = 0;
-
-                /* delete button status and counter bit from status_word */
-                if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
-                {
-                    i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
-                    /* decrease button counter by the value has been sent */
-                    button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
-                }
             } break;
 
             case CMD_GENERAL_CONTROL:
