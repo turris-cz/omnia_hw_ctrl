@@ -339,7 +339,7 @@ void bootloader(void)
 
         case RESET_MANAGER:
         {
-            system_reset = gpio_output_bit_get(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
+            system_reset = gpio_input_bit_get(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN);
 
             if(system_reset == 0) /* reset is active in low level */
             {
