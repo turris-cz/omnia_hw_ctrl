@@ -5,3 +5,7 @@
 *.elf
 *.hex
 *.list
+*.dis
+*.nocrc
+crc32tool
+
