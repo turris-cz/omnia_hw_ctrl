@@ -44,6 +44,7 @@ extern struct st_i2c_status i2c_status;
 
 enum status_word_bits {
     GD32_MCU_STSBIT        = 0x0001,
+    USER_REGULATOR_NOT_SUPPORTED_STSBIT = 0x0008,
     CARD_DET_STSBIT        = 0x0010,
     MSATA_IND_STSBIT       = 0x0020,
     USB30_OVC_STSBIT       = 0x0040,

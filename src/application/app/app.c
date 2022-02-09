@@ -118,6 +118,8 @@ static uint16_t app_get_status_word(void)
 #if USER_REGULATOR_ENABLED
     if(gpio_output_bit_get(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
         status_word |= ENABLE_4V5_STSBIT;
+#else
+    status_word |= USER_REGULATOR_NOT_SUPPORTED_STSBIT;
 #endif
 
     return status_word;
