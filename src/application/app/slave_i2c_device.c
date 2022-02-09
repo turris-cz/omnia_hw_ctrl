@@ -388,15 +388,6 @@ void slave_i2c_handler(void)
                 i2c_state->tx_data_len = 2;
                 DBG_UART("STS\r\n");
 
-                /*
-                 * if we managed to send status word successfuly, delete button
-                 * status from status word and decrease button counter by the
-                 * value we transmitted
-                 */
-
-                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
-                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
-
                 i2c_state->rx_data_ctr = 0;
             } break;
 
@@ -607,6 +598,18 @@ void slave_i2c_handler(void)
             /* all bytes transmitted, disable TBE interrupt */
             DBG_UART("no more bytes to send, disabling TBE\r\n");
             i2c_interrupt_disable(I2C_PERIPH_NAME, I2C_INT_BUF);
+
+
+            /*
+             * if we managed to send status word successfuly, delete button
+             * status from status word and decrease button counter by the
+             * value we transmitted
+             */
+            if (i2c_state->rx_buf[CMD_INDEX] == CMD_GET_STATUS_WORD)
+            {
+                i2c_state->status_word &= ~BUTTON_PRESSED_STSBIT;
+                button_counter_decrease((i2c_state->status_word & BUTTON_COUNTER_VALBITS) >> 13);
+            }
         }
     }
 
