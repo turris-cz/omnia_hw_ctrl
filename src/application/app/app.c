@@ -94,6 +94,9 @@ static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
+    /* this MCU is GD32 */
+    status_word |= GD32_MCU_STSBIT;
+
     if (msata_pci_card_detection())
         status_word |= CARD_DET_STSBIT;
 
@@ -115,6 +118,8 @@ static uint16_t app_get_status_word(void)
 #if USER_REGULATOR_ENABLED
     if(gpio_output_bit_get(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
         status_word |= ENABLE_4V5_STSBIT;
+#else
+    status_word |= USER_REGULATOR_NOT_SUPPORTED_STSBIT;
 #endif
 
     return status_word;
