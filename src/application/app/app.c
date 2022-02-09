@@ -94,6 +94,9 @@ static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
+    /* this MCU is GD32 */
+    status_word |= GD32_MCU_STSBIT;
+
     if (msata_pci_card_detection())
         status_word |= CARD_DET_STSBIT;
 
