@@ -39,7 +39,7 @@ static void wan_lan_pci_io_config(void)
                           | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
                           | C0_P3_LED_PIN_PERIPH_CLOCK | C1_LED_PIN_PERIPH_CLOCK
                           | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
-                          | SFP_DIS_PIN_PERIPH_CLOCK, ENABLE);
+                          | SFP_DIS_PIN_PERIPH_CLOCK | WAN_LED1_PIN_PERIPH_CLOCK, ENABLE);
 
     /* for compatibility with older versions of board */
     GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
@@ -71,6 +71,9 @@ static void wan_lan_pci_io_config(void)
     /* WAN LED pins */
     GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
     GPIO_Init(WAN_LED0_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = WAN_LED1_PIN;
+    GPIO_Init(WAN_LED1_PIN_PORT, &GPIO_InitStructure);
 
     /* LAN LED input pins */
     GPIO_InitStructure.GPIO_Pin = R0_P0_LED_PIN;
@@ -117,14 +120,15 @@ void wan_lan_pci_config(void)
   *****************************************************************************/
 void wan_led_activity(void)
 {
-    uint8_t led0_status;
+    uint8_t led0_status, led1_status;
     struct led_rgb *rgb_leds = leds;
 
     if (rgb_leds[WAN_LED].led_mode == LED_DEFAULT_MODE)
     {
         led0_status = GPIO_ReadInputDataBit(WAN_LED0_PIN_PORT, WAN_LED0_PIN);
+        led1_status = GPIO_ReadInputDataBit(WAN_LED1_PIN_PORT, WAN_LED1_PIN);
 
-        if (led0_status == 0)
+        if ((led0_status == 0) || (led1_status == 0))
         {
             rgb_leds[WAN_LED].led_state_default = LED_ON;
         }

@@ -63,9 +63,7 @@
 #define CFG_CTRL_PIN_PORT                   GPIOC
 #define CFG_CTRL_PIN                        GPIO_Pin_15
 
-#define PRG_4V5_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOF
-#define PRG_4V5_PIN_PORT                    GPIOF
-#define PRG_4V5_PIN                         GPIO_Pin_1
+
 
 /* Inputs */
 #define MANRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB

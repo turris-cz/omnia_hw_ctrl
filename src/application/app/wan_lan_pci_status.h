@@ -31,7 +31,9 @@
 #define WAN_LED0_PIN_PORT                   GPIOF
 #define WAN_LED0_PIN                        GPIO_Pin_0
 
-
+#define WAN_LED1_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOF
+#define WAN_LED1_PIN_PORT                   GPIOF
+#define WAN_LED1_PIN                        GPIO_Pin_1
 
 
 /* LAN LED */
