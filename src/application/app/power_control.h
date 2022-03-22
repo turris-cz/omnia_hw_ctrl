@@ -19,9 +19,7 @@
 #define INT_MCU_PIN_PORT                    GPIOC
 #define INT_MCU_PIN                         GPIO_Pin_0
 
-#define RES_RAM_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
-#define RES_RAM_PIN_PORT                    GPIOC
-#define RES_RAM_PIN                         GPIO_Pin_3
+
 
 #define ENABLE_5V_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOC
 #define ENABLE_5V_PIN_PORT                  GPIOC
@@ -35,9 +33,7 @@
 #define ENABLE_1V35_PIN_PORT                GPIOC
 #define ENABLE_1V35_PIN                     GPIO_Pin_6
 
-#define ENABLE_4V5_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
-#define ENABLE_4V5_PIN_PORT                 GPIOC
-#define ENABLE_4V5_PIN                      GPIO_Pin_7
+
 
 #define ENABLE_1V8_PIN_PERIPH_CLOCK         RCC_AHBPeriph_GPIOC
 #define ENABLE_1V8_PIN_PORT                 GPIOC
@@ -80,13 +76,9 @@
 #define SYSRES_OUT_PIN_PORT                 GPIOB
 #define SYSRES_OUT_PIN                      GPIO_Pin_1
 
-#define DGBRES_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
-#define DGBRES_PIN_PORT                     GPIOB
-#define DGBRES_PIN                          GPIO_Pin_2
 
-#define MRES_PIN_PERIPH_CLOCK               RCC_AHBPeriph_GPIOB
-#define MRES_PIN_PORT                       GPIOB
-#define MRES_PIN                            GPIO_Pin_3
+
+
 
 #define PG_5V_PIN_PERIPH_CLOCK              RCC_AHBPeriph_GPIOB
 #define PG_5V_PIN_PORT                      GPIOB
@@ -100,9 +92,7 @@
 #define PG_1V35_PIN_PORT                    GPIOB
 #define PG_1V35_PIN                         GPIO_Pin_6
 
-#define PG_4V5_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
-#define PG_4V5_PIN_PORT                     GPIOB
-#define PG_4V5_PIN                          GPIO_Pin_7
+
 
 #define PG_1V8_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOB
 #define PG_1V8_PIN_PORT                     GPIOB
@@ -128,13 +118,52 @@
 #define USB31_OVC_PIN_PORT                  GPIOB
 #define USB31_OVC_PIN                       GPIO_Pin_13
 
-#define RTC_ALARM_PIN_PERIPH_CLOCK          RCC_AHBPeriph_GPIOB
-#define RTC_ALARM_PIN_PORT                  GPIOB
-#define RTC_ALARM_PIN                       GPIO_Pin_14
+
 
 #define LED_BRT_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOB
 #define LED_BRT_PIN_PORT                    GPIOB
 #define LED_BRT_PIN                         GPIO_Pin_15
+
+/* Omnia v32 changes --------------------------------------- */
+#define PERST1_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOA
+#define PERST1_PIN_PORT                     GPIOA
+#define PERST1_PIN                          GPIO_Pin_10
+
+#define RES_MMC_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOB
+#define RES_MMC_PIN_PORT                    GPIOB
+#define RES_MMC_PIN                         GPIO_Pin_2
+
+#define RES_LAN_PERIPH_CLOCK                RCC_AHBPeriph_GPIOB
+#define RES_LAN_PIN_PORT                    GPIOB
+#define RES_LAN_PIN                         GPIO_Pin_3
+
+#define RES_PHY_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOB
+#define RES_PHY_PIN_PORT                    GPIOB
+#define RES_PHY_PIN                         GPIO_Pin_7
+
+#define VHV_CTRL_PIN_PERIPH_CLOCK           RCC_AHBPeriph_GPIOB
+#define VHV_CTRL_PIN_PORT                   GPIOB
+#define VHV_CTRL_PIN                        GPIO_Pin_14
+
+#define PHY_SFP_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOC
+#define PHY_SFP_PIN_PORT                    GPIOC
+#define PHY_SFP_PIN                         GPIO_Pin_3
+
+#define RSVD_PIN_PERIPH_CLOCK               RCC_AHBPeriph_GPIOC
+#define RSVD_PIN_PORT                       GPIOC
+#define RSVD_4V5_PIN                        GPIO_Pin_7
+
+#define SFP_DET_PIN_PERIPH_CLOCK            RCC_AHBPeriph_GPIOD
+#define SFP_DET_PIN_PORT                    GPIOD
+#define SFP_DET_PIN                         GPIO_Pin_2
+
+#define PERST2_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOF
+#define PERST2_PIN_PORT                     GPIOF
+#define PERST2_PIN                          GPIO_Pin_4
+
+#define PERST0_PIN_PERIPH_CLOCK             RCC_AHBPeriph_GPIOF
+#define PERST0_PIN_PORT                     GPIOF
+#define PERST0_PIN                          GPIO_Pin_5
 
 typedef enum voltages {
     VOLTAGE_33 = 1,

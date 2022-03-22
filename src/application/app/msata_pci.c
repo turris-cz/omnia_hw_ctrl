@@ -84,7 +84,7 @@ void msata_pci_activity(void)
   * @param      None.
   * @retval     1 - a card inserted, 0 - no card inserted.
   *****************************************************************************/
-inline uint8_t msata_pci_card_detection(void)
+uint8_t msata_pci_card_detection(void)
 {
     /* inverted due to the HW connection
     HW connection: 1 = no card inserted, 0 = card inserted */
@@ -97,7 +97,7 @@ inline uint8_t msata_pci_card_detection(void)
   * @param      None.
   * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
   *****************************************************************************/
-inline uint8_t msata_pci_type_card_detection(void)
+uint8_t msata_pci_type_card_detection(void)
 {
     return GPIO_ReadInputDataBit(MSATAIND_PIN_PORT, MSATAIND_PIN);
 }
