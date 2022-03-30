@@ -55,7 +55,7 @@ enum status_word_bits {
  *      0   |   dont care
  *      1   |   dont care
  *      2   |   dont care
- *      3   |   dont care
+ *      3   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
  *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
  *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
  *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent

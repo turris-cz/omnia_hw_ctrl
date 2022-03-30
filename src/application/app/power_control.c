@@ -161,8 +161,6 @@ void power_control_io_config(void)
 
     GPIO_SetBits(SYSRES_OUT_PIN_PORT, SYSRES_OUT_PIN); /* dont control this ! */
     GPIO_SetBits(INT_MCU_PIN_PORT, INT_MCU_PIN);
-
-    power_control_prog4v5_config();
 }
 
 /*******************************************************************************
@@ -919,3 +917,57 @@ void power_led_activity(void)
     }
 }
 
+/*******************************************************************************
+  * @function   power_io_new_config
+  * @brief      Configuration of new IO pins for Omnia32
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_new_io_config(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    RCC_AHBPeriphClockCmd(PERST0_PIN_PERIPH_CLOCK | PERST1_PIN_PERIPH_CLOCK
+                          | PERST2_PIN_PERIPH_CLOCK | SFP_DET_PIN_PERIPH_CLOCK
+                          | PHY_SFP_PIN_PERIPH_CLOCK | VHV_CTRL_PIN_PERIPH_CLOCK
+                          | RES_PHY_PIN_PERIPH_CLOCK | RES_LAN_PERIPH_CLOCK
+                          | RES_MMC_PIN_PERIPH_CLOCK, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = SFP_DET_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(SFP_DET_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = RES_MMC_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(RES_MMC_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PERST0_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(PERST0_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PERST1_PIN;
+    GPIO_Init(PERST1_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PERST2_PIN;
+    GPIO_Init(PERST2_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = RES_LAN_PIN;
+    GPIO_Init(RES_LAN_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = RES_PHY_PIN;
+    GPIO_Init(RES_PHY_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = VHV_CTRL_PIN;
+    GPIO_Init(VHV_CTRL_PIN_PORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = PHY_SFP_PIN;
+    GPIO_Init(PHY_SFP_PIN_PORT, &GPIO_InitStructure);
+
+}
