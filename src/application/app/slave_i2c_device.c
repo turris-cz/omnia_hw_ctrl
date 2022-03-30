@@ -56,6 +56,7 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
+    CMD_PERIPH_CONTROL                  = 0x0F
 };
 
 enum i2c_control_byte_mask {
@@ -87,6 +88,17 @@ enum boot_requests {
     BOOTLOADER_REQ                      = 0xAA,
     FLASH_ERROR                         = 0x55,
     FLASH_OK                            = 0x88
+};
+
+enum i2c_periph_byte_mask {
+    RES_MMC_MASK                        = 0x01,
+    RES_LAN_MASK                        = 0x02,
+    RES_PHY_MASK                        = 0x04,
+    PERST0_MASK                         = 0x08,
+    PERST1_MASK                         = 0x10,
+    PERST2_MASK                         = 0x20,
+    PHY_SFP_MODE_MASK                   = 0x40,
+    VHV_CTRL_MASK                       = 0x80
 };
 
 struct st_i2c_status i2c_status;
@@ -275,19 +287,19 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
             i2c_control->status_word &= (~USB31_PWRON_STSBIT);
         }
     }
-
-    if (bit_mask & ENABLE_4V5_MASK)
-    {
-        if (control_byte & ENABLE_4V5_MASK)
-        {
-            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
-        }
-        else
-        {
-            GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-            i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
-        }
-    }
+// commented out, it is not used on Omnia32
+//    if (bit_mask & ENABLE_4V5_MASK)
+//    {
+//        if (control_byte & ENABLE_4V5_MASK)
+//        {
+//            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
+//        }
+//        else
+//        {
+//            GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+//            i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
+//        }
+//    }
 
     if (bit_mask & BUTTON_MODE_MASK)
     {
@@ -323,6 +335,16 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 }
+
+/*******************************************************************************
+  * @function   slave_i2c_periph_control
+  * @brief      Decodes a peripheral control byte and perform suitable reaction.
+  * @param      control_byte: control byte sent from master (CPU)
+  * @param      bit_mask: 0 - dont care bit, 1 - write bit
+  * @retval     None.
+  *****************************************************************************/
+void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
+{}
 
 /*******************************************************************************
   * @function   slave_i2c_handler
@@ -618,6 +640,19 @@ void slave_i2c_handler(void)
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
+                } break;
+
+                case CMD_PERIPH_CONTROL:
+                {
+                    if((i2c_state->rx_data_ctr -1) == TWO_BYTES_EXPECTED)
+                    {
+                        slave_i2c_periph_control(i2c_state->rx_buf[1], \
+                        i2c_state->rx_buf[2]);
+                    }
+                    DBG("ACK\r\n");
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
                 default: /* command doesnt exist - send NACK */

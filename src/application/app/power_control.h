@@ -332,12 +332,12 @@ void power_control_usb_timeout_enable(void);
 void power_control_usb_timeout_disable(void);
 
 /*******************************************************************************
-  * @function   power_control_set_voltage
-  * @brief      Set required voltage to the user regulator.
-  * @param      voltage: enum value for desired voltage.
+  * @function   power_io_new_config
+  * @brief      Configuration of new IO pins for Omnia32
+  * @param      None.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(voltage_value_t voltage);
+void power_new_io_config(void);
 
 #endif // POWER_CONTROL_H
 

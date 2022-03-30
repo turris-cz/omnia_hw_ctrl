@@ -91,6 +91,20 @@ enum status_word_bits {
 */
 
 /*
+ * Bit meanings in peripheral control byte:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *      0   |   RES_MMC   : 1 - reset of MMC, 0 - no reset
+ *      1   |   RES_LAN   : 1 - reset of LAN switch, 0 - no reset
+ *      2   |   RES_PHY   : 1 - reset of PHY WAN, 0 - no reset
+ *      3   |   PERST0    : 1 - reset of PCIE0, 0 - no reset
+ *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
+ *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
+ *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
+ *      7   |   VHV_CTRL  : 1 - VHV control active, 0 - VHV control not active
+*/
+
+/*
  * Bit meanings in led_mode_byte:
  *  Bit Nr. |   Meanings
  * -----------------

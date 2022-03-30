@@ -970,4 +970,14 @@ void power_new_io_config(void)
     GPIO_InitStructure.GPIO_Pin = PHY_SFP_PIN;
     GPIO_Init(PHY_SFP_PIN_PORT, &GPIO_InitStructure);
 
+    GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
+    GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
+    GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
+
+    GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
+    GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
+    GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
+
+    GPIO_SetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
+    GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
 }
