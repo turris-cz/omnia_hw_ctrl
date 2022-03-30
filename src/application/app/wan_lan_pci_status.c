@@ -34,21 +34,10 @@ static void wan_lan_pci_io_config(void)
     /* GPIO Periph clock enable */
     RCC_AHBPeriphClockCmd(PCI_LLED2_PIN_PERIPH_CLOCK
                           | PCI_LLED1_PIN_PERIPH_CLOCK | WAN_LED0_PIN_PERIPH_CLOCK
-                          | PCI_PLED2_PIN_PERIPH_CLOCK | PCI_PLED0_PIN_PERIPH_CLOCK
-                          | PCI_PLED1_PIN_PERIPH_CLOCK | R0_P0_LED_PIN_PERIPH_CLOCK
-                          | R1_P1_LED_PIN_PERIPH_CLOCK | R2_P2_LED_PIN_PERIPH_CLOCK
-                          | C0_P3_LED_PIN_PERIPH_CLOCK | C1_LED_PIN_PERIPH_CLOCK
-                          | C2_P4_LED_PIN_PERIPH_CLOCK | C3_P5_LED_PIN_PERIPH_CLOCK
-                          | SFP_DIS_PIN_PERIPH_CLOCK | WAN_LED1_PIN_PERIPH_CLOCK, ENABLE);
-
-    /* for compatibility with older versions of board */
-    GPIO_InitStructure.GPIO_Pin = SFP_DIS_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(SFP_DIS_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_ResetBits(SFP_DIS_PIN_PORT, SFP_DIS_PIN);
+                          | R0_P0_LED_PIN_PERIPH_CLOCK | R1_P1_LED_PIN_PERIPH_CLOCK
+                          | R2_P2_LED_PIN_PERIPH_CLOCK | C0_P3_LED_PIN_PERIPH_CLOCK
+                          | C1_LED_PIN_PERIPH_CLOCK    | C2_P4_LED_PIN_PERIPH_CLOCK
+                          | C3_P5_LED_PIN_PERIPH_CLOCK |  WAN_LED1_PIN_PERIPH_CLOCK, ENABLE);
 
     /* PCIe LED pins */
     GPIO_InitStructure.GPIO_Pin = PCI_LLED2_PIN;
@@ -58,15 +47,6 @@ static void wan_lan_pci_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = PCI_LLED1_PIN;
     GPIO_Init(PCI_LLED1_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED0_PIN;
-    GPIO_Init(PCI_PLED0_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED1_PIN;
-    GPIO_Init(PCI_PLED1_PIN_PORT, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = PCI_PLED2_PIN;
-    GPIO_Init(PCI_PLED2_PIN_PORT, &GPIO_InitStructure);
 
     /* WAN LED pins */
     GPIO_InitStructure.GPIO_Pin = WAN_LED0_PIN;
@@ -147,17 +127,15 @@ void wan_led_activity(void)
   *****************************************************************************/
 void pci_led_activity(void)
 {
-    uint8_t pcie_led1, pcie_pled1, pcie_led2, pcie_pled2;
+    uint8_t pcie_led1, pcie_led2;
     struct led_rgb *rgb_leds = leds;
 
     pcie_led2 = GPIO_ReadInputDataBit(PCI_LLED2_PIN_PORT, PCI_LLED2_PIN);
     pcie_led1 = GPIO_ReadInputDataBit(PCI_LLED1_PIN_PORT, PCI_LLED1_PIN);
-    pcie_pled1 = GPIO_ReadInputDataBit(PCI_PLED1_PIN_PORT, PCI_PLED1_PIN);
-    pcie_pled2 = GPIO_ReadInputDataBit(PCI_PLED2_PIN_PORT, PCI_PLED2_PIN);
 
     if (rgb_leds[PCI2_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if((pcie_led2 == 0) || (pcie_pled2 == 0))
+        if(pcie_led2 == 0)
         {
             rgb_leds[PCI2_LED].led_state_default = LED_ON;
         }
@@ -169,7 +147,7 @@ void pci_led_activity(void)
 
     if (rgb_leds[PCI1_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if ((pcie_led1 == 0) || (pcie_pled1 == 0))
+        if (pcie_led1 == 0)
         {
             rgb_leds[PCI1_LED].led_state_default = LED_ON;
         }
