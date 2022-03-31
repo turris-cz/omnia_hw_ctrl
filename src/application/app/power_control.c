@@ -325,10 +325,10 @@ error_type_t power_control_enable_regulators(void)
     /*
      * power-up sequence:
      * 1) 5V regulator
-     * 2) 4.5V regulator - user selectable
+     * 2) 4.5V regulator - user selectable - not populated on the board
      * 3) 3.3V regulator
      * 4) 1.8V regulator
-     * 5) 1.5V regulator
+     * 5) 1.5V regulator - not populated on the board
      * 6) 1.35V regulator
      *    VTT regulator
      * 7) 1.2V regulator
@@ -350,9 +350,9 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
-    value = power_control_start_regulator(REG_1V5);
-    if (value != NO_ERROR)
-        return value;
+//    value = power_control_start_regulator(REG_1V5);
+//    if (value != NO_ERROR)
+//        return value;
 
     value = power_control_start_regulator(REG_1V35);
     if (value != NO_ERROR)
@@ -380,7 +380,6 @@ void power_control_disable_regulators(void)
     GPIO_ResetBits(ENABLE_1V2_PIN_PORT, ENABLE_1V2_PIN);
     GPIO_ResetBits(ENABLE_1V35_PIN_PORT, ENABLE_1V35_PIN);
     GPIO_ResetBits(ENABLE_VTT_PIN_PORT, ENABLE_VTT_PIN);
-    GPIO_ResetBits(ENABLE_1V5_PIN_PORT, ENABLE_1V5_PIN);
     GPIO_ResetBits(ENABLE_1V8_PIN_PORT, ENABLE_1V8_PIN);
     GPIO_ResetBits(ENABLE_3V3_PIN_PORT, ENABLE_3V3_PIN);
     GPIO_ResetBits(ENABLE_5V_PIN_PORT, ENABLE_5V_PIN);
