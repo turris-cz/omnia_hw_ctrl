@@ -88,6 +88,9 @@ static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
+    if(GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN))
+        status_word |= SFP_DET_STSBIT;
+
     if (msata_pci_card_detection())
         status_word |= CARD_DET_STSBIT;
 
@@ -105,9 +108,6 @@ static uint16_t app_get_status_word(void)
 
     if (power_control_get_usb_poweron(USB3_PORT1))
         status_word |= USB31_PWRON_STSBIT;
-
-    if(GPIO_ReadInputDataBit(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
-        status_word |= ENABLE_4V5_STSBIT;
 
     return status_word;
 }
