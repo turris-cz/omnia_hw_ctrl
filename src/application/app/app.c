@@ -519,14 +519,6 @@ void app_mcu_cyclic(void)
             {
                 led_manager();
             }
-            next_state = DEVICE_MANAGER;
-        }
-        break;
-
-        case DEVICE_MANAGER:
-        {
-            //power_device_manager();
-
             next_state = INPUT_MANAGER;
         }
         break;
