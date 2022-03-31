@@ -344,7 +344,103 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
   * @retval     None.
   *****************************************************************************/
 void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
-{}
+{
+    if (bit_mask & RES_MMC_MASK)
+    {
+        if (control_byte & RES_MMC_MASK)
+        {
+           GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
+        }
+    }
+
+    if (bit_mask & RES_LAN_MASK)
+    {
+        if (control_byte & RES_LAN_MASK)
+        {
+           GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
+        }
+    }
+
+    if (bit_mask & RES_PHY_MASK)
+    {
+        if (control_byte & RES_PHY_MASK)
+        {
+           GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
+        }
+    }
+
+    if (bit_mask & PERST0_MASK)
+    {
+        if (control_byte & PERST0_MASK)
+        {
+           GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(PERST0_PIN_PORT, PERST0_PIN);
+        }
+    }
+
+    if (bit_mask & PERST1_MASK)
+    {
+        if (control_byte & PERST1_MASK)
+        {
+           GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(PERST1_PIN_PORT, PERST1_PIN);
+        }
+    }
+
+    if (bit_mask & PERST2_MASK)
+    {
+        if (control_byte & PERST2_MASK)
+        {
+           GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(PERST2_PIN_PORT, PERST2_PIN);
+        }
+    }
+
+    if (bit_mask & PHY_SFP_MODE_MASK)
+    {
+        if (control_byte & PHY_SFP_MODE_MASK)
+        {
+           GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
+        }
+        else
+        {
+           GPIO_ResetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
+        }
+    }
+
+    if (bit_mask & VHV_CTRL_MASK)
+    {
+        if (control_byte & VHV_CTRL_MASK)
+        {
+           GPIO_ResetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
+        }
+        else
+        {
+           GPIO_SetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
+        }
+    }
+}
 
 /*******************************************************************************
   * @function   slave_i2c_handler
@@ -525,7 +621,7 @@ void slave_i2c_handler(void)
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        power_control_set_voltage(i2c_state->rx_buf[1]);
+                        //power_control_set_voltage(i2c_state->rx_buf[1]);
 
                         DBG("user voltage: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
