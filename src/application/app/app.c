@@ -73,7 +73,9 @@ void app_mcu_init(void)
     power_control_usb_timeout_config();
     led_driver_config();
     slave_i2c_config();
+    power_new_io_config(); /* new features for Omnia32 */
     debug_serial_config();
+
 
     DBG("\r\nInit completed.\r\n");
 }
