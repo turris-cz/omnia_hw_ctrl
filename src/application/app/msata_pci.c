@@ -12,6 +12,7 @@
 #include "msata_pci.h"
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
+#include "debug_serial.h"
 
 /*******************************************************************************
   * @function   msata_pci_io_config
@@ -31,7 +32,13 @@ static void msata_pci_io_config(void)
     GPIO_InitStructure.GPIO_Pin = CARD_DET_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(CARD_DET_PIN_PORT, &GPIO_InitStructure);
+
+    /*
+     * CARD_DET pin is also used as MCU's UART TX pin, so only configure it as
+     * GPIO if debugging is disabled
+     */
+    if (!DBG_ENABLE)
+        GPIO_Init(CARD_DET_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = MSATALED_PIN;
     GPIO_Init(MSATALED_PIN_PORT, &GPIO_InitStructure);
@@ -59,15 +66,14 @@ void msata_pci_indication_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-    uint8_t msata_pci_activity, pci_pled0;
+    uint8_t msata_pci_activity;
     struct led_rgb *rgb_leds = leds;
 
     msata_pci_activity = GPIO_ReadInputDataBit(MSATALED_PIN_PORT, MSATALED_PIN);
-    pci_pled0 = GPIO_ReadInputDataBit(PCI_PLED0_PIN_PORT, PCI_PLED0_PIN);
 
     if (rgb_leds[MSATA_PCI_LED].led_mode == LED_DEFAULT_MODE)
     {
-        if (!msata_pci_activity || !pci_pled0)
+        if (!msata_pci_activity)
         {
             rgb_leds[MSATA_PCI_LED].led_state_default = LED_ON;
         }

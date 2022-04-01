@@ -939,7 +939,7 @@ void power_new_io_config(void)
 
     GPIO_InitStructure.GPIO_Pin = RES_MMC_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_2;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(RES_MMC_PIN_PORT, &GPIO_InitStructure);
@@ -952,7 +952,12 @@ void power_new_io_config(void)
     GPIO_Init(PERST0_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PERST1_PIN;
-    GPIO_Init(PERST1_PIN_PORT, &GPIO_InitStructure);
+    /*
+     * PERST1 pin is also used as MCU's UART RX pin, so only configure it as
+     * GPIO if debugging is disabled
+     */
+    if (!DBG_ENABLE)
+        GPIO_Init(PERST1_PIN_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = PERST2_PIN;
     GPIO_Init(PERST2_PIN_PORT, &GPIO_InitStructure);
@@ -974,7 +979,13 @@ void power_new_io_config(void)
     GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
 
     GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
-    GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
+    /*
+     * PERST1 pin is also used as MCU's UART RX pin, so only configure it as
+     * GPIO if debugging is disabled
+     */
+    if (!DBG_ENABLE)
+        GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
+
     GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
 
     GPIO_SetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
