@@ -56,7 +56,8 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
-    CMD_PERIPH_CONTROL                  = 0x0F
+    CMD_PERIPH_CONTROL                  = 0x0F,
+    CMD_GET_PERIPH_STATUS               = 0x10
 };
 
 enum i2c_control_byte_mask {
@@ -440,6 +441,43 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
            GPIO_SetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
         }
     }
+}
+
+/*******************************************************************************
+  * @function   slave_i2c_get_periph_reset_status
+  * @brief      Get peripheral's reset status.
+  * @param      None.
+  * @retval     reset_status.
+  *****************************************************************************/
+static uint16_t slave_i2c_get_periph_reset_status(void)
+{
+    uint8_t reset_status = 0;
+
+    if(GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
+        reset_status |= RES_MMC_MASK;
+
+    if(GPIO_ReadInputDataBit(RES_LAN_PIN_PORT, RES_LAN_PIN))
+        reset_status |= RES_LAN_MASK;
+
+    if(GPIO_ReadInputDataBit(RES_PHY_PIN_PORT, RES_PHY_PIN))
+        reset_status |= RES_PHY_MASK;
+
+    if(GPIO_ReadInputDataBit(PERST0_PIN_PORT, PERST0_PIN))
+        reset_status |= PERST0_MASK;
+
+    if(GPIO_ReadInputDataBit(PERST1_PIN_PORT, PERST1_PIN))
+        reset_status |= PERST1_MASK;
+
+    if(GPIO_ReadInputDataBit(PERST2_PIN_PORT, PERST2_PIN))
+        reset_status |= PERST2_MASK;
+
+    if(GPIO_ReadInputDataBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN))
+        reset_status |= PHY_SFP_MODE_MASK;
+
+    if(GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
+        reset_status |= VHV_CTRL_MASK;
+
+    return reset_status;
 }
 
 /*******************************************************************************
