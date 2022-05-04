@@ -57,7 +57,7 @@ enum i2c_commands {
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
     CMD_PERIPH_CONTROL                  = 0x0F,
-    CMD_GET_PERIPH_STATUS               = 0x10
+    CMD_GET_PERIPH_RESET_STATUS         = 0x10
 };
 
 enum i2c_control_byte_mask {
@@ -786,6 +786,15 @@ void slave_i2c_handler(void)
                     DBG("ACK\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     /* release SCL line */
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
+                case CMD_GET_PERIPH_RESET_STATUS:
+                {
+                    i2c_state->tx_buf[0] = slave_i2c_get_periph_reset_status();
+                    DBG("per_rst\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
