@@ -339,5 +339,13 @@ void power_control_usb_timeout_disable(void);
   *****************************************************************************/
 void power_new_io_config(void);
 
+/*******************************************************************************
+  * @function   power_control_periph_rst_init
+  * @brief      Set reset init states for peripherals for Omnia32
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void power_control_periph_rst_init(void);
+
 #endif // POWER_CONTROL_H
 

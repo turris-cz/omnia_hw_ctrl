@@ -166,6 +166,8 @@ static ret_value_t light_reset(void)
 
     reset_event = power_control_first_startup();
 
+    power_control_periph_rst_init(); // set active reset of peripherals after CPU reset
+
     i2c_control->reset_type = reset_event;
 
     if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
