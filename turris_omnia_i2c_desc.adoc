@@ -106,7 +106,7 @@ enum i2c_commands {
  *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
  *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
  *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
- *      7   |   VHV_CTRL  : 1 - VHV control active, 0 - VHV control not active
+ *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
 */
 
 * Example of a setting of the peripheral control byte (set MMC into reset state):
@@ -116,6 +116,32 @@ enum i2c_commands {
 *** 0x0F -> "address of the register" = command
 *** 0x0101 -> set MMC into reset – the lower byte is a mask (set particular bit to "1" to use a value defined in the higher byte)
 *** w -> word data type
+
+=== CMD_GET_PERIPH_RESET_STATUS
+* Reads status of peripherals and their resets (if applicable)
+* Read only
+
+* Example of a reset status reading
+** "i2cget 1 0x2A 0x10 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x10 -> "address of the register" = command
+***	b -> byte data type
+
+[source,C]
+/* 
+ * Bit meanings in reset status: 
+ *  Bit Nr. |   Meanings 
+ * ----------------- 
+ *      0   |   RES_MMC   : 1 - reset of MMC, 0 - no reset
+ *      1   |   RES_LAN   : 1 - reset of LAN switch, 0 - no reset
+ *      2   |   RES_PHY   : 1 - reset of PHY WAN, 0 - no reset
+ *      3   |   PERST0    : 1 - reset of PCIE0, 0 - no reset
+ *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
+ *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
+ *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
+ *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+*/
 
 
 === CMD_LED_MODE
