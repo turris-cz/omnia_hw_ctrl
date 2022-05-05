@@ -346,9 +346,9 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
   *****************************************************************************/
 void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 {
-    if (control_byte & RES_MMC_MASK)
+    if (bit_mask & RES_MMC_MASK)
     {
-        if (bit_mask & RES_MMC_MASK)
+        if (control_byte & RES_MMC_MASK)
         {
            GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
         }
@@ -358,9 +358,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & RES_LAN_MASK)
+    if (bit_mask & RES_LAN_MASK)
     {
-        if (bit_mask & RES_LAN_MASK)
+        if (control_byte & RES_LAN_MASK)
         {
            GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
         }
@@ -370,9 +370,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & RES_PHY_MASK)
+    if (bit_mask & RES_PHY_MASK)
     {
-        if (bit_mask & RES_PHY_MASK)
+        if (control_byte & RES_PHY_MASK)
         {
            GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
         }
@@ -382,9 +382,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & PERST0_MASK)
+    if (bit_mask & PERST0_MASK)
     {
-        if (bit_mask & PERST0_MASK)
+        if (control_byte & PERST0_MASK)
         {
            GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
         }
@@ -394,9 +394,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & PERST1_MASK)
+    if (bit_mask & PERST1_MASK)
     {
-        if (bit_mask & PERST1_MASK)
+        if (control_byte & PERST1_MASK)
         {
            GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
         }
@@ -406,9 +406,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & PERST2_MASK)
+    if (bit_mask & PERST2_MASK)
     {
-        if (bit_mask & PERST2_MASK)
+        if (control_byte & PERST2_MASK)
         {
            GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
         }
@@ -418,9 +418,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & PHY_SFP_MODE_MASK)
+    if (bit_mask & PHY_SFP_MODE_MASK)
     {
-        if (bit_mask & PHY_SFP_MODE_MASK)
+        if (control_byte & PHY_SFP_MODE_MASK)
         {
            GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
         }
@@ -430,9 +430,9 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
         }
     }
 
-    if (control_byte & VHV_CTRL_MASK)
+    if (bit_mask & VHV_CTRL_MASK)
     {
-        if (bit_mask & VHV_CTRL_MASK)
+        if (control_byte & VHV_CTRL_MASK)
         {
            GPIO_ResetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
         }
@@ -783,7 +783,7 @@ void slave_i2c_handler(void)
                         slave_i2c_periph_control(i2c_state->rx_buf[1], \
                         i2c_state->rx_buf[2]);
                     }
-                    DBG("ACK\r\n");
+                    DBG("PER_CTRL\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     /* release SCL line */
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
@@ -792,7 +792,7 @@ void slave_i2c_handler(void)
                 case CMD_GET_PERIPH_RESET_STATUS:
                 {
                     i2c_state->tx_buf[0] = slave_i2c_get_periph_reset_status();
-                    DBG("per_rst\r\n");
+                    DBG("STS_RST\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
