@@ -24,7 +24,8 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS        = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE     = 0x0D,
     CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
-    CMD_PERIPH_CONTROL                  = 0x0F
+    CMD_PERIPH_CONTROL         = 0x0F,
+    CMD_GET_PERIPH_RESET_STATUS         = 0x10
 };
 
 === CMD_GET_STATUS_WORD
