@@ -36,7 +36,10 @@ struct st_i2c_status {
 extern struct st_i2c_status i2c_status;
 
 enum status_word_bits {
-    SFP_DET_STSBIT         = 0x0008,
+    GD32_MCU_STSBIT        = 0x0001,
+    SFP_DET_STSBIT         = 0x0002,
+    PERIPH_RST_MCU_STSBIT  = 0x0004,
+    USER_REGULATOR_NOT_SUPPORTED_STSBIT = 0x0008,
     CARD_DET_STSBIT        = 0x0010,
     MSATA_IND_STSBIT       = 0x0020,
     USB30_OVC_STSBIT       = 0x0040,
@@ -53,10 +56,18 @@ enum status_word_bits {
  * Bit meanings in status_word:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   dont care
- *      1   |   dont care
- *      2   |   dont care
- *      3   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
+ *   0,x,2,3  |   MCU_TYPE      : 00*0 -> "old" STM32
+ *                                10*1 -> "old" GD32
+ *                                10*0 -> STM32 with resets
+ *                                11*1 -> GD32 with resets
+ *                                11*0 -> MKL with resets
+ *      0   |   GD32_MCU        : 1 - GD32 MCU used, 0 - STM32 or MKL used
+ *
+ * Caution! STM32 and GD32 uses Atsha for security, MKL doesn't!!!!!!!!!
+ * IT IS NECESSARY TO READ AND DECODE THE FIRST FOUR BITS PROPERLY!
+ *
+ *      1   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
+ *      3   |   USER_REG_NOT_SUP: 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
  *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
  *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
  *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent
