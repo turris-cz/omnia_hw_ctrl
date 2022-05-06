@@ -24,6 +24,9 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS        = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE     = 0x0D,
     CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
+    CMD_PERIPH_CONTROL         = 0x0F, /* only for Omnia board version 32 and higher ! */
+    CMD_GET_PERIPH_RESET_STATUS         = 0x10 /* only for Omnia board version 32 and higher ! */
+
 };
 
 === CMD_GET_STATUS_WORD
@@ -32,25 +35,34 @@ enum i2c_commands {
 * Bit overview:
 
 [source,C]
-/* 
- * Bit meanings in status_word: 
- *  Bit Nr. |   Meanings 
- * ----------------- 
- *      0   |   don't care 
- *      1   |   don't care 
- *      2   |   don't care 
- *      3   |   don't care 
- *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card 
- *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted 
- *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent 
- *      7   |   USB31_OVC       : 1 - USB3-port1 overcurrent, 0 - no overcurrent 
- *      8   |   USB30_PWRON     : 1 - USB3-port0 power ON, 0 - USB-port0 power off 
- *      9   |   USB31_PWRON     : 1 - USB3-port1 power ON, 0 - USB-port1 power off 
- *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled 
- *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings) 
- *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed 
- * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode 
+/*
+ * Bit meanings in status_word:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *   0,x,2,3  |   MCU_TYPE      : 00*0 -> "old" STM32
+ *                                10*1 -> "old" GD32
+ *                                10*0 -> STM32 with resets
+ *                                11*1 -> GD32 with resets
+ *                                11*0 -> MKL with resets
+ *      0   |   GD32_MCU        : 1 - GD32 MCU used, 0 - STM32 or MKL used
+ *
+ * Caution! STM32 and GD32 uses Atsha for security, MKL doesn't!!!!!!!!!
+ * IT IS NECESSARY TO READ AND DECODE THE FIRST FOUR BITS PROPERLY!
+ *
+ *      1   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
+ *      3   |   USER_REG_NOT_SUP: 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
+ *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
+ *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
+ *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent
+ *      7   |   USB31_OVC       : 1 - USB3-port1 overcurrent, 0 - no overcurrent
+ *      8   |   USB30_PWRON     : 1 - USB3-port0 power ON, 0 - USB-port0 power off
+ *      9   |   USB31_PWRON     : 1 - USB3-port1 power ON, 0 - USB-port1 power off
+ *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
+ *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings)
+ *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed
+ * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode
 */
+
 
 * Example of a reading of the status word from Linux:
 ** "i2cget 1 0x2A 1 w"
@@ -87,6 +99,61 @@ enum i2c_commands {
 *** 2 -> "address of the register" = command
 *** 0x0101 -> do light reset – the lower byte is a mask (set particular bit to "1" to use a value defined in the higher byte)
 *** w -> word data type
+
+=== CMD_PERIPH_CONTROL
+* Reset of different peripheral devies on the board
+* Write only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in control_byte:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *      0   |   RES_MMC   : 1 - reset of MMC, 0 - no reset
+ *      1   |   RES_LAN   : 1 - reset of LAN switch, 0 - no reset
+ *      2   |   RES_PHY   : 1 - reset of PHY WAN, 0 - no reset
+ *      3   |   PERST0    : 1 - reset of PCIE0, 0 - no reset
+ *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
+ *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
+ *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
+ *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+*/
+
+
+* Example of a setting of the peripheral control byte (release reset of PCIE slot 0):
+** "i2cset 1 0x2A 0x0F 0x0800 w"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x0F -> "address of the register" = command
+*** 0x0800 -> do light reset – the lower byte is a mask (set particular bit to "1" to use a value defined in the higher byte)
+*** w -> word data type
+
+=== CMD_GET_PERIPH_RESET_STATUS
+* Reads status of peripherals and their resets (if applicable)
+* Read only
+
+* Example of a brightness reading
+** "i2cget 1 0x2A 0x10 b"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x10 -> "address of the register" = command
+***	b -> byte data type
+
+[source,C]
+/*
+ * Bit meanings in reset status:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *      0   |   RES_MMC   : 1 - reset of MMC, 0 - no reset
+ *      1   |   RES_LAN   : 1 - reset of LAN switch, 0 - no reset
+ *      2   |   RES_PHY   : 1 - reset of PHY WAN, 0 - no reset
+ *      3   |   PERST0    : 1 - reset of PCIE0, 0 - no reset
+ *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
+ *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
+ *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
+ *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+*/
 
 
 === CMD_LED_MODE
