@@ -74,6 +74,7 @@ enum i2c_commands {
 * Read only
 * Bit overview:
 
+[source,C]
 /*
  * Bit meanings in extended_status_word:
  *  Bit Nr. |   Meanings
