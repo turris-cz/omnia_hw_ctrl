@@ -57,7 +57,8 @@ enum i2c_commands {
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
     CMD_PERIPH_CONTROL                  = 0x0F,
-    CMD_GET_PERIPH_RESET_STATUS         = 0x10
+    CMD_GET_PERIPH_RESET_STATUS         = 0x10,
+    CMD_GET_EXTENDED_STATUS_WORD        = 0x11
 };
 
 enum i2c_control_byte_mask {
@@ -796,6 +797,17 @@ void slave_i2c_handler(void)
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                } break;
+
+                case CMD_GET_EXTENDED_STATUS_WORD:
+                {
+                    /* prepare data to be sent to the master */
+                    i2c_state->tx_buf[0] = i2c_state->extended_sts_word & 0x00FF;
+                    i2c_state->tx_buf[1] = (i2c_state->extended_sts_word & 0xFF00) >> 8;
+                    DBG("EXT_STS\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
                 } break;
 
                 default: /* command doesnt exist - send NACK */
