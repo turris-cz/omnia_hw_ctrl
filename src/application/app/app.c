@@ -131,7 +131,7 @@ static uint16_t app_get_extended_status_word(void)
 {
     uint16_t status_word = 0;
 
-    if(GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN))
+    if (GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN))
         status_word |= SFP_DET_STSBIT;
 }
 
