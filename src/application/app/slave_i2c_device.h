@@ -55,6 +55,7 @@ enum status_word_bits {
 
 enum extended_status_word_bits {
     SFP_DET_STSBIT         = 0x0001,
+    PERIPH_RST_MCU_STSBIT  = 0x0002,
 };
 
 /*
@@ -88,7 +89,8 @@ enum extended_status_word_bits {
  *  Bit Nr. |   Meanings
  * -----------------
  *      0   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
- *  1..15   |   reserved
+ *      1   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
+ *  2..15   |   reserved
 */
 
 /*
