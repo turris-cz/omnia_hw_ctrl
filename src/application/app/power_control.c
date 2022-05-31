@@ -14,6 +14,14 @@
 #include "led_driver.h"
 #include "debug_serial.h"
 
+#if !defined(USER_REGULATOR_ENABLED)
+#error build system did not define USER_REGULATOR_ENABLED macro
+#endif
+
+#if USER_REGULATOR_ENABLED
+#error user regulator not supported on this branch, wait until branches are merged
+#endif
+
 /* Private define ------------------------------------------------------------*/
 
 /* defines for timeout handling during regulator startup */
@@ -338,9 +346,11 @@ error_type_t power_control_enable_regulators(void)
     if (value != NO_ERROR)
         return value;
 
+#if USER_REGULATOR_ENABLED
 //    value = power_control_start_regulator(REG_4V5);
 //    if (value != NO_ERROR)
 //        return value;
+#endif
 
     value = power_control_start_regulator(REG_3V3);
     if (value != NO_ERROR)

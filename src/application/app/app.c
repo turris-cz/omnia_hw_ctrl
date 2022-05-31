@@ -161,7 +161,9 @@ static ret_value_t power_on(void)
         case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
         case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
         case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
+#if USER_REGULATOR_ENABLED
         case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
+#endif
         case PG_1V8_ERROR: value = GO_TO_1V8_ERROR; break;
         case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
         case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
@@ -265,6 +267,7 @@ static ret_value_t input_manager(void)
         input_state->pg = DEACTIVATED;
     }
 
+#if USER_REGULATOR_ENABLED
     /* PG signal from 4.5V user controlled regulator */
     if(input_state->pg_4v5 == ACTIVATED)
     {
@@ -272,6 +275,7 @@ static ret_value_t input_manager(void)
         value = GO_TO_HARD_RESET;
         input_state->pg_4v5 = DEACTIVATED;
     }
+#endif
 
     /* USB30 overcurrent */
     if(input_state->usb30_ovc == ACTIVATED)
@@ -349,6 +353,7 @@ static ret_value_t input_manager(void)
     return value;
 }
 
+#if USER_REGULATOR_ENABLED
 /*******************************************************************************
   * @function   enable_4v5
   * @brief      Enable 4V5 power regulator.
@@ -375,6 +380,7 @@ static ret_value_t enable_4v5(void)
 
     return val;
 }
+#endif
 
 /*******************************************************************************
   * @function   ic2_manager
@@ -399,7 +405,9 @@ static ret_value_t ic2_manager(void)
     {
         case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
         case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
+#if USER_REGULATOR_ENABLED
         case SLAVE_I2C_PWR4V5_ENABLE:       value = enable_4v5(); break;
+#endif
         case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
         default:                            value = OK; break;
     }
@@ -449,7 +457,9 @@ static void error_manager(ret_value_t error_state)
         case GO_TO_1V35_ERROR: led_driver_set_led_state(LED4, LED_ON); break;
         case GO_TO_VTT_ERROR: led_driver_set_led_state(LED5, LED_ON); break;
         case GO_TO_1V2_ERROR: led_driver_set_led_state(LED6, LED_ON); break;
+#if USER_REGULATOR_ENABLED
         case GO_TO_4V5_ERROR: led_driver_set_led_state(LED7, LED_ON); break;
+#endif
 
         default: led_driver_set_led_state(LED_COUNT, LED_ON); break;
     }
@@ -542,7 +552,9 @@ void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET:  next_state = HARD_RESET; break;
+#if USER_REGULATOR_ENABLED
                 case GO_TO_4V5_ERROR:   next_state = ERROR_STATE; break;
+#endif
                 case GO_TO_BOOTLOADER:  next_state = BOOTLOADER; break;
                 default: next_state = LED_MANAGER; break;
             }

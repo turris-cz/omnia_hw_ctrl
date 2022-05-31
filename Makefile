@@ -43,6 +43,12 @@ else
 	DEBUG_INFO_PRINT =
 endif
 
+ifeq ($(USER_REGULATOR_ENABLED), 1)
+	DEFS += -DUSER_REGULATOR_ENABLED=1
+else
+	DEFS += -DUSER_REGULATOR_ENABLED=0
+endif
+
 ##### Assembler options
 
 AFLAGS  = -mcpu=cortex-m0 

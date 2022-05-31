@@ -289,19 +289,21 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
             i2c_control->status_word &= (~USB31_PWRON_STSBIT);
         }
     }
-// commented out, it is not used on Omnia32
-//    if (bit_mask & ENABLE_4V5_MASK)
-//    {
-//        if (control_byte & ENABLE_4V5_MASK)
-//        {
-//            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
-//        }
-//        else
-//        {
-//            GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
-//            i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
-//        }
-//    }
+
+#if USER_REGULATOR_ENABLED
+    if (bit_mask & ENABLE_4V5_MASK)
+    {
+        if (control_byte & ENABLE_4V5_MASK)
+        {
+            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
+        }
+        else
+        {
+            GPIO_ResetBits(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN);
+            i2c_control->status_word &= (~ENABLE_4V5_STSBIT);
+        }
+    }
+#endif
 
     if (bit_mask & BUTTON_MODE_MASK)
     {
@@ -656,11 +658,12 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
+#if USER_REGULATOR_ENABLED
                 case CMD_USER_VOLTAGE:
                 {
                     if((i2c_state->rx_data_ctr -1) == ONE_BYTE_EXPECTED)
                     {
-                        //power_control_set_voltage(i2c_state->rx_buf[1]);
+                        power_control_set_voltage(i2c_state->rx_buf[1]);
 
                         DBG("user voltage: ");
                         DBG((const char*)(i2c_state->rx_buf + 1));
@@ -671,6 +674,7 @@ void slave_i2c_handler(void)
                     /* release SCL line */
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
+#endif
 
                 case CMD_WATCHDOG_STATE:
                 {
