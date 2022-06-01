@@ -54,7 +54,7 @@ enum status_word_bits {
 };
 
 enum features_bits {
-    PERIPH_RST_MCU_SUPPORTED = 0x0001,
+    PERIPH_MCU_SUPPORTED   = 0x0001,
 };
 
 enum ext_status_word_bits {
@@ -91,7 +91,9 @@ enum ext_status_word_bits {
  * Bit meanings in features:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
+ *      0   |   PERIPH_MCU      : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
+ *                                    (CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported)
+ *                                0 - otherwise
  *  1..15   |   reserved
 */
 

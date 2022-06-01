@@ -42,7 +42,7 @@ static const uint8_t version[] = VERSION;
 #define BOOTLOADER_VERSION_ADDR         0x080000C0
 
 static const uint16_t slave_features_supported =
-	PERIPH_RST_MCU_SUPPORTED;
+	PERIPH_MCU_SUPPORTED;
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
