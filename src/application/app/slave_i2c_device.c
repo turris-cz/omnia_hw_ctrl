@@ -96,15 +96,15 @@ enum boot_requests {
     FLASH_OK                            = 0x88
 };
 
-enum i2c_periph_byte_mask {
-    RES_MMC_MASK                        = 0x01,
-    RES_LAN_MASK                        = 0x02,
-    RES_PHY_MASK                        = 0x04,
-    PERST0_MASK                         = 0x08,
-    PERST1_MASK                         = 0x10,
-    PERST2_MASK                         = 0x20,
-    PHY_SFP_MODE_MASK                   = 0x40,
-    VHV_CTRL_MASK                       = 0x80
+enum i2c_periph_control_mask {
+    RES_MMC_MASK                        = 0x0001,
+    RES_LAN_MASK                        = 0x0002,
+    RES_PHY_MASK                        = 0x0004,
+    PERST0_MASK                         = 0x0008,
+    PERST1_MASK                         = 0x0010,
+    PERST2_MASK                         = 0x0020,
+    PHY_SFP_MODE_MASK                   = 0x0040,
+    VHV_CTRL_MASK                       = 0x0080
 };
 
 struct st_i2c_status i2c_status;
@@ -346,16 +346,16 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
 /*******************************************************************************
   * @function   slave_i2c_periph_control
-  * @brief      Decodes a peripheral control byte and perform suitable reaction.
-  * @param      control_byte: control byte sent from master (CPU)
+  * @brief      Decodes a peripheral control word and perform suitable reaction.
+  * @param      control_word: control word sent from master (CPU)
   * @param      bit_mask: 0 - dont care bit, 1 - write bit
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
+void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 {
     if (bit_mask & RES_MMC_MASK)
     {
-        if (control_byte & RES_MMC_MASK)
+        if (control_word & RES_MMC_MASK)
         {
            GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
         }
@@ -367,7 +367,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & RES_LAN_MASK)
     {
-        if (control_byte & RES_LAN_MASK)
+        if (control_word & RES_LAN_MASK)
         {
            GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
         }
@@ -379,7 +379,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & RES_PHY_MASK)
     {
-        if (control_byte & RES_PHY_MASK)
+        if (control_word & RES_PHY_MASK)
         {
            GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
         }
@@ -391,7 +391,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & PERST0_MASK)
     {
-        if (control_byte & PERST0_MASK)
+        if (control_word & PERST0_MASK)
         {
            GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
         }
@@ -403,7 +403,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & PERST1_MASK)
     {
-        if (control_byte & PERST1_MASK)
+        if (control_word & PERST1_MASK)
         {
            GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
         }
@@ -415,7 +415,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & PERST2_MASK)
     {
-        if (control_byte & PERST2_MASK)
+        if (control_word & PERST2_MASK)
         {
            GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
         }
@@ -427,7 +427,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & PHY_SFP_MODE_MASK)
     {
-        if (control_byte & PHY_SFP_MODE_MASK)
+        if (control_word & PHY_SFP_MODE_MASK)
         {
            GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
         }
@@ -439,7 +439,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
 
     if (bit_mask & VHV_CTRL_MASK)
     {
-        if (control_byte & VHV_CTRL_MASK)
+        if (control_word & VHV_CTRL_MASK)
         {
            GPIO_ResetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
         }
@@ -458,7 +458,7 @@ void slave_i2c_periph_control(uint8_t control_byte, uint8_t bit_mask)
   *****************************************************************************/
 static uint16_t slave_i2c_get_periph_reset_status(void)
 {
-    uint8_t reset_status = 0;
+    uint16_t reset_status = 0;
 
     if(GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
         reset_status |= RES_MMC_MASK;
@@ -787,10 +787,12 @@ void slave_i2c_handler(void)
 
                 case CMD_PERIPH_CONTROL:
                 {
-                    if((i2c_state->rx_data_ctr -1) == TWO_BYTES_EXPECTED)
+                    if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
                     {
-                        slave_i2c_periph_control(i2c_state->rx_buf[1], \
-                        i2c_state->rx_buf[2]);
+                        slave_i2c_periph_control(i2c_state->rx_buf[1] |
+                                                 (i2c_state->rx_buf[2] << 8),
+                                                 i2c_state->rx_buf[3] |
+                                                 (i2c_state->rx_buf[4] << 8));
                     }
                     DBG("PER_CTRL\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
@@ -800,11 +802,13 @@ void slave_i2c_handler(void)
 
                 case CMD_GET_PERIPH_RESET_STATUS:
                 {
-                    i2c_state->tx_buf[0] = slave_i2c_get_periph_reset_status();
+                    uint16_t periph_status = slave_i2c_get_periph_reset_status();
+                    i2c_state->tx_buf[0] = periph_status & 0x00FF;
+                    i2c_state->tx_buf[1] = (periph_status & 0xFF00) >> 8;
                     DBG("STS_RST\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
-                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
                 } break;
 
                 case CMD_GET_FEATURES:

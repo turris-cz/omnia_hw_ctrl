@@ -139,6 +139,7 @@ enum ext_status_word_bits {
  *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
  *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
  *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+ *  8..15   |   reserved
 */
 
 /*

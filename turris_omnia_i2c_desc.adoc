@@ -158,26 +158,28 @@ enum i2c_commands {
  *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
  *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
  *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+ *  8..15   |   reserved
 */
 
-* Example of a setting of the peripheral control byte (release PERST0):
-** "i2cset 1 0x2A 0x0F 0x0800 w"
+* Example of a setting of the peripheral control word (release PERST0):
+** "i2cset 1 0x2A 0x0F 0x00 0x00 0x08 0x00 i"
 *** 1 -> i2cbus number
 *** 0x2A -> I2C address of the slave
 *** 0x0F -> "address of the register" = command
-*** 0x0800 -> release PERST0 from reset – the lower byte is a mask (set particular bit to "1" to use a value defined in the higher byte)
-*** w -> word data type
+*** 0x00 0x00 -> value of the word, lower byte first. Bit 3 is 0 -> release PERST0 from reset
+*** 0x08 0x00 -> value of the mask, lower byte first. Bit 3 is 1 -> bit 3 will be changed
+***	i -> block data type
 
 === CMD_GET_PERIPH_RESET_STATUS
 * Reads status of peripherals and their resets (if applicable)
 * Read only
 
 * Example of a reset status reading
-** "i2cget 1 0x2A 0x10 b"
+** "i2cget 1 0x2A 0x10 w"
 *** 1 -> i2cbus number
 *** 0x2A -> I2C address of the slave
 *** 0x10 -> "address of the register" = command
-***	b -> byte data type
+***	w -> word data type
 
 [source,C]
 /* 
@@ -192,6 +194,7 @@ enum i2c_commands {
  *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
  *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
  *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+ *  8..15   |   reserved
 */
 
 
