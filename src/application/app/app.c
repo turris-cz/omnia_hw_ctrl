@@ -90,7 +90,8 @@ static uint16_t app_get_status_word(void)
 {
     uint16_t status_word = 0;
 
-    status_word |= EXTEND_STS_WORD_STSBIT; /* always set for board Omnia32 and later */
+    /* GET_FEATURES command is supported */
+    status_word |= FEATURES_SUPPORTED_STSBIT;
 
     #if USER_REGULATOR_ENABLED
         if(GPIO_ReadOutputDataBit(ENABLE_4V5_PIN_PORT, ENABLE_4V5_PIN))
@@ -121,22 +122,19 @@ static uint16_t app_get_status_word(void)
 }
 
 /*******************************************************************************
-  * @function   app_get_extended_status_word
-  * @brief      Set extended status word after reset. Only for board Omnia32 and
-  *             later.
+  * @function   app_get_ext_status_word
+  * @brief      Get value for extended status word after reset.
   * @param      None.
-  * @retval     extended_status_word.
+  * @retval     features.
   *****************************************************************************/
-static uint16_t app_get_extended_status_word(void)
+static uint16_t app_get_ext_status_word(void)
 {
-    uint16_t status_word = 0;
+    uint16_t ext_status_word = 0;
 
     if (GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN))
-        status_word |= SFP_DET_STSBIT;
+        ext_status_word |= SFP_DET_STSBIT;
 
-    status_word |= PERIPH_RST_MCU_STSBIT;
-
-    return status_word;
+    return ext_status_word;
 }
 
 /*******************************************************************************
@@ -225,7 +223,7 @@ static ret_value_t load_settings(void)
 
     debounce_config(); /* start evaluation of inputs */
     i2c_control->status_word = app_get_status_word();
-    i2c_control->extended_sts_word = app_get_extended_status_word();
+    i2c_control->ext_status_word = app_get_ext_status_word();
 
     return OK;
 }
@@ -346,9 +344,9 @@ static ret_value_t input_manager(void)
 
 
     if(GPIO_ReadInputDataBit(SFP_DET_PIN_PORT, SFP_DET_PIN))
-        i2c_control->extended_sts_word |= SFP_DET_STSBIT;
+        i2c_control->ext_status_word |= SFP_DET_STSBIT;
     else
-        i2c_control->extended_sts_word &= (~(SFP_DET_STSBIT));
+        i2c_control->ext_status_word &= (~(SFP_DET_STSBIT));
 
     return value;
 }

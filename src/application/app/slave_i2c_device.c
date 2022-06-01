@@ -41,6 +41,9 @@ static const uint8_t version[] = VERSION;
 #define NUMBER_OF_BYTES_VERSION         MAX_TX_BUFFER_SIZE
 #define BOOTLOADER_VERSION_ADDR         0x080000C0
 
+static const uint16_t slave_features_supported =
+	PERIPH_RST_MCU_SUPPORTED;
+
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
     CMD_GENERAL_CONTROL                 = 0x02,
@@ -58,13 +61,14 @@ enum i2c_commands {
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
     CMD_PERIPH_CONTROL                  = 0x0F,
     CMD_GET_PERIPH_RESET_STATUS         = 0x10,
-    CMD_GET_EXTENDED_STATUS_WORD        = 0x11
+    CMD_GET_FEATURES                    = 0x11,
+    CMD_GET_EXT_STATUS_WORD             = 0x12,
 };
 
 enum i2c_control_byte_mask {
     LIGHT_RST_MASK                      = 0x01,
     HARD_RST_MASK                       = 0x02,
-    RESERVED1_MASK                      = 0x04,
+    RESERVED_MASK                       = 0x04,
     USB30_PWRON_MASK                    = 0x08,
     USB31_PWRON_MASK                    = 0x10,
     ENABLE_4V5_MASK                     = 0x20,
@@ -803,11 +807,22 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                case CMD_GET_EXTENDED_STATUS_WORD:
+                case CMD_GET_FEATURES:
                 {
                     /* prepare data to be sent to the master */
-                    i2c_state->tx_buf[0] = i2c_state->extended_sts_word & 0x00FF;
-                    i2c_state->tx_buf[1] = (i2c_state->extended_sts_word & 0xFF00) >> 8;
+                    i2c_state->tx_buf[0] = slave_features_supported & 0x00FF;
+                    i2c_state->tx_buf[1] = (slave_features_supported & 0xFF00) >> 8;
+                    DBG("FEAT\r\n");
+
+                    I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
+                    I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
+                } break;
+
+                case CMD_GET_EXT_STATUS_WORD:
+                {
+                    /* prepare data to be sent to the master */
+                    i2c_state->tx_buf[0] = i2c_state->ext_status_word & 0x00FF;
+                    i2c_state->tx_buf[1] = (i2c_state->ext_status_word & 0xFF00) >> 8;
                     DBG("EXT_STS\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);

@@ -24,7 +24,7 @@ typedef enum slave_i2c_states {
 
 struct st_i2c_status {
     uint16_t status_word;
-    uint16_t extended_sts_word;
+    uint16_t ext_status_word;
     uint8_t reset_type;
     slave_i2c_states_t state;             // reported in main state machine
     uint8_t rx_data_ctr;                  // RX data counter
@@ -39,7 +39,7 @@ extern struct st_i2c_status i2c_status;
 enum status_word_bits {
     GD32_MCU_STSBIT        = 0x0001,
     MKL_MCU_STSBIT         = 0x0002,
-    EXTEND_STS_WORD_STSBIT = 0x0004,
+    FEATURES_SUPPORTED_STSBIT = 0x0004,
     USER_REGULATOR_NOT_SUPPORTED_STSBIT = 0x0008,
     CARD_DET_STSBIT        = 0x0010,
     MSATA_IND_STSBIT       = 0x0020,
@@ -53,9 +53,12 @@ enum status_word_bits {
     BUTTON_COUNTER_VALBITS = 0xE000
 };
 
-enum extended_status_word_bits {
+enum features_bits {
+    PERIPH_RST_MCU_SUPPORTED = 0x0001,
+};
+
+enum ext_status_word_bits {
     SFP_DET_STSBIT         = 0x0001,
-    PERIPH_RST_MCU_STSBIT  = 0x0002,
 };
 
 /*
@@ -70,7 +73,7 @@ enum extended_status_word_bits {
  * Caution! STM32 and GD32 uses Atsha for security, MKL doesn't!!!!!!!!!
  * IT IS NECESSARY TO READ AND DECODE THE FIRST TWO BITS PROPERLY!
  *
- *      2   |   EXTEND_STATUS   : 1 - extended status_word supported, 0 - extended status_word not supported
+ *      2   |   FEATURES_SUPPORT: 1 - get features command supported, 0 - get features command not supported
  *      3   |   USER_REG_NOT_SUP: 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
  *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
  *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
@@ -85,12 +88,19 @@ enum extended_status_word_bits {
 */
 
 /*
- * Bit meanings in extended_status_word:
+ * Bit meanings in features:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *      0   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
+ *  1..15   |   reserved
+*/
+
+/*
+ * Bit meanings in ext_status_word:
  *  Bit Nr. |   Meanings
  * -----------------
  *      0   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
- *      1   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
- *  2..15   |   reserved
+ *  1..15   |   reserved
 */
 
 /*

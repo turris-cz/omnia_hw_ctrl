@@ -26,7 +26,8 @@ enum i2c_commands {
     CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
     CMD_PERIPH_CONTROL         = 0x0F,
     CMD_GET_PERIPH_RESET_STATUS         = 0x10,
-    CMD_GET_EXTENDED_STATUS_WORD        = 0x11
+    CMD_GET_FEATURES           = 0x11
+    CMD_GET_EXT_STATUS_WORD    = 0x12
 };
 
 === CMD_GET_STATUS_WORD
@@ -47,7 +48,7 @@ enum i2c_commands {
  * Caution! STM32 and GD32 uses Atsha for security, MKL doesn't!!!!!!!!!
  * IT IS NECESSARY TO READ AND DECODE THE FIRST TWO BITS PROPERLY!
  *
- *      2   |   EXTEND_STATUS   : 1 - extended status_word supported, 0 - extended status_word not supported
+ *      2   |   FEATURES_SUPPORT: 1 - get features command supported, 0 - get features command not supported
  *      3   |   USER_REG_NOT_SUP: 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
  *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
  *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
@@ -69,27 +70,45 @@ enum i2c_commands {
 *** 1 -> "address of the register" = command
 *** w -> word data type
 
-=== CMD_GET_EXTENDED_STATUS_WORD
+=== CMD_GET_FEATURES
+* The features information is read from the MCU.
+* Read only
+* Bit overview:
+
+[source,C]
+/*
+ * Bit meanings in features:
+ *  Bit Nr. |   Meanings
+ * -----------------
+ *      0   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
+ *  1..15   |   reserved
+*/
+
+* Example of a reading of features from Linux:
+** "i2cget 1 0x2A 0x11 w"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x11 -> "address of the register" = command
+*** w -> word data type
+
+=== CMD_GET_EXT_STATUS_WORD
 * The extended status information is read from the MCU.
 * Read only
 * Bit overview:
 
 [source,C]
 /*
- * Bit meanings in extended_status_word:
+ * Bit meanings in ext_status_word:
  *  Bit Nr. |   Meanings
  * -----------------
  *      0   |   SFP_DET         : 1 - no SFP detected, 0 - SFP detected
- *      1   |   PERIPH_RST_MCU  : 1 - CMD_PERIPH_CONTROL and CMD_GET_PERIPH_RESET_STATUS commands are supported, 0 - they aren't
- *  2..15   |   reserved
-*/
+ *  1..15   |   reserved
+ */
 
 * Example of a reading of the extended status word from Linux:
-** "i2cget 1 0x2A 0x11 w"
+** "i2cget 1 0x2A 0x12 w"
 *** 1 -> i2cbus number
 *** 0x2A -> I2C address of the slave
-*** 0x11 -> "address of the register" = command
-*** w -> word data type
 
 === CMD_GENERAL_CONTROL
 * Different HW related settings (disabling USB, changing behaviour of the front button, etc.)
