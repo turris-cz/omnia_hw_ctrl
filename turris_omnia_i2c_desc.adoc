@@ -160,7 +160,7 @@ enum i2c_commands {
  *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
 */
 
-* Example of a setting of the peripheral control byte (set MMC into reset state):
+* Example of a setting of the peripheral control byte (release PERST0):
 ** "i2cset 1 0x2A 0x0F 0x0800 w"
 *** 1 -> i2cbus number
 *** 0x2A -> I2C address of the slave
