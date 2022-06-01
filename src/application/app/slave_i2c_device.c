@@ -42,7 +42,8 @@ static const uint8_t version[] = VERSION;
 #define BOOTLOADER_VERSION_ADDR         0x080000C0
 
 static const uint16_t slave_features_supported =
-	PERIPH_MCU_SUPPORTED;
+	PERIPH_MCU_SUPPORTED |
+	EXT_CONTROL_SUPPORTED;
 
 enum i2c_commands {
     CMD_GET_STATUS_WORD                 = 0x01, /* slave sends status word back */
@@ -59,8 +60,8 @@ enum i2c_commands {
     CMD_WATCHDOG_STATUS                 = 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
-    CMD_PERIPH_CONTROL                  = 0x0F,
-    CMD_GET_PERIPH_RESET_STATUS         = 0x10,
+    CMD_EXT_CONTROL                     = 0x0F,
+    CMD_GET_EXT_CONTROL                 = 0x10,
     CMD_GET_FEATURES                    = 0x11,
     CMD_GET_EXT_STATUS_WORD             = 0x12,
 };
@@ -96,7 +97,7 @@ enum boot_requests {
     FLASH_OK                            = 0x88
 };
 
-enum i2c_periph_control_mask {
+enum i2c_ext_control_mask {
     RES_MMC_MASK                        = 0x0001,
     RES_LAN_MASK                        = 0x0002,
     RES_PHY_MASK                        = 0x0004,
@@ -345,17 +346,17 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_periph_control
-  * @brief      Decodes a peripheral control word and perform suitable reaction.
-  * @param      control_word: control word sent from master (CPU)
+  * @function   slave_i2c_ext_control
+  * @brief      Decodes an extended control word and performs suitable reaction.
+  * @param      ext_control_word: extended control word sent from master (CPU)
   * @param      bit_mask: 0 - dont care bit, 1 - write bit
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
+void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
 {
     if (bit_mask & RES_MMC_MASK)
     {
-        if (control_word & RES_MMC_MASK)
+        if (ext_control_word & RES_MMC_MASK)
         {
            GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
         }
@@ -367,7 +368,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & RES_LAN_MASK)
     {
-        if (control_word & RES_LAN_MASK)
+        if (ext_control_word & RES_LAN_MASK)
         {
            GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
         }
@@ -379,7 +380,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & RES_PHY_MASK)
     {
-        if (control_word & RES_PHY_MASK)
+        if (ext_control_word & RES_PHY_MASK)
         {
            GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
         }
@@ -391,7 +392,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & PERST0_MASK)
     {
-        if (control_word & PERST0_MASK)
+        if (ext_control_word & PERST0_MASK)
         {
            GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
         }
@@ -403,7 +404,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & PERST1_MASK)
     {
-        if (control_word & PERST1_MASK)
+        if (ext_control_word & PERST1_MASK)
         {
            GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
         }
@@ -415,7 +416,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & PERST2_MASK)
     {
-        if (control_word & PERST2_MASK)
+        if (ext_control_word & PERST2_MASK)
         {
            GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
         }
@@ -427,7 +428,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & PHY_SFP_MODE_MASK)
     {
-        if (control_word & PHY_SFP_MODE_MASK)
+        if (ext_control_word & PHY_SFP_MODE_MASK)
         {
            GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
         }
@@ -439,7 +440,7 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 
     if (bit_mask & VHV_CTRL_MASK)
     {
-        if (control_word & VHV_CTRL_MASK)
+        if (ext_control_word & VHV_CTRL_MASK)
         {
            GPIO_ResetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
         }
@@ -451,40 +452,40 @@ void slave_i2c_periph_control(uint16_t control_word, uint16_t bit_mask)
 }
 
 /*******************************************************************************
-  * @function   slave_i2c_get_periph_reset_status
-  * @brief      Get peripheral's reset status.
+  * @function   slave_i2c_get_ext_control_status
+  * @brief      Get extended control status (peripheral's resets, ...).
   * @param      None.
-  * @retval     reset_status.
+  * @retval     ext_control_status.
   *****************************************************************************/
-static uint16_t slave_i2c_get_periph_reset_status(void)
+static uint16_t slave_i2c_get_ext_control_status(void)
 {
-    uint16_t reset_status = 0;
+    uint16_t ext_control_status = 0;
 
     if(GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
-        reset_status |= RES_MMC_MASK;
+        ext_control_status |= RES_MMC_MASK;
 
     if(GPIO_ReadInputDataBit(RES_LAN_PIN_PORT, RES_LAN_PIN))
-        reset_status |= RES_LAN_MASK;
+        ext_control_status |= RES_LAN_MASK;
 
     if(GPIO_ReadInputDataBit(RES_PHY_PIN_PORT, RES_PHY_PIN))
-        reset_status |= RES_PHY_MASK;
+        ext_control_status |= RES_PHY_MASK;
 
     if(GPIO_ReadInputDataBit(PERST0_PIN_PORT, PERST0_PIN))
-        reset_status |= PERST0_MASK;
+        ext_control_status |= PERST0_MASK;
 
     if(GPIO_ReadInputDataBit(PERST1_PIN_PORT, PERST1_PIN))
-        reset_status |= PERST1_MASK;
+        ext_control_status |= PERST1_MASK;
 
     if(GPIO_ReadInputDataBit(PERST2_PIN_PORT, PERST2_PIN))
-        reset_status |= PERST2_MASK;
+        ext_control_status |= PERST2_MASK;
 
     if(GPIO_ReadInputDataBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN))
-        reset_status |= PHY_SFP_MODE_MASK;
+        ext_control_status |= PHY_SFP_MODE_MASK;
 
     if(GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
-        reset_status |= VHV_CTRL_MASK;
+        ext_control_status |= VHV_CTRL_MASK;
 
-    return reset_status;
+    return ext_control_status;
 }
 
 /*******************************************************************************
@@ -785,27 +786,27 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWENTY_BYTES_EXPECTED);
                 } break;
 
-                case CMD_PERIPH_CONTROL:
+                case CMD_EXT_CONTROL:
                 {
                     if((i2c_state->rx_data_ctr -1) == FOUR_BYTES_EXPECTED)
                     {
-                        slave_i2c_periph_control(i2c_state->rx_buf[1] |
-                                                 (i2c_state->rx_buf[2] << 8),
-                                                 i2c_state->rx_buf[3] |
-                                                 (i2c_state->rx_buf[4] << 8));
+                        slave_i2c_ext_control(i2c_state->rx_buf[1] |
+                                              (i2c_state->rx_buf[2] << 8),
+                                              i2c_state->rx_buf[3] |
+                                              (i2c_state->rx_buf[4] << 8));
                     }
-                    DBG("PER_CTRL\r\n");
+                    DBG("EXT_CTRL\r\n");
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     /* release SCL line */
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                case CMD_GET_PERIPH_RESET_STATUS:
+                case CMD_GET_EXT_CONTROL:
                 {
-                    uint16_t periph_status = slave_i2c_get_periph_reset_status();
-                    i2c_state->tx_buf[0] = periph_status & 0x00FF;
-                    i2c_state->tx_buf[1] = (periph_status & 0xFF00) >> 8;
-                    DBG("STS_RST\r\n");
+                    uint16_t ext_ctrl = slave_i2c_get_ext_control_status();
+                    i2c_state->tx_buf[0] = ext_ctrl & 0x00FF;
+                    i2c_state->tx_buf[1] = (ext_ctrl & 0xFF00) >> 8;
+                    DBG("GET_EXT_CTRL\r\n");
 
                     I2C_AcknowledgeConfig(I2C_PERIPH_NAME, ENABLE);
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, TWO_BYTES_EXPECTED);
