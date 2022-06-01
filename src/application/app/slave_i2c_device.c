@@ -64,7 +64,7 @@ enum i2c_commands {
 enum i2c_control_byte_mask {
     LIGHT_RST_MASK                      = 0x01,
     HARD_RST_MASK                       = 0x02,
-    SFP_DIS_MASK                        = 0x04,
+    RESERVED1_MASK                      = 0x04,
     USB30_PWRON_MASK                    = 0x08,
     USB31_PWRON_MASK                    = 0x10,
     ENABLE_4V5_MASK                     = 0x20,
