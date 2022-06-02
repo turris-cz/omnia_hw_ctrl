@@ -224,6 +224,9 @@ static ret_value_t load_settings(void)
     debounce_config(); /* start evaluation of inputs */
     i2c_control->status_word = app_get_status_word();
     i2c_control->ext_status_word = app_get_ext_status_word();
+    i2c_control->ext_control_word =
+        RES_MMC_MASK | RES_LAN_MASK | RES_PHY_MASK | PERST0_MASK | PERST1_MASK |
+        PERST2_MASK | PHY_SFP_MASK | PHY_SFP_AUTO_MASK;
 
     return OK;
 }
@@ -347,6 +350,12 @@ static ret_value_t input_manager(void)
         i2c_control->ext_status_word |= SFP_DET_STSBIT;
     else
         i2c_control->ext_status_word &= (~(SFP_DET_STSBIT));
+
+    __disable_irq();
+    if (i2c_control->ext_control_word & PHY_SFP_AUTO_MASK)
+        GPIO_WriteBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN,
+                      !!(i2c_control->ext_status_word & SFP_DET_STSBIT));
+    __enable_irq();
 
     return value;
 }

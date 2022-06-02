@@ -98,17 +98,6 @@ enum boot_requests {
     FLASH_OK                            = 0x88
 };
 
-enum i2c_ext_control_mask {
-    RES_MMC_MASK                        = 0x0001,
-    RES_LAN_MASK                        = 0x0002,
-    RES_PHY_MASK                        = 0x0004,
-    PERST0_MASK                         = 0x0008,
-    PERST1_MASK                         = 0x0010,
-    PERST2_MASK                         = 0x0020,
-    PHY_SFP_MASK                        = 0x0040,
-    VHV_CTRL_MASK                       = 0x0080
-};
-
 struct st_i2c_status i2c_status;
 
 /*******************************************************************************
@@ -374,6 +363,23 @@ static const struct {
   *****************************************************************************/
 void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
 {
+    /* save the requested value */
+    ext_control_word = (i2c_status.ext_control_word & ~bit_mask) |
+                       (ext_control_word & bit_mask);
+    i2c_status.ext_control_word = ext_control_word;
+
+    /*
+     * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
+     * If set, we let PHY_SFP to be set in app.c' input_manager() according to
+     * value read from SFP_DET, so we don't change it here.
+     * If not set, we want to set PHY_SFP according to value in
+     * ext_control_word.
+     */
+    if (ext_control_word & PHY_SFP_AUTO_MASK)
+        bit_mask &= ~PHY_SFP_MASK;
+    else
+        bit_mask |= PHY_SFP_MASK;
+
     for_each_const(pin, ext_control_pins)
         if (bit_mask & pin->mask)
             GPIO_WriteBit(pin->port, pin->pin,
@@ -393,6 +399,9 @@ static uint16_t slave_i2c_get_ext_control_status(void)
     for_each_const(pin, ext_control_pins)
         if (GPIO_ReadInputDataBit(pin->port, pin->pin) ^ pin->inv)
             ext_control_status |= pin->mask;
+
+    /* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
+    ext_control_status |= i2c_status.ext_control_word & PHY_SFP_AUTO_MASK;
 
     return ext_control_status;
 }

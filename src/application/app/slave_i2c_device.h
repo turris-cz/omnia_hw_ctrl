@@ -25,6 +25,7 @@ typedef enum slave_i2c_states {
 struct st_i2c_status {
     uint16_t status_word;
     uint16_t ext_status_word;
+    uint16_t ext_control_word;
     uint8_t reset_type;
     slave_i2c_states_t state;             // reported in main state machine
     uint8_t rx_data_ctr;                  // RX data counter
@@ -60,6 +61,18 @@ enum features_bits {
 
 enum ext_status_word_bits {
     SFP_DET_STSBIT         = 0x0001,
+};
+
+enum i2c_ext_control_mask {
+    RES_MMC_MASK                        = 0x0001,
+    RES_LAN_MASK                        = 0x0002,
+    RES_PHY_MASK                        = 0x0004,
+    PERST0_MASK                         = 0x0008,
+    PERST1_MASK                         = 0x0010,
+    PERST2_MASK                         = 0x0020,
+    PHY_SFP_MASK                        = 0x0040,
+    PHY_SFP_AUTO_MASK                   = 0x0080,
+    VHV_CTRL_MASK                       = 0x0100,
 };
 
 /*
@@ -140,8 +153,10 @@ enum ext_status_word_bits {
  *      4   |   PERST1    : 1 - reset of PCIE1, 0 - no reset
  *      5   |   PERST2    : 1 - reset of PCIE2, 0 - no reset
  *      6   |   PHY_SFP   : 1 - PHY WAN mode, 0 - SFP WAN mode
- *      7   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
- *  8..15   |   reserved
+ *      7   |   PHY_SFP_AUTO : 1 - automatically switch between PHY and SFP WAN modes
+ *                             0 - PHY/SFP WAN mode determined by value written to PHY_SFP bit
+ *      8   |   VHV_CTRL  : 1 - VHV control not active, 0 - VHV control voltage active
+ *  9..15   |   reserved
 */
 
 /*
