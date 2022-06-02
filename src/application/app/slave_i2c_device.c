@@ -461,28 +461,28 @@ static uint16_t slave_i2c_get_ext_control_status(void)
 {
     uint16_t ext_control_status = 0;
 
-    if(GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
+    if(!GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
         ext_control_status |= RES_MMC_MASK;
 
-    if(GPIO_ReadInputDataBit(RES_LAN_PIN_PORT, RES_LAN_PIN))
+    if(!GPIO_ReadInputDataBit(RES_LAN_PIN_PORT, RES_LAN_PIN))
         ext_control_status |= RES_LAN_MASK;
 
-    if(GPIO_ReadInputDataBit(RES_PHY_PIN_PORT, RES_PHY_PIN))
+    if(!GPIO_ReadInputDataBit(RES_PHY_PIN_PORT, RES_PHY_PIN))
         ext_control_status |= RES_PHY_MASK;
 
-    if(GPIO_ReadInputDataBit(PERST0_PIN_PORT, PERST0_PIN))
+    if(!GPIO_ReadInputDataBit(PERST0_PIN_PORT, PERST0_PIN))
         ext_control_status |= PERST0_MASK;
 
-    if(GPIO_ReadInputDataBit(PERST1_PIN_PORT, PERST1_PIN))
+    if(!GPIO_ReadInputDataBit(PERST1_PIN_PORT, PERST1_PIN))
         ext_control_status |= PERST1_MASK;
 
-    if(GPIO_ReadInputDataBit(PERST2_PIN_PORT, PERST2_PIN))
+    if(!GPIO_ReadInputDataBit(PERST2_PIN_PORT, PERST2_PIN))
         ext_control_status |= PERST2_MASK;
 
     if(GPIO_ReadInputDataBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN))
         ext_control_status |= PHY_SFP_MASK;
 
-    if(GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
+    if(!GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
         ext_control_status |= VHV_CTRL_MASK;
 
     return ext_control_status;
