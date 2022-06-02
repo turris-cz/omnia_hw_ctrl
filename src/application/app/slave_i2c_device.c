@@ -61,7 +61,7 @@ enum i2c_commands {
     CMD_GET_WATCHDOG_STATE              = 0x0D,
     CMD_GET_FW_VERSION_BOOT             = 0x0E, /* 20B git hash number */
     CMD_EXT_CONTROL                     = 0x0F,
-    CMD_GET_EXT_CONTROL                 = 0x10,
+    CMD_GET_EXT_CONTROL_STATUS          = 0x10,
     CMD_GET_FEATURES                    = 0x11,
     CMD_GET_EXT_STATUS_WORD             = 0x12,
 };
@@ -801,7 +801,7 @@ void slave_i2c_handler(void)
                     I2C_NumberOfBytesConfig(I2C_PERIPH_NAME, ONE_BYTE_EXPECTED);
                 } break;
 
-                case CMD_GET_EXT_CONTROL:
+                case CMD_GET_EXT_CONTROL_STATUS:
                 {
                     uint16_t ext_ctrl = slave_i2c_get_ext_control_status();
                     i2c_state->tx_buf[0] = ext_ctrl & 0x00FF;

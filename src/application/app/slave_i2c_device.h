@@ -95,7 +95,7 @@ enum ext_status_word_bits {
  *      0   |   PERIPH_MCU      : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
  *                                    (available to set via CMD_EXT_CONTROL command)
  *                                0 - otherwise
- *      1   |   EXT_CONTROL     : 1 - CMD_EXT_CONTROL and CMD_GET_EXT_CONTROL commands are available, 0 - otherwise
+ *      1   |   EXT_CONTROL     : 1 - CMD_EXT_CONTROL and CMD_GET_EXT_CONTROL_STATUS commands are available, 0 - otherwise
  *  2..15   |   reserved
 */
 

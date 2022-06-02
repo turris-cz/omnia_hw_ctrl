@@ -25,7 +25,7 @@ enum i2c_commands {
     CMD_GET_WATCHDOG_STATE     = 0x0D,
     CMD_GET_FW_VERSION_BOOT    = 0x0E, /* 20B git hash number */
     CMD_EXT_CONTROL            = 0x0F,
-    CMD_GET_EXT_CONTROL        = 0x10,
+    CMD_GET_EXT_CONTROL_STATUS = 0x10,
     CMD_GET_FEATURES           = 0x11
     CMD_GET_EXT_STATUS_WORD    = 0x12
 };
@@ -83,7 +83,7 @@ enum i2c_commands {
  *      0   |   PERIPH_MCU      : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
  *                                    (available to set via CMD_EXT_CONTROL command)
  *                                0 - otherwise
- *      1   |   EXT_CONTROL     : 1 - CMD_EXT_CONTROL and CMD_GET_EXT_CONTROL commands are available, 0 - otherwise
+ *      1   |   EXT_CONTROL     : 1 - CMD_EXT_CONTROL and CMD_GET_EXT_CONTROL_STATUS commands are available, 0 - otherwise
  *  2..15   |   reserved
 */
 
@@ -171,7 +171,7 @@ enum i2c_commands {
 *** 0x08 0x00 -> value of the mask, lower byte first. Bit 3 is 1 -> bit 3 will be changed
 ***	i -> block data type
 
-=== CMD_GET_EXT_CONTROL
+=== CMD_GET_EXT_CONTROL_STATUS
 * Reads status of extended control (if applicable)
 * Read only
 
