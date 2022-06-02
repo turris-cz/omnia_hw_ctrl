@@ -8,6 +8,7 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
+#include "compiler.h"
 #include "stm32f0xx_conf.h"
 #include "slave_i2c_device.h"
 #include "debug_serial.h"
@@ -345,6 +346,25 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     }
 }
 
+static const struct {
+    GPIO_TypeDef *port;
+    uint16_t pin;
+    uint16_t mask;
+    bool inv;
+} ext_control_pins[] = {
+#define ECTRL(n, i) \
+    { n ## _PIN_PORT, n ## _PIN, n ## _MASK, i }
+    ECTRL(RES_MMC, 1),
+    ECTRL(RES_LAN, 1),
+    ECTRL(RES_PHY, 1),
+    ECTRL(PERST0, 1),
+    ECTRL(PERST1, 1),
+    ECTRL(PERST2, 1),
+    ECTRL(PHY_SFP, 0),
+    ECTRL(VHV_CTRL, 1),
+#undef ECTRL
+};
+
 /*******************************************************************************
   * @function   slave_i2c_ext_control
   * @brief      Decodes an extended control word and performs suitable reaction.
@@ -354,101 +374,10 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
   *****************************************************************************/
 void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
 {
-    if (bit_mask & RES_MMC_MASK)
-    {
-        if (ext_control_word & RES_MMC_MASK)
-        {
-           GPIO_ResetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(RES_MMC_PIN_PORT, RES_MMC_PIN);
-        }
-    }
-
-    if (bit_mask & RES_LAN_MASK)
-    {
-        if (ext_control_word & RES_LAN_MASK)
-        {
-           GPIO_ResetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(RES_LAN_PIN_PORT, RES_LAN_PIN);
-        }
-    }
-
-    if (bit_mask & RES_PHY_MASK)
-    {
-        if (ext_control_word & RES_PHY_MASK)
-        {
-           GPIO_ResetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(RES_PHY_PIN_PORT, RES_PHY_PIN);
-        }
-    }
-
-    if (bit_mask & PERST0_MASK)
-    {
-        if (ext_control_word & PERST0_MASK)
-        {
-           GPIO_ResetBits(PERST0_PIN_PORT, PERST0_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(PERST0_PIN_PORT, PERST0_PIN);
-        }
-    }
-
-    if (bit_mask & PERST1_MASK)
-    {
-        if (ext_control_word & PERST1_MASK)
-        {
-           GPIO_ResetBits(PERST1_PIN_PORT, PERST1_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(PERST1_PIN_PORT, PERST1_PIN);
-        }
-    }
-
-    if (bit_mask & PERST2_MASK)
-    {
-        if (ext_control_word & PERST2_MASK)
-        {
-           GPIO_ResetBits(PERST2_PIN_PORT, PERST2_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(PERST2_PIN_PORT, PERST2_PIN);
-        }
-    }
-
-    if (bit_mask & PHY_SFP_MASK)
-    {
-        if (ext_control_word & PHY_SFP_MASK)
-        {
-           GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
-        }
-        else
-        {
-           GPIO_ResetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
-        }
-    }
-
-    if (bit_mask & VHV_CTRL_MASK)
-    {
-        if (ext_control_word & VHV_CTRL_MASK)
-        {
-           GPIO_ResetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
-        }
-        else
-        {
-           GPIO_SetBits(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN);
-        }
-    }
+    for_each_const(pin, ext_control_pins)
+        if (bit_mask & pin->mask)
+            GPIO_WriteBit(pin->port, pin->pin,
+                          !!(ext_control_word & pin->mask) ^ pin->inv);
 }
 
 /*******************************************************************************
@@ -461,29 +390,9 @@ static uint16_t slave_i2c_get_ext_control_status(void)
 {
     uint16_t ext_control_status = 0;
 
-    if(!GPIO_ReadInputDataBit(RES_MMC_PIN_PORT, RES_MMC_PIN))
-        ext_control_status |= RES_MMC_MASK;
-
-    if(!GPIO_ReadInputDataBit(RES_LAN_PIN_PORT, RES_LAN_PIN))
-        ext_control_status |= RES_LAN_MASK;
-
-    if(!GPIO_ReadInputDataBit(RES_PHY_PIN_PORT, RES_PHY_PIN))
-        ext_control_status |= RES_PHY_MASK;
-
-    if(!GPIO_ReadInputDataBit(PERST0_PIN_PORT, PERST0_PIN))
-        ext_control_status |= PERST0_MASK;
-
-    if(!GPIO_ReadInputDataBit(PERST1_PIN_PORT, PERST1_PIN))
-        ext_control_status |= PERST1_MASK;
-
-    if(!GPIO_ReadInputDataBit(PERST2_PIN_PORT, PERST2_PIN))
-        ext_control_status |= PERST2_MASK;
-
-    if(GPIO_ReadInputDataBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN))
-        ext_control_status |= PHY_SFP_MASK;
-
-    if(!GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
-        ext_control_status |= VHV_CTRL_MASK;
+    for_each_const(pin, ext_control_pins)
+        if (GPIO_ReadInputDataBit(pin->port, pin->pin) ^ pin->inv)
+            ext_control_status |= pin->mask;
 
     return ext_control_status;
 }
