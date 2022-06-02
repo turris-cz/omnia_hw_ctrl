@@ -104,7 +104,7 @@ enum i2c_ext_control_mask {
     PERST0_MASK                         = 0x0008,
     PERST1_MASK                         = 0x0010,
     PERST2_MASK                         = 0x0020,
-    PHY_SFP_MODE_MASK                   = 0x0040,
+    PHY_SFP_MASK                        = 0x0040,
     VHV_CTRL_MASK                       = 0x0080
 };
 
@@ -426,9 +426,9 @@ void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
         }
     }
 
-    if (bit_mask & PHY_SFP_MODE_MASK)
+    if (bit_mask & PHY_SFP_MASK)
     {
-        if (ext_control_word & PHY_SFP_MODE_MASK)
+        if (ext_control_word & PHY_SFP_MASK)
         {
            GPIO_SetBits(PHY_SFP_PIN_PORT, PHY_SFP_PIN);
         }
@@ -480,7 +480,7 @@ static uint16_t slave_i2c_get_ext_control_status(void)
         ext_control_status |= PERST2_MASK;
 
     if(GPIO_ReadInputDataBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN))
-        ext_control_status |= PHY_SFP_MODE_MASK;
+        ext_control_status |= PHY_SFP_MASK;
 
     if(GPIO_ReadInputDataBit(VHV_CTRL_PIN_PORT, VHV_CTRL_PIN))
         ext_control_status |= VHV_CTRL_MASK;
