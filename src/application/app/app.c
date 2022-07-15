@@ -132,7 +132,7 @@ static uint32_t app_get_ext_status_dword(void)
     uint32_t ext_status_dword = 0;
 
     if (GPIO_ReadInputDataBit(SFP_nDET_PIN_PORT, SFP_nDET_PIN))
-        ext_status_dword |= SFP_nDET_STSBIT;
+        ext_status_dword |= EXT_STS_SFP_nDET;
 
     return ext_status_dword;
 }
@@ -347,14 +347,14 @@ static ret_value_t input_manager(void)
 
 
     if(GPIO_ReadInputDataBit(SFP_nDET_PIN_PORT, SFP_nDET_PIN))
-        i2c_control->ext_status_dword |= SFP_nDET_STSBIT;
+        i2c_control->ext_status_dword |= EXT_STS_SFP_nDET;
     else
-        i2c_control->ext_status_dword &= (~(SFP_nDET_STSBIT));
+        i2c_control->ext_status_dword &= (~(EXT_STS_SFP_nDET));
 
     __disable_irq();
     if (i2c_control->ext_control_word & EXT_CTL_PHY_SFP_AUTO)
         GPIO_WriteBit(PHY_SFP_PIN_PORT, PHY_SFP_PIN,
-                      !!(i2c_control->ext_status_dword & SFP_nDET_STSBIT));
+                      !!(i2c_control->ext_status_dword & EXT_STS_SFP_nDET));
     __enable_irq();
 
     return value;
