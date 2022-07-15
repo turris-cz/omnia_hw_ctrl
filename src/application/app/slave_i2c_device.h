@@ -11,6 +11,8 @@
 #ifndef SLAVE_I2C_DEVICE_H
 #define SLAVE_I2C_DEVICE_H
 
+#include "bits.h"
+
 #define MAX_RX_BUFFER_SIZE                 10
 #define MAX_TX_BUFFER_SIZE                 20
 
@@ -38,66 +40,66 @@ struct st_i2c_status {
 extern struct st_i2c_status i2c_status;
 
 enum status_word_bits {
-    GD32_MCU_STSBIT                     = 0x0001,
-    MKL_MCU_STSBIT                      = 0x0002,
-    FEATURES_SUPPORTED_STSBIT           = 0x0004,
-    USER_REGULATOR_NOT_SUPPORTED_STSBIT = 0x0008,
-    CARD_DET_STSBIT                     = 0x0010,
-    MSATA_IND_STSBIT                    = 0x0020,
-    USB30_OVC_STSBIT                    = 0x0040,
-    USB31_OVC_STSBIT                    = 0x0080,
-    USB30_PWRON_STSBIT                  = 0x0100,
-    USB31_PWRON_STSBIT                  = 0x0200,
-    ENABLE_4V5_STSBIT                   = 0x0400,
-    BUTTON_MODE_STSBIT                  = 0x0800,
-    BUTTON_PRESSED_STSBIT               = 0x1000,
-    BUTTON_COUNTER_VALBITS              = 0xE000
+    GD32_MCU_STSBIT                     = BIT(0),
+    MKL_MCU_STSBIT                      = BIT(1),
+    FEATURES_SUPPORTED_STSBIT           = BIT(2),
+    USER_REGULATOR_NOT_SUPPORTED_STSBIT = BIT(3),
+    CARD_DET_STSBIT                     = BIT(4),
+    MSATA_IND_STSBIT                    = BIT(5),
+    USB30_OVC_STSBIT                    = BIT(6),
+    USB31_OVC_STSBIT                    = BIT(7),
+    USB30_PWRON_STSBIT                  = BIT(8),
+    USB31_PWRON_STSBIT                  = BIT(9),
+    ENABLE_4V5_STSBIT                   = BIT(10),
+    BUTTON_MODE_STSBIT                  = BIT(11),
+    BUTTON_PRESSED_STSBIT               = BIT(12),
+    BUTTON_COUNTER_VALBITS              = GENMASK(15, 13)
 };
 
 enum features_bits {
-    PERIPH_MCU_SUPPORTED   = 0x0001,
-    EXT_CMDS_SUPPORTED     = 0x0002,
-    WDT_PING_SUPPORTED     = 0x0004,
-    LED_STATE_EXT_MASK     = 0x0018,
-    LED_STATE_EXT          = 0x0008,
-    LED_STATE_EXT_V32      = 0x0010,
+    PERIPH_MCU_SUPPORTED   = BIT(0),
+    EXT_CMDS_SUPPORTED     = BIT(1),
+    WDT_PING_SUPPORTED     = BIT(2),
+    LED_STATE_EXT_MASK     = GENMASK(4, 3),
+    LED_STATE_EXT          = FIELD_PREP(LED_STATE_EXT_MASK, 1),
+    LED_STATE_EXT_V32      = FIELD_PREP(LED_STATE_EXT_MASK, 2),
 };
 
 enum ext_status_dword_bits {
-    SFP_nDET_STSBIT        = 0x00000001,
-    LED_STATES_MASK        = 0xFFFFF000,
-    WLAN0_MSATA_LED_STSBIT = 0x00001000,
-    WLAN1_LED_STSBIT       = 0x00002000,
-    WLAN2_LED_STSBIT       = 0x00004000,
-    WPAN0_LED_STSBIT       = 0x00008000,
-    WPAN1_LED_STSBIT       = 0x00010000,
-    WPAN2_LED_STSBIT       = 0x00020000,
-    WAN_LED0_STSBIT        = 0x00040000,
-    WAN_LED1_STSBIT        = 0x00080000,
-    LAN0_LED0_STSBIT       = 0x00100000,
-    LAN0_LED1_STSBIT       = 0x00200000,
-    LAN1_LED0_STSBIT       = 0x00400000,
-    LAN1_LED1_STSBIT       = 0x00800000,
-    LAN2_LED0_STSBIT       = 0x01000000,
-    LAN2_LED1_STSBIT       = 0x02000000,
-    LAN3_LED0_STSBIT       = 0x04000000,
-    LAN3_LED1_STSBIT       = 0x08000000,
-    LAN4_LED0_STSBIT       = 0x10000000,
-    LAN4_LED1_STSBIT       = 0x20000000,
-    LAN5_LED0_STSBIT       = 0x40000000,
-    LAN5_LED1_STSBIT       = 0x80000000,
+    SFP_nDET_STSBIT        = BIT(0),
+    LED_STATES_MASK        = GENMASK(31, 12),
+    WLAN0_MSATA_LED_STSBIT = BIT(12),
+    WLAN1_LED_STSBIT       = BIT(13),
+    WLAN2_LED_STSBIT       = BIT(14),
+    WPAN0_LED_STSBIT       = BIT(15),
+    WPAN1_LED_STSBIT       = BIT(16),
+    WPAN2_LED_STSBIT       = BIT(17),
+    WAN_LED0_STSBIT        = BIT(18),
+    WAN_LED1_STSBIT        = BIT(19),
+    LAN0_LED0_STSBIT       = BIT(20),
+    LAN0_LED1_STSBIT       = BIT(21),
+    LAN1_LED0_STSBIT       = BIT(22),
+    LAN1_LED1_STSBIT       = BIT(23),
+    LAN2_LED0_STSBIT       = BIT(24),
+    LAN2_LED1_STSBIT       = BIT(25),
+    LAN3_LED0_STSBIT       = BIT(26),
+    LAN3_LED1_STSBIT       = BIT(27),
+    LAN4_LED0_STSBIT       = BIT(28),
+    LAN4_LED1_STSBIT       = BIT(29),
+    LAN5_LED0_STSBIT       = BIT(30),
+    LAN5_LED1_STSBIT       = BIT(31),
 };
 
 enum i2c_ext_control_mask {
-    RES_MMC_MASK           = 0x0001,
-    RES_LAN_MASK           = 0x0002,
-    RES_PHY_MASK           = 0x0004,
-    PERST0_MASK            = 0x0008,
-    PERST1_MASK            = 0x0010,
-    PERST2_MASK            = 0x0020,
-    PHY_SFP_MASK           = 0x0040,
-    PHY_SFP_AUTO_MASK      = 0x0080,
-    VHV_CTRL_MASK          = 0x0100,
+    RES_MMC_MASK           = BIT(0),
+    RES_LAN_MASK           = BIT(1),
+    RES_PHY_MASK           = BIT(2),
+    PERST0_MASK            = BIT(3),
+    PERST1_MASK            = BIT(4),
+    PERST2_MASK            = BIT(5),
+    PHY_SFP_MASK           = BIT(6),
+    PHY_SFP_AUTO_MASK      = BIT(7),
+    VHV_CTRL_MASK          = BIT(8),
 };
 
 /*
