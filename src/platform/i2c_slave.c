@@ -1,4 +1,5 @@
 #include "i2c_slave.h"
+#include "cpu.h"
 
 i2c_slave_t *i2c_slave_ptr[2];
 
@@ -10,7 +11,7 @@ void __irq i2c_slave_irq_handler(void)
 	uint32_t isr;
 	int ret;
 
-	__disable_irq();
+	disable_irq();
 
 	isr = i2c->ISR;
 
@@ -90,5 +91,5 @@ void __irq i2c_slave_irq_handler(void)
 		i2c->ICR = I2C_ICR_ADDRCF;
 	}
 
-	__enable_irq();
+	enable_irq();
 }

@@ -8,13 +8,13 @@
  ******************************************************************************
  **/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_conf.h"
 #include "led_driver.h"
 #include "delay.h"
 #include "power_control.h"
 #include "gpio.h"
 #include "spi.h"
 #include "timer.h"
+#include "cpu.h"
 
 /* Private define ------------------------------------------------------------*/
 #define LED_SPI_ALT_FN		0
@@ -299,7 +299,7 @@ static void led_driver_send_frame(void)
     {
         /* latch enable pulse */
         gpio_write(LED_SPI_SS_PIN, 1);
-        __NOP();
+        nop();
         gpio_write(LED_SPI_SS_PIN, 0);
 
         level++;
@@ -673,7 +673,7 @@ static void led_driver_timer_config_knight_rider(void)
   * @param      colour: colour in RGB range.
   * @retval     None.
   *****************************************************************************/
-void led_driver_reset_effect(FunctionalState state)
+void led_driver_reset_effect(bool state)
 {
     timer_enable(LED_EFFECT_TIMER, state);
     if (!state)
