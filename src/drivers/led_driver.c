@@ -289,7 +289,7 @@ static void led_driver_send_frame(void)
         } break;
 
         default:
-            break;
+            unreachable();
     }
 
     led_driver_send_data16b(data);
