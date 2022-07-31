@@ -10,12 +10,16 @@ SRCS_PLAT_stm32	+= src/platform/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx
 SRCS_PLAT_stm32	+= src/platform/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_spi.c
 SRCS_PLAT_stm32	+= src/platform/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_flash.c
 SRCS_PLAT_stm32	+= src/platform/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_usart.c
-CSUM_POS_stm32	= 0xC0
+
 CPPFLAGS_stm32	= -DSTM32F030X8 -DUSE_STDPERIPH_DRIVER
 CPPFLAGS_stm32	+= -Isrc/platform/stm_lib/cmsis_boot
 CPPFLAGS_stm32	+= -Isrc/platform/stm_lib/cmsis_core
 CPPFLAGS_stm32	+= -Isrc/platform/stm_lib/stm32f0xx_stdperiph_driver/inc
+
 CFLAGS_stm32	= -mcpu=cortex-m0 -mthumb -mlittle-endian
+
+APP_POS_stm32	= 0x5000
+CSUM_POS_stm32	= 0xC0
 
 VARIANTS_stm32 = rev23 rev23-user-regulator rev32
 CPPFLAGS_stm32-rev23			= -DOMNIA_BOARD_REVISION=23 -DUSER_REGULATOR_ENABLED=0
