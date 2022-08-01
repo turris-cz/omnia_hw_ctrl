@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "eeprom.h"
 #include "cpu.h"
+#include "flash.h"
 #include "flash_defs.h"
 #include "delay.h"
 
@@ -62,7 +63,7 @@ static void app_mcu_init(void)
     eeprom_var_t ee_var;
     uint16_t ee_data;
 
-    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    flash_init(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
 
     ee_var = EE_ReadVariable(WDG_VIRT_ADDR, &ee_data);

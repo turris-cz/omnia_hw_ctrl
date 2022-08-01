@@ -53,9 +53,8 @@ static void bootloader_init(void)
     led_driver_config();
     boot_i2c_config();
 
-    FLASH_Unlock(); /* Unlock the Flash Program Erase controller */
+    flash_init(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
-    flash_init();
     timer_deinit(DEBOUNCE_TIMER);
     timer_deinit(USB_TIMEOUT_TIMER);
     enable_irq();
