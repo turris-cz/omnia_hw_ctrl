@@ -9,7 +9,7 @@ HOSTCFLAGS	= -O2
 
 CFLAGS		= -ggdb -Os -fno-pie -ffreestanding -Wall -Wextra -Warray-bounds -nostdlib -ffunction-sections -fdata-sections
 CPPFLAGS	= -DVERSION="{ $(shell git rev-parse HEAD | sed 's/\(..\)/0x\1, /g' | sed -r 's/,\s+$$//') }"
-CPPFLAGS	+= -Isrc/include -Isrc/drivers -Isrc/platform -Isrc/application
+CPPFLAGS	+= -Isrc/include -Isrc/drivers -Isrc/application
 CPPFLAGS_app	= -DBOOTLOADER_BUILD=0
 CPPFLAGS_boot	= -DBOOTLOADER_BUILD=1
 
