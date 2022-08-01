@@ -22,7 +22,7 @@ SRCS_DRIVERS	= $(filter-out $(SRCS_DEBUG),$(wildcard src/drivers/*.c))
 SRCS_APP	= $(wildcard src/application/*.c)
 SRCS_BOOT	= $(wildcard src/bootloader/*.c)
 
-HOSTTOOLS = crc32tool genflashimg
+HOSTTOOLS = crc32tool genflashimg stm32tool
 
 ifeq ($(DBG_ENABLE), 1)
 	SRCS_DRIVERS += $(SRCS_DEBUG)
@@ -56,7 +56,7 @@ endif
 
 .PHONY: all app boot clean
 
-all: app boot
+all: app boot tools/stm32tool
 
 app:
 	$(DEBUG_INFO_PRINT)
