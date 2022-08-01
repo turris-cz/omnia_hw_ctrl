@@ -2,7 +2,6 @@
 #define USART_H
 
 #include "stm32f0xx_usart.h"
-#include "stm32f0xx_usart.h"
 #include "compiler.h"
 #include "gpio.h"
 
