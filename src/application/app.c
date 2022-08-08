@@ -63,6 +63,8 @@ static void app_mcu_init(void)
     eeprom_var_t ee_var;
     uint16_t ee_data;
 
+    debug_init();
+
     flash_init(); /* Unlock the Flash Program Erase controller */
     EE_Init(); /* EEPROM Init */
 
@@ -102,9 +104,6 @@ static void app_mcu_init(void)
     /* new features for Omnia32 */
     if (OMNIA_BOARD_REVISION >= 32)
         periph_control_io_config();
-
-    debug_init();
-
 
     debug("\nInit completed.\n");
 }

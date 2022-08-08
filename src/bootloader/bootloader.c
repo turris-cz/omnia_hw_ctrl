@@ -47,6 +47,8 @@ typedef enum bootloader_return_val {
   *****************************************************************************/
 static void bootloader_init(void)
 {
+    debug_init();
+
     /* peripheral initialization*/
     delay_systimer_config();
     led_driver_config();
@@ -60,7 +62,6 @@ static void bootloader_init(void)
 
     led_driver_set_colour(LED_COUNT, GREEN_COLOUR);
     led_driver_reset_effect(ENABLE);
-    debug_init();
 
     gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
