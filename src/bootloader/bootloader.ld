@@ -1,11 +1,13 @@
 ENTRY(reset_handler)
 
+#include <flash_defs.h>
+
 MEMORY
 {
-	isr_vector (r)	: ORIGIN = 0x08000000, LENGTH = 0xC0 /* vector table */
-	boot_version(r)	: ORIGIN = 0x080000C0, LENGTH = 0x14 /* bootloader version */
-	flash (rx)	: ORIGIN = 0x080000D4, LENGTH = 0x5000 - 0x14 - 0xC0
-	ram (xrw)	: ORIGIN = 0x200000C0, LENGTH = 0x2000 - 192 /* 8K - 192B for vector table */
+	isr_vector (r)	: ORIGIN = BOOTLOADER_BEGIN,				LENGTH = ISR_VECTOR_LENGTH
+	boot_version(r)	: ORIGIN = ORIGIN(isr_vector) + LENGTH(isr_vector),	LENGTH = 0x14
+	flash (rx)	: ORIGIN = ORIGIN(boot_version) + LENGTH(boot_version),	LENGTH = APPLICATION_BEGIN - ORIGIN(flash)
+	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
 _stack_top = ORIGIN(ram) + LENGTH(ram);

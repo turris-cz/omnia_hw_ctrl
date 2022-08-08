@@ -1,6 +1,7 @@
 CROSS_COMPILE	?= arm-none-eabi-
 
 CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CROSS_COMPILE)gcc -E
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
 
@@ -79,11 +80,19 @@ define CompileRule
 	$(Q)mkdir -p $$(@D) && $$(CC) -c $$(CPPFLAGS) $$(CPPFLAGS_$(1)) $$(CFLAGS) $$(CFLAGS_$(1)) $$< -o $$@
 endef
 
+define LinkScriptRule
+  build.$(1)/$(2)/$(3): $(3)
+	$(call echo,"$(1): [GENLDS  ]  $$^")
+	$(Q)mkdir -p $$(@D) && $$(CPP) $$(CPPFLAGS) $$(CPPFLAGS_$(1)) -D__ASSEMBLY__ -x assembler-with-cpp -std=c99 -P -o $$@ $$<
+endef
+
 define PlatBuildVariant
   SRCS_APP_$(1) = $$(SRCS_DRIVERS) $$(SRCS_APP) $$(SRCS_PLAT_$(1))
   SRCS_BOOT_$(1) = $$(SRCS_DRIVERS) $$(SRCS_BOOT) $$(SRCS_PLAT_$(1))
   OBJS_APP_$(1) = $$(addprefix build.$(1)/app/,$$(SRCS_APP_$(1):.c=.o))
   OBJS_BOOT_$(1) = $$(addprefix build.$(1)/boot/,$$(SRCS_BOOT_$(1):.c=.o))
+  LDSCRIPT_app_$(1) = build.$(1)/app/$$(LDSCRIPT_app)
+  LDSCRIPT_boot_$(1) = build.$(1)/boot/$$(LDSCRIPT_boot)
 
   .PHONY: $(1) app_$(1) boot_$(1) clean_$(1)
 
@@ -116,10 +125,12 @@ define PlatBuildVariant
 	$(call echo,"$(1): [BIN     ]  $$@")
 	$(Q)$$(OBJCOPY) -O binary $$< $$@
 
+  $$(eval $$(call LinkScriptRule,$(1),app,$$(LDSCRIPT_app)))
+
   build.$(1)/app.elf: CPPFLAGS += $$(CPPFLAGS_app)
-  build.$(1)/app.elf: LDSCRIPT = $$(LDSCRIPT_app)
+  build.$(1)/app.elf: LDSCRIPT = $$(LDSCRIPT_app_$(1))
   build.$(1)/app.elf: LDMAP = build.$(1)/app.map
-  build.$(1)/app.elf: $$(OBJS_APP_$(1)) $$(LDSCRIPT_app)
+  build.$(1)/app.elf: $$(OBJS_APP_$(1)) $$(LDSCRIPT_app_$(1))
 	$(call echo,"$(1): [LD      ]  $$@")
 	$(Q)$$(CC) $$(CFLAGS) $$(CFLAGS_$(1)) $$(LDFLAGS) $$(OBJS_APP_$(1)) -o $$@
 
@@ -127,10 +138,12 @@ define PlatBuildVariant
 	$(call echo,"$(1): [BIN     ]  $$@")
 	$(Q)$$(OBJCOPY) -O binary $$< $$@
 
+  $$(eval $$(call LinkScriptRule,$(1),boot,$$(LDSCRIPT_boot)))
+
   build.$(1)/boot.elf: CPPFLAGS += $$(CPPFLAGS_boot)
-  build.$(1)/boot.elf: LDSCRIPT = $$(LDSCRIPT_boot)
+  build.$(1)/boot.elf: LDSCRIPT = $$(LDSCRIPT_boot_$(1))
   build.$(1)/boot.elf: LDMAP = build.$(1)/boot.map
-  build.$(1)/boot.elf: $$(OBJS_BOOT_$(1)) $$(LDSCRIPT_boot)
+  build.$(1)/boot.elf: $$(OBJS_BOOT_$(1)) $$(LDSCRIPT_boot_$(1))
 	$(call echo,"$(1): [LD      ]  $$@")
 	$(Q)$$(CC) $$(CFLAGS_$(1)) $$(LDFLAGS) $$(OBJS_BOOT_$(1)) -o $$@
 

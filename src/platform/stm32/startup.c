@@ -2,6 +2,7 @@
 #include "stm32f0xx_syscfg.h"
 #include "stm32f0xx_rcc.h"
 #include "compiler.h"
+#include "flash_defs.h"
 
 extern uint32_t _stack_top, _sfdata, _sdata, _edata, _sbss, _ebss;
 extern void __noreturn main(void);
@@ -134,8 +135,6 @@ static void platform_init(void)
 	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, DISABLE);
 }
 
-#define RAM_BEGINNING		0x20000000
-
 static void configure_isr_vector(void)
 {
 	if (BOOTLOADER_BUILD) {
@@ -145,7 +144,7 @@ static void configure_isr_vector(void)
 	}
 
 	/* copy ISR vector to start of RAM */
-	for (uint32_t *dst = (uint32_t *)RAM_BEGINNING,
+	for (uint32_t *dst = (uint32_t *)RAM_BEGIN_RAW,
 		      *src = (uint32_t *)&isr_vector[0];
 	     src < (uint32_t *)&isr_vector[ARRAY_SIZE(isr_vector)];)
 		*dst++ = *src++;
