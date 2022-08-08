@@ -691,7 +691,7 @@ static void led_driver_knight_rider_effect_handler(void)
         {
             effect_reset_finished = RESET;
             led_driver_set_led_state(LED_COUNT, LED_OFF);
-            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);            
+            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
             led_driver_set_led_state(LED0, LED_ON);
             effect_state = EFFECT_UP;
         } break;
