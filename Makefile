@@ -14,8 +14,8 @@ CPPFLAGS	+= -Isrc/include -Isrc/drivers -Isrc/application
 CPPFLAGS_app	= -DBOOTLOADER_BUILD=0
 CPPFLAGS_boot	= -DBOOTLOADER_BUILD=1
 
-LDSCRIPT_app	= src/application/application.ld
-LDSCRIPT_boot	= src/bootloader/bootloader.ld
+LDSCRIPT_app	= src/application/application.lds
+LDSCRIPT_boot	= src/bootloader/bootloader.lds
 LDFLAGS		= -T$(LDSCRIPT) -Wl,-Map=$(LDMAP),--cref -nostartfiles -no-pie -Xlinker --gc-sections
 
 SRCS_DEBUG	= src/drivers/debug.c
