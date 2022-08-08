@@ -144,6 +144,9 @@ void __irq debounce_timer_irq_handler(void)
     static uint16_t idx;
     struct button_def *button = &button_front;
 
+    if (!timer_irq_clear_up(DEBOUNCE_TIMER))
+        return;
+
     /* port B, pins 0-14 debounced by general function debounce_check_inputs() */
     /* only button on PB15 is debounced here, but read the whole port */
     button->button_pin_state[idx] = ~gpio_read_port(PORT_B);
@@ -155,8 +158,6 @@ void __irq debounce_timer_irq_handler(void)
     /* other inputs handled by general function debounce_check_inputs() */
     debounce_card_det();
     debounce_msata_ind();
-
-    timer_irq_clear(DEBOUNCE_TIMER);
 }
 
 /*******************************************************************************

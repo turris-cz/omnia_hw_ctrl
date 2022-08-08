@@ -430,14 +430,15 @@ void __irq power_control_usb_timeout_irq_handler(void)
 {
     struct st_i2c_status *i2c_control = &i2c_status;
 
+    if (!timer_irq_clear_up(USB_TIMEOUT_TIMER))
+        return;
+
     power_control_usb(USB3_PORT0, USB_ON);
     power_control_usb(USB3_PORT1, USB_ON);
 
     i2c_control->status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
 
     power_control_usb_timeout_disable();
-
-    timer_irq_clear(USB_TIMEOUT_TIMER);
 }
 #endif
 

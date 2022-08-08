@@ -125,9 +125,15 @@ static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 	TIM_Cmd(timer_to_plat(tim_nr), on);
 }
 
-static __force_inline void timer_irq_clear(timer_nr_t tim_nr)
+static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 {
-	timer_to_plat(tim_nr)->SR = ~(uint16_t)TIM_IT_Update;
+	TIM_TypeDef *tim = timer_to_plat(tim_nr);
+	bool up = tim->SR & TIM_IT_Update;
+
+	if (up)
+		tim->SR = ~(uint16_t)TIM_IT_Update;
+
+	return up;
 }
 
 static __force_inline void timer_set_counter(timer_nr_t tim_nr, uint32_t cnt)

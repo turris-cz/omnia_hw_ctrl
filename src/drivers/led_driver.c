@@ -302,8 +302,10 @@ static void led_driver_send_frame(void)
 
 void __irq led_driver_irq_handler(void)
 {
+	if (!timer_irq_clear_up(LED_TIMER))
+		return;
+
 	led_driver_send_frame();
-	timer_irq_clear(LED_TIMER);
 }
 
 /*******************************************************************************
@@ -781,10 +783,11 @@ static void led_driver_bootloader_effect_handler(void)
 
 void __irq led_driver_effect_irq_handler(void)
 {
+	if (!timer_irq_clear_up(LED_EFFECT_TIMER))
+		return;
+
 	if (BOOTLOADER_BUILD)
 		led_driver_bootloader_effect_handler();
 	else
 		led_driver_knight_rider_effect_handler();
-
-	timer_irq_clear(LED_EFFECT_TIMER);
 }
