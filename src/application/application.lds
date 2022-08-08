@@ -1,6 +1,6 @@
 ENTRY(reset_handler)
 
-#include <flash_defs.h>
+#include <memory_layout.h>
 
 MEMORY
 {

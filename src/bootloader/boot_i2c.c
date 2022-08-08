@@ -18,7 +18,7 @@
 #include "boot_i2c.h"
 #include "bootloader.h"
 #include "gpio.h"
-#include "flash_defs.h"
+#include "memory_layout.h"
 
 __attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
 

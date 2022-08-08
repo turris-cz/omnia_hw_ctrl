@@ -19,7 +19,7 @@
 #include "eeprom.h"
 #include "msata_pci.h"
 #include "i2c_slave.h"
-#include "flash_defs.h"
+#include "memory_layout.h"
 
 static const uint8_t version[] = VERSION;
 static struct {

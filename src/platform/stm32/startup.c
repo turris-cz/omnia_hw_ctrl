@@ -2,7 +2,7 @@
 #include "stm32f0xx_syscfg.h"
 #include "stm32f0xx_rcc.h"
 #include "compiler.h"
-#include "flash_defs.h"
+#include "memory_layout.h"
 
 extern uint32_t _stack_top, _sfdata, _sdata, _edata, _sbss, _ebss;
 extern void __noreturn main(void);

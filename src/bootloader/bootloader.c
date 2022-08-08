@@ -15,12 +15,11 @@
 #include "bootloader.h"
 #include "led_driver.h"
 #include "flash.h"
-#include "flash_defs.h"
+#include "memory_layout.h"
 #include "debounce.h"
 #include "gpio.h"
 #include "timer.h"
 #include "cpu.h"
-#include "flash_defs.h"
 #include "crc32.h"
 
 typedef enum bootloader_states {

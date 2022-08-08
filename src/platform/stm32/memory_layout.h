@@ -1,5 +1,5 @@
-#ifndef FLASH_DEFS_H
-#define FLASH_DEFS_H
+#ifndef MEMORY_LAYOUT_H
+#define MEMORY_LAYOUT_H
 
 #define ISR_VECTOR_LENGTH	0xC0
 
@@ -16,4 +16,4 @@
 #define RAM_BEGIN		(RAM_BEGIN_RAW + ISR_VECTOR_LENGTH)
 #define RAM_LENGTH		(RAM_LENGTH_RAW - ISR_VECTOR_LENGTH)
 
-#endif /* FLASH_DEFS_H */
+#endif /* MEMORY_LAYOUT_H */

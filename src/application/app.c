@@ -18,7 +18,7 @@
 #include "eeprom.h"
 #include "cpu.h"
 #include "flash.h"
-#include "flash_defs.h"
+#include "memory_layout.h"
 #include "delay.h"
 
 #define MAX_ERROR_COUNT            5
