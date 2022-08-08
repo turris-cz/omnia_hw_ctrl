@@ -410,7 +410,7 @@ static int cmd_get_version(slave_i2c_state_t *state)
 	switch (state->cmd[0]) {
 	case CMD_GET_FW_VERSION_BOOT:
 		state->reply_len = 20;
-		__builtin_memcpy(state->reply, BOOTLOADER_VERSION_PTR, 20);
+		__builtin_memcpy(state->reply, (void *)BOOTLOADER_VERSION_POS, 20);
 		break;
 
 	case CMD_GET_FW_VERSION_APP:
