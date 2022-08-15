@@ -74,7 +74,7 @@ typedef struct {
 } rgb_t;
 
 struct led_rgb {
-    rgb_t                   led_rgb_default;    /* colour data */
+    rgb_t                   led_color;          /* colour data */
     led_state_t             led_state_default;  /* LED ON/OFF default mode */
     led_state_t             led_state_user;     /* LED ON/OFF user mode */
     led_mode_t              led_mode;           /* default / user mode */

@@ -71,18 +71,18 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            rgb_leds->led_rgb_default.red = colour >> 16;
-            rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
-            rgb_leds->led_rgb_default.blue = colour & 0xFF;
+            rgb_leds->led_color.red = colour >> 16;
+            rgb_leds->led_color.green = (colour >> 8) & 0xFF;
+            rgb_leds->led_color.blue = colour & 0xFF;
         }
     }
     else /* individual LED */
     {
         rgb_leds += led_index;
 
-        rgb_leds->led_rgb_default.red = colour >> 16;
-        rgb_leds->led_rgb_default.green = (colour >> 8) & 0xFF;
-        rgb_leds->led_rgb_default.blue = colour & 0xFF;
+        rgb_leds->led_color.red = colour >> 16;
+        rgb_leds->led_color.green = (colour >> 8) & 0xFF;
+        rgb_leds->led_color.blue = colour & 0xFF;
     }
 }
 
@@ -109,7 +109,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.red > current_colour_level)
+                        if (rgb_leds->led_color.red > current_colour_level)
                         {
                             data |= 1 << (2 + idx); /* shift by 2 - due to the HW connection */
                         }
@@ -119,7 +119,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.red > current_colour_level)
+                        if (rgb_leds->led_color.red > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -136,7 +136,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.green > current_colour_level)
+                        if (rgb_leds->led_color.green > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -146,7 +146,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.green > current_colour_level)
+                        if (rgb_leds->led_color.green > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -163,7 +163,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_default == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.blue > current_colour_level)
+                        if (rgb_leds->led_color.blue > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -173,7 +173,7 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
                 {
                     if (rgb_leds->led_state_user == LED_ON)
                     {
-                        if (rgb_leds->led_rgb_default.blue > current_colour_level)
+                        if (rgb_leds->led_color.blue > current_colour_level)
                         {
                             data |= 1 << (2 + idx);
                         }
