@@ -55,9 +55,6 @@ finished and normal operation can take the LED control */
 
 static uint8_t pwm_brightness;
 
-/* Private functions ---------------------------------------------------------*/
-static void led_driver_timer_config_knight_rider(void);
-
 /*******************************************************************************
   * @function   led_driver_set_colour
   * @brief      Set colour of LED specified in parameters to be displayed in next cycle.
@@ -271,8 +268,8 @@ void led_driver_config(void)
 	timer_init(LED_TIMER, timer_interrupt, 200, 2400000, 4);
 	timer_enable(LED_TIMER, 1);
 
-	/* Configure knight rider effect */
-	led_driver_timer_config_knight_rider();
+	/* Configure boot effect */
+	timer_init(LED_EFFECT_TIMER, timer_interrupt, 8000, 120000, 5);
 }
 
 /*******************************************************************************
@@ -526,17 +523,6 @@ void led_driver_double_knight_rider_effect(void)
 
     led_driver_set_colour(LED_COUNT, 0xFFFFFF); //back to default colour
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-}
-
-/*******************************************************************************
-  * @function   led_driver_timer_config_knight_rider
-  * @brief      Timer config for knight rider effect after reset.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_timer_config_knight_rider(void)
-{
-    timer_init(LED_EFFECT_TIMER, timer_interrupt, 8000, 120000, 5);
 }
 
 /*******************************************************************************
