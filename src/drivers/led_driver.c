@@ -253,39 +253,20 @@ static uint16_t led_driver_prepare_data(const rgb_colour_t colour, const uint8_t
   *****************************************************************************/
 static void led_driver_send_frame(void)
 {
-    static uint8_t level;
+    static uint8_t level, channel = RED;
     uint16_t data;
-    static rgb_colour_t colour = RED;
 
-    switch (colour)
-    {
-        case RED:
-        {
-            /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
-            data = led_driver_prepare_data(RED, level << COLOUR_DECIMATION);
-            colour = GREEN;
-        } break;
-
-        case GREEN:
-        {
-            data = led_driver_prepare_data(GREEN, level << COLOUR_DECIMATION);
-            colour = BLUE;
-        } break;
-
-        case BLUE: /* last colour -> go back to RED */
-        {
-            data = led_driver_prepare_data(BLUE, level << COLOUR_DECIMATION);
-            colour = RED;
-        } break;
-
-        default:
-            unreachable();
-    }
+    /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
+    data = led_driver_prepare_data(channel, level << COLOUR_DECIMATION);
+    if (channel == BLUE)
+        channel = RED;
+    else
+        channel++;
 
     led_driver_send_data16b(data);
 
     /* blue colour were sent to driver -> enable latch to write to LEDs */
-    if (colour == RED)
+    if (channel == RED)
     {
         /* latch enable pulse */
         gpio_write(LED_SPI_SS_PIN, 1);
