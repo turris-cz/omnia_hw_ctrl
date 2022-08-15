@@ -83,8 +83,8 @@ static void led_driver_io_config(void)
     gpio_init_alts(LED_SPI_ALT_FN, pin_pushpull, pin_spd_3, pin_pulldown,
                    LED_SPI_SCK_PIN, LED_SPI_MOSI_PIN);
 
-    /* Configure NSS pin (start with low value to hold previous data) */
-    gpio_init_outputs(pin_pushpull, pin_spd_3, 0, LED_SPI_SS_PIN);
+    /* Configure NSS pin */
+    gpio_init_outputs(pin_pushpull, pin_spd_3, 1, LED_SPI_SS_PIN);
 }
 
 /*******************************************************************************
@@ -256,28 +256,27 @@ static void led_driver_send_frame(void)
     static uint8_t level, channel = RED;
     uint16_t data;
 
-    /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
-    data = led_driver_prepare_data(channel, level << COLOUR_DECIMATION);
-    if (channel == BLUE)
-        channel = RED;
-    else
-        channel++;
-
-    led_driver_send_data16b(data);
-
-    /* blue colour were sent to driver -> enable latch to write to LEDs */
-    if (channel == RED)
-    {
-        /* latch enable pulse */
+    /* toggle SS before sending red channel */
+    if (channel == RED) {
         gpio_write(LED_SPI_SS_PIN, 1);
         nop();
         gpio_write(LED_SPI_SS_PIN, 0);
+    }
+
+    /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
+    data = led_driver_prepare_data(channel, level << COLOUR_DECIMATION);
+    led_driver_send_data16b(data);
+
+    if (channel == BLUE) {
+        channel = RED;
 
         level++;
 
-        /* restart cycle - all levels were sent to driver */
+        /* restart cycle when all levels sent */
         if (level >= COLOUR_LEVELS)
             level = 0;
+    } else {
+        channel++;
     }
 }
 
