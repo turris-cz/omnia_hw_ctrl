@@ -56,6 +56,7 @@ finished and normal operation can take the LED control */
 
 /* values for LED brightness [%] */
 static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
+static uint16_t pwm_brightness;
 
 /* Private functions ---------------------------------------------------------*/
 static void led_driver_timer_config_knight_rider(void);
@@ -286,7 +287,6 @@ void led_driver_config(void)
 void led_driver_pwm_set_brightness(uint16_t procent_val)
 {
     uint16_t counter_val;
-    struct led_rgb *rgb_leds = leds;
 
     if (procent_val > MAX_LED_BRIGHTNESS)
         procent_val = MAX_LED_BRIGHTNESS;
@@ -294,7 +294,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
     counter_val = procent_val * LED_PWM_PERIOD / MAX_LED_BRIGHTNESS;
 
     timer_set_pulse(LED_PWM_TIMER, counter_val);
-    rgb_leds->brightness = procent_val;
+    pwm_brightness = procent_val;
 }
 
 /*******************************************************************************
@@ -305,9 +305,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
   *****************************************************************************/
 uint16_t led_driver_pwm_get_brightness(void)
 {
-    struct led_rgb *rgb_leds = leds;
-
-    return  rgb_leds->brightness;
+	return pwm_brightness;
 }
 
 /*******************************************************************************
@@ -318,11 +316,10 @@ uint16_t led_driver_pwm_get_brightness(void)
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
-    struct led_rgb *rgb_leds = leds;
     static uint8_t step = 1;
 
-    rgb_leds->brightness = brightness_value[step++];
-    led_driver_pwm_set_brightness(rgb_leds->brightness);
+    pwm_brightness = brightness_value[step++];
+    led_driver_pwm_set_brightness(pwm_brightness);
 
     if (step >= MAX_BRIGHTNESS_STEPS)
         step = 0;

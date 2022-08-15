@@ -78,7 +78,6 @@ struct led_rgb {
     led_state_t             led_state_default;  /* LED ON/OFF default mode */
     led_state_t             led_state_user;     /* LED ON/OFF user mode */
     led_mode_t              led_mode;           /* default / user mode */
-    uint16_t                brightness;
 };
 
 extern struct led_rgb leds[LED_COUNT];

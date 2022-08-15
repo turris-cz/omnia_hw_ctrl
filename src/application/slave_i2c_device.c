@@ -350,7 +350,7 @@ static int cmd_set_brightness(slave_i2c_state_t *state)
 
 static int cmd_get_brightness(slave_i2c_state_t *state)
 {
-	uint8_t brightness = leds->brightness;
+	uint8_t brightness = led_driver_pwm_get_brightness();
 
 	debug("get_brightness\n");
 	set_reply(brightness);
