@@ -28,7 +28,6 @@
 #define COLOUR_LEVELS               64
 #define COLOUR_DECIMATION           2
 #define MAX_LED_BRIGHTNESS          100
-#define MAX_BRIGHTNESS_STEPS        8
 #define EFFECT_TIMEOUT              5
 
 #define LED_PWM_PERIOD		2000
@@ -54,9 +53,7 @@ struct led_rgb leds[LED_COUNT];
 uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
 finished and normal operation can take the LED control */
 
-/* values for LED brightness [%] */
-static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
-static uint16_t pwm_brightness;
+static uint8_t pwm_brightness;
 
 /* Private functions ---------------------------------------------------------*/
 static void led_driver_timer_config_knight_rider(void);
@@ -284,7 +281,7 @@ void led_driver_config(void)
   * @param      procent_val: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_pwm_set_brightness(uint16_t procent_val)
+void led_driver_pwm_set_brightness(uint8_t procent_val)
 {
     uint16_t counter_val;
 
@@ -303,7 +300,7 @@ void led_driver_pwm_set_brightness(uint16_t procent_val)
   * @param      None.
   * @retval     procent_val: PWM value in [%].
   *****************************************************************************/
-uint16_t led_driver_pwm_get_brightness(void)
+uint8_t led_driver_pwm_get_brightness(void)
 {
 	return pwm_brightness;
 }
@@ -316,12 +313,13 @@ uint16_t led_driver_pwm_get_brightness(void)
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
+    static const uint8_t brightnesses[] = { 100, 70, 40, 25, 12, 5, 1, 0 };
     static uint8_t step = 1;
 
-    pwm_brightness = brightness_value[step++];
+    pwm_brightness = brightnesses[step++];
     led_driver_pwm_set_brightness(pwm_brightness);
 
-    if (step >= MAX_BRIGHTNESS_STEPS)
+    if (step >= ARRAY_SIZE(brightnesses))
         step = 0;
 }
 
