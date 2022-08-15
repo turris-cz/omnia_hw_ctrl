@@ -131,18 +131,6 @@ void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
 }
 
 /*******************************************************************************
-  * @function   led_driver_send_data16b
-  * @brief      Send SPI data to the LED driver.
-  * @param      data: 16bit data buffer.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_send_data16b(const uint16_t data)
-{
-    spi_send16(LED_SPI, data);
-    while (spi_is_busy(LED_SPI));
-}
-
-/*******************************************************************************
   * @function   led_driver_prepare_data
   * @brief      Prepare data to be sent to LED driver.
   * @param      colour: RED, GREEN or BLUE.
@@ -265,7 +253,7 @@ static void led_driver_send_frame(void)
 
     /* decrease 255 colour levels to COLOUR_LEVELS by shift (COLOUR_DECIMATION) */
     data = led_driver_prepare_data(channel, level << COLOUR_DECIMATION);
-    led_driver_send_data16b(data);
+    spi_send16(LED_SPI, data);
 
     if (channel == BLUE) {
         channel = RED;
