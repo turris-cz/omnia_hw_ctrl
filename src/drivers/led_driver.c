@@ -61,45 +61,6 @@ static const uint16_t brightness_value[] = {100, 70, 40, 25, 12, 5, 1, 0};
 static void led_driver_timer_config_knight_rider(void);
 
 /*******************************************************************************
-  * @function   led_driver_spi_config
-  * @brief      SPI config for led driver serial register.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_spi_config(void)
-{
-    spi_init(LED_SPI);
-}
-
-/*******************************************************************************
-  * @function   led_driver_io_config
-  * @brief      GPIO config for led driver serial register.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_io_config(void)
-{
-    /* Configure SCK and MOSI pins */
-    gpio_init_alts(LED_SPI_ALT_FN, pin_pushpull, pin_spd_3, pin_pulldown,
-                   LED_SPI_SCK_PIN, LED_SPI_MOSI_PIN);
-
-    /* Configure NSS pin */
-    gpio_init_outputs(pin_pushpull, pin_spd_3, 1, LED_SPI_SS_PIN);
-}
-
-/*******************************************************************************
-  * @function   led_driver_timer_config
-  * @brief      Timer config for led driver serial register - send data regularly.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_timer_config(void)
-{
-    timer_init(LED_TIMER, timer_interrupt, 200, 2400000, 4);
-    timer_enable(LED_TIMER, 1);
-}
-
-/*******************************************************************************
   * @function   led_driver_set_colour
   * @brief      Set colour of LED specified in parameters to be displayed in next cycle.
   * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
@@ -277,70 +238,6 @@ void __irq led_driver_irq_handler(void)
 }
 
 /*******************************************************************************
-  * @function   led_driver_pwm_io_config
-  * @brief      Config of PWM signal for LED driver.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_pwm_io_config(void)
-{
-    gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1, pin_pullup,
-                   LED_PWM_PIN);
-}
-
-/*******************************************************************************
-  * @function   led_driver_pwm_timer_config
-  * @brief      Timer config for PWM signal (OE pin of LED driver).
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_pwm_timer_config(void)
-{
-    timer_init(LED_PWM_TIMER, timer_pwm, LED_PWM_PERIOD, LED_PWM_FREQ, 0);
-    timer_enable(LED_PWM_TIMER, 1);
-}
-
-/*******************************************************************************
-  * @function   led_driver_pwm_config
-  * @brief      Configuration of PWM functionality.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_pwm_config(void)
-{
-    led_driver_pwm_io_config();
-    led_driver_pwm_timer_config();
-}
-
-/*******************************************************************************
-  * @function   led_driver_init_led
-  * @brief      Enable all LED to default mode (LEDs are ON).
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_driver_init_led(void)
-{
-    uint8_t idx;
-    struct led_rgb *rgb_leds = leds;
-
-    /* user mode - all LEDs white and ON */
-    for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-    {
-        rgb_leds->led_state_user = LED_ON;
-        rgb_leds->led_mode = LED_USER_MODE;
-    }
-    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs white */
-
-    /* default mode - all LEDS OFF and white */
-    for (idx = 0, rgb_leds = leds; idx < LED_COUNT; idx++, rgb_leds++)
-    {
-        rgb_leds->led_state_default = LED_OFF;
-        rgb_leds->led_mode = LED_DEFAULT_MODE;
-    }
-    led_driver_set_colour(LED_COUNT, WHITE_COLOUR); /* all LEDs white */
-}
-
-/*******************************************************************************
   * @function   led_driver_config
   * @brief      Configure LED driver.
   * @param      None.
@@ -348,16 +245,36 @@ static void led_driver_init_led(void)
   *****************************************************************************/
 void led_driver_config(void)
 {
-    led_driver_io_config();
-    led_driver_spi_config();
+	/* Set initial mode, state and color */
+	for (struct led_rgb *led = leds; led < &leds[LED_COUNT]; ++led) {
+		led->led_state_user = LED_ON;
+		led->led_state_default = LED_OFF;
+		led->led_mode = LED_DEFAULT_MODE;
+	}
 
-    led_driver_init_led(); /* set mode and state - default after reset */
+	led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
 
-    led_driver_pwm_config();
-    led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS); /* 100% brightness after reset */
+	/* Configure SPI and it's pins */
+	gpio_init_alts(LED_SPI_ALT_FN, pin_pushpull, pin_spd_3, pin_pulldown,
+		       LED_SPI_SCK_PIN, LED_SPI_MOSI_PIN);
+	gpio_init_outputs(pin_pushpull, pin_spd_3, 1, LED_SPI_SS_PIN);
+	spi_init(LED_SPI);
 
-    led_driver_timer_config();
-    led_driver_timer_config_knight_rider();
+	/* Configure PWM pin and timer */
+	gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1, pin_pullup,
+		       LED_PWM_PIN);
+	timer_init(LED_PWM_TIMER, timer_pwm, LED_PWM_PERIOD, LED_PWM_FREQ, 0);
+	timer_enable(LED_PWM_TIMER, 1);
+
+	/* Set initial PWM brightness */
+	led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS);
+
+	/* Initialize timer (every tick we send one frame) */
+	timer_init(LED_TIMER, timer_interrupt, 200, 2400000, 4);
+	timer_enable(LED_TIMER, 1);
+
+	/* Configure knight rider effect */
+	led_driver_timer_config_knight_rider();
 }
 
 /*******************************************************************************
