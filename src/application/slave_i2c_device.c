@@ -61,8 +61,6 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
     if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST))
     {
-        /* confirm received byte of I2C and reset */
-        i2c_slave_ack(SLAVE_I2C, 1);
         /* set CFG_CTRL pin to high state ASAP */
         gpio_write(CFG_CTRL_PIN, 1);
         /* reset of CPU */
