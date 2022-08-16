@@ -107,6 +107,12 @@ static void platform_init(void)
 	/* set HSI and PLL */
 	SystemCoreClockUpdate();
 
+	/* disable all interrupts and clear all pending interrupts */
+	for (unsigned int i = 0; i < ARRAY_SIZE(NVIC->ICER); ++i) {
+		NVIC->ICER[i] = 0xffffffff;
+		NVIC->ICPR[i] = 0xffffffff;
+	}
+
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)
 		return;
