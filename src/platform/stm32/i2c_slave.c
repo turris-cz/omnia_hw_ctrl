@@ -3,6 +3,18 @@
 
 i2c_slave_t *i2c_slave_ptr[2];
 
+static __force_inline void send_ack_and_release_scl(I2C_TypeDef *i2c, bool ack)
+{
+	/* SCL is released by writing value >= 1 to I2C_CR2_NBYTES.
+	 * Since I2C_CR2_NBYTES is already set to 1 in i2c_slave_init(), we can
+	 * simply set/unset NACK (and the code also writes 1 to NBYTES). */
+
+	if (ack)
+		i2c->CR2 &= ~I2C_CR2_NACK;
+	else
+		i2c->CR2 |= I2C_CR2_NACK;
+}
+
 void __irq i2c_slave_irq_handler(void)
 {
 	i2c_nr_t i2c_nr = i2c_nr_in_irq();
@@ -44,8 +56,8 @@ void __irq i2c_slave_irq_handler(void)
 		slave->state = I2C_SLAVE_WRITE_RECEIVED;
 		ret = slave->cb(slave->priv, slave->addr, slave->state, &slave->val);
 
-		/* set NACK on error */
-		i2c_slave_ack(i2c_nr, !ret);
+		/* send NACK on error */
+		send_ack_and_release_scl(i2c, !ret);
 	}
 
 	/* Transmit interrupt status */
@@ -80,7 +92,7 @@ void __irq i2c_slave_irq_handler(void)
 			/* enable slave byte control and RX interrupts */
 			i2c->CR1 |= I2C_CR1_SBC | I2C_CR1_RXIE;
 
-			i2c_slave_ack(i2c_nr, 1);
+			send_ack_and_release_scl(i2c, 1);
 
 			slave->state = I2C_SLAVE_WRITE_REQUESTED;
 			slave->cb(slave->priv, slave->addr, slave->state,

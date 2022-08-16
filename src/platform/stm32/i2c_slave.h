@@ -121,6 +121,9 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	/* Address match, transfer complete, stop and transmit interrupt */
 	I2C_ITConfig(i2c, I2C_IT_ADDRI | I2C_IT_ERRI | I2C_IT_STOPI, ENABLE);
 
+	/* set NBYTES to 1 */
+	i2c->CR2 = (i2c->CR2 & ~I2C_CR2_NBYTES) | FIELD_PREP(I2C_CR2_NBYTES, 1);
+
 	slave->state = I2C_SLAVE_STOP;
 	i2c_slave_ptr[i2c_nr - 1] = slave;
 
@@ -140,19 +143,6 @@ static __force_inline void i2c_slave_resume(i2c_nr_t i2c_nr)
 	i2c_slave_ptr[i2c_nr - 1]->paused = 0;
 	i2c_to_plat(i2c_nr)->CR1 |= I2C_CR1_ADDRIE | I2C_CR1_ERRIE |
 				    I2C_CR1_STOPIE;
-}
-
-static __force_inline void i2c_slave_ack(i2c_nr_t i2c_nr, bool ack)
-{
-	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
-
-	if (ack)
-		i2c->CR2 &= ~I2C_CR2_NACK;
-	else
-		i2c->CR2 |= I2C_CR2_NACK;
-
-	/* set NBYTES=1 to release SCL */
-	i2c->CR2 = (i2c->CR2 & ~I2C_CR2_NBYTES) | FIELD_PREP(I2C_CR2_NBYTES, 1);
 }
 
 void i2c_slave_irq_handler(void);
