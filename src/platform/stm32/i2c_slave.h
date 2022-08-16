@@ -68,6 +68,11 @@ static __force_inline uint8_t i2c_irqn(i2c_nr_t i2c_nr)
 
 static __force_inline i2c_nr_t i2c_nr_in_irq(void)
 {
+	/* This saves some space in the resulting binary.
+	 * Disable if you want to use both I2Cs. */
+	if (1)
+		return SLAVE_I2C;
+
 	switch ((__get_IPSR() & 0x3f) - 16) {
 	case I2C1_IRQn: return 1;
 	case I2C2_IRQn: return 2;
@@ -77,6 +82,8 @@ static __force_inline i2c_nr_t i2c_nr_in_irq(void)
 
 static __force_inline void i2c_init_pins(i2c_nr_t i2c_nr)
 {
+	/* If you want to implement other I2C peripheral, disable also the early
+	 * return in i2c_nr_in_irq(). */
 	compiletime_assert(i2c_nr == SLAVE_I2C, "Invalid I2C peripheral used");
 
 	gpio_init_alts(I2C2_PINS_ALT_FN, pin_opendrain, pin_spd_1,
