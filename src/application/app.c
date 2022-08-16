@@ -116,7 +116,7 @@ static void app_mcu_init(void)
   *****************************************************************************/
 static uint16_t app_get_status_word(void)
 {
-    uint16_t status_word = 0;
+    uint16_t status_word = STS_MCU_TYPE;
 
     /* GET_FEATURES command is supported */
     status_word |= STS_FEATURES_SUPPORTED;

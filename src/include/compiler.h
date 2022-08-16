@@ -13,6 +13,9 @@
 
 #define ARRAY_SIZE(__x) (sizeof((__x)) / sizeof((__x)[0]))
 
+#define _CONCAT(x, y) x ## y
+#define CONCAT(x, y) _CONCAT(x, y)
+
 #define for_each(__m, __a)				\
 	for (typeof((__a)[0]) *(__m) = &(__a)[0];	\
 	     (__m) < &(__a)[ARRAY_SIZE((__a))];		\

@@ -66,6 +66,7 @@ enum sts_word_e {
     STS_MCU_TYPE_STM32               = FIELD_PREP(STS_MCU_TYPE_MASK, 0),
     STS_MCU_TYPE_GD32                = FIELD_PREP(STS_MCU_TYPE_MASK, 1),
     STS_MCU_TYPE_MKL                 = FIELD_PREP(STS_MCU_TYPE_MASK, 2),
+#define STS_MCU_TYPE CONCAT(STS_MCU_TYPE_, MCU_TYPE)
     STS_FEATURES_SUPPORTED           = BIT(2),
     STS_USER_REGULATOR_NOT_SUPPORTED = BIT(3),
     STS_CARD_DET                     = BIT(4),
