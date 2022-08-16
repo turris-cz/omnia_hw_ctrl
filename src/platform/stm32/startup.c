@@ -103,10 +103,8 @@ static __used __section(".isr_vector") void *isr_vector[] = {
 
 static void platform_init(void)
 {
-	/* initialize system clocks and recompute */
+	/* initialize system clocks */
 	SystemInit();
-	/* set HSI and PLL */
-	SystemCoreClockUpdate();
 
 	/* disable all interrupts and clear all pending interrupts */
 	for (unsigned int i = 0; i < ARRAY_SIZE(NVIC->ICER); ++i) {
