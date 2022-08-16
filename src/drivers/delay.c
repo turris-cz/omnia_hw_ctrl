@@ -27,7 +27,7 @@ struct st_watchdog watchdog;
   *****************************************************************************/
 void delay_systimer_config(void)
 {
-    if (SysTick_Config(SystemCoreClock / 1000u))
+    if (SysTick_Config(SYS_CORE_FREQ / 1000u))
     {
         /* Capture error */
         while (1);

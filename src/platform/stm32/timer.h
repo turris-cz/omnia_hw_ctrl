@@ -13,7 +13,7 @@ typedef uint8_t timer_nr_t;
 #define LED_PWM_TIMER		15
 #define USB_TIMEOUT_TIMER	17
 
-#define TIMER_PARENT_FREQ	48000000U
+#define TIMER_PARENT_FREQ	SYS_CORE_FREQ
 
 typedef enum {
 	timer_interrupt,
