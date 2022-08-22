@@ -262,7 +262,7 @@ void led_driver_config(void)
 	timer_enable(LED_PWM_TIMER, 1);
 
 	/* Set initial PWM brightness */
-	led_driver_pwm_set_brightness(MAX_LED_BRIGHTNESS);
+	led_driver_set_brightness(MAX_LED_BRIGHTNESS);
 
 	/* Initialize timer (every tick we send one frame) */
 	timer_init(LED_TIMER, timer_interrupt, 200, 2400000, 4);
@@ -273,12 +273,12 @@ void led_driver_config(void)
 }
 
 /*******************************************************************************
-  * @function   led_driver_pwm_set_brightness
+  * @function   led_driver_set_brightness
   * @brief      Set PWM value.
   * @param      procent_val: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_pwm_set_brightness(uint8_t procent_val)
+void led_driver_set_brightness(uint8_t procent_val)
 {
     uint16_t counter_val;
 
@@ -292,12 +292,12 @@ void led_driver_pwm_set_brightness(uint8_t procent_val)
 }
 
 /*******************************************************************************
-  * @function   led_driver_pwm_get_brightness
+  * @function   led_driver_get_brightness
   * @brief      Set PWM value.
   * @param      None.
   * @retval     procent_val: PWM value in [%].
   *****************************************************************************/
-uint8_t led_driver_pwm_get_brightness(void)
+uint8_t led_driver_get_brightness(void)
 {
 	return pwm_brightness;
 }
@@ -314,7 +314,7 @@ void led_driver_step_brightness(void)
     static uint8_t step = 1;
 
     pwm_brightness = brightnesses[step++];
-    led_driver_pwm_set_brightness(pwm_brightness);
+    led_driver_set_brightness(pwm_brightness);
 
     if (step >= ARRAY_SIZE(brightnesses))
         step = 0;

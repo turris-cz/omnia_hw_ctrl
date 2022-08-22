@@ -463,7 +463,7 @@ reset_type_t power_control_first_startup(void)
     gpio_write(MANRES_PIN, 1);
 
     /* save brightness value to restore it */
-    user_brightness = led_driver_pwm_get_brightness();
+    user_brightness = led_driver_get_brightness();
 
     /* wait for main board reset signal */
     while (!gpio_read(SYSRES_OUT_PIN))
@@ -481,7 +481,7 @@ reset_type_t power_control_first_startup(void)
                     led_set_color(LED_COUNT, GREEN_COLOR);
                     led_driver_set_led_state(LED_COUNT, LED_OFF);
                     led_driver_set_led_state(LED11, LED_ON);
-                    led_driver_pwm_set_brightness(100);
+                    led_driver_set_brightness(100);
                     reset_state = RST_LED11;
                     idx = 0;
                     red = 0;
@@ -813,18 +813,18 @@ reset_type_t power_control_first_startup(void)
 
     if (reset_type != NORMAL_RESET)
     {
-        led_driver_pwm_set_brightness(0);
+        led_driver_set_brightness(0);
         delay(300);
-        led_driver_pwm_set_brightness(100);
+        led_driver_set_brightness(100);
         delay(300);
-        led_driver_pwm_set_brightness(0);
+        led_driver_set_brightness(0);
         delay(300);
-        led_driver_pwm_set_brightness(100);
+        led_driver_set_brightness(100);
         delay(600);
     }
 
     /* restore brightness and color */
-    led_driver_pwm_set_brightness(user_brightness);
+    led_driver_set_brightness(user_brightness);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
     led_set_color(LED_COUNT, WHITE_COLOR);
 

@@ -109,20 +109,20 @@ void led_set_color(const uint8_t led_index, const uint32_t color);
 void led_driver_irq_handler(void);
 
 /*******************************************************************************
-  * @function   led_driver_pwm_set_brightness
+  * @function   led_driver_set_brightness
   * @brief      Set PWM value.
   * @param      procent_val: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_pwm_set_brightness(uint8_t procent_val);
+void led_driver_set_brightness(uint8_t procent_val);
 
 /*******************************************************************************
-  * @function   led_driver_pwm_get_brightness
+  * @function   led_driver_get_brightness
   * @brief      Set PWM value.
   * @param      None.
   * @retval     procent_val: PWM value in [%].
   *****************************************************************************/
-uint8_t led_driver_pwm_get_brightness(void);
+uint8_t led_driver_get_brightness(void);
 
 /*******************************************************************************
   * @function   led_driver_step_brightness

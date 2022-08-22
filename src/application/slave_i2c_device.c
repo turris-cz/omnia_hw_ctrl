@@ -341,14 +341,14 @@ static int cmd_led_color(slave_i2c_state_t *state)
 static int cmd_set_brightness(slave_i2c_state_t *state)
 {
 	debug("set_brightness\n");
-	led_driver_pwm_set_brightness(state->cmd[1]);
+	led_driver_set_brightness(state->cmd[1]);
 
 	return 0;
 }
 
 static int cmd_get_brightness(slave_i2c_state_t *state)
 {
-	uint8_t brightness = led_driver_pwm_get_brightness();
+	uint8_t brightness = led_driver_get_brightness();
 
 	debug("get_brightness\n");
 	set_reply(brightness);
