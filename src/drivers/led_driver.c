@@ -396,24 +396,12 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
   *****************************************************************************/
 void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state)
 {
-    struct led_rgb *rgb_leds;
-    int8_t idx;
-
-    if (led_index >= LED_COUNT) { /* all LED */
-        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++) {
-            rgb_leds = leds + idx;
-            if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-                rgb_leds->led_state_user = led_state;
-            else
-                led_driver_set_led_state(led_index, led_state);
-        }
-    } else {
-        rgb_leds = leds + led_index;
-        if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-            rgb_leds->led_state_user = led_state;
-        else
-            led_driver_set_led_state(led_index, led_state);
-    }
+	if (led_index >= LED_COUNT) { /* all LED */
+		for (int idx = 0; idx < LED_COUNT; idx++)
+			leds[idx].led_state_user = led_state;
+	} else {
+		leds[led_index].led_state_user = led_state;
+	}
 }
 
 /*******************************************************************************
