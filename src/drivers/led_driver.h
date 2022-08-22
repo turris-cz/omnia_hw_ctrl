@@ -35,34 +35,19 @@ typedef enum led_states {
     LED_ON          = 1,
 }led_state_t;
 
-enum led_numbers {
-    LED0            = 0,
-    LED1            = 1,
-    LED2            = 2,
-    LED3            = 3,
-    LED4            = 4,
-    LED5            = 5,
-    LED6            = 6,
-    LED7            = 7,
-    LED8            = 8,
-    LED9            = 9,
-    LED10           = 10,
-    LED11           = 11
-};
-
 enum led_names {
-    POWER_LED       = LED11,
-    LAN0_LED        = LED10,
-    LAN1_LED        = LED9,
-    LAN2_LED        = LED8,
-    LAN3_LED        = LED7,
-    LAN4_LED        = LED6,
-    WAN_LED         = LED5,
-    PCI1_LED        = LED3,
-    PCI2_LED        = LED4,
-    MSATA_PCI_LED   = LED2,
-    USER_LED1       = LED1,
-    USER_LED2       = LED0
+    POWER_LED       = 11,
+    LAN0_LED        = 10,
+    LAN1_LED        = 9,
+    LAN2_LED        = 8,
+    LAN3_LED        = 7,
+    LAN4_LED        = 6,
+    WAN_LED         = 5,
+    PCI1_LED        = 3,
+    PCI2_LED        = 4,
+    MSATA_PCI_LED   = 2,
+    USER_LED1       = 1,
+    USER_LED2       = 0
 };
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */

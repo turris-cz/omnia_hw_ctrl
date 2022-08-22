@@ -477,15 +477,15 @@ static void error_manager(ret_value_t error_state)
 
     switch(error_state)
     {
-        case GO_TO_5V_ERROR: led_set_state(LED0, LED_ON); break;
-        case GO_TO_3V3_ERROR: led_set_state(LED1, LED_ON); break;
-        case GO_TO_1V8_ERROR: led_set_state(LED2, LED_ON); break;
-        case GO_TO_1V5_ERROR: led_set_state(LED3, LED_ON); break;
-        case GO_TO_1V35_ERROR: led_set_state(LED4, LED_ON); break;
-        case GO_TO_VTT_ERROR: led_set_state(LED5, LED_ON); break;
-        case GO_TO_1V2_ERROR: led_set_state(LED6, LED_ON); break;
+        case GO_TO_5V_ERROR: led_set_state(0, LED_ON); break;
+        case GO_TO_3V3_ERROR: led_set_state(1, LED_ON); break;
+        case GO_TO_1V8_ERROR: led_set_state(2, LED_ON); break;
+        case GO_TO_1V5_ERROR: led_set_state(3, LED_ON); break;
+        case GO_TO_1V35_ERROR: led_set_state(4, LED_ON); break;
+        case GO_TO_VTT_ERROR: led_set_state(5, LED_ON); break;
+        case GO_TO_1V2_ERROR: led_set_state(6, LED_ON); break;
 #if USER_REGULATOR_ENABLED
-        case GO_TO_4V5_ERROR: led_set_state(LED7, LED_ON); break;
+        case GO_TO_4V5_ERROR: led_set_state(7, LED_ON); break;
 #endif
 
         default: led_set_state(LED_COUNT, LED_ON); break;

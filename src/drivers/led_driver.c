@@ -392,16 +392,16 @@ void led_driver_knight_rider_effect(uint32_t color)
 
     led_set_state(LED_COUNT, LED_OFF);
     led_set_color(LED_COUNT, color);
-    led_set_state(LED0, LED_ON);
+    led_set_state(0, LED_ON);
 
-    for (led = LED1; led < LED_COUNT; led++)
+    for (led = 1; led < LED_COUNT; led++)
     {
         delay(70);
         led_set_state(led - 1, LED_OFF);
         led_set_state(led, LED_ON);
     }
 
-    for (led = LED10; led > -1 ; led--)
+    for (led = 10; led > -1 ; led--)
     {
         delay(70);
         led_set_state(led + 1, LED_OFF);
@@ -461,10 +461,10 @@ void led_driver_double_knight_rider_effect(void)
         default: led_set_color(LED_COUNT, WHITE_COLOR); break;
         }
 
-        led_set_state(LED5, LED_ON);
-        led_set_state(LED6, LED_ON);
+        led_set_state(5, LED_ON);
+        led_set_state(6, LED_ON);
 
-        for(led_down = LED4, led_up = LED7; led_down > -1; led_down--, led_up++)
+        for(led_down = 4, led_up = 7; led_down > -1; led_down--, led_up++)
         {
             delay(100);
             led_set_state(led_down + 1, LED_OFF);
@@ -474,7 +474,7 @@ void led_driver_double_knight_rider_effect(void)
             led_set_state(led_up, LED_ON);
         }
 
-        for(led_down = LED10, led_up = LED1; led_down > LED5; led_down--, led_up++)
+        for(led_down = 10, led_up = 1; led_down > 5; led_down--, led_up++)
         {
             delay(100);
             led_set_state(led_down + 1, LED_OFF);
@@ -523,18 +523,18 @@ static void led_driver_knight_rider_effect_handler(void)
             led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
             led_set_state(LED_COUNT, LED_OFF);
             led_set_color(LED_COUNT, WHITE_COLOR);
-            led_set_state(LED0, LED_ON);
+            led_set_state(0, LED_ON);
             effect_state = EFFECT_UP;
         } break;
 
         case EFFECT_UP:
         {
             led++;
-            led_set_state(LED11, LED_OFF);
+            led_set_state(11, LED_OFF);
             led_set_state(led - 1, LED_OFF);
             led_set_state(led, LED_ON);
 
-            if (led >= LED11)
+            if (led >= 11)
             {
                 effect_state = EFFECT_DOWN; /* next state */
             }
