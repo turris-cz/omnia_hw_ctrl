@@ -16,13 +16,13 @@
 
 #define LED_COUNT		12
 
-enum colours {
-    WHITE_COLOUR        = 0xFFFFFF,
-    RED_COLOUR          = 0xFF0000,
-    GREEN_COLOUR        = 0x00FF00,
-    BLUE_COLOUR         = 0x0000FF,
-    BLACK_COLOUR        = 0x000000,
-    YELLOW_COLOUR       = 0xFFFF00,
+enum colors {
+    WHITE_COLOR        = 0xFFFFFF,
+    RED_COLOR          = 0xFF0000,
+    GREEN_COLOR        = 0x00FF00,
+    BLUE_COLOR         = 0x0000FF,
+    BLACK_COLOR        = 0x000000,
+    YELLOW_COLOR       = 0xFFFF00,
 };
 
 typedef enum led_modes {
@@ -74,7 +74,7 @@ typedef struct {
 } rgb_t;
 
 struct led_rgb {
-    rgb_t                   led_color;          /* colour data */
+    rgb_t                   led_color;          /* color data */
     led_state_t             led_state_default;  /* LED ON/OFF default mode */
     led_state_t             led_state_user;     /* LED ON/OFF user mode */
     led_mode_t              led_mode;           /* default / user mode */
@@ -93,12 +93,12 @@ void led_driver_config(void);
 
 /*******************************************************************************
   * @function   led_set_color
-  * @brief      Save colour of LED specified in parameters to be displayed in next cycle.
+  * @brief      Save color of LED specified in parameters to be displayed in next cycle.
   * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
-  * @param      colour: LED colour (RGB range).
+  * @param      color: LED color (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(const uint8_t led_index, const uint32_t colour);
+void led_set_color(const uint8_t led_index, const uint32_t color);
 
 /*******************************************************************************
   * @function   led_driver_irq_handler
@@ -162,18 +162,18 @@ void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t le
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect
   * @brief      Display knight rider effect on LEDs.
-  * @param      colour: colour in RGB range.
+  * @param      color: color in RGB range.
   * @retval     None.
   *****************************************************************************/
-void led_driver_knight_rider_effect(uint32_t colour);
+void led_driver_knight_rider_effect(uint32_t color);
 
 /*******************************************************************************
-  * @function   led_driver_knight_rider_colour_effect
+  * @function   led_driver_knight_rider_color_effect
   * @brief      Display knight rider effect on LEDs.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void led_driver_knight_rider_colour_effect(void);
+void led_driver_knight_rider_color_effect(void);
 
 /*******************************************************************************
   * @function   led_driver_double_knight_rider_effect
@@ -194,7 +194,7 @@ void led_driver_effect_irq_handler(void);
 /*******************************************************************************
   * @function   led_driver_reset_effect
   * @brief      Enable/Disable knight rider effect after reset.
-  * @param      colour: colour in RGB range.
+  * @param      color: color in RGB range.
   * @retval     None.
   *****************************************************************************/
 void led_driver_reset_effect(bool state);

@@ -450,7 +450,7 @@ static const cmdinfo_t commands[] = {
 	/* LEDs */
 	[CMD_LED_MODE]			= { 2, cmd_led_mode, 1 },
 	[CMD_LED_STATE]			= { 2, cmd_led_state, 1 },
-	[CMD_LED_COLOUR]		= { 5, cmd_led_color, 1 },
+	[CMD_LED_COLOR]			= { 5, cmd_led_color, 1 },
 	[CMD_SET_BRIGHTNESS]		= { 2, cmd_set_brightness, 1 },
 	[CMD_GET_BRIGHTNESS]		= { 1, cmd_get_brightness, 1 },
 

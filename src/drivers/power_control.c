@@ -39,7 +39,7 @@
 #define RESET_STATE_READING     5 /* ms */
 #define RESET_TIMEOFFSET        2
 
-#define RGB_COLOUR_LEVELS       255
+#define RGB_COLOR_LEVELS        255
 
 typedef enum reset_states {
     RST_INIT,
@@ -455,7 +455,7 @@ reset_type_t power_control_first_startup(void)
     reset_state_t reset_state = RST_INIT;
     uint16_t reset_cnt = 0;
     uint8_t red, green, idx;
-    uint32_t colour = 0;
+    uint32_t color = 0;
     uint16_t user_brightness;
 
     gpio_write(CFG_CTRL_PIN, 1);
@@ -478,14 +478,14 @@ reset_type_t power_control_first_startup(void)
             {
                 case RST_INIT:
                 {
-                    led_set_color(LED_COUNT, GREEN_COLOUR);
+                    led_set_color(LED_COUNT, GREEN_COLOR);
                     led_driver_set_led_state(LED_COUNT, LED_OFF);
                     led_driver_set_led_state(LED11, LED_ON);
                     led_driver_pwm_set_brightness(100);
                     reset_state = RST_LED11;
                     idx = 0;
                     red = 0;
-                    green = RGB_COLOUR_LEVELS;
+                    green = RGB_COLOR_LEVELS;
                 } break;
 
                 case RST_LED11:
@@ -494,19 +494,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED11, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);
+                    color = (red << 16) | (green << 8);
 
-                    led_set_color(LED11, colour);
+                    led_set_color(LED11, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED10; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -520,19 +520,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED10, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED10, colour);
+                    led_set_color(LED10, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED9; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -546,19 +546,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED9, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED9, colour);
+                    led_set_color(LED9, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED8; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -572,19 +572,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED8, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED8, colour);
+                    led_set_color(LED8, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED7; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -598,19 +598,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED7, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED7, colour);
+                    led_set_color(LED7, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED6; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -624,19 +624,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED6, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED6, colour);
+                    led_set_color(LED6, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED5; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -650,19 +650,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED5, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED5, colour);
+                    led_set_color(LED5, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED4; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -676,19 +676,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED4, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED4, colour);
+                    led_set_color(LED4, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED3; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -702,19 +702,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED3, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED3, colour);
+                    led_set_color(LED3, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED2; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -728,19 +728,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED2, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED2, colour);
+                    led_set_color(LED2, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED1; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -754,19 +754,19 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED1, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED1, colour);
+                    led_set_color(LED1, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED0; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                     }
                     else
                     {
@@ -780,21 +780,21 @@ reset_type_t power_control_first_startup(void)
 
                     led_driver_set_led_state(LED0, LED_ON);
 
-                    idx++; /* increase colour level */
+                    idx++; /* increase color level */
                     red++;
                     green--;
-                    colour = (red << 16) | (green << 8);;
+                    color = (red << 16) | (green << 8);;
 
-                    led_set_color(LED0, colour);
+                    led_set_color(LED0, color);
 
-                    if (idx >= RGB_COLOUR_LEVELS)
+                    if (idx >= RGB_COLOR_LEVELS)
                     {
                         reset_state = RST_LED11; /* next state */
                         idx = 0;
                         red = 0;
-                        green = RGB_COLOUR_LEVELS;
+                        green = RGB_COLOR_LEVELS;
                         /* final state - go back to start */
-                        led_set_color(LED_COUNT, GREEN_COLOUR);
+                        led_set_color(LED_COUNT, GREEN_COLOR);
                         led_driver_set_led_state(LED_COUNT, LED_OFF);
                     }
                     else
@@ -823,10 +823,10 @@ reset_type_t power_control_first_startup(void)
         delay(600);
     }
 
-    /* restore brightness and colour */
+    /* restore brightness and color */
     led_driver_pwm_set_brightness(user_brightness);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_set_color(LED_COUNT, WHITE_COLOUR);
+    led_set_color(LED_COUNT, WHITE_COLOR);
 
     return reset_type;
 }
@@ -841,7 +841,7 @@ void power_control_set_power_led(void)
 {
     struct led_rgb *rgb_leds = leds;
 
-    led_set_color(POWER_LED, WHITE_COLOUR);
+    led_set_color(POWER_LED, WHITE_COLOR);
     rgb_leds[POWER_LED].led_state_default = LED_ON;
 }
 

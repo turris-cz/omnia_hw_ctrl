@@ -36,7 +36,7 @@ enum commands_e {
     CMD_GENERAL_CONTROL                 = 0x02,
     CMD_LED_MODE                        = 0x03, /* default/user */
     CMD_LED_STATE                       = 0x04, /* LED on/off */
-    CMD_LED_COLOUR                      = 0x05, /* LED number + RED + GREEN + BLUE */
+    CMD_LED_COLOR                       = 0x05, /* LED number + RED + GREEN + BLUE */
     CMD_USER_VOLTAGE                    = 0x06,
     CMD_SET_BRIGHTNESS                  = 0x07,
     CMD_GET_BRIGHTNESS                  = 0x08,
@@ -288,14 +288,14 @@ enum ext_ctl_e {
 */
 
 /*
- * Bit meanings in led colour:
+ * Bit meanings in led color:
  * Byte Nr. |  Bit Nr. |   Meanings
  * -----------------
  *  1.B     |  0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
  *  1.B     |  4..7   |   dont care
- *  2.B     |  8..15  |   red colour [0..255]
- *  3.B     |  16..23 |   green colour [0..255]
- *  4.B     |  24..31 |   blue colour [0..255]
+ *  2.B     |  8..15  |   red color [0..255]
+ *  3.B     |  16..23 |   green color [0..255]
+ *  4.B     |  24..31 |   blue color [0..255]
 */
 
 /*******************************************************************************
