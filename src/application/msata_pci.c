@@ -41,10 +41,7 @@ void msata_pci_indication_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-    struct led_rgb *rgb_leds = leds;
-
-    if (rgb_leds[MSATA_PCI_LED].led_mode == LED_DEFAULT_MODE)
-        rgb_leds[MSATA_PCI_LED].led_state_default = !gpio_read(MSATALED_PIN);
+    led_set_state(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
 }
 
 /*******************************************************************************

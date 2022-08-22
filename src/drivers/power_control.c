@@ -839,10 +839,8 @@ reset_type_t power_control_first_startup(void)
   *****************************************************************************/
 void power_control_set_power_led(void)
 {
-    struct led_rgb *rgb_leds = leds;
-
     led_set_color(POWER_LED, WHITE_COLOR);
-    rgb_leds[POWER_LED].led_state_default = LED_ON;
+    led_set_state(POWER_LED, LED_ON);
 }
 
 /*******************************************************************************
@@ -853,12 +851,7 @@ void power_control_set_power_led(void)
   *****************************************************************************/
 void power_led_activity(void)
 {
-    struct led_rgb *rgb_leds = leds;
-
-    if (rgb_leds[POWER_LED].led_mode == LED_DEFAULT_MODE)
-    {
-        rgb_leds[POWER_LED].led_state_default = LED_ON;
-    }
+    led_set_state(POWER_LED, LED_ON);
 }
 
 #if USER_REGULATOR_ENABLED
