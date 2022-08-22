@@ -471,7 +471,7 @@ static void error_manager(ret_value_t error_state)
 {
     led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, RED_COLOUR);
+    led_set_color(LED_COUNT, RED_COLOUR);
 
     delay(300);
 

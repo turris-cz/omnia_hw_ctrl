@@ -92,13 +92,13 @@ extern uint8_t effect_reset_finished;
 void led_driver_config(void);
 
 /*******************************************************************************
-  * @function   led_driver_set_colour
+  * @function   led_set_color
   * @brief      Save colour of LED specified in parameters to be displayed in next cycle.
   * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
   * @param      colour: LED colour (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_colour(const uint8_t led_index, const uint32_t colour);
+void led_set_color(const uint8_t led_index, const uint32_t colour);
 
 /*******************************************************************************
   * @function   led_driver_irq_handler

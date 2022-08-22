@@ -56,13 +56,13 @@ finished and normal operation can take the LED control */
 static uint8_t pwm_brightness;
 
 /*******************************************************************************
-  * @function   led_driver_set_colour
+  * @function   led_set_color
   * @brief      Set colour of LED specified in parameters to be displayed in next cycle.
   * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
   * @param      colour: LED colour (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_colour(const uint8_t led_index, const uint32_t colour)
+void led_set_color(const uint8_t led_index, const uint32_t colour)
 {
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
@@ -247,7 +247,7 @@ void led_driver_config(void)
 		led->led_mode = LED_DEFAULT_MODE;
 	}
 
-	led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+	led_set_color(LED_COUNT, WHITE_COLOUR);
 
 	/* Configure SPI and it's pins */
 	gpio_init_alts(LED_SPI_ALT_FN, pin_pushpull, pin_spd_3, pin_pulldown,
@@ -391,7 +391,7 @@ void led_driver_knight_rider_effect(uint32_t colour)
     int8_t led;
 
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, colour);
+    led_set_color(LED_COUNT, colour);
     led_driver_set_led_state(LED0, LED_ON);
 
     for (led = LED1; led < LED_COUNT; led++)
@@ -408,7 +408,7 @@ void led_driver_knight_rider_effect(uint32_t colour)
         led_driver_set_led_state(led, LED_ON);
     }
 
-    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+    led_set_color(LED_COUNT, WHITE_COLOUR);
     led_driver_set_led_state(LED_COUNT, LED_OFF);
 }
 
@@ -449,16 +449,16 @@ void led_driver_double_knight_rider_effect(void)
     int8_t colour;
 
     led_driver_set_led_state(LED_COUNT, LED_OFF);
-    led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+    led_set_color(LED_COUNT, WHITE_COLOUR);
 
     for (colour = WHITE; colour < BLUE + 1; colour++)
     {
         switch (colour)
         {
-        case RED: led_driver_set_colour(LED_COUNT, RED_COLOUR); break;
-        case GREEN: led_driver_set_colour(LED_COUNT, GREEN_COLOUR); break;
-        case BLUE: led_driver_set_colour(LED_COUNT, BLUE_COLOUR); break;
-        default: led_driver_set_colour(LED_COUNT, WHITE_COLOUR); break;
+        case RED: led_set_color(LED_COUNT, RED_COLOUR); break;
+        case GREEN: led_set_color(LED_COUNT, GREEN_COLOUR); break;
+        case BLUE: led_set_color(LED_COUNT, BLUE_COLOUR); break;
+        default: led_set_color(LED_COUNT, WHITE_COLOUR); break;
         }
 
         led_driver_set_led_state(LED5, LED_ON);
@@ -485,7 +485,7 @@ void led_driver_double_knight_rider_effect(void)
         }
     }
 
-    led_driver_set_colour(LED_COUNT, 0xFFFFFF); //back to default colour
+    led_set_color(LED_COUNT, 0xFFFFFF); //back to default colour
     led_driver_set_led_state(LED_COUNT, LED_OFF);
 }
 
@@ -522,7 +522,7 @@ static void led_driver_knight_rider_effect_handler(void)
             effect_reset_finished = RESET;
             led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
             led_driver_set_led_state(LED_COUNT, LED_OFF);
-            led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+            led_set_color(LED_COUNT, WHITE_COLOUR);
             led_driver_set_led_state(LED0, LED_ON);
             effect_state = EFFECT_UP;
         } break;
@@ -563,7 +563,7 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_LEDSON:
         {
             led_driver_set_led_state(LED_COUNT, LED_ON);
-            led_driver_set_colour(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
+            led_set_color(LED_COUNT, GREEN_COLOUR | BLUE_COLOUR);
             effect_state = EFFECT_DEINIT;
         } break;
 
@@ -574,7 +574,7 @@ static void led_driver_knight_rider_effect_handler(void)
             if (state_timeout_cnt >= EFFECT_TIMEOUT)
             {
                 led_driver_set_led_state(LED_COUNT, LED_OFF);
-                led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
+                led_set_color(LED_COUNT, WHITE_COLOUR);
 
                 led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
                 led_driver_reset_effect(DISABLE);

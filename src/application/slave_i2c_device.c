@@ -332,8 +332,8 @@ static int cmd_led_color(slave_i2c_state_t *state)
 	uint8_t *args = &state->cmd[1];
 
 	debug("led_color\n");
-	led_driver_set_colour(args[0] & 0x0F,
-			      (args[1] << 16) | (args[2] << 8) | args[3]);
+	led_set_color(args[0] & 0x0F,
+		      (args[1] << 16) | (args[2] << 8) | args[3]);
 
 	return 0;
 }
