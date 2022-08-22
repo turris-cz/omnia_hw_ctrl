@@ -142,22 +142,22 @@ void led_driver_step_brightness(void);
 void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode);
 
 /*******************************************************************************
-  * @function   led_driver_set_led_state
+  * @function   led_set_state
   * @brief      Set state of the LED(s) - LED_ON / LED_OFF
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_state: LED_OFF / LED_ON
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state);
+void led_set_state(const uint8_t led_index, const led_state_t led_state);
 
 /*******************************************************************************
-  * @function   led_driver_set_led_state
+  * @function   led_set_state_user
   * @brief      Set state of the LED(s) from user/I2C - LED_ON / LED_OFF
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_state: LED_OFF / LED_ON
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state);
+void led_set_state_user(const uint8_t led_index, const led_state_t led_state);
 
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect

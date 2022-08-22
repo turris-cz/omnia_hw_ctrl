@@ -347,13 +347,13 @@ void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode)
 }
 
 /*******************************************************************************
-  * @function   led_driver_set_led_state
+  * @function   led_set_state
   * @brief      Set state of the LED(s) - LED_ON / LED_OFF
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_state: LED_OFF / LED_ON
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state)
+void led_set_state(const uint8_t led_index, const led_state_t led_state)
 {
 	if (led_index >= LED_COUNT) { /* all LED */
 		for (int idx = 0; idx < LED_COUNT; idx++)
@@ -364,13 +364,13 @@ void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_sta
 }
 
 /*******************************************************************************
-  * @function   led_driver_set_led_state
+  * @function   led_set_state_user
   * @brief      Set state of the LED(s)i from user/I2C - LED_ON / LED_OFF
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_state: LED_OFF / LED_ON
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_state_user(const uint8_t led_index, const led_state_t led_state)
+void led_set_state_user(const uint8_t led_index, const led_state_t led_state)
 {
 	if (led_index >= LED_COUNT) { /* all LED */
 		for (int idx = 0; idx < LED_COUNT; idx++)
@@ -390,26 +390,26 @@ void led_driver_knight_rider_effect(uint32_t color)
 {
     int8_t led;
 
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, LED_OFF);
     led_set_color(LED_COUNT, color);
-    led_driver_set_led_state(LED0, LED_ON);
+    led_set_state(LED0, LED_ON);
 
     for (led = LED1; led < LED_COUNT; led++)
     {
         delay(70);
-        led_driver_set_led_state(led - 1, LED_OFF);
-        led_driver_set_led_state(led, LED_ON);
+        led_set_state(led - 1, LED_OFF);
+        led_set_state(led, LED_ON);
     }
 
     for (led = LED10; led > -1 ; led--)
     {
         delay(70);
-        led_driver_set_led_state(led + 1, LED_OFF);
-        led_driver_set_led_state(led, LED_ON);
+        led_set_state(led + 1, LED_OFF);
+        led_set_state(led, LED_ON);
     }
 
     led_set_color(LED_COUNT, WHITE_COLOR);
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, LED_OFF);
 }
 
 /*******************************************************************************
@@ -422,7 +422,7 @@ void led_driver_knight_rider_color_effect(void)
 {
     int8_t color;
 
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, LED_OFF);
 
     for (color = WHITE; color < BLUE + 1; color++)
     {
@@ -448,7 +448,7 @@ void led_driver_double_knight_rider_effect(void)
     int8_t led_down, led_up;
     int8_t color;
 
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, LED_OFF);
     led_set_color(LED_COUNT, WHITE_COLOR);
 
     for (color = WHITE; color < BLUE + 1; color++)
@@ -461,32 +461,32 @@ void led_driver_double_knight_rider_effect(void)
         default: led_set_color(LED_COUNT, WHITE_COLOR); break;
         }
 
-        led_driver_set_led_state(LED5, LED_ON);
-        led_driver_set_led_state(LED6, LED_ON);
+        led_set_state(LED5, LED_ON);
+        led_set_state(LED6, LED_ON);
 
         for(led_down = LED4, led_up = LED7; led_down > -1; led_down--, led_up++)
         {
             delay(100);
-            led_driver_set_led_state(led_down + 1, LED_OFF);
-            led_driver_set_led_state(led_down, LED_ON);
+            led_set_state(led_down + 1, LED_OFF);
+            led_set_state(led_down, LED_ON);
 
-            led_driver_set_led_state(led_up - 1, LED_OFF);
-            led_driver_set_led_state(led_up, LED_ON);
+            led_set_state(led_up - 1, LED_OFF);
+            led_set_state(led_up, LED_ON);
         }
 
         for(led_down = LED10, led_up = LED1; led_down > LED5; led_down--, led_up++)
         {
             delay(100);
-            led_driver_set_led_state(led_down + 1, LED_OFF);
-            led_driver_set_led_state(led_down, LED_ON);
+            led_set_state(led_down + 1, LED_OFF);
+            led_set_state(led_down, LED_ON);
 
-            led_driver_set_led_state(led_up - 1, LED_OFF);
-            led_driver_set_led_state(led_up, LED_ON);
+            led_set_state(led_up - 1, LED_OFF);
+            led_set_state(led_up, LED_ON);
         }
     }
 
     led_set_color(LED_COUNT, 0xFFFFFF); //back to default color
-    led_driver_set_led_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, LED_OFF);
 }
 
 /*******************************************************************************
@@ -521,18 +521,18 @@ static void led_driver_knight_rider_effect_handler(void)
         {
             effect_reset_finished = RESET;
             led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
-            led_driver_set_led_state(LED_COUNT, LED_OFF);
+            led_set_state(LED_COUNT, LED_OFF);
             led_set_color(LED_COUNT, WHITE_COLOR);
-            led_driver_set_led_state(LED0, LED_ON);
+            led_set_state(LED0, LED_ON);
             effect_state = EFFECT_UP;
         } break;
 
         case EFFECT_UP:
         {
             led++;
-            led_driver_set_led_state(LED11, LED_OFF);
-            led_driver_set_led_state(led - 1, LED_OFF);
-            led_driver_set_led_state(led, LED_ON);
+            led_set_state(LED11, LED_OFF);
+            led_set_state(led - 1, LED_OFF);
+            led_set_state(led, LED_ON);
 
             if (led >= LED11)
             {
@@ -547,8 +547,8 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_DOWN:
         {
             led--;
-            led_driver_set_led_state(led + 1, LED_OFF);
-            led_driver_set_led_state(led, LED_ON);
+            led_set_state(led + 1, LED_OFF);
+            led_set_state(led, LED_ON);
 
             if (led <= 0)
             {
@@ -562,7 +562,7 @@ static void led_driver_knight_rider_effect_handler(void)
 
         case EFFECT_LEDSON:
         {
-            led_driver_set_led_state(LED_COUNT, LED_ON);
+            led_set_state(LED_COUNT, LED_ON);
             led_set_color(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
             effect_state = EFFECT_DEINIT;
         } break;
@@ -573,7 +573,7 @@ static void led_driver_knight_rider_effect_handler(void)
 
             if (state_timeout_cnt >= EFFECT_TIMEOUT)
             {
-                led_driver_set_led_state(LED_COUNT, LED_OFF);
+                led_set_state(LED_COUNT, LED_OFF);
                 led_set_color(LED_COUNT, WHITE_COLOR);
 
                 led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
@@ -608,7 +608,7 @@ static void led_driver_bootloader_effect_handler(void)
         timeout = 0;
 
         on = !on;
-        led_driver_set_led_state(LED_COUNT, on);
+        led_set_state(LED_COUNT, on);
     }
 }
 
