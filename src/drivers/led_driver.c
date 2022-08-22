@@ -321,13 +321,13 @@ void led_driver_step_brightness(void)
 }
 
 /*******************************************************************************
-  * @function   led_driver_set_led_mode
+  * @function   led_set_mode
   * @brief      Set mode to LED(s) - default or user mode
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode)
+void led_set_mode(const uint8_t led_index, const led_mode_t led_mode)
 {
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
@@ -520,7 +520,7 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_INIT:
         {
             effect_reset_finished = RESET;
-            led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
+            led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
             led_set_state(LED_COUNT, LED_OFF);
             led_set_color(LED_COUNT, WHITE_COLOR);
             led_set_state(LED0, LED_ON);
@@ -576,7 +576,7 @@ static void led_driver_knight_rider_effect_handler(void)
                 led_set_state(LED_COUNT, LED_OFF);
                 led_set_color(LED_COUNT, WHITE_COLOR);
 
-                led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
+                led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
                 led_driver_reset_effect(DISABLE);
                 state_timeout_cnt = 0;
                 effect_reset_finished = SET;

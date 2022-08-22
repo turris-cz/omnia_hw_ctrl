@@ -133,13 +133,13 @@ uint8_t led_driver_get_brightness(void);
 void led_driver_step_brightness(void);
 
 /*******************************************************************************
-  * @function   led_driver_set_led_mode
+  * @function   led_set_mode
   * @brief      Set mode to LED(s) - default or user mode
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
   * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode);
+void led_set_mode(const uint8_t led_index, const led_mode_t led_mode);
 
 /*******************************************************************************
   * @function   led_set_state
