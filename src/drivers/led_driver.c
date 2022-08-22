@@ -355,36 +355,12 @@ void led_driver_set_led_mode(const uint8_t led_index, const led_mode_t led_mode)
   *****************************************************************************/
 void led_driver_set_led_state(const uint8_t led_index, const led_state_t led_state)
 {
-    uint8_t idx;
-    struct led_rgb *rgb_leds = leds;
-
-    if (led_index >= LED_COUNT) /* all LED */
-    {
-        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-        {
-            if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-            {
-                rgb_leds->led_state_default = led_state;
-            }
-            else
-            {
-                rgb_leds->led_state_user = led_state;
-            }
-        }
-    }
-    else /* or individual LED */
-    {
-        rgb_leds += led_index;
-
-        if (rgb_leds->led_mode == LED_DEFAULT_MODE)
-            {
-                rgb_leds->led_state_default = led_state;
-            }
-            else
-            {
-                rgb_leds->led_state_user = led_state;
-            }
-    }
+	if (led_index >= LED_COUNT) { /* all LED */
+		for (int idx = 0; idx < LED_COUNT; idx++)
+			leds[idx].led_state_default = led_state;
+	} else {
+		leds[led_index].led_state_default = led_state;
+	}
 }
 
 /*******************************************************************************
@@ -544,6 +520,7 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_INIT:
         {
             effect_reset_finished = RESET;
+            led_driver_set_led_mode(LED_COUNT, LED_DEFAULT_MODE);
             led_driver_set_led_state(LED_COUNT, LED_OFF);
             led_driver_set_colour(LED_COUNT, WHITE_COLOUR);
             led_driver_set_led_state(LED0, LED_ON);
