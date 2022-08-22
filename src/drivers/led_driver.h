@@ -30,11 +30,6 @@ typedef enum led_modes {
     LED_USER_MODE      = 1,
 }led_mode_t;
 
-typedef enum led_states {
-    LED_OFF         = 0,
-    LED_ON          = 1,
-}led_state_t;
-
 enum led_names {
     POWER_LED       = 11,
     LAN0_LED        = 10,
@@ -60,8 +55,8 @@ typedef struct {
 
 struct led_rgb {
     rgb_t                   led_color;          /* color data */
-    led_state_t             led_state_default;  /* LED ON/OFF default mode */
-    led_state_t             led_state_user;     /* LED ON/OFF user mode */
+    bool                    led_state_default;  /* LED ON/OFF default mode */
+    bool                    led_state_user;     /* LED ON/OFF user mode */
     led_mode_t              led_mode;           /* default / user mode */
 };
 
@@ -128,21 +123,21 @@ void led_set_mode(const uint8_t led_index, const led_mode_t led_mode);
 
 /*******************************************************************************
   * @function   led_set_state
-  * @brief      Set state of the LED(s) - LED_ON / LED_OFF
+  * @brief      Set state of the LED(s)
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
+  * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(const uint8_t led_index, const led_state_t led_state);
+void led_set_state(const uint8_t led_index, const bool state);
 
 /*******************************************************************************
   * @function   led_set_state_user
-  * @brief      Set state of the LED(s) from user/I2C - LED_ON / LED_OFF
+  * @brief      Set state of the LED(s) from user/I2C
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
+  * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(const uint8_t led_index, const led_state_t led_state);
+void led_set_state_user(const uint8_t led_index, const bool state);
 
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect

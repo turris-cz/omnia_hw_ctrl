@@ -2,6 +2,7 @@
 #define COMPILER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define _VARIADIC_SEL(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, x, ...) x
 
@@ -51,7 +52,5 @@
 #define __compiletime_error(message) __attribute__((__error__(message)))
 
 #define NULL ((void *)0)
-
-typedef _Bool bool;
 
 #endif /* COMPILER_H */

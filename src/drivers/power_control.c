@@ -479,8 +479,8 @@ reset_type_t power_control_first_startup(void)
                 case RST_INIT:
                 {
                     led_set_color(LED_COUNT, GREEN_COLOR);
-                    led_set_state(LED_COUNT, LED_OFF);
-                    led_set_state(11, LED_ON);
+                    led_set_state(LED_COUNT, false);
+                    led_set_state(11, true);
                     led_driver_set_brightness(100);
                     reset_state = RST_LED11;
                     idx = 0;
@@ -492,7 +492,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = NORMAL_RESET;
 
-                    led_set_state(11, LED_ON);
+                    led_set_state(11, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -518,7 +518,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = PREVIOUS_SNAPSHOT;
 
-                    led_set_state(10, LED_ON);
+                    led_set_state(10, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -544,7 +544,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = NORMAL_FACTORY_RESET;
 
-                    led_set_state(9, LED_ON);
+                    led_set_state(9, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -570,7 +570,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = HARD_FACTORY_RESET;
 
-                    led_set_state(8, LED_ON);
+                    led_set_state(8, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -596,7 +596,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET1;
 
-                    led_set_state(7, LED_ON);
+                    led_set_state(7, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -622,7 +622,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET2;
 
-                    led_set_state(6, LED_ON);
+                    led_set_state(6, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -648,7 +648,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET3;
 
-                    led_set_state(5, LED_ON);
+                    led_set_state(5, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -674,7 +674,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET4;
 
-                    led_set_state(4, LED_ON);
+                    led_set_state(4, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -700,7 +700,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET5;
 
-                    led_set_state(3, LED_ON);
+                    led_set_state(3, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -726,7 +726,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET6;
 
-                    led_set_state(2, LED_ON);
+                    led_set_state(2, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -752,7 +752,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET7;
 
-                    led_set_state(1, LED_ON);
+                    led_set_state(1, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -778,7 +778,7 @@ reset_type_t power_control_first_startup(void)
                 {
                     reset_type = USER_RESET8;
 
-                    led_set_state(0, LED_ON);
+                    led_set_state(0, true);
 
                     idx++; /* increase color level */
                     red++;
@@ -795,7 +795,7 @@ reset_type_t power_control_first_startup(void)
                         green = RGB_COLOR_LEVELS;
                         /* final state - go back to start */
                         led_set_color(LED_COUNT, GREEN_COLOR);
-                        led_set_state(LED_COUNT, LED_OFF);
+                        led_set_state(LED_COUNT, false);
                     }
                     else
                     {
@@ -825,7 +825,7 @@ reset_type_t power_control_first_startup(void)
 
     /* restore brightness and color */
     led_driver_set_brightness(user_brightness);
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
     led_set_color(LED_COUNT, WHITE_COLOR);
 
     return reset_type;
@@ -840,7 +840,7 @@ reset_type_t power_control_first_startup(void)
 void power_control_set_power_led(void)
 {
     led_set_color(POWER_LED, WHITE_COLOR);
-    led_set_state(POWER_LED, LED_ON);
+    led_set_state(POWER_LED, true);
 }
 
 /*******************************************************************************
@@ -851,7 +851,7 @@ void power_control_set_power_led(void)
   *****************************************************************************/
 void power_led_activity(void)
 {
-    led_set_state(POWER_LED, LED_ON);
+    led_set_state(POWER_LED, true);
 }
 
 #if USER_REGULATOR_ENABLED

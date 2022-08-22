@@ -107,7 +107,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
             {
                 if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_state_default == LED_ON)
+                    if (rgb_leds->led_state_default)
                     {
                         if (rgb_leds->led_color.red > current_color_level)
                         {
@@ -117,7 +117,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user == LED_ON)
+                    if (rgb_leds->led_state_user)
                     {
                         if (rgb_leds->led_color.red > current_color_level)
                         {
@@ -134,7 +134,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
             {
                 if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_state_default == LED_ON)
+                    if (rgb_leds->led_state_default)
                     {
                         if (rgb_leds->led_color.green > current_color_level)
                         {
@@ -144,7 +144,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user == LED_ON)
+                    if (rgb_leds->led_state_user)
                     {
                         if (rgb_leds->led_color.green > current_color_level)
                         {
@@ -161,7 +161,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
             {
                 if (rgb_leds->led_mode == LED_DEFAULT_MODE)
                 {
-                    if (rgb_leds->led_state_default == LED_ON)
+                    if (rgb_leds->led_state_default)
                     {
                         if (rgb_leds->led_color.blue > current_color_level)
                         {
@@ -171,7 +171,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user == LED_ON)
+                    if (rgb_leds->led_state_user)
                     {
                         if (rgb_leds->led_color.blue > current_color_level)
                         {
@@ -242,8 +242,8 @@ void led_driver_config(void)
 {
 	/* Set initial mode, state and color */
 	for (struct led_rgb *led = leds; led < &leds[LED_COUNT]; ++led) {
-		led->led_state_user = LED_ON;
-		led->led_state_default = LED_OFF;
+		led->led_state_user = true;
+		led->led_state_default = false;
 		led->led_mode = LED_DEFAULT_MODE;
 	}
 
@@ -348,35 +348,35 @@ void led_set_mode(const uint8_t led_index, const led_mode_t led_mode)
 
 /*******************************************************************************
   * @function   led_set_state
-  * @brief      Set state of the LED(s) - LED_ON / LED_OFF
+  * @brief      Set state of the LED(s)
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
+  * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(const uint8_t led_index, const led_state_t led_state)
+void led_set_state(const uint8_t led_index, const bool state)
 {
 	if (led_index >= LED_COUNT) { /* all LED */
 		for (int idx = 0; idx < LED_COUNT; idx++)
-			leds[idx].led_state_default = led_state;
+			leds[idx].led_state_default = state;
 	} else {
-		leds[led_index].led_state_default = led_state;
+		leds[led_index].led_state_default = state;
 	}
 }
 
 /*******************************************************************************
   * @function   led_set_state_user
-  * @brief      Set state of the LED(s)i from user/I2C - LED_ON / LED_OFF
+  * @brief      Set state of the LED(s)i from user/I2C
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_state: LED_OFF / LED_ON
+  * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(const uint8_t led_index, const led_state_t led_state)
+void led_set_state_user(const uint8_t led_index, const bool state)
 {
 	if (led_index >= LED_COUNT) { /* all LED */
 		for (int idx = 0; idx < LED_COUNT; idx++)
-			leds[idx].led_state_user = led_state;
+			leds[idx].led_state_user = state;
 	} else {
-		leds[led_index].led_state_user = led_state;
+		leds[led_index].led_state_user = state;
 	}
 }
 
@@ -390,26 +390,26 @@ void led_driver_knight_rider_effect(uint32_t color)
 {
     int8_t led;
 
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
     led_set_color(LED_COUNT, color);
-    led_set_state(0, LED_ON);
+    led_set_state(0, true);
 
     for (led = 1; led < LED_COUNT; led++)
     {
         delay(70);
-        led_set_state(led - 1, LED_OFF);
-        led_set_state(led, LED_ON);
+        led_set_state(led - 1, false);
+        led_set_state(led, true);
     }
 
     for (led = 10; led > -1 ; led--)
     {
         delay(70);
-        led_set_state(led + 1, LED_OFF);
-        led_set_state(led, LED_ON);
+        led_set_state(led + 1, false);
+        led_set_state(led, true);
     }
 
     led_set_color(LED_COUNT, WHITE_COLOR);
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
 }
 
 /*******************************************************************************
@@ -422,7 +422,7 @@ void led_driver_knight_rider_color_effect(void)
 {
     int8_t color;
 
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
 
     for (color = WHITE; color < BLUE + 1; color++)
     {
@@ -448,7 +448,7 @@ void led_driver_double_knight_rider_effect(void)
     int8_t led_down, led_up;
     int8_t color;
 
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
     led_set_color(LED_COUNT, WHITE_COLOR);
 
     for (color = WHITE; color < BLUE + 1; color++)
@@ -461,32 +461,32 @@ void led_driver_double_knight_rider_effect(void)
         default: led_set_color(LED_COUNT, WHITE_COLOR); break;
         }
 
-        led_set_state(5, LED_ON);
-        led_set_state(6, LED_ON);
+        led_set_state(5, true);
+        led_set_state(6, true);
 
         for(led_down = 4, led_up = 7; led_down > -1; led_down--, led_up++)
         {
             delay(100);
-            led_set_state(led_down + 1, LED_OFF);
-            led_set_state(led_down, LED_ON);
+            led_set_state(led_down + 1, false);
+            led_set_state(led_down, true);
 
-            led_set_state(led_up - 1, LED_OFF);
-            led_set_state(led_up, LED_ON);
+            led_set_state(led_up - 1, false);
+            led_set_state(led_up, true);
         }
 
         for(led_down = 10, led_up = 1; led_down > 5; led_down--, led_up++)
         {
             delay(100);
-            led_set_state(led_down + 1, LED_OFF);
-            led_set_state(led_down, LED_ON);
+            led_set_state(led_down + 1, false);
+            led_set_state(led_down, true);
 
-            led_set_state(led_up - 1, LED_OFF);
-            led_set_state(led_up, LED_ON);
+            led_set_state(led_up - 1, false);
+            led_set_state(led_up, true);
         }
     }
 
     led_set_color(LED_COUNT, 0xFFFFFF); //back to default color
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
 }
 
 /*******************************************************************************
@@ -521,18 +521,18 @@ static void led_driver_knight_rider_effect_handler(void)
         {
             effect_reset_finished = RESET;
             led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
-            led_set_state(LED_COUNT, LED_OFF);
+            led_set_state(LED_COUNT, false);
             led_set_color(LED_COUNT, WHITE_COLOR);
-            led_set_state(0, LED_ON);
+            led_set_state(0, true);
             effect_state = EFFECT_UP;
         } break;
 
         case EFFECT_UP:
         {
             led++;
-            led_set_state(11, LED_OFF);
-            led_set_state(led - 1, LED_OFF);
-            led_set_state(led, LED_ON);
+            led_set_state(11, false);
+            led_set_state(led - 1, false);
+            led_set_state(led, true);
 
             if (led >= 11)
             {
@@ -547,8 +547,8 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_DOWN:
         {
             led--;
-            led_set_state(led + 1, LED_OFF);
-            led_set_state(led, LED_ON);
+            led_set_state(led + 1, false);
+            led_set_state(led, true);
 
             if (led <= 0)
             {
@@ -562,7 +562,7 @@ static void led_driver_knight_rider_effect_handler(void)
 
         case EFFECT_LEDSON:
         {
-            led_set_state(LED_COUNT, LED_ON);
+            led_set_state(LED_COUNT, true);
             led_set_color(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
             effect_state = EFFECT_DEINIT;
         } break;
@@ -573,7 +573,7 @@ static void led_driver_knight_rider_effect_handler(void)
 
             if (state_timeout_cnt >= EFFECT_TIMEOUT)
             {
-                led_set_state(LED_COUNT, LED_OFF);
+                led_set_state(LED_COUNT, false);
                 led_set_color(LED_COUNT, WHITE_COLOR);
 
                 led_set_mode(LED_COUNT, LED_DEFAULT_MODE);

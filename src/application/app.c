@@ -470,25 +470,25 @@ static ret_value_t led_manager(void)
 static void error_manager(ret_value_t error_state)
 {
     led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
-    led_set_state(LED_COUNT, LED_OFF);
+    led_set_state(LED_COUNT, false);
     led_set_color(LED_COUNT, RED_COLOR);
 
     delay(300);
 
     switch(error_state)
     {
-        case GO_TO_5V_ERROR: led_set_state(0, LED_ON); break;
-        case GO_TO_3V3_ERROR: led_set_state(1, LED_ON); break;
-        case GO_TO_1V8_ERROR: led_set_state(2, LED_ON); break;
-        case GO_TO_1V5_ERROR: led_set_state(3, LED_ON); break;
-        case GO_TO_1V35_ERROR: led_set_state(4, LED_ON); break;
-        case GO_TO_VTT_ERROR: led_set_state(5, LED_ON); break;
-        case GO_TO_1V2_ERROR: led_set_state(6, LED_ON); break;
+        case GO_TO_5V_ERROR: led_set_state(0, true); break;
+        case GO_TO_3V3_ERROR: led_set_state(1, true); break;
+        case GO_TO_1V8_ERROR: led_set_state(2, true); break;
+        case GO_TO_1V5_ERROR: led_set_state(3, true); break;
+        case GO_TO_1V35_ERROR: led_set_state(4, true); break;
+        case GO_TO_VTT_ERROR: led_set_state(5, true); break;
+        case GO_TO_1V2_ERROR: led_set_state(6, true); break;
 #if USER_REGULATOR_ENABLED
-        case GO_TO_4V5_ERROR: led_set_state(7, LED_ON); break;
+        case GO_TO_4V5_ERROR: led_set_state(7, true); break;
 #endif
 
-        default: led_set_state(LED_COUNT, LED_ON); break;
+        default: led_set_state(LED_COUNT, true); break;
     }
 
     delay(300);
