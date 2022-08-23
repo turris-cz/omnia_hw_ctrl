@@ -7,7 +7,6 @@
  ******************************************************************************
  ******************************************************************************
  **/
-/* Includes ------------------------------------------------------------------*/
 #include "led_driver.h"
 #include "delay.h"
 #include "power_control.h"
@@ -16,7 +15,6 @@
 #include "timer.h"
 #include "cpu.h"
 
-/* Private define ------------------------------------------------------------*/
 #define LED_SPI_ALT_FN		0
 #define LED_SPI_MOSI_PIN	PIN(A, 7)
 #define LED_SPI_SCK_PIN		PIN(A, 5)
@@ -32,7 +30,6 @@
 #define LED_PWM_PERIOD		2000
 #define LED_PWM_FREQ		8000000
 
-/* Private typedef -----------------------------------------------------------*/
 enum {
 	RED = 0,
 	GREEN = 1,
