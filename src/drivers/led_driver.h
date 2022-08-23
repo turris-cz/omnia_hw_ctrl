@@ -121,30 +121,6 @@ void led_set_state(unsigned led, bool state);
 void led_set_state_user(unsigned led, bool state);
 
 /*******************************************************************************
-  * @function   led_driver_knight_rider_effect
-  * @brief      Display knight rider effect on LEDs.
-  * @param      color: color in RGB range.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_knight_rider_effect(uint32_t color);
-
-/*******************************************************************************
-  * @function   led_driver_knight_rider_color_effect
-  * @brief      Display knight rider effect on LEDs.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_knight_rider_color_effect(void);
-
-/*******************************************************************************
-  * @function   led_driver_double_knight_rider_effect
-  * @brief      Display double knight rider effect on LEDs.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_double_knight_rider_effect(void);
-
-/*******************************************************************************
   * @function   led_driver_effect_irq_handler
   * @brief      Display LED effect.
   * @param      None.
