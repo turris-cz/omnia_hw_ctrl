@@ -312,7 +312,7 @@ static int cmd_led_mode(slave_i2c_state_t *state)
 	uint8_t *args = &state->cmd[1];
 
 	debug("led_mode\n");
-	led_set_mode(args[0] & 0x0F, !!(args[0] & 0x10));
+	led_set_user_mode(args[0] & 0x0F, !!(args[0] & 0x10));
 
 	return 0;
 }

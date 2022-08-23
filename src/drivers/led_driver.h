@@ -25,11 +25,6 @@ enum colors {
     YELLOW_COLOR       = 0xFFFF00,
 };
 
-typedef enum led_modes {
-    LED_DEFAULT_MODE   = 0,
-    LED_USER_MODE      = 1,
-}led_mode_t;
-
 enum led_names {
     POWER_LED       = 11,
     LAN0_LED        = 10,
@@ -57,7 +52,7 @@ struct led_rgb {
     rgb_t                   led_color;          /* color data */
     bool                    led_state_default;  /* LED ON/OFF default mode */
     bool                    led_state_user;     /* LED ON/OFF user mode */
-    led_mode_t              led_mode;           /* default / user mode */
+    bool                    led_user_mode;      /* default / user mode */
 };
 
 extern struct led_rgb leds[LED_COUNT];
@@ -113,13 +108,13 @@ uint8_t led_driver_get_brightness(void);
 void led_driver_step_brightness(void);
 
 /*******************************************************************************
-  * @function   led_set_mode
+  * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
+  * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_mode(const uint8_t led_index, const led_mode_t led_mode);
+void led_set_user_mode(const uint8_t led_index, const bool set);
 
 /*******************************************************************************
   * @function   led_set_state

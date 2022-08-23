@@ -105,7 +105,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                if (!rgb_leds->led_user_mode)
                 {
                     if (rgb_leds->led_state_default)
                     {
@@ -132,7 +132,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                if (!rgb_leds->led_user_mode)
                 {
                     if (rgb_leds->led_state_default)
                     {
@@ -159,7 +159,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (rgb_leds->led_mode == LED_DEFAULT_MODE)
+                if (!rgb_leds->led_user_mode)
                 {
                     if (rgb_leds->led_state_default)
                     {
@@ -244,7 +244,7 @@ void led_driver_config(void)
 	for (struct led_rgb *led = leds; led < &leds[LED_COUNT]; ++led) {
 		led->led_state_user = true;
 		led->led_state_default = false;
-		led->led_mode = LED_DEFAULT_MODE;
+		led->led_user_mode = false;
 	}
 
 	led_set_color(LED_COUNT, WHITE_COLOR);
@@ -321,13 +321,13 @@ void led_driver_step_brightness(void)
 }
 
 /*******************************************************************************
-  * @function   led_set_mode
+  * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
   * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
-  * @parame     led_mode: LED_DEFAULT_MODE / LED_USER_MODE
+  * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_mode(const uint8_t led_index, const led_mode_t led_mode)
+void led_set_user_mode(const uint8_t led_index, const bool set)
 {
     uint8_t idx;
     struct led_rgb *rgb_leds = leds;
@@ -336,13 +336,13 @@ void led_set_mode(const uint8_t led_index, const led_mode_t led_mode)
     {
         for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
         {
-            rgb_leds->led_mode = led_mode;
+            rgb_leds->led_user_mode = set;
         }
     }
     else /* or individual LED */
     {
         rgb_leds += led_index;
-        rgb_leds->led_mode = led_mode;
+        rgb_leds->led_user_mode = set;
     }
 }
 
@@ -520,7 +520,7 @@ static void led_driver_knight_rider_effect_handler(void)
         case EFFECT_INIT:
         {
             effect_reset_finished = RESET;
-            led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
+            led_set_user_mode(LED_COUNT, false);
             led_set_state(LED_COUNT, false);
             led_set_color(LED_COUNT, WHITE_COLOR);
             led_set_state(0, true);
@@ -576,7 +576,7 @@ static void led_driver_knight_rider_effect_handler(void)
                 led_set_state(LED_COUNT, false);
                 led_set_color(LED_COUNT, WHITE_COLOR);
 
-                led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
+                led_set_user_mode(LED_COUNT, false);
                 led_driver_reset_effect(DISABLE);
                 state_timeout_cnt = 0;
                 effect_reset_finished = SET;

@@ -469,7 +469,7 @@ static ret_value_t led_manager(void)
   *****************************************************************************/
 static void error_manager(ret_value_t error_state)
 {
-    led_set_mode(LED_COUNT, LED_DEFAULT_MODE);
+    led_set_user_mode(LED_COUNT, false);
     led_set_state(LED_COUNT, false);
     led_set_color(LED_COUNT, RED_COLOR);
 
