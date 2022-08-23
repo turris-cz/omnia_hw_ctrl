@@ -42,20 +42,6 @@ enum led_names {
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
 
-typedef struct {
-    uint8_t blue; /* [0..255] */
-    uint8_t green;
-    uint8_t red;
-} rgb_t;
-
-struct led_rgb {
-    rgb_t                   led_color;          /* color data */
-    bool                    led_state_default;  /* LED ON/OFF default mode */
-    bool                    led_state_user;     /* LED ON/OFF user mode */
-    bool                    led_user_mode;      /* default / user mode */
-};
-
-extern struct led_rgb leds[LED_COUNT];
 extern uint8_t effect_reset_finished;
 
 /*******************************************************************************

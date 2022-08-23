@@ -49,7 +49,21 @@ typedef enum led_effect_states {
     EFFECT_DEINIT
 } effect_state_t;
 
-struct led_rgb leds[LED_COUNT];
+typedef struct {
+	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
+} rgb_t;
+
+struct led_rgb {
+	rgb_t led_color;         /* color data */
+	bool led_state_default;  /* LED ON/OFF default mode */
+	bool led_state_user;     /* LED ON/OFF user mode */
+	bool led_user_mode;      /* default / user mode */
+};
+
+static struct led_rgb leds[LED_COUNT];
+
 uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
 finished and normal operation can take the LED control */
 
