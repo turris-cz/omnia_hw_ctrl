@@ -582,7 +582,7 @@ static void app_mcu_cyclic(void)
 
         case LED_MANAGER:
         {
-            if (effect_reset_finished == SET)
+            if (effect_reset_finished)
             {
                 led_manager();
             }

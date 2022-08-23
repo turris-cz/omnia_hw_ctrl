@@ -70,7 +70,7 @@ static union {
 
 static struct led leds[LED_COUNT];
 
-uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
+bool effect_reset_finished; /* flag is set when LED effect after reset is
 finished and normal operation can take the LED control */
 
 static uint8_t pwm_brightness;
@@ -379,7 +379,7 @@ static void led_driver_knight_rider_effect_handler(void)
 	{
 		case EFFECT_INIT:
 		{
-			effect_reset_finished = RESET;
+			effect_reset_finished = false;
 			led_set_user_mode(LED_COUNT, false);
 			led_set_state(LED_COUNT, false);
 			led_set_color(LED_COUNT, WHITE_COLOR);
@@ -439,7 +439,7 @@ static void led_driver_knight_rider_effect_handler(void)
 				led_set_user_mode(LED_COUNT, false);
 				led_driver_reset_effect(DISABLE);
 				state_timeout_cnt = 0;
-				effect_reset_finished = SET;
+				effect_reset_finished = true;
 				effect_state = EFFECT_INIT;
 			}
 			else

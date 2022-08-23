@@ -40,7 +40,7 @@ enum led_names {
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
 
-extern uint8_t effect_reset_finished;
+extern bool effect_reset_finished;
 
 /*******************************************************************************
   * @function   led_driver_config
