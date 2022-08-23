@@ -100,11 +100,11 @@ static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
 /*******************************************************************************
   * @function   led_set_color
   * @brief      Set color of LED specified in parameters to be displayed in next cycle.
-  * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
+  * @param      led: position of LED (0..11) or index >=12 -> all LEDs
   * @param      color: LED color (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(uint8_t led_index, uint32_t color)
+void led_set_color(unsigned led, uint32_t color)
 {
 	uint8_t r, g, b;
 
@@ -112,11 +112,11 @@ void led_set_color(uint8_t led_index, uint32_t color)
 	g = (color >> 8) & 0xFF;
 	b = color & 0xFF;
 
-	if (led_index >= LED_COUNT) {
+	if (led >= LED_COUNT) {
 		for (int idx = 0; idx < LED_COUNT; ++idx)
 			_led_set_color(idx, r, g, b);
 	} else {
-		_led_set_color(led_index, r, g, b);
+		_led_set_color(led, r, g, b);
 	}
 }
 
@@ -305,16 +305,16 @@ static void recompute_led_states(void)
 /*******************************************************************************
   * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_user_mode(uint8_t led_index, bool set)
+void led_set_user_mode(unsigned led, bool set)
 {
 	if (set)
-		leds_modes_user |= led_bits(led_index);
+		leds_modes_user |= led_bits(led);
 	else
-		leds_modes_user &= ~led_bits(led_index);
+		leds_modes_user &= ~led_bits(led);
 
 	recompute_led_states();
 }
@@ -322,16 +322,16 @@ void led_set_user_mode(uint8_t led_index, bool set)
 /*******************************************************************************
   * @function   led_set_state
   * @brief      Set state of the LED(s)
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(uint8_t led_index, bool state)
+void led_set_state(unsigned led, bool state)
 {
 	if (state)
-		leds_states_default |= led_bits(led_index);
+		leds_states_default |= led_bits(led);
 	else
-		leds_states_default &= ~led_bits(led_index);
+		leds_states_default &= ~led_bits(led);
 
 	recompute_led_states();
 }
@@ -339,16 +339,16 @@ void led_set_state(uint8_t led_index, bool state)
 /*******************************************************************************
   * @function   led_set_state_user
   * @brief      Set state of the LED(s)i from user/I2C
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(uint8_t led_index, bool state)
+void led_set_state_user(unsigned led, bool state)
 {
 	if (state)
-		leds_states_user |= led_bits(led_index);
+		leds_states_user |= led_bits(led);
 	else
-		leds_states_user &= ~led_bits(led_index);
+		leds_states_user &= ~led_bits(led);
 
 	recompute_led_states();
 }

@@ -59,7 +59,7 @@ void led_driver_config(void);
   * @param      color: LED color (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(uint8_t led_index, uint32_t color);
+void led_set_color(unsigned led, uint32_t color);
 
 /*******************************************************************************
   * @function   led_driver_irq_handler
@@ -96,29 +96,29 @@ void led_driver_step_brightness(void);
 /*******************************************************************************
   * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_user_mode(uint8_t led_index, bool set);
+void led_set_user_mode(unsigned led, bool set);
 
 /*******************************************************************************
   * @function   led_set_state
   * @brief      Set state of the LED(s)
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(uint8_t led_index, bool state);
+void led_set_state(unsigned led, bool state);
 
 /*******************************************************************************
   * @function   led_set_state_user
   * @brief      Set state of the LED(s) from user/I2C
-  * @param      led_index: position of LED (0..11) or led_index >=12 -> all LED.
+  * @param      led: position of LED (0..11) or led >=12 -> all LED.
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(uint8_t led_index, bool state);
+void led_set_state_user(unsigned led, bool state);
 
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect
