@@ -26,7 +26,7 @@
 #define LED_PWM_PIN		PIN(A, 3)
 
 #define COLOR_LEVELS		256
-#define MAX_LED_BRIGHTNESS          100
+#define FULL_BRIGHTNESS		100
 #define EFFECT_TIMEOUT              5
 
 #define LED_PWM_PERIOD		2000
@@ -229,7 +229,7 @@ void led_driver_config(void)
 	timer_enable(LED_PWM_TIMER, 1);
 
 	/* Set initial PWM brightness */
-	led_driver_set_brightness(MAX_LED_BRIGHTNESS);
+	led_driver_set_brightness(FULL_BRIGHTNESS);
 
 	/* Initialize timer (every tick we send one frame) */
 	timer_init(LED_TIMER, timer_interrupt, 50, 2400000, 4);
@@ -249,10 +249,10 @@ void led_driver_set_brightness(uint8_t procent_val)
 {
     uint16_t counter_val;
 
-    if (procent_val > MAX_LED_BRIGHTNESS)
-        procent_val = MAX_LED_BRIGHTNESS;
+    if (procent_val > FULL_BRIGHTNESS)
+        procent_val = FULL_BRIGHTNESS;
 
-    counter_val = procent_val * LED_PWM_PERIOD / MAX_LED_BRIGHTNESS;
+    counter_val = procent_val * LED_PWM_PERIOD / FULL_BRIGHTNESS;
 
     timer_set_pulse(LED_PWM_TIMER, counter_val);
     pwm_brightness = procent_val;
