@@ -50,13 +50,11 @@ typedef enum led_effect_states {
 } effect_state_t;
 
 typedef struct {
-	uint8_t blue;
-	uint8_t green;
-	uint8_t red;
+	uint8_t r, g, b;
 } rgb_t;
 
 struct led {
-	rgb_t led_color;         /* color data */
+	rgb_t color;
 };
 
 #define LED_BITS_ALL	GENMASK(13, 2)
@@ -75,6 +73,13 @@ finished and normal operation can take the LED control */
 
 static uint8_t pwm_brightness;
 
+static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
+{
+	leds[led].color.r = r;
+	leds[led].color.g = g;
+	leds[led].color.b = b;
+}
+
 /*******************************************************************************
   * @function   led_set_color
   * @brief      Set color of LED specified in parameters to be displayed in next cycle.
@@ -84,26 +89,18 @@ static uint8_t pwm_brightness;
   *****************************************************************************/
 void led_set_color(const uint8_t led_index, const uint32_t color)
 {
-    uint8_t idx;
-    struct led *rgb_leds = leds;
+	uint8_t r, g, b;
 
-    if (led_index >= LED_COUNT) /* all LEDs */
-    {
-        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-        {
-            rgb_leds->led_color.red = color >> 16;
-            rgb_leds->led_color.green = (color >> 8) & 0xFF;
-            rgb_leds->led_color.blue = color & 0xFF;
-        }
-    }
-    else /* individual LED */
-    {
-        rgb_leds += led_index;
+	r = color >> 16;
+	g = (color >> 8) & 0xFF;
+	b = color & 0xFF;
 
-        rgb_leds->led_color.red = color >> 16;
-        rgb_leds->led_color.green = (color >> 8) & 0xFF;
-        rgb_leds->led_color.blue = color & 0xFF;
-    }
+	if (led_index >= LED_COUNT) {
+		for (int idx = 0; idx < LED_COUNT; ++idx)
+			_led_set_color(idx, r, g, b);
+	} else {
+		_led_set_color(led_index, r, g, b);
+	}
 }
 
 /*******************************************************************************
@@ -129,7 +126,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_default & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.red > current_color_level)
+                        if (rgb_leds->color.r > current_color_level)
                         {
                             data |= 1 << (2 + idx); /* shift by 2 - due to the HW connection */
                         }
@@ -139,7 +136,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_user & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.red > current_color_level)
+                        if (rgb_leds->color.r > current_color_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -156,7 +153,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_default & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.green > current_color_level)
+                        if (rgb_leds->color.g > current_color_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -166,7 +163,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_user & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.green > current_color_level)
+                        if (rgb_leds->color.g > current_color_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -183,7 +180,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_default & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.blue > current_color_level)
+                        if (rgb_leds->color.b > current_color_level)
                         {
                             data |= 1 << (2 + idx);
                         }
@@ -193,7 +190,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 {
                     if (leds_states_user & LED_BIT(idx))
                     {
-                        if (rgb_leds->led_color.blue > current_color_level)
+                        if (rgb_leds->color.b > current_color_level)
                         {
                             data |= 1 << (2 + idx);
                         }
