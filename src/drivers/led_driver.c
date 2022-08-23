@@ -55,14 +55,14 @@ typedef struct {
 	uint8_t red;
 } rgb_t;
 
-struct led_rgb {
+struct led {
 	rgb_t led_color;         /* color data */
 	bool led_state_default;  /* LED ON/OFF default mode */
 	bool led_state_user;     /* LED ON/OFF user mode */
 	bool led_user_mode;      /* default / user mode */
 };
 
-static struct led_rgb leds[LED_COUNT];
+static struct led leds[LED_COUNT];
 
 uint8_t effect_reset_finished; /* flag is set when LED effect after reset is
 finished and normal operation can take the LED control */
@@ -79,7 +79,7 @@ static uint8_t pwm_brightness;
 void led_set_color(const uint8_t led_index, const uint32_t color)
 {
     uint8_t idx;
-    struct led_rgb *rgb_leds = leds;
+    struct led *rgb_leds = leds;
 
     if (led_index >= LED_COUNT) /* all LEDs */
     {
@@ -111,7 +111,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
 {
     uint16_t data = 0;
     uint8_t idx;
-    struct led_rgb *rgb_leds = leds;
+    struct led *rgb_leds = leds;
 
     switch (color)
     {
@@ -255,7 +255,7 @@ void __irq led_driver_irq_handler(void)
 void led_driver_config(void)
 {
 	/* Set initial mode, state and color */
-	for (struct led_rgb *led = leds; led < &leds[LED_COUNT]; ++led) {
+	for (struct led *led = leds; led < &leds[LED_COUNT]; ++led) {
 		led->led_state_user = true;
 		led->led_state_default = false;
 		led->led_user_mode = false;
@@ -344,7 +344,7 @@ void led_driver_step_brightness(void)
 void led_set_user_mode(const uint8_t led_index, const bool set)
 {
     uint8_t idx;
-    struct led_rgb *rgb_leds = leds;
+    struct led *rgb_leds = leds;
 
     if (led_index >= LED_COUNT)  /* all LED */
     {
