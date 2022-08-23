@@ -64,7 +64,14 @@ struct led {
  * connected in hardware */
 static uint16_t leds_modes_user,     /* bitmask of LEDs in user mode */
 		leds_states_default, /* bitmask of LED states for default mode */
-		leds_states_user;    /* bitmask of LED states for user mode */
+		leds_states_user,    /* bitmask of LED states for user mode */
+		leds_states;         /* bitmask of actual LED states */
+
+/* LED color levels for faster computation in LED timer handler */
+static union {
+	uint16_t value[12];
+	uint32_t for_cmp[6];
+} led_levels[3];
 
 static struct led leds[LED_COUNT];
 
@@ -73,11 +80,27 @@ finished and normal operation can take the LED control */
 
 static uint8_t pwm_brightness;
 
+static inline uint8_t decimate(uint8_t x)
+{
+	return (x + (1 << COLOR_DECIMATION) - 1) >> COLOR_DECIMATION;
+}
+
 static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
 {
+	/* this is due to how we compute corresponding bits in
+	 * led_driver_prepare_data(). We do this rearrangement here so that
+	 * we save time there. */
+	unsigned idx = (led << 1) - ((led > 5) ? 11 : 0);
+
 	leds[led].color.r = r;
 	leds[led].color.g = g;
 	leds[led].color.b = b;
+
+	/* always set bit 15 for fast comparison (two values at once) in
+	 * led_driver_prepare_data() */
+	led_levels[0].value[idx] = BIT(15) | decimate(r);
+	led_levels[1].value[idx] = BIT(15) | decimate(g);
+	led_levels[2].value[idx] = BIT(15) | decimate(b);
 }
 
 /*******************************************************************************
@@ -106,104 +129,47 @@ void led_set_color(const uint8_t led_index, const uint32_t color)
 /*******************************************************************************
   * @function   led_driver_prepare_data
   * @brief      Prepare data to be sent to LED driver.
-  * @param      color: RED, GREEN or BLUE.
-  * @param      current_color_level: color density [0..255]
+  * @param      channel: RED, GREEN or BLUE.
   * @retval     Data to be sent to LED driver.
   *****************************************************************************/
-static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t current_color_level)
+static uint16_t led_driver_prepare_data(unsigned channel)
 {
-    uint16_t data = 0;
-    uint8_t idx;
-    struct led *rgb_leds = leds;
+	/* Two values are compared with current level at once: the two values
+	 * are stored in one uint32_t (values[N]), and current level is repeated
+	 * two times in another uint32_t (level2x). Both values always have MSB
+	 * set, and so subtracting current level unsets the corresponding bit if
+	 * level is greater than the value.
+	 *
+	 * This saves some precious processor ticks. GCC with -Os should compile
+	 * the interrupt handler (together with exception entry and exit) to
+	 * something around 160 ticks for Cortex-M0, or 135 ticks for Cortex-M3
+	 * (on average).
+	 */
+	static const uint32_t mask = BIT(31) | BIT(15),
+			      one = 0x10001;
+	static uint32_t level2x = one;
+	const uint32_t *values;
+	uint32_t res;
 
-    switch (color)
-    {
-        case RED:
-        {
-            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-            {
-                if (!(leds_modes_user & LED_BIT(idx)))
-                {
-                    if (leds_states_default & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.r > current_color_level)
-                        {
-                            data |= 1 << (2 + idx); /* shift by 2 - due to the HW connection */
-                        }
-                    }
-                }
-                else /* LED_USER_MODE has the same color profile as default mode now */
-                {
-                    if (leds_states_user & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.r > current_color_level)
-                        {
-                            data |= 1 << (2 + idx);
-                        }
-                    }
-                }
-            }
-        } break;
+	values = led_levels[channel].for_cmp;
 
-        case GREEN:
-        {
-            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-            {
-                if (!(leds_modes_user & LED_BIT(idx)))
-                {
-                    if (leds_states_default & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.g > current_color_level)
-                        {
-                            data |= 1 << (2 + idx);
-                        }
-                    }
-                }
-                else /* LED_USER_MODE has the same color profile as default mode now */
-                {
-                    if (leds_states_user & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.g > current_color_level)
-                        {
-                            data |= 1 << (2 + idx);
-                        }
-                    }
-                }
-            }
-        } break;
+	res = ((values[0] - level2x) & mask) >> 1;
+	res = (res | ((values[1] - level2x) & mask)) >> 1;
+	res = (res | ((values[2] - level2x) & mask)) >> 1;
+	res = (res | ((values[3] - level2x) & mask)) >> 1;
+	res = (res | ((values[4] - level2x) & mask)) >> 1;
+	res = (res | ((values[5] - level2x) & mask));
 
-        case BLUE:
-        {
-            for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-            {
-                if (!(leds_modes_user & LED_BIT(idx)))
-                {
-                    if (leds_states_default & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.b > current_color_level)
-                        {
-                            data |= 1 << (2 + idx);
-                        }
-                    }
-                }
-                else /* LED_USER_MODE has the same color profile as default mode now */
-                {
-                    if (leds_states_user & LED_BIT(idx))
-                    {
-                        if (rgb_leds->color.b > current_color_level)
-                        {
-                            data |= 1 << (2 + idx);
-                        }
-                    }
-                }
-            }
-        } break;
+	res = (res >> 18) | ((res & 0xffffU) >> 8);
 
-        default:
-            break;
-    }
+	if (channel == BLUE) {
+		level2x += one;
 
-    return data;
+		if ((level2x & 0xffff) == COLOR_LEVELS + 1)
+			level2x = one;
+	}
+
+	return res & leds_states;
 }
 
 /*******************************************************************************
@@ -214,7 +180,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
   *****************************************************************************/
 static void led_driver_send_frame(void)
 {
-    static uint8_t level, channel = RED;
+    static uint8_t channel = RED;
     uint16_t data;
 
     /* toggle SS before sending red channel */
@@ -224,26 +190,18 @@ static void led_driver_send_frame(void)
         gpio_write(LED_SPI_SS_PIN, 0);
     }
 
-    /* decrease 255 color levels to COLOR_LEVELS by shift (COLOR_DECIMATION) */
-    data = led_driver_prepare_data(channel, level << COLOR_DECIMATION);
+    data = led_driver_prepare_data(channel);
     spi_send16(LED_SPI, data);
 
-    if (channel == BLUE) {
+    if (channel == BLUE)
         channel = RED;
-
-        level++;
-
-        /* restart cycle when all levels sent */
-        if (level >= COLOR_LEVELS)
-            level = 0;
-    } else {
+    else
         channel++;
-    }
 }
 
 void __irq led_driver_irq_handler(void)
 {
-	if (!timer_irq_clear_up(LED_TIMER))
+	if (unlikely(!timer_irq_clear_up(LED_TIMER)))
 		return;
 
 	led_driver_send_frame();
@@ -261,6 +219,7 @@ void led_driver_config(void)
 	leds_modes_user = 0;
 	leds_states_default = 0;
 	leds_states_user = LED_BITS_ALL;
+	leds_states = 0;
 
 	led_set_color(LED_COUNT, WHITE_COLOR);
 
@@ -343,6 +302,12 @@ static inline uint16_t led_bits(unsigned led)
 		return LED_BIT(led);
 }
 
+static void recompute_led_states(void)
+{
+	leds_states = (leds_modes_user & leds_states_user) |
+		      (~leds_modes_user & leds_states_default);
+}
+
 /*******************************************************************************
   * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
@@ -356,6 +321,8 @@ void led_set_user_mode(const uint8_t led_index, const bool set)
 		leds_modes_user |= led_bits(led_index);
 	else
 		leds_modes_user &= ~led_bits(led_index);
+
+	recompute_led_states();
 }
 
 /*******************************************************************************
@@ -371,6 +338,8 @@ void led_set_state(const uint8_t led_index, const bool state)
 		leds_states_default |= led_bits(led_index);
 	else
 		leds_states_default &= ~led_bits(led_index);
+
+	recompute_led_states();
 }
 
 /*******************************************************************************
@@ -386,6 +355,8 @@ void led_set_state_user(const uint8_t led_index, const bool state)
 		leds_states_user |= led_bits(led_index);
 	else
 		leds_states_user &= ~led_bits(led_index);
+
+	recompute_led_states();
 }
 
 /*******************************************************************************

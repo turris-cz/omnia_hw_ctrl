@@ -30,6 +30,9 @@
 #define unreachable() __builtin_unreachable()
 #define fallthrough __attribute__((__fallthrough__))
 
+#define likely(x) __builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
+
 #define __force_inline inline __attribute__((__always_inline__))
 #define __noreturn __attribute__((__noreturn__))
 #define __naked __attribute__((__naked__))
