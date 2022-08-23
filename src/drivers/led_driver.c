@@ -57,10 +57,16 @@ typedef struct {
 
 struct led {
 	rgb_t led_color;         /* color data */
-	bool led_state_default;  /* LED ON/OFF default mode */
-	bool led_state_user;     /* LED ON/OFF user mode */
-	bool led_user_mode;      /* default / user mode */
 };
+
+#define LED_BITS_ALL	GENMASK(13, 2)
+#define LED_BIT(led)	BIT((led) + 2)
+
+/* the following bitmasks are shifted by 2 because of how LEDs are
+ * connected in hardware */
+static uint16_t leds_modes_user,     /* bitmask of LEDs in user mode */
+		leds_states_default, /* bitmask of LED states for default mode */
+		leds_states_user;    /* bitmask of LED states for user mode */
 
 static struct led leds[LED_COUNT];
 
@@ -119,9 +125,9 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (!rgb_leds->led_user_mode)
+                if (!(leds_modes_user & LED_BIT(idx)))
                 {
-                    if (rgb_leds->led_state_default)
+                    if (leds_states_default & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.red > current_color_level)
                         {
@@ -131,7 +137,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user)
+                    if (leds_states_user & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.red > current_color_level)
                         {
@@ -146,9 +152,9 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (!rgb_leds->led_user_mode)
+                if (!(leds_modes_user & LED_BIT(idx)))
                 {
-                    if (rgb_leds->led_state_default)
+                    if (leds_states_default & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.green > current_color_level)
                         {
@@ -158,7 +164,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user)
+                    if (leds_states_user & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.green > current_color_level)
                         {
@@ -173,9 +179,9 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
         {
             for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
             {
-                if (!rgb_leds->led_user_mode)
+                if (!(leds_modes_user & LED_BIT(idx)))
                 {
-                    if (rgb_leds->led_state_default)
+                    if (leds_states_default & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.blue > current_color_level)
                         {
@@ -185,7 +191,7 @@ static uint16_t led_driver_prepare_data(const rgb_color_t color, const uint8_t c
                 }
                 else /* LED_USER_MODE has the same color profile as default mode now */
                 {
-                    if (rgb_leds->led_state_user)
+                    if (leds_states_user & LED_BIT(idx))
                     {
                         if (rgb_leds->led_color.blue > current_color_level)
                         {
@@ -255,11 +261,9 @@ void __irq led_driver_irq_handler(void)
 void led_driver_config(void)
 {
 	/* Set initial mode, state and color */
-	for (struct led *led = leds; led < &leds[LED_COUNT]; ++led) {
-		led->led_state_user = true;
-		led->led_state_default = false;
-		led->led_user_mode = false;
-	}
+	leds_modes_user = 0;
+	leds_states_default = 0;
+	leds_states_user = LED_BITS_ALL;
 
 	led_set_color(LED_COUNT, WHITE_COLOR);
 
@@ -334,6 +338,14 @@ void led_driver_step_brightness(void)
         step = 0;
 }
 
+static inline uint16_t led_bits(unsigned led)
+{
+	if (led >= LED_COUNT)
+		return LED_BITS_ALL;
+	else
+		return LED_BIT(led);
+}
+
 /*******************************************************************************
   * @function   led_set_user_mode
   * @brief      Set mode to LED(s) - default or user mode
@@ -343,21 +355,10 @@ void led_driver_step_brightness(void)
   *****************************************************************************/
 void led_set_user_mode(const uint8_t led_index, const bool set)
 {
-    uint8_t idx;
-    struct led *rgb_leds = leds;
-
-    if (led_index >= LED_COUNT)  /* all LED */
-    {
-        for (idx = 0; idx < LED_COUNT; idx++, rgb_leds++)
-        {
-            rgb_leds->led_user_mode = set;
-        }
-    }
-    else /* or individual LED */
-    {
-        rgb_leds += led_index;
-        rgb_leds->led_user_mode = set;
-    }
+	if (set)
+		leds_modes_user |= led_bits(led_index);
+	else
+		leds_modes_user &= ~led_bits(led_index);
 }
 
 /*******************************************************************************
@@ -369,12 +370,10 @@ void led_set_user_mode(const uint8_t led_index, const bool set)
   *****************************************************************************/
 void led_set_state(const uint8_t led_index, const bool state)
 {
-	if (led_index >= LED_COUNT) { /* all LED */
-		for (int idx = 0; idx < LED_COUNT; idx++)
-			leds[idx].led_state_default = state;
-	} else {
-		leds[led_index].led_state_default = state;
-	}
+	if (state)
+		leds_states_default |= led_bits(led_index);
+	else
+		leds_states_default &= ~led_bits(led_index);
 }
 
 /*******************************************************************************
@@ -386,12 +385,10 @@ void led_set_state(const uint8_t led_index, const bool state)
   *****************************************************************************/
 void led_set_state_user(const uint8_t led_index, const bool state)
 {
-	if (led_index >= LED_COUNT) { /* all LED */
-		for (int idx = 0; idx < LED_COUNT; idx++)
-			leds[idx].led_state_user = state;
-	} else {
-		leds[led_index].led_state_user = state;
-	}
+	if (state)
+		leds_states_user |= led_bits(led_index);
+	else
+		leds_states_user &= ~led_bits(led_index);
 }
 
 /*******************************************************************************
