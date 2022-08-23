@@ -159,7 +159,7 @@ static uint16_t led_driver_prepare_data(unsigned channel)
 	if (channel == BLUE) {
 		level2x += one;
 
-		if ((level2x & 0xffff) == COLOR_LEVELS + 1)
+		if ((level2x & 0xffff) == COLOR_LEVELS)
 			level2x = one;
 	}
 
