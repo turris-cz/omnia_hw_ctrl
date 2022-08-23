@@ -33,12 +33,11 @@
 #define LED_PWM_FREQ		8000000
 
 /* Private typedef -----------------------------------------------------------*/
-typedef enum rgb_color {
-    RED     = 0,
-    GREEN   = 1,
-    BLUE    = 2,
-    WHITE   = -1,
-}rgb_color_t;
+enum {
+	RED = 0,
+	GREEN = 1,
+	BLUE = 2,
+};
 
 typedef enum led_effect_states {
     EFFECT_INIT,
