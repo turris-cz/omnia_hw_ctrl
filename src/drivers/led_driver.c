@@ -25,8 +25,7 @@
 #define LED_PWM_ALT_FN		0
 #define LED_PWM_PIN		PIN(A, 3)
 
-#define COLOR_LEVELS                64
-#define COLOR_DECIMATION            2
+#define COLOR_LEVELS		256
 #define MAX_LED_BRIGHTNESS          100
 #define EFFECT_TIMEOUT              5
 
@@ -80,11 +79,6 @@ finished and normal operation can take the LED control */
 
 static uint8_t pwm_brightness;
 
-static inline uint8_t decimate(uint8_t x)
-{
-	return (x + (1 << COLOR_DECIMATION) - 1) >> COLOR_DECIMATION;
-}
-
 static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
 {
 	/* this is due to how we compute corresponding bits in
@@ -98,9 +92,9 @@ static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
 
 	/* always set bit 15 for fast comparison (two values at once) in
 	 * led_driver_prepare_data() */
-	led_levels[0].value[idx] = BIT(15) | decimate(r);
-	led_levels[1].value[idx] = BIT(15) | decimate(g);
-	led_levels[2].value[idx] = BIT(15) | decimate(b);
+	led_levels[0].value[idx] = BIT(15) | r;
+	led_levels[1].value[idx] = BIT(15) | g;
+	led_levels[2].value[idx] = BIT(15) | b;
 }
 
 /*******************************************************************************
@@ -239,7 +233,7 @@ void led_driver_config(void)
 	led_driver_set_brightness(MAX_LED_BRIGHTNESS);
 
 	/* Initialize timer (every tick we send one frame) */
-	timer_init(LED_TIMER, timer_interrupt, 200, 2400000, 4);
+	timer_init(LED_TIMER, timer_interrupt, 50, 2400000, 4);
 	timer_enable(LED_TIMER, 1);
 
 	/* Configure boot effect */
