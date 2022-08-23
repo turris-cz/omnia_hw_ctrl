@@ -59,7 +59,7 @@ void led_driver_config(void);
   * @param      color: LED color (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(const uint8_t led_index, const uint32_t color);
+void led_set_color(uint8_t led_index, uint32_t color);
 
 /*******************************************************************************
   * @function   led_driver_irq_handler
@@ -100,7 +100,7 @@ void led_driver_step_brightness(void);
   * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_user_mode(const uint8_t led_index, const bool set);
+void led_set_user_mode(uint8_t led_index, bool set);
 
 /*******************************************************************************
   * @function   led_set_state
@@ -109,7 +109,7 @@ void led_set_user_mode(const uint8_t led_index, const bool set);
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(const uint8_t led_index, const bool state);
+void led_set_state(uint8_t led_index, bool state);
 
 /*******************************************************************************
   * @function   led_set_state_user
@@ -118,7 +118,7 @@ void led_set_state(const uint8_t led_index, const bool state);
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(const uint8_t led_index, const bool state);
+void led_set_state_user(uint8_t led_index, bool state);
 
 /*******************************************************************************
   * @function   led_driver_knight_rider_effect

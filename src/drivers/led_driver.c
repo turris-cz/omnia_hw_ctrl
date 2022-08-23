@@ -104,7 +104,7 @@ static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
   * @param      color: LED color (RGB range).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(const uint8_t led_index, const uint32_t color)
+void led_set_color(uint8_t led_index, uint32_t color)
 {
 	uint8_t r, g, b;
 
@@ -309,7 +309,7 @@ static void recompute_led_states(void)
   * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_user_mode(const uint8_t led_index, const bool set)
+void led_set_user_mode(uint8_t led_index, bool set)
 {
 	if (set)
 		leds_modes_user |= led_bits(led_index);
@@ -326,7 +326,7 @@ void led_set_user_mode(const uint8_t led_index, const bool set)
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state(const uint8_t led_index, const bool state)
+void led_set_state(uint8_t led_index, bool state)
 {
 	if (state)
 		leds_states_default |= led_bits(led_index);
@@ -343,7 +343,7 @@ void led_set_state(const uint8_t led_index, const bool state)
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(const uint8_t led_index, const bool state)
+void led_set_state_user(uint8_t led_index, bool state)
 {
 	if (state)
 		leds_states_user |= led_bits(led_index);
