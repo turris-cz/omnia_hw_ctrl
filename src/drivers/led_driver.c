@@ -25,7 +25,7 @@
 
 #define COLOR_LEVELS		256
 #define FULL_BRIGHTNESS		100
-#define EFFECT_TIMEOUT              5
+#define EFFECT_TIMEOUT		5
 
 #define LED_PWM_PERIOD		2000
 #define LED_PWM_FREQ		8000000
@@ -37,11 +37,11 @@ enum {
 };
 
 typedef enum led_effect_states {
-    EFFECT_INIT,
-    EFFECT_UP,
-    EFFECT_DOWN,
-    EFFECT_LEDSON,
-    EFFECT_DEINIT
+	EFFECT_INIT,
+	EFFECT_UP,
+	EFFECT_DOWN,
+	EFFECT_LEDSON,
+	EFFECT_DEINIT
 } effect_state_t;
 
 typedef struct {
@@ -170,23 +170,23 @@ static uint16_t led_driver_prepare_data(unsigned channel)
   *****************************************************************************/
 static void led_driver_send_frame(void)
 {
-    static uint8_t channel = RED;
-    uint16_t data;
+	static uint8_t channel = RED;
+	uint16_t data;
 
-    /* toggle SS before sending red channel */
-    if (channel == RED) {
-        gpio_write(LED_SPI_SS_PIN, 1);
-        nop();
-        gpio_write(LED_SPI_SS_PIN, 0);
-    }
+	/* toggle SS before sending red channel */
+	if (channel == RED) {
+		gpio_write(LED_SPI_SS_PIN, 1);
+		nop();
+		gpio_write(LED_SPI_SS_PIN, 0);
+	}
 
-    data = led_driver_prepare_data(channel);
-    spi_send16(LED_SPI, data);
+	data = led_driver_prepare_data(channel);
+	spi_send16(LED_SPI, data);
 
-    if (channel == BLUE)
-        channel = RED;
-    else
-        channel++;
+	if (channel == BLUE)
+		channel = RED;
+	else
+		channel++;
 }
 
 void __irq led_driver_irq_handler(void)
@@ -244,15 +244,15 @@ void led_driver_config(void)
   *****************************************************************************/
 void led_driver_set_brightness(uint8_t procent_val)
 {
-    uint16_t counter_val;
+	uint16_t counter_val;
 
-    if (procent_val > FULL_BRIGHTNESS)
-        procent_val = FULL_BRIGHTNESS;
+	if (procent_val > FULL_BRIGHTNESS)
+		procent_val = FULL_BRIGHTNESS;
 
-    counter_val = procent_val * LED_PWM_PERIOD / FULL_BRIGHTNESS;
+	counter_val = procent_val * LED_PWM_PERIOD / FULL_BRIGHTNESS;
 
-    timer_set_pulse(LED_PWM_TIMER, counter_val);
-    pwm_brightness = procent_val;
+	timer_set_pulse(LED_PWM_TIMER, counter_val);
+	pwm_brightness = procent_val;
 }
 
 /*******************************************************************************
@@ -274,14 +274,14 @@ uint8_t led_driver_get_brightness(void)
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
-    static const uint8_t brightnesses[] = { 100, 70, 40, 25, 12, 5, 1, 0 };
-    static uint8_t step = 1;
+	static const uint8_t brightnesses[] = { 100, 70, 40, 25, 12, 5, 1, 0 };
+	static uint8_t step = 1;
 
-    pwm_brightness = brightnesses[step++];
-    led_driver_set_brightness(pwm_brightness);
+	pwm_brightness = brightnesses[step++];
+	led_driver_set_brightness(pwm_brightness);
 
-    if (step >= ARRAY_SIZE(brightnesses))
-        step = 0;
+	if (step >= ARRAY_SIZE(brightnesses))
+		step = 0;
 }
 
 static inline uint16_t led_bits(unsigned led)
@@ -357,9 +357,9 @@ void led_set_state_user(unsigned led, bool state)
   *****************************************************************************/
 void led_driver_reset_effect(bool state)
 {
-    timer_enable(LED_EFFECT_TIMER, state);
-    if (!state)
-        timer_set_counter(LED_EFFECT_TIMER, 0);
+	timer_enable(LED_EFFECT_TIMER, state);
+	if (!state)
+		timer_set_counter(LED_EFFECT_TIMER, 0);
 }
 
 /*******************************************************************************
@@ -371,84 +371,84 @@ void led_driver_reset_effect(bool state)
   *****************************************************************************/
 static void led_driver_knight_rider_effect_handler(void)
 {
-    static int8_t led;
-    static uint8_t state_timeout_cnt;
-    static effect_state_t effect_state; /* states for LED effect after reset */
+	static int8_t led;
+	static uint8_t state_timeout_cnt;
+	static effect_state_t effect_state; /* states for LED effect after reset */
 
-    switch (effect_state)
-    {
-        case EFFECT_INIT:
-        {
-            effect_reset_finished = RESET;
-            led_set_user_mode(LED_COUNT, false);
-            led_set_state(LED_COUNT, false);
-            led_set_color(LED_COUNT, WHITE_COLOR);
-            led_set_state(0, true);
-            effect_state = EFFECT_UP;
-        } break;
+	switch (effect_state)
+	{
+		case EFFECT_INIT:
+		{
+			effect_reset_finished = RESET;
+			led_set_user_mode(LED_COUNT, false);
+			led_set_state(LED_COUNT, false);
+			led_set_color(LED_COUNT, WHITE_COLOR);
+			led_set_state(0, true);
+			effect_state = EFFECT_UP;
+		} break;
 
-        case EFFECT_UP:
-        {
-            led++;
-            led_set_state(11, false);
-            led_set_state(led - 1, false);
-            led_set_state(led, true);
+		case EFFECT_UP:
+		{
+			led++;
+			led_set_state(11, false);
+			led_set_state(led - 1, false);
+			led_set_state(led, true);
 
-            if (led >= 11)
-            {
-                effect_state = EFFECT_DOWN; /* next state */
-            }
-            else
-            {
-                effect_state = EFFECT_UP;
-            }
-        } break;
+			if (led >= 11)
+			{
+				effect_state = EFFECT_DOWN; /* next state */
+			}
+			else
+			{
+				effect_state = EFFECT_UP;
+			}
+		} break;
 
-        case EFFECT_DOWN:
-        {
-            led--;
-            led_set_state(led + 1, false);
-            led_set_state(led, true);
+		case EFFECT_DOWN:
+		{
+			led--;
+			led_set_state(led + 1, false);
+			led_set_state(led, true);
 
-            if (led <= 0)
-            {
-                effect_state = EFFECT_LEDSON; /* next state */
-            }
-            else
-            {
-                effect_state = EFFECT_DOWN;
-            }
-        } break;
+			if (led <= 0)
+			{
+				effect_state = EFFECT_LEDSON; /* next state */
+			}
+			else
+			{
+				effect_state = EFFECT_DOWN;
+			}
+		} break;
 
-        case EFFECT_LEDSON:
-        {
-            led_set_state(LED_COUNT, true);
-            led_set_color(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
-            effect_state = EFFECT_DEINIT;
-        } break;
+		case EFFECT_LEDSON:
+		{
+			led_set_state(LED_COUNT, true);
+			led_set_color(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
+			effect_state = EFFECT_DEINIT;
+		} break;
 
-        case EFFECT_DEINIT:
-        {
-            state_timeout_cnt++;
+		case EFFECT_DEINIT:
+		{
+			state_timeout_cnt++;
 
-            if (state_timeout_cnt >= EFFECT_TIMEOUT)
-            {
-                led_set_state(LED_COUNT, false);
-                led_set_color(LED_COUNT, WHITE_COLOR);
+			if (state_timeout_cnt >= EFFECT_TIMEOUT)
+			{
+				led_set_state(LED_COUNT, false);
+				led_set_color(LED_COUNT, WHITE_COLOR);
 
-                led_set_user_mode(LED_COUNT, false);
-                led_driver_reset_effect(DISABLE);
-                state_timeout_cnt = 0;
-                effect_reset_finished = SET;
-                effect_state = EFFECT_INIT;
-            }
-            else
-            {
-                effect_state = EFFECT_DEINIT;
-            }
+				led_set_user_mode(LED_COUNT, false);
+				led_driver_reset_effect(DISABLE);
+				state_timeout_cnt = 0;
+				effect_reset_finished = SET;
+				effect_state = EFFECT_INIT;
+			}
+			else
+			{
+				effect_state = EFFECT_DEINIT;
+			}
 
-        } break;
-    }
+		} break;
+	}
 }
 
 /*******************************************************************************
@@ -459,17 +459,17 @@ static void led_driver_knight_rider_effect_handler(void)
   *****************************************************************************/
 static void led_driver_bootloader_effect_handler(void)
 {
-    static uint8_t timeout;
-    static bool on;
+	static uint8_t timeout;
+	static bool on;
 
-    timeout++;
+	timeout++;
 
-    if (timeout >= 8) {
-        timeout = 0;
+	if (timeout >= 8) {
+		timeout = 0;
 
-        on = !on;
-        led_set_state(LED_COUNT, on);
-    }
+		on = !on;
+		led_set_state(LED_COUNT, on);
+	}
 }
 
 void __irq led_driver_effect_irq_handler(void)

@@ -12,30 +12,30 @@
 
 #include "compiler.h"
 
-#define LED_COUNT		12
+#define LED_COUNT	12
 
 enum colors {
-    WHITE_COLOR        = 0xFFFFFF,
-    RED_COLOR          = 0xFF0000,
-    GREEN_COLOR        = 0x00FF00,
-    BLUE_COLOR         = 0x0000FF,
-    BLACK_COLOR        = 0x000000,
-    YELLOW_COLOR       = 0xFFFF00,
+	WHITE_COLOR	= 0xFFFFFF,
+	RED_COLOR	= 0xFF0000,
+	GREEN_COLOR	= 0x00FF00,
+	BLUE_COLOR	= 0x0000FF,
+	BLACK_COLOR	= 0x000000,
+	YELLOW_COLOR	= 0xFFFF00,
 };
 
 enum led_names {
-    POWER_LED       = 11,
-    LAN0_LED        = 10,
-    LAN1_LED        = 9,
-    LAN2_LED        = 8,
-    LAN3_LED        = 7,
-    LAN4_LED        = 6,
-    WAN_LED         = 5,
-    PCI1_LED        = 3,
-    PCI2_LED        = 4,
-    MSATA_PCI_LED   = 2,
-    USER_LED1       = 1,
-    USER_LED2       = 0
+	POWER_LED	= 11,
+	LAN0_LED	= 10,
+	LAN1_LED	= 9,
+	LAN2_LED	= 8,
+	LAN3_LED	= 7,
+	LAN4_LED	= 6,
+	WAN_LED		= 5,
+	PCI1_LED	= 3,
+	PCI2_LED	= 4,
+	MSATA_PCI_LED	= 2,
+	USER_LED1	= 1,
+	USER_LED2	= 0,
 };
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
