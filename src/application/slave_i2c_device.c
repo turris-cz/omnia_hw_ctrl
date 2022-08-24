@@ -34,7 +34,8 @@ static const uint16_t slave_features_supported =
 #if OMNIA_BOARD_REVISION >= 32
 	FEAT_PERIPH_MCU |
 #endif
-	FEAT_EXT_CMDS;
+	FEAT_EXT_CMDS |
+	FEAT_LED_GAMMA_CORRECTION;
 
 enum boot_request_e {
     BOOTLOADER_REQ                      = 0xAA,
@@ -356,6 +357,24 @@ static int cmd_get_brightness(slave_i2c_state_t *state)
 	return 0;
 }
 
+static int cmd_set_gamma_correction(slave_i2c_state_t *state)
+{
+	debug("set_gamma_correction\n");
+	led_driver_set_gamma_correction(state->cmd[1] & BIT(0));
+
+	return 0;
+}
+
+static int cmd_get_gamma_correction(slave_i2c_state_t *state)
+{
+	uint8_t gamma_correction = led_driver_get_gamma_correction();
+
+	debug("get_gamma_correction\n");
+	set_reply(gamma_correction);
+
+	return 0;
+}
+
 static int cmd_watchdog_state(slave_i2c_state_t *state)
 {
 	watchdog.watchdog_state = state->cmd[1];
@@ -431,7 +450,11 @@ static int cmd_get_version(slave_i2c_state_t *state)
 typedef struct {
 	uint8_t len;
 	int (*handler)(slave_i2c_state_t *state);
-	bool leds_only;
+	enum {
+		MCU_ADDR_ONLY = 0,
+		LED_ADDR_ONLY,
+		BOTH_ADDRS,
+	} availability;
 } cmdinfo_t;
 
 static const cmdinfo_t commands[] = {
@@ -448,11 +471,15 @@ static const cmdinfo_t commands[] = {
 #endif
 
 	/* LEDs */
-	[CMD_LED_MODE]			= { 2, cmd_led_mode, 1 },
-	[CMD_LED_STATE]			= { 2, cmd_led_state, 1 },
-	[CMD_LED_COLOR]			= { 5, cmd_led_color, 1 },
-	[CMD_SET_BRIGHTNESS]		= { 2, cmd_set_brightness, 1 },
-	[CMD_GET_BRIGHTNESS]		= { 1, cmd_get_brightness, 1 },
+	[CMD_LED_MODE]			= { 2, cmd_led_mode, BOTH_ADDRS },
+	[CMD_LED_STATE]			= { 2, cmd_led_state, BOTH_ADDRS },
+	[CMD_LED_COLOR]			= { 5, cmd_led_color, BOTH_ADDRS },
+	[CMD_SET_BRIGHTNESS]		= { 2, cmd_set_brightness, BOTH_ADDRS },
+	[CMD_GET_BRIGHTNESS]		= { 1, cmd_get_brightness, BOTH_ADDRS },
+
+	/* LEDs, commands only available at LED controller I2C address */
+	[CMD_SET_GAMMA_CORRECTION]	= { 2, cmd_set_gamma_correction, LED_ADDR_ONLY },
+	[CMD_GET_GAMMA_CORRECTION]	= { 1, cmd_get_gamma_correction, LED_ADDR_ONLY },
 
 	/* watchdog */
 	[CMD_WATCHDOG_STATE]		= { 2, cmd_watchdog_state },
@@ -474,8 +501,12 @@ static int handle_cmd(uint8_t addr, slave_i2c_state_t *state)
 		return -1;
 
 	cmd = &commands[cmdidx];
-	if (!cmd->handler ||
-	    (addr == LED_CONTROLLER_I2C_ADDR && !cmd->leds_only))
+	if (!cmd->handler)
+		return -1;
+
+	if (cmd->availability != BOTH_ADDRS &&
+	    !(cmd->availability == MCU_ADDR_ONLY && addr == MCU_I2C_ADDR) &&
+	    !(cmd->availability == LED_ADDR_ONLY && addr == LED_CONTROLLER_I2C_ADDR))
 		return -1;
 
 	if (state->cmd_len < cmd->len)

@@ -59,6 +59,11 @@ enum commands_e {
     /* available if WDT_PING bit set in features */
     CMD_SET_WDT_TIMEOUT                 = 0x20,
     CMD_GET_WDT_TIMELEFT                = 0x21,
+
+    /* available only at address 0x2b (led-controller) */
+    /* available only if LED_GAMMA_CORRECTION bit set in features */
+    CMD_SET_GAMMA_CORRECTION            = 0x30,
+    CMD_GET_GAMMA_CORRECTION            = 0x31,
 };
 
 enum sts_word_e {
@@ -93,12 +98,13 @@ enum ctl_byte_e {
 };
 
 enum features_e {
-    FEAT_PERIPH_MCU         = BIT(0),
-    FEAT_EXT_CMDS           = BIT(1),
-    FEAT_WDT_PING           = BIT(2),
-    FEAT_LED_STATE_EXT_MASK = GENMASK(4, 3),
-    FEAT_LED_STATE_EXT      = FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 1),
-    FEAT_LED_STATE_EXT_V32  = FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 2),
+    FEAT_PERIPH_MCU           = BIT(0),
+    FEAT_EXT_CMDS             = BIT(1),
+    FEAT_WDT_PING             = BIT(2),
+    FEAT_LED_STATE_EXT_MASK   = GENMASK(4, 3),
+    FEAT_LED_STATE_EXT        = FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 1),
+    FEAT_LED_STATE_EXT_V32    = FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 2),
+    FEAT_LED_GAMMA_CORRECTION = BIT(5),
 };
 
 enum ext_sts_dword_e {
@@ -168,16 +174,18 @@ enum ext_ctl_e {
  * Bit meanings in features:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   PERIPH_MCU      : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
- *                                    (available to set via CMD_EXT_CONTROL command)
- *                                0 - otherwise
- *      1   |   EXT_CMDS        : 1 - extended control and status commands are available, 0 - otherwise
- *      2   |   WDT_PING        : 1 - CMD_SET_WDT_TIMEOUT and CMD_GET_WDT_TIMELEFT supported, 0 - otherwise
- *    3,4   |   LED_STATE_EXT   : 00 -> LED status extension not supported in extended status word
- *                                01 -> LED status extension supported, board revision <32
- *                                10 -> LED status extension supported, board revision >=32
- *                                11 -> reserved
- *  5..15   |   reserved
+ *      0   |   PERIPH_MCU           : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
+ *                                         (available to set via CMD_EXT_CONTROL command)
+ *                                     0 - otherwise
+ *      1   |   EXT_CMDS             : 1 - extended control and status commands are available, 0 - otherwise
+ *      2   |   WDT_PING             : 1 - CMD_SET_WDT_TIMEOUT and CMD_GET_WDT_TIMELEFT supported, 0 - otherwise
+ *    3,4   |   LED_STATE_EXT        : 00 -> LED status extension not supported in extended status word
+ *                                     01 -> LED status extension supported, board revision <32
+ *                                     10 -> LED status extension supported, board revision >=32
+ *                                     11 -> reserved
+ *      5   |   LED_GAMMA_CORRECTION : 1 - LEDs gamma correction is supported
+ *                                     0 - otherwise
+ *  6..15   |   reserved
 */
 
 /*

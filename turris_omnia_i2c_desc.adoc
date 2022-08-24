@@ -38,6 +38,11 @@ enum commands_e {
     /* available if WDT_PING bit set in features */
     CMD_SET_WDT_TIMEOUT        = 0x20,
     CMD_GET_WDT_TIMELEFT       = 0x21,
+
+    /* available only at address 0x2b (led-controller) */
+    /* available only if LED_GAMMA_CORRECTION bit set in features */
+    CMD_SET_GAMMA_CORRECTION   = 0x30,
+    CMD_GET_GAMMA_CORRECTION   = 0x31,
 };
 ----
 
@@ -92,16 +97,18 @@ enum commands_e {
  * Bit meanings in features:
  *  Bit Nr. |   Meanings
  * -----------------
- *      0   |   PERIPH_MCU      : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
- *                                    (available to set via CMD_EXT_CONTROL command)
- *                                0 - otherwise
- *      1   |   EXT_CMDS        : 1 - extended control and status commands are available, 0 - otherwise
- *      2   |   WDT_PING        : 1 - CMD_SET_WDT_TIMEOUT and CMD_GET_WDT_TIMELEFT supported, 0 - otherwise
- *    3,4   |   LED_STATE_EXT   : 00 -> LED status extension not supported in extended status word
- *                                01 -> LED status extension supported, board revision <32
- *                                10 -> LED status extension supported, board revision >=32
- *                                11 -> reserved
- *  5..15   |   reserved
+ *      0   |   PERIPH_MCU           : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
+ *                                         (available to set via CMD_EXT_CONTROL command)
+ *                                     0 - otherwise
+ *      1   |   EXT_CMDS             : 1 - extended control and status commands are available, 0 - otherwise
+ *      2   |   WDT_PING             : 1 - CMD_SET_WDT_TIMEOUT and CMD_GET_WDT_TIMELEFT supported, 0 - otherwise
+ *    3,4   |   LED_STATE_EXT        : 00 -> LED status extension not supported in extended status word
+ *                                     01 -> LED status extension supported, board revision <32
+ *                                     10 -> LED status extension supported, board revision >=32
+ *                                     11 -> reserved
+ *      5   |   LED_GAMMA_CORRECTION : 1 - LEDs gamma correction is supported
+ *                                     0 - otherwise
+ *  6..15   |   reserved
 */
 
 * Example of a reading of features from Linux:
@@ -349,6 +356,35 @@ NOTE: LED numbers are reversed. LED11 (the first LED from the left) is POWER_LED
 *** 1 -> i2cbus number
 *** 0x2A -> I2C address of the slave
 *** 8 -> "address of the register" = command
+***	b -> byte data type
+
+
+=== CMD_SET_GAMMA_CORRECTION
+* Enables/disables gamma correction
+* Available only if LED_GAMMA_CORRECTION feature bit is set
+* Available only at address 0x2B (LED controller)
+* Write only
+
+* Example of enabling gamma correction
+** "i2cset 1 0x2B 0x30 1 b"
+*** 1 -> i2cbus number
+*** 0x2B -> I2C address of the LED controller
+*** 0x30 -> command
+*** 1 -> enable (0 for disable)
+***	b -> byte data type
+
+
+=== CMD_GET_GAMMA_CORRECTION
+* Reads gamma correction status
+* Available only if LED_GAMMA_CORRECTION feature bit is set
+* Available only at address 0x2B (LED controller)
+* Read only
+
+* Example of reading whether gamma correction is enabled
+** "i2cget 1 0x2B 0x31 b"
+*** 1 -> i2cbus number
+*** 0x2B -> I2C address of the LED controller
+*** 0x31 -> command
 ***	b -> byte data type
 
 

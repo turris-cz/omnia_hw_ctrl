@@ -77,22 +77,80 @@ bool effect_reset_finished;
 
 static uint8_t pwm_brightness;
 
-static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
+static bool gamma_correction;
+
+static const uint8_t gamma_table_r[256] = {
+	  0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,
+	  2,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   4,
+	  4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6,   6,   6,   6,   6,   7,
+	  7,   7,   7,   8,   8,   8,   8,   9,   9,   9,  10,  10,  10,  10,  11,  11,
+	 11,  12,  12,  12,  13,  13,  13,  14,  14,  15,  15,  15,  16,  16,  17,  17,
+	 17,  18,  18,  19,  19,  20,  20,  21,  21,  22,  22,  23,  23,  24,  24,  25,
+	 25,  26,  26,  27,  28,  28,  29,  29,  30,  31,  31,  32,  32,  33,  34,  34,
+	 35,  36,  37,  37,  38,  39,  39,  40,  41,  42,  43,  43,  44,  45,  46,  47,
+	 47,  48,  49,  50,  51,  52,  53,  54,  54,  55,  56,  57,  58,  59,  60,  61,
+	 62,  63,  64,  65,  66,  67,  68,  70,  71,  72,  73,  74,  75,  76,  77,  79,
+	 80,  81,  82,  83,  85,  86,  87,  88,  90,  91,  92,  94,  95,  96,  98,  99,
+	100, 102, 103, 105, 106, 108, 109, 110, 112, 113, 115, 116, 118, 120, 121, 123,
+	124, 126, 128, 129, 131, 132, 134, 136, 138, 139, 141, 143, 145, 146, 148, 150,
+	152, 154, 155, 157, 159, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181,
+	183, 185, 187, 189, 191, 193, 196, 198, 200, 202, 204, 207, 209, 211, 214, 216,
+	218, 220, 223, 225, 228, 230, 232, 235, 237, 240, 242, 245, 247, 250, 252, 255,
+};
+
+static const uint8_t gamma_table_gb[256] = {
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
+	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,
+	  2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,
+	  3,   3,   3,   4,   4,   4,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,
+	  5,   5,   6,   6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   8,   8,   8,
+	  8,   8,   9,   9,   9,   9,   9,  10,  10,  10,  10,  11,  11,  11,  11,  12,
+	 12,  12,  12,  13,  13,  13,  14,  14,  14,  14,  15,  15,  15,  16,  16,  16,
+	 17,  17,  17,  18,  18,  18,  19,  19,  19,  20,  20,  20,  21,  21,  22,  22,
+	 22,  23,  23,  24,  24,  24,  25,  25,  26,  26,  27,  27,  27,  28,  28,  29,
+	 29,  30,  30,  31,  31,  32,  32,  33,  33,  34,  34,  35,  35,  36,  36,  37,
+	 38,  38,  39,  39,  40,  40,  41,  42,  42,  43,  43,  44,  45,  45,  46,  47,
+	 47,  48,  49,  49,  50,  51,  51,  52,  53,  53,  54,  55,  56,  56,  57,  58,
+	 58,  59,  60,  61,  62,  62,  63,  64,  65,  66,  66,  67,  68,  69,  70,  71,
+	 71,  72,  73,  74,  75,  76,  77,  78,  79,  79,  80,  81,  82,  83,  84,  85,
+	 86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 102,
+	103, 104, 105, 106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 118, 119, 120,
+};
+
+static void _led_set_levels(unsigned led)
 {
+	uint8_t r, g, b;
+	unsigned idx;
+
+	r = leds[led].color.r;
+	g = leds[led].color.g;
+	b = leds[led].color.b;
+
+	if (!BOOTLOADER_BUILD && gamma_correction) {
+		r = gamma_table_r[r];
+		g = gamma_table_gb[g];
+		b = gamma_table_gb[b];
+	}
+
 	/* this is due to how we compute corresponding bits in
 	 * led_driver_prepare_data(). We do this rearrangement here so that
 	 * we save time there. */
-	unsigned idx = (led << 1) - ((led > 5) ? 11 : 0);
-
-	leds[led].color.r = r;
-	leds[led].color.g = g;
-	leds[led].color.b = b;
+	idx = (led << 1) - ((led > 5) ? 11 : 0);
 
 	/* always set bit 15 for fast comparison (two values at once) in
 	 * led_driver_prepare_data() */
 	led_levels[0].value[idx] = BIT(15) | r;
 	led_levels[1].value[idx] = BIT(15) | g;
 	led_levels[2].value[idx] = BIT(15) | b;
+}
+
+static void _led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b)
+{
+	leds[led].color.r = r;
+	leds[led].color.g = g;
+	leds[led].color.b = b;
+
+	_led_set_levels(led);
 }
 
 /*******************************************************************************
@@ -116,6 +174,22 @@ void led_set_color(unsigned led, uint32_t color)
 	} else {
 		_led_set_color(led, r, g, b);
 	}
+}
+
+void led_driver_set_gamma_correction(bool on)
+{
+	if (gamma_correction == on)
+		return;
+
+	gamma_correction = on;
+
+	for (int led = 0; led < LED_COUNT; ++led)
+		_led_set_levels(led);
+}
+
+bool led_driver_get_gamma_correction(void)
+{
+	return gamma_correction;
 }
 
 /*******************************************************************************

@@ -59,6 +59,9 @@ void led_driver_config(void);
   *****************************************************************************/
 void led_set_color(unsigned led, uint32_t color);
 
+void led_driver_set_gamma_correction(bool on);
+bool led_driver_get_gamma_correction(void);
+
 /*******************************************************************************
   * @function   led_driver_irq_handler
   * @brief      Send RGB LEDs frame. Called as LED driver timer interrupt.
