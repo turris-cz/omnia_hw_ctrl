@@ -403,7 +403,7 @@ void power_control_usb_timeout_config(void)
   *****************************************************************************/
 void power_control_usb_timeout_enable(void)
 {
-    timer_enable(USB_TIMEOUT_TIMER, 1);
+    timer_enable(USB_TIMEOUT_TIMER, true);
 }
 
 /*******************************************************************************
@@ -415,7 +415,7 @@ void power_control_usb_timeout_enable(void)
 void power_control_usb_timeout_disable(void)
 {
     /* disable timer and set initial condition */
-    timer_enable(USB_TIMEOUT_TIMER, 0);
+    timer_enable(USB_TIMEOUT_TIMER, false);
     timer_set_counter(USB_TIMEOUT_TIMER, 0);
 }
 

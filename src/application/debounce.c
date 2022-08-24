@@ -56,7 +56,7 @@ static void debounce_timer_config(void)
 {
     timer_init(DEBOUNCE_TIMER, timer_interrupt,
                DEBOUNCE_PERIOD, DEBOUNCE_FREQ, 3);
-    timer_enable(DEBOUNCE_TIMER, 1);
+    timer_enable(DEBOUNCE_TIMER, true);
 }
 
 /*******************************************************************************
