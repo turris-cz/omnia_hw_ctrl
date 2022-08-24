@@ -27,8 +27,8 @@
 #define FULL_BRIGHTNESS		100
 #define EFFECT_TIMEOUT		5
 
-#define LED_PWM_PERIOD		2000
-#define LED_PWM_FREQ		8000000
+#define LED_PWM_PERIOD		100
+#define LED_PWM_FREQ		4000000
 
 enum {
 	RED = 0,
