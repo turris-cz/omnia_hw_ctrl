@@ -27,8 +27,8 @@ static struct {
 	uint32_t crcsum;
 } app_checksum __section(".crcsum");
 
-#define I2C_SLAVE_ADDRESS		0x2a
-#define I2C_SLAVE_ADDRESS_EMULATOR	0x2b
+#define MCU_I2C_ADDR			0x2a
+#define LED_CONTROLLER_I2C_ADDR		0x2b
 
 static const uint16_t slave_features_supported =
 #if OMNIA_BOARD_REVISION >= 32
@@ -475,7 +475,7 @@ static int handle_cmd(uint8_t addr, slave_i2c_state_t *state)
 
 	cmd = &commands[cmdidx];
 	if (!cmd->handler ||
-	    (addr == I2C_SLAVE_ADDRESS_EMULATOR && !cmd->leds_only))
+	    (addr == LED_CONTROLLER_I2C_ADDR && !cmd->leds_only))
 		return -1;
 
 	if (state->cmd_len < cmd->len)
@@ -547,6 +547,6 @@ static i2c_slave_t i2c_slave = {
   *****************************************************************************/
 void slave_i2c_config(void)
 {
-	i2c_slave_init(SLAVE_I2C, &i2c_slave,
-		       I2C_SLAVE_ADDRESS, I2C_SLAVE_ADDRESS_EMULATOR, 1);
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
+		       LED_CONTROLLER_I2C_ADDR, 1);
 }
