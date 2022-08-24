@@ -70,8 +70,10 @@ static union {
 
 static struct led leds[LED_COUNT];
 
-bool effect_reset_finished; /* flag is set when LED effect after reset is
-finished and normal operation can take the LED control */
+/* Indicates that initialization effect is done, so that application will can
+ * start updating LED states according to PHY / switch / PCIe / mSATA pins.
+ */
+bool effect_reset_finished;
 
 static uint8_t pwm_brightness;
 
