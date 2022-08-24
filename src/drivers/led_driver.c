@@ -24,10 +24,8 @@
 #define LED_PWM_PIN		PIN(A, 3)
 
 #define COLOR_LEVELS		256
-#define FULL_BRIGHTNESS		100
 #define EFFECT_TIMEOUT		5
 
-#define LED_PWM_PERIOD		100
 #define LED_PWM_FREQ		4000000
 
 enum {
@@ -298,11 +296,11 @@ void led_driver_config(void)
 	/* Configure PWM pin and timer */
 	gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1, pin_pullup,
 		       LED_PWM_PIN);
-	timer_init(LED_PWM_TIMER, timer_pwm, LED_PWM_PERIOD, LED_PWM_FREQ, 0);
+	timer_init(LED_PWM_TIMER, timer_pwm, 100, LED_PWM_FREQ, 0);
 	timer_enable(LED_PWM_TIMER, true);
 
 	/* Set initial PWM brightness */
-	led_driver_set_brightness(FULL_BRIGHTNESS);
+	led_driver_set_brightness(100);
 
 	/* Initialize timer (every tick we send one frame) */
 	timer_init(LED_TIMER, timer_interrupt, 50, 2400000, 4);
@@ -314,28 +312,24 @@ void led_driver_config(void)
 
 /*******************************************************************************
   * @function   led_driver_set_brightness
-  * @brief      Set PWM value.
-  * @param      procent_val: PWM value in [%].
+  * @brief      Set PWM brightness.
+  * @param      value: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_brightness(uint8_t procent_val)
+void led_driver_set_brightness(uint8_t value)
 {
-	uint16_t counter_val;
+	if (value > 100)
+		value = 100;
 
-	if (procent_val > FULL_BRIGHTNESS)
-		procent_val = FULL_BRIGHTNESS;
-
-	counter_val = procent_val * LED_PWM_PERIOD / FULL_BRIGHTNESS;
-
-	timer_set_pulse(LED_PWM_TIMER, counter_val);
-	pwm_brightness = procent_val;
+	timer_set_pulse(LED_PWM_TIMER, value);
+	pwm_brightness = value;
 }
 
 /*******************************************************************************
   * @function   led_driver_get_brightness
-  * @brief      Set PWM value.
+  * @brief      Get PWM brightness.
   * @param      None.
-  * @retval     procent_val: PWM value in [%].
+  * @retval     PWM value in [%].
   *****************************************************************************/
 uint8_t led_driver_get_brightness(void)
 {
