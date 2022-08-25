@@ -136,9 +136,27 @@ static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 	return up;
 }
 
+static __force_inline void timer_set_period(timer_nr_t tim_nr, uint16_t period)
+{
+	timer_to_plat(tim_nr)->ARR = period - 1;
+}
+
+static __force_inline void timer_set_freq(timer_nr_t tim_nr, uint32_t freq)
+{
+	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
+			   "Requested frequency unachievable");
+
+	timer_to_plat(tim_nr)->PSC = (TIMER_PARENT_FREQ / freq) - 1;
+}
+
 static __force_inline void timer_set_counter(timer_nr_t tim_nr, uint32_t cnt)
 {
 	timer_to_plat(tim_nr)->CNT = cnt;
+}
+
+static __force_inline uint16_t timer_get_counter(timer_nr_t tim_nr)
+{
+	return timer_to_plat(tim_nr)->CNT;
 }
 
 static __force_inline void timer_set_pulse(timer_nr_t tim_nr, uint32_t pulse)
