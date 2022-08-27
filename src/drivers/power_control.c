@@ -31,9 +31,10 @@
 /* Private define ------------------------------------------------------------*/
 
 /* defines for timeout handling during regulator startup */
-#define DELAY_AFTER_ENABLE      5
-#define DELAY_BETWEEN_READINGS  20
-#define TIMEOUT                 100 /* DELAY_BETWEEN_READINGS * 100 = 2 sec */
+#define DELAY_AFTER_ENABLE		5
+#define DELAY_BETWEEN_READINGS		20
+/* DELAY_BETWEEN_READINGS * 100 = 2 sec */
+#define TIMEOUT				100
 
 #define RESET_SELECTOR_LEVEL_TIMEOUT	10
 
@@ -57,26 +58,26 @@ typedef enum {
   *****************************************************************************/
 void power_control_io_config(void)
 {
-    /* Output signals */
-    gpio_init_outputs(pin_pushpull, pin_spd_2, 0,
-                      RES_RAM_PIN, ENABLE_5V_PIN, ENABLE_3V3_PIN,
-                      ENABLE_1V35_PIN, ENABLE_4V5_PIN, ENABLE_1V8_PIN,
-                      ENABLE_1V5_PIN, ENABLE_1V2_PIN, ENABLE_VTT_PIN,
-                      USB30_PWRON_PIN, USB31_PWRON_PIN, CFG_CTRL_PIN);
-    gpio_init_outputs(pin_pushpull, pin_spd_2, 1, INT_MCU_PIN);
+	/* Output signals */
+	gpio_init_outputs(pin_pushpull, pin_spd_2, 0,
+			  RES_RAM_PIN, ENABLE_5V_PIN, ENABLE_3V3_PIN,
+			  ENABLE_1V35_PIN, ENABLE_4V5_PIN, ENABLE_1V8_PIN,
+			  ENABLE_1V5_PIN, ENABLE_1V2_PIN, ENABLE_VTT_PIN,
+			  USB30_PWRON_PIN, USB31_PWRON_PIN, CFG_CTRL_PIN);
+	gpio_init_outputs(pin_pushpull, pin_spd_2, 1, INT_MCU_PIN);
 
-    gpio_init_outputs(pin_opendrain, pin_spd_2, 0, MANRES_PIN);
-    gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
+	gpio_init_outputs(pin_opendrain, pin_spd_2, 0, MANRES_PIN);
+	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
-    /* Input signals */
-    gpio_init_inputs(pin_pullup,
-                     PG_5V_PIN, PG_3V3_PIN, PG_1V35_PIN, PG_4V5_PIN,
-                     PG_1V8_PIN, PG_1V5_PIN, PG_1V2_PIN, PG_VTT_PIN,
-                     USB30_OVC_PIN, USB31_OVC_PIN, LED_BRT_PIN,
-                     DBGRES_PIN, MRES_PIN, RTC_ALARM_PIN);
+	/* Input signals */
+	gpio_init_inputs(pin_pullup,
+			 PG_5V_PIN, PG_3V3_PIN, PG_1V35_PIN, PG_4V5_PIN,
+			 PG_1V8_PIN, PG_1V5_PIN, PG_1V2_PIN, PG_VTT_PIN,
+			 USB30_OVC_PIN, USB31_OVC_PIN, LED_BRT_PIN,
+			 DBGRES_PIN, MRES_PIN, RTC_ALARM_PIN);
 
 #if USER_REGULATOR_ENABLED
-    gpio_init_outputs(pin_pushpull, pin_spd_2, 0, PRG_4V5_PIN);
+	gpio_init_outputs(pin_pushpull, pin_spd_2, 0, PRG_4V5_PIN);
 #endif
 }
 
@@ -88,10 +89,10 @@ void power_control_io_config(void)
   *****************************************************************************/
 void power_control_set_startup_condition(void)
 {
-    gpio_write(CFG_CTRL_PIN, 1); /* disconnect switches */
-    gpio_write(MANRES_PIN, 0); /* board reset activated */
-    power_control_usb(USB3_PORT0, USB_ON);
-    power_control_usb(USB3_PORT1, USB_ON);
+	gpio_write(CFG_CTRL_PIN, 1); /* disconnect switches */
+	gpio_write(MANRES_PIN, 0); /* board reset activated */
+	power_control_usb(USB3_PORT0, USB_ON);
+	power_control_usb(USB3_PORT1, USB_ON);
 }
 
 typedef struct {
@@ -177,16 +178,16 @@ int power_control_enable_regulators(void)
   *****************************************************************************/
 void power_control_disable_regulators(void)
 {
-    /* don't collapse this into one call of gpio_write_multi(), since these
-     * should be disabled in the given order */
-    gpio_write(ENABLE_1V2_PIN, 0);
-    gpio_write(ENABLE_1V35_PIN, 0);
-    gpio_write(ENABLE_VTT_PIN, 0);
-    gpio_write(ENABLE_1V5_PIN, 0);
-    gpio_write(ENABLE_1V8_PIN, 0);
-    gpio_write(ENABLE_3V3_PIN, 0);
-    gpio_write(ENABLE_4V5_PIN, 0);
-    gpio_write(ENABLE_5V_PIN, 0);
+	/* don't collapse this into one call of gpio_write_multi(), since these
+	 * should be disabled in the given order */
+	gpio_write(ENABLE_1V2_PIN, 0);
+	gpio_write(ENABLE_1V35_PIN, 0);
+	gpio_write(ENABLE_VTT_PIN, 0);
+	gpio_write(ENABLE_1V5_PIN, 0);
+	gpio_write(ENABLE_1V8_PIN, 0);
+	gpio_write(ENABLE_3V3_PIN, 0);
+	gpio_write(ENABLE_4V5_PIN, 0);
+	gpio_write(ENABLE_5V_PIN, 0);
 }
 
 /*******************************************************************************
@@ -198,8 +199,8 @@ void power_control_disable_regulators(void)
   *****************************************************************************/
 void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
 {
-    gpio_write(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN,
-               usb_state != USB_ON);
+	gpio_write(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN,
+		   usb_state != USB_ON);
 }
 
 /*******************************************************************************
@@ -210,7 +211,7 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
   *****************************************************************************/
 bool power_control_get_usb_overcurrent(usb_ports_t usb_port)
 {
-    return !gpio_read(usb_port == USB3_PORT0 ? USB30_OVC_PIN : USB31_OVC_PIN);
+	return !gpio_read(usb_port == USB3_PORT0 ? USB30_OVC_PIN : USB31_OVC_PIN);
 }
 
 /*******************************************************************************
@@ -221,7 +222,7 @@ bool power_control_get_usb_overcurrent(usb_ports_t usb_port)
   *****************************************************************************/
 bool power_control_get_usb_poweron(usb_ports_t usb_port)
 {
-    return !gpio_read(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN);
+	return !gpio_read(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN);
 }
 
 /*******************************************************************************
@@ -232,7 +233,7 @@ bool power_control_get_usb_poweron(usb_ports_t usb_port)
   *****************************************************************************/
 void power_control_usb_timeout_config(void)
 {
-    timer_init(USB_TIMEOUT_TIMER, timer_interrupt, 8000, 8000, 5);
+	timer_init(USB_TIMEOUT_TIMER, timer_interrupt, 8000, 8000, 5);
 }
 
 /*******************************************************************************
@@ -243,7 +244,7 @@ void power_control_usb_timeout_config(void)
   *****************************************************************************/
 void power_control_usb_timeout_enable(void)
 {
-    timer_enable(USB_TIMEOUT_TIMER, true);
+	timer_enable(USB_TIMEOUT_TIMER, true);
 }
 
 /*******************************************************************************
@@ -254,9 +255,9 @@ void power_control_usb_timeout_enable(void)
   *****************************************************************************/
 void power_control_usb_timeout_disable(void)
 {
-    /* disable timer and set initial condition */
-    timer_enable(USB_TIMEOUT_TIMER, false);
-    timer_set_counter(USB_TIMEOUT_TIMER, 0);
+	/* disable timer and set initial condition */
+	timer_enable(USB_TIMEOUT_TIMER, false);
+	timer_set_counter(USB_TIMEOUT_TIMER, 0);
 }
 
 #if !BOOTLOADER_BUILD
@@ -268,17 +269,17 @@ void power_control_usb_timeout_disable(void)
   *****************************************************************************/
 void __irq power_control_usb_timeout_irq_handler(void)
 {
-    struct st_i2c_status *i2c_control = &i2c_status;
+	struct st_i2c_status *i2c_control = &i2c_status;
 
-    if (!timer_irq_clear_up(USB_TIMEOUT_TIMER))
-        return;
+	if (!timer_irq_clear_up(USB_TIMEOUT_TIMER))
+		return;
 
-    power_control_usb(USB3_PORT0, USB_ON);
-    power_control_usb(USB3_PORT1, USB_ON);
+	power_control_usb(USB3_PORT0, USB_ON);
+	power_control_usb(USB3_PORT1, USB_ON);
 
-    i2c_control->status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
+	i2c_control->status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
 
-    power_control_usb_timeout_disable();
+	power_control_usb_timeout_disable();
 }
 #endif
 
@@ -406,8 +407,8 @@ void power_control_first_startup(void)
   *****************************************************************************/
 void power_control_set_power_led(void)
 {
-    led_set_color24(POWER_LED, WHITE_COLOR);
-    led_set_state(POWER_LED, true);
+	led_set_color24(POWER_LED, WHITE_COLOR);
+	led_set_state(POWER_LED, true);
 }
 
 /*******************************************************************************
@@ -418,7 +419,7 @@ void power_control_set_power_led(void)
   *****************************************************************************/
 void power_led_activity(void)
 {
-    led_set_state_nocommit(POWER_LED, true);
+	led_set_state_nocommit(POWER_LED, true);
 }
 
 #if USER_REGULATOR_ENABLED
@@ -516,34 +517,34 @@ static __force_inline void user_reg_prg_logic(bool val)
   *****************************************************************************/
 static void power_control_set_voltage33(void)
 {
-     /* start condition */
-     user_reg_prg_logic(1);
+	/* start condition */
+	user_reg_prg_logic(1);
 
-     /* chip select */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
+	/* chip select */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
 
-     /* register address */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
+	/* register address */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
 
-     /* datafield - 0xDF */
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
+	/* datafield - 0xDF */
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
 
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
 
-     /* stop condition */
-     user_reg_prg_logic(1);
+	/* stop condition */
+	user_reg_prg_logic(1);
 }
 
 /*******************************************************************************
@@ -554,34 +555,34 @@ static void power_control_set_voltage33(void)
   *****************************************************************************/
 static void power_control_set_voltage36(void)
 {
-     /* start condition */
-     user_reg_prg_logic(1);
+	/* start condition */
+	user_reg_prg_logic(1);
 
-     /* chip select */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
+	/* chip select */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
 
-     /* register address */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
+	/* register address */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
 
-     /* datafield - 0xEF */
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
+	/* datafield - 0xEF */
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
 
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
 
-     /* stop condition */
-     user_reg_prg_logic(1);
+	/* stop condition */
+	user_reg_prg_logic(1);
 }
 
 /*******************************************************************************
@@ -592,34 +593,34 @@ static void power_control_set_voltage36(void)
   *****************************************************************************/
 static void power_control_set_voltage51(void)
 {
-     /* start condition */
-     user_reg_prg_logic(1);
+	/* start condition */
+	user_reg_prg_logic(1);
 
-     /* chip select */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
+	/* chip select */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
 
-     /* register address */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
+	/* register address */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
 
-     /* datafield - 0xFC */
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
+	/* datafield - 0xFC */
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
 
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
 
-     /* stop condition */
-     user_reg_prg_logic(1);
+	/* stop condition */
+	user_reg_prg_logic(1);
 }
 
 /*******************************************************************************
@@ -630,34 +631,34 @@ static void power_control_set_voltage51(void)
   *****************************************************************************/
 static void power_control_set_voltage45(void)
 {
-     /* start condition */
-     user_reg_prg_logic(1);
+	/* start condition */
+	user_reg_prg_logic(1);
 
-     /* chip select */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
+	/* chip select */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
 
-     /* register address */
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
+	/* register address */
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
 
-     /* datafield - 0xF8 */
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(1);
+	/* datafield - 0xF8 */
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(1);
 
-     user_reg_prg_logic(1);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
-     user_reg_prg_logic(0);
+	user_reg_prg_logic(1);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
+	user_reg_prg_logic(0);
 
-     /* stop condition */
-     user_reg_prg_logic(1);
+	/* stop condition */
+	user_reg_prg_logic(1);
 }
 
 /*******************************************************************************
@@ -668,16 +669,16 @@ static void power_control_set_voltage45(void)
   *****************************************************************************/
 void power_control_set_voltage(voltage_value_t voltage)
 {
-    /* delay at least 10us before the next sequence */
-    switch (voltage)
-    {
-        case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */
-        case VOLTAGE_36: power_control_set_voltage36(); break; /* 3.63V */
-        case VOLTAGE_45: power_control_set_voltage45(); break; /* 4.5V */
-        case VOLTAGE_51: power_control_set_voltage51(); break; /* 5.125V */
-        default:
-            break;
-    }
+	/* delay at least 10us before the next sequence */
+	switch (voltage)
+	{
+		case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */
+		case VOLTAGE_36: power_control_set_voltage36(); break; /* 3.63V */
+		case VOLTAGE_45: power_control_set_voltage45(); break; /* 4.5V */
+		case VOLTAGE_51: power_control_set_voltage51(); break; /* 5.125V */
+		default:
+			break;
+	}
 }
 #endif /* USER_REGULATOR_ENABLED */
 
@@ -689,13 +690,13 @@ void power_control_set_voltage(voltage_value_t voltage)
   *****************************************************************************/
 void periph_control_io_config(void)
 {
-    gpio_init_inputs(pin_pullup, SFP_nDET_PIN);
-    gpio_init_outputs(pin_opendrain, pin_spd_2, 0,
-                      nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN,
-                      nPERST0_PIN, nPERST1_PIN, nPERST2_PIN,
-                      nVHV_CTRL_PIN, PHY_SFP_PIN);
+	gpio_init_inputs(pin_pullup, SFP_nDET_PIN);
+	gpio_init_outputs(pin_opendrain, pin_spd_2, 0,
+			  nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN,
+			  nPERST0_PIN, nPERST1_PIN, nPERST2_PIN,
+			  nVHV_CTRL_PIN, PHY_SFP_PIN);
 
-    gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
+	gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
 }
 
 /*******************************************************************************
@@ -706,10 +707,10 @@ void periph_control_io_config(void)
   *****************************************************************************/
 uint16_t periph_control_rst_init(void)
 {
-    gpio_write_multi(0, nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN, nPERST0_PIN,
-                     nPERST1_PIN, nPERST2_PIN);
+	gpio_write_multi(0, nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN, nPERST0_PIN,
+			 nPERST1_PIN, nPERST2_PIN);
 
-    gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
+	gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
 
-    return EXT_CTL_PHY_SFP | EXT_CTL_nVHV_CTRL;
+	return EXT_CTL_PHY_SFP | EXT_CTL_nVHV_CTRL;
 }

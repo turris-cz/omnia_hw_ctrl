@@ -58,20 +58,20 @@
 #define SFP_nDET_PIN		PIN(D, 2, OMNIA_BOARD_REVISION >= 32)
 
 typedef enum voltages {
-    VOLTAGE_33 = 1,
-    VOLTAGE_36 = 2,
-    VOLTAGE_45 = 3,
-    VOLTAGE_51 = 4,
+	VOLTAGE_33 = 1,
+	VOLTAGE_36 = 2,
+	VOLTAGE_45 = 3,
+	VOLTAGE_51 = 4,
 }voltage_value_t;
 
 typedef enum usb_states {
-    USB_OFF = 0,
-    USB_ON  = 1
+	USB_OFF = 0,
+	USB_ON  = 1
 }usb_state_t;
 
 typedef enum usb_ports {
-    USB3_PORT0 = 0,
-    USB3_PORT1 = 1
+	USB3_PORT0 = 0,
+	USB3_PORT1 = 1
 }usb_ports_t;
 
 /*******************************************************************************
