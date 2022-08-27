@@ -197,7 +197,7 @@ void power_control_disable_regulators(void)
   * @param      usb_state: USB_ON or USB_OFF.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
+void power_control_usb(usb_port_t usb_port, usb_state_t usb_state)
 {
 	gpio_write(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN,
 		   usb_state != USB_ON);
@@ -209,7 +209,7 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state)
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @retval     1 - USB overcurrent ocurred; 0 - no USB overcurrent
   *****************************************************************************/
-bool power_control_get_usb_overcurrent(usb_ports_t usb_port)
+bool power_control_get_usb_overcurrent(usb_port_t usb_port)
 {
 	return !gpio_read(usb_port == USB3_PORT0 ? USB30_OVC_PIN : USB31_OVC_PIN);
 }
@@ -220,7 +220,7 @@ bool power_control_get_usb_overcurrent(usb_ports_t usb_port)
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @retval     1 - USB power ON; 0 - USB power OFF
   *****************************************************************************/
-bool power_control_get_usb_poweron(usb_ports_t usb_port)
+bool power_control_get_usb_poweron(usb_port_t usb_port)
 {
 	return !gpio_read(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN);
 }
@@ -667,7 +667,7 @@ static void power_control_set_voltage45(void)
   * @param      voltage: enum value for desired voltage.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(voltage_value_t voltage)
+void power_control_set_voltage(user_reg_voltage_t voltage)
 {
 	/* delay at least 10us before the next sequence */
 	switch (voltage)

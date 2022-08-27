@@ -57,22 +57,22 @@
 /* v32 specific inputs */
 #define SFP_nDET_PIN		PIN(D, 2, OMNIA_BOARD_REVISION >= 32)
 
-typedef enum voltages {
+typedef enum {
 	VOLTAGE_33 = 1,
 	VOLTAGE_36 = 2,
 	VOLTAGE_45 = 3,
 	VOLTAGE_51 = 4,
-}voltage_value_t;
+} user_reg_voltage_t;
 
-typedef enum usb_states {
+typedef enum {
 	USB_OFF = 0,
 	USB_ON  = 1
-}usb_state_t;
+} usb_state_t;
 
-typedef enum usb_ports {
+typedef enum {
 	USB3_PORT0 = 0,
 	USB3_PORT1 = 1
-}usb_ports_t;
+} usb_port_t;
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -105,7 +105,7 @@ void power_control_disable_regulators(void);
   * @param      usb_state: USB_ON or USB_OFF.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
+void power_control_usb(usb_port_t usb_port, usb_state_t usb_state);
 
 /*******************************************************************************
   * @function   power_control_first_startup
@@ -129,7 +129,7 @@ void power_control_usb_timeout_config(void);
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @retval     1 - USB overcurrent ocurred; 0 - no USB overcurrent
   *****************************************************************************/
-bool power_control_get_usb_overcurrent(usb_ports_t usb_port);
+bool power_control_get_usb_overcurrent(usb_port_t usb_port);
 
 /*******************************************************************************
   * @function   power_control_get_usb_poweron
@@ -137,7 +137,7 @@ bool power_control_get_usb_overcurrent(usb_ports_t usb_port);
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
   * @retval     1 - USB power ON; 0 - USB power OFF
   *****************************************************************************/
-bool power_control_get_usb_poweron(usb_ports_t usb_port);
+bool power_control_get_usb_poweron(usb_port_t usb_port);
 
 /*******************************************************************************
   * @function   power_control_set_startup_condition
@@ -193,7 +193,7 @@ void power_control_usb_timeout_irq_handler(void);
   * @param      voltage: enum value for desired voltage.
   * @retval     None.
   *****************************************************************************/
-void power_control_set_voltage(voltage_value_t voltage);
+void power_control_set_voltage(user_reg_voltage_t voltage);
 
 /*******************************************************************************
   * @function   periph_control_io_config
