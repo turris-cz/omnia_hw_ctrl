@@ -14,7 +14,6 @@
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
 #include "power_control.h"
-#include "delay.h"
 #include "debounce.h"
 #include "eeprom.h"
 #include "msata_pci.h"

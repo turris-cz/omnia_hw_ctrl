@@ -10,7 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "cpu.h"
 #include "power_control.h"
-#include "delay.h"
+#include "time.h"
 #include "led_driver.h"
 #include "slave_i2c_device.h"
 #include "debug.h"

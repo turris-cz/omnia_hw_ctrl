@@ -19,7 +19,7 @@
 #include "cpu.h"
 #include "flash.h"
 #include "memory_layout.h"
-#include "delay.h"
+#include "time.h"
 #include "watchdog.h"
 
 #define MAX_ERROR_COUNT		5
@@ -85,7 +85,7 @@ static void app_mcu_init(void)
 			break;
 	}
 
-	delay_systimer_config();
+	time_config();
 	/* init ports and peripheral */
 	power_control_io_config();
 	msata_pci_indication_config();

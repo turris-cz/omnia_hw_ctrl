@@ -9,7 +9,7 @@
  **/
 #include "boot_i2c.h"
 #include "power_control.h"
-#include "delay.h"
+#include "time.h"
 #include "eeprom.h"
 #include "debug.h"
 #include "bootloader.h"
@@ -50,7 +50,7 @@ static void bootloader_init(void)
     debug_init();
 
     /* peripheral initialization*/
-    delay_systimer_config();
+    time_config();
     led_driver_config();
     boot_i2c_config();
 

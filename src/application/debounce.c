@@ -9,7 +9,7 @@
  **/
 #include "debounce.h"
 #include "power_control.h"
-#include "delay.h"
+#include "time.h"
 #include "led_driver.h"
 #include "wan_lan_pci_status.h"
 #include "msata_pci.h"

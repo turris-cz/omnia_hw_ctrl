@@ -11,7 +11,6 @@
 #include "debug.h"
 #include "led_driver.h"
 #include "power_control.h"
-#include "delay.h"
 #include "eeprom.h"
 #include "flash.h"
 #include "i2c_slave.h"

@@ -1,24 +1,33 @@
 /**
-  ******************************************************************************
-  * @file    delay.h
-  * @author  CZ.NIC, z.s.p.o.
-  * @date    22-July-2015
-  * @brief   Header file delay file
-  ******************************************************************************
-  ******************************************************************************
-**/
-#ifndef __DELAY_H
-#define __DELAY_H
+ ******************************************************************************
+ * @file    time.c
+ * @author  CZ.NIC, z.s.p.o.
+ * @date    22-July-2015
+ * @brief   This file ensures time driver using of System Timer
+ ******************************************************************************
+ ******************************************************************************
+ **/
+#include "time.h"
+#include "power_control.h"
+#include "watchdog.h"
 
-#include "compiler.h"
+static volatile uint32_t timingdelay;
 
 /*******************************************************************************
-  * @function   delay_systimer_config
+  * @function   time_config
   * @brief      Setup SysTick Timer for 1 msec interrupts.
   * @param      None
   * @retval     None
   *****************************************************************************/
-void delay_systimer_config(void);
+void time_config(void)
+{
+	if (SysTick_Config(SYS_CORE_FREQ / 1000u)) {
+		/* Capture error */
+		while (1);
+	}
+
+	NVIC_SetPriority(SysTick_IRQn, 2);
+}
 
 /******************************************************************************
   * @function   delay
@@ -26,7 +35,12 @@ void delay_systimer_config(void);
   * @param      nTime: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void delay(volatile uint32_t nTime);
+void delay(volatile uint32_t nTime)
+{
+	timingdelay = nTime;
+
+	while(timingdelay != 0u);
+}
 
 /******************************************************************************
   * @function   systick_irq_handler
@@ -35,6 +49,11 @@ void delay(volatile uint32_t nTime);
   * @param      None
   * @retval     None
   *****************************************************************************/
-void systick_irq_handler(void);
+void __irq systick_irq_handler(void)
+{
+	if (timingdelay != 0x00)
+		timingdelay--;
 
-#endif /* __DELAY_H */
+	if (!BOOTLOADER_BUILD)
+		watchdog_handler();
+}

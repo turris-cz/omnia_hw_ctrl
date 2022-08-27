@@ -8,7 +8,6 @@
  ******************************************************************************
  **/
 #include "led_driver.h"
-#include "delay.h"
 #include "power_control.h"
 #include "gpio.h"
 #include "spi.h"
