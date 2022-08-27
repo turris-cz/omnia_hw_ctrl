@@ -57,18 +57,17 @@ typedef enum reset_states {
     RST_LED11,
 } reset_state_t;
 
-#if USER_REGULATOR_ENABLED
-/*******************************************************************************
- * @function   power_control_prog4v5_config
- * @brief      Configuration for programming possibility of 4V5 power source.
- * @param      None.
- * @retval     None.
- *****************************************************************************/
-static void power_control_prog4v5_config(void)
-{
-    gpio_init_outputs(pin_pushpull, pin_spd_2, 0, PRG_4V5_PIN);
-}
-#endif
+/* sequence of enumerator entires is also power-up sequence */
+typedef enum {
+	REG_5V,
+	REG_3V3,
+	REG_1V8,
+	REG_1V5,
+	REG_1V35,
+	REG_VTT,
+	REG_1V2,
+	REG_MAX,
+} reg_idx_t;
 
 /*******************************************************************************
   * @function   system_control_io_config
@@ -97,7 +96,7 @@ void power_control_io_config(void)
                      DBGRES_PIN, MRES_PIN, RTC_ALARM_PIN);
 
 #if USER_REGULATOR_ENABLED
-    power_control_prog4v5_config();
+    gpio_init_outputs(pin_pushpull, pin_spd_2, 0, PRG_4V5_PIN);
 #endif
 }
 
@@ -115,218 +114,79 @@ void power_control_set_startup_condition(void)
     power_control_usb(USB3_PORT1, USB_ON);
 }
 
-/*******************************************************************************
-  * @function   power_control_start_regulator
-  * @brief      Start DC/DC regulator and handle timeout.
-  * @param      regulator: regulator type.
-  * @retval     error, if problem with PG signal occures.
-  *****************************************************************************/
-error_type_t power_control_start_regulator(reg_type_t regulator)
+typedef struct {
+	gpio_t en, pg;
+} regulator_t;
+
+static const regulator_t regulators[] = {
+#define DEF_REG(n) \
+	[REG_ ## n] = { ENABLE_ ## n ## _PIN, PG_ ## n ## _PIN }
+	DEF_REG(5V),
+	DEF_REG(3V3),
+	DEF_REG(1V8),
+	DEF_REG(1V5),
+	DEF_REG(1V35),
+	DEF_REG(VTT),
+	DEF_REG(1V2),
+#undef DEF_REG
+};
+
+static bool power_control_start_regulator(const regulator_t *reg)
 {
-    error_type_t error = NO_ERROR;
-    uint16_t counter = 0;
+	uint16_t timeout = TIMEOUT;
 
-    switch(regulator)
-    {
-        case REG_5V:
-        {
-            gpio_write(ENABLE_5V_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
+	/* Some boards don't have some regulators, for example board revisions
+	 * 32 and later do not have 1V5 regulator.
+	 * During power-on we report a failure of power-good of a regulator by
+	 * setting a specific LED to red color. In order to have consistent
+	 * reporting across all boards revisions, the regulator array defines
+	 * all regulators, even those that are invalid for specific boards.
+	 * Pretend that regulator started up successfully if it does not exist.
+	 */
+	if (reg->en == PIN_INVALID)
+		return true;
 
-            while(!gpio_read(PG_5V_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_5V_ERROR;
-                    break;
-                }
-            }
-        }break;
+	/* enable regulator */
+	gpio_write(reg->en, 1);
 
-        case REG_3V3:
-        {
-            gpio_write(ENABLE_3V3_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
+	/* wait until power-good */
+	do {
+		delay(DELAY_BETWEEN_READINGS);
+		if (gpio_read(reg->pg))
+			return true;
+	} while (--timeout);
 
-            while(!gpio_read(PG_3V3_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_3V3_ERROR;
-                    break;
-                }
-            }
-
-        } break;
-
-        case REG_1V35:
-        {
-            gpio_write(ENABLE_1V35_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_1V35_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_1V35_ERROR;
-                    break;
-                }
-            }
-        }break;
-
-#if USER_REGULATOR_ENABLED
-        case REG_4V5:
-        {
-            gpio_write(ENABLE_4V5_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_4V5_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_4V5_ERROR;
-                    break;
-                }
-            }
-        }break;
-#endif /* USER_REGULATOR_ENABLED */
-
-        case REG_1V8:
-        {
-            gpio_write(ENABLE_1V8_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_1V8_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_1V8_ERROR;
-                    break;
-                }
-            }
-        }break;
-
-        case REG_1V5:
-        {
-            gpio_write(ENABLE_1V5_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_1V5_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_1V5_ERROR;
-                    break;
-                }
-            }
-        }break;
-
-        case REG_1V2:
-        {
-            gpio_write(ENABLE_1V2_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_1V2_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_1V2_ERROR;
-                    break;
-                }
-            }
-        }break;
-
-        case REG_VTT:
-        {
-            gpio_write(ENABLE_VTT_PIN, 1);
-            delay(DELAY_AFTER_ENABLE);
-            while(!gpio_read(PG_VTT_PIN))
-            {
-                delay(DELAY_BETWEEN_READINGS);
-                counter++;
-                if (counter >= TIMEOUT)
-                {
-                    error = PG_VTT_ERROR;
-                    break;
-                }
-            }
-        }break;
-
-        default:
-            break;
-    }
-
-    return error;
+	return false;
 }
 
 /*******************************************************************************
   * @function   power_control_enable_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
-  * @retval     Error if timeout elapsed.
+  * @retval     0 on success, -n if enableing n-th regulator failed.
   *****************************************************************************/
-error_type_t power_control_enable_regulators(void)
+int power_control_enable_regulators(void)
 {
-    error_type_t value = NO_ERROR;
+	/*
+	 * power-up sequence:
+	 * 1) 5V regulator
+	 * 2) 3.3V regulator
+	 * 3) 1.8V regulator
+	 * 4) 1.5V regulator - not populated on the board
+	 * 5) 1.35V regulator
+	 * 6) VTT regulator
+	 * 7) 1.2V regulator
+	 */
+	const regulator_t *reg;
+	int i;
 
-    /*
-     * power-up sequence:
-     * 1) 5V regulator
-     * 2) 4.5V regulator - user selectable - not populated on the board
-     * 3) 3.3V regulator
-     * 4) 1.8V regulator
-     * 5) 1.5V regulator - not populated on the board
-     * 6) 1.35V regulator
-     *    VTT regulator
-     * 7) 1.2V regulator
-     */
+	for (reg = &regulators[0], i = 1;
+	     reg < &regulators[ARRAY_SIZE(regulators)];
+	     ++reg, ++i)
+		if (!power_control_start_regulator(reg))
+			return -i;
 
-    value = power_control_start_regulator(REG_5V);
-    if (value != NO_ERROR)
-        return value;
-
-#if USER_REGULATOR_ENABLED
-    value = power_control_start_regulator(REG_4V5);
-    if (value != NO_ERROR)
-        return value;
-#endif
-
-    value = power_control_start_regulator(REG_3V3);
-    if (value != NO_ERROR)
-        return value;
-
-    value = power_control_start_regulator(REG_1V8);
-    if (value != NO_ERROR)
-        return value;
-
-    if (OMNIA_BOARD_REVISION < 32) {
-        value = power_control_start_regulator(REG_1V5);
-        if (value != NO_ERROR)
-            return value;
-    }
-
-    value = power_control_start_regulator(REG_1V35);
-    if (value != NO_ERROR)
-        return value;
-
-    value = power_control_start_regulator(REG_VTT);
-    if (value != NO_ERROR)
-        return value;
-
-    value = power_control_start_regulator(REG_1V2);
-    if (value != NO_ERROR)
-        return value;
-
-    return value;
+	return 0;
 }
 
 /*******************************************************************************

@@ -26,14 +26,6 @@
 #define RESET_INTERRUPT_TO_CPU     gpio_write(INT_MCU_PIN, 1)
 
 typedef enum {
-	GO_TO_VTT_ERROR		= -8,
-	GO_TO_1V2_ERROR		= -7,
-	GO_TO_1V5_ERROR		= -6,
-	GO_TO_1V8_ERROR		= -5,
-	GO_TO_4V5_ERROR		= -4,
-	GO_TO_1V35_ERROR	= -3,
-	GO_TO_3V3_ERROR		= -2,
-	GO_TO_5V_ERROR		= -1,
 	OK			= 0,
 	GO_TO_LIGHT_RESET	= 1,
 	GO_TO_HARD_RESET	= 2,
@@ -171,35 +163,16 @@ static uint32_t app_get_ext_status_dword(void)
   * @function   power_on
   * @brief      Start the board / enable dc-dc regulators.
   * @param      None.
-  * @retval     value: next state.
+  * @retval     0 on success, -n if enableing n-th regulator failed.
   *****************************************************************************/
-static ret_value_t power_on(void)
+static int power_on(void)
 {
-    ret_value_t value = OK;
-    error_type_t error = NO_ERROR;
+	power_control_set_startup_condition();
+	power_control_disable_regulators();
 
-    power_control_set_startup_condition();
-    power_control_disable_regulators();
-    delay(100);
+	delay(100);
 
-    error = power_control_enable_regulators();
-
-    switch(error)
-    {
-        case PG_5V_ERROR: value = GO_TO_5V_ERROR; break;
-        case PG_3V3_ERROR: value = GO_TO_3V3_ERROR; break;
-        case PG_1V35_ERROR: value = GO_TO_1V35_ERROR; break;
-#if USER_REGULATOR_ENABLED
-        case PG_4V5_ERROR: value = GO_TO_4V5_ERROR; break;
-#endif
-        case PG_1V8_ERROR: value = GO_TO_1V8_ERROR; break;
-        case PG_1V5_ERROR: value = GO_TO_1V5_ERROR; break;
-        case PG_1V2_ERROR: value = GO_TO_1V2_ERROR; break;
-        case PG_VTT_ERROR: value = GO_TO_VTT_ERROR; break;
-        default: value = OK; break;
-    }
-
-    return value;
+	return power_control_enable_regulators();
 }
 
 /*******************************************************************************
@@ -380,35 +353,6 @@ static ret_value_t input_manager(void)
     return value;
 }
 
-#if USER_REGULATOR_ENABLED
-/*******************************************************************************
-  * @function   enable_4v5
-  * @brief      Enable 4V5 power regulator.
-  * @param      None.
-  * @retval     val: next_state.
-  *****************************************************************************/
-static ret_value_t enable_4v5(void)
-{
-    error_type_t pwr_error = NO_ERROR;
-    ret_value_t val = OK;
-    struct st_i2c_status *i2c_control = &i2c_status;
-
-    pwr_error = power_control_start_regulator(REG_4V5);
-
-    if (pwr_error == NO_ERROR)
-    {
-        i2c_control->status_word |= STS_ENABLE_4V5;
-        val = OK;
-    }
-    else /* error */
-    {
-        val = GO_TO_4V5_ERROR;
-    }
-
-    return val;
-}
-#endif
-
 /*******************************************************************************
   * @function   i2c_manager
   * @brief      Handle I2C communication.
@@ -432,9 +376,6 @@ static ret_value_t i2c_manager(void)
     {
         case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
         case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
-#if USER_REGULATOR_ENABLED
-        case SLAVE_I2C_PWR4V5_ENABLE:       value = enable_4v5(); break;
-#endif
         case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
         default:                            value = OK; break;
     }
@@ -465,34 +406,20 @@ static ret_value_t led_manager(void)
 /*******************************************************************************
   * @function   error_manager
   * @brief      Handle error occuring in startup.
-  * @param      error_state: type of error.
+  * @param      err_led: LED index indicating the error
   * @retval     None.
   *****************************************************************************/
-static void error_manager(ret_value_t error_state)
+static void error_manager(unsigned led)
 {
-    led_set_user_mode(LED_COUNT, false);
-    led_set_state(LED_COUNT, false);
-    led_set_color24(LED_COUNT, RED_COLOR);
+	led_set_user_mode(LED_COUNT, false);
+	led_set_state(LED_COUNT, false);
+	led_set_color24(LED_COUNT, RED_COLOR);
 
-    delay(300);
+	delay(300);
 
-    switch(error_state)
-    {
-        case GO_TO_5V_ERROR: led_set_state(0, true); break;
-        case GO_TO_3V3_ERROR: led_set_state(1, true); break;
-        case GO_TO_1V8_ERROR: led_set_state(2, true); break;
-        case GO_TO_1V5_ERROR: led_set_state(3, true); break;
-        case GO_TO_1V35_ERROR: led_set_state(4, true); break;
-        case GO_TO_VTT_ERROR: led_set_state(5, true); break;
-        case GO_TO_1V2_ERROR: led_set_state(6, true); break;
-#if USER_REGULATOR_ENABLED
-        case GO_TO_4V5_ERROR: led_set_state(7, true); break;
-#endif
+	led_set_state(led, true);
 
-        default: led_set_state(LED_COUNT, true); break;
-    }
-
-    delay(300);
+	delay(300);
 }
 
 /*******************************************************************************
@@ -505,15 +432,16 @@ static void app_mcu_cyclic(void)
 {
     static states_t next_state = POWER_ON;
     static ret_value_t val = OK;
+    static int err;
     static uint8_t error_counter;
 
     switch(next_state)
     {
         case POWER_ON:
         {
-            val = power_on();
+            err = power_on();
 
-            if(val == OK)
+            if (!err)
                 next_state = LIGHT_RESET;
             else
                 next_state = ERROR_STATE;
@@ -536,7 +464,7 @@ static void app_mcu_cyclic(void)
 
         case ERROR_STATE:
         {
-            error_manager(val);
+            error_manager(-err - 1);
             error_counter++;
 
             if(error_counter >= MAX_ERROR_COUNT)
@@ -572,9 +500,6 @@ static void app_mcu_cyclic(void)
             {
                 case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
                 case GO_TO_HARD_RESET:  next_state = HARD_RESET; break;
-#if USER_REGULATOR_ENABLED
-                case GO_TO_4V5_ERROR:   next_state = ERROR_STATE; break;
-#endif
                 case GO_TO_BOOTLOADER:  next_state = BOOTLOADER; break;
                 default: next_state = LED_MANAGER; break;
             }

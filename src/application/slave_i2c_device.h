@@ -17,7 +17,6 @@ typedef enum slave_i2c_states {
     SLAVE_I2C_OK,
     SLAVE_I2C_LIGHT_RST,
     SLAVE_I2C_HARD_RST,
-    SLAVE_I2C_PWR4V5_ENABLE,
     SLAVE_I2C_GO_TO_BOOTLOADER
 }slave_i2c_states_t;
 

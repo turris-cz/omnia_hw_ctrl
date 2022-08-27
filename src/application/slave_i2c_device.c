@@ -108,7 +108,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & CTL_ENABLE_4V5)
         {
-            i2c_control->state = SLAVE_I2C_PWR4V5_ENABLE;
+            gpio_write(ENABLE_4V5_PIN, 1);
         }
         else
         {

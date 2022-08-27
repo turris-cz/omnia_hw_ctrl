@@ -74,29 +74,6 @@ typedef enum usb_ports {
     USB3_PORT1 = 1
 }usb_ports_t;
 
-typedef enum reg_types {
-    REG_5V,
-    REG_3V3,
-    REG_1V35,
-    REG_4V5,
-    REG_1V8,
-    REG_1V5,
-    REG_1V2,
-    REG_VTT,
-}reg_type_t;
-
-typedef enum error_types {
-    NO_ERROR,
-    PG_5V_ERROR,
-    PG_3V3_ERROR,
-    PG_1V35_ERROR,
-    PG_4V5_ERROR,
-    PG_1V8_ERROR,
-    PG_1V5_ERROR,
-    PG_1V2_ERROR,
-    PG_VTT_ERROR,
-}error_type_t;
-
 typedef enum reset_types {
     NORMAL_RESET            = 0,
     PREVIOUS_SNAPSHOT       = 1,
@@ -124,9 +101,9 @@ void power_control_io_config(void);
   * @function   power_control_start_regulators
   * @brief      Starts DC/DC regulators.
   * @param      None.
-  * @retval     Error if timeout elapsed.
+  * @retval     0 on success, -n if enableing n-th regulator failed.
   *****************************************************************************/
-error_type_t power_control_enable_regulators(void);
+int power_control_enable_regulators(void);
 
 /*******************************************************************************
   * @function   power_control_disable_regulators
@@ -184,14 +161,6 @@ bool power_control_get_usb_poweron(usb_ports_t usb_port);
   * @retval     None.
   *****************************************************************************/
 void power_control_set_startup_condition(void);
-
-/*******************************************************************************
-  * @function   power_control_start_regulator
-  * @brief      Start DC/DC regulator and handle timeout.
-  * @param      regulator: regulator type.
-  * @retval     error, if problem with PG signal occures.
-  *****************************************************************************/
-error_type_t power_control_start_regulator(reg_type_t regulator);
 
 /*******************************************************************************
   * @function   power_control_set_power_led
