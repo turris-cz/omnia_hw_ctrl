@@ -24,7 +24,7 @@ struct st_i2c_status {
     uint16_t status_word;
     uint16_t ext_control_word;
     uint32_t ext_status_dword;
-    uint8_t reset_type;
+    uint8_t reset_selector;
     slave_i2c_states_t state;             // reported in main state machine
 };
 

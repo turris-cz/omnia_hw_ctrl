@@ -74,21 +74,6 @@ typedef enum usb_ports {
     USB3_PORT1 = 1
 }usb_ports_t;
 
-typedef enum reset_types {
-    NORMAL_RESET            = 0,
-    PREVIOUS_SNAPSHOT       = 1,
-    NORMAL_FACTORY_RESET    = 2,
-    HARD_FACTORY_RESET      = 3,
-    USER_RESET1             = 4,
-    USER_RESET2             = 5,
-    USER_RESET3             = 6,
-    USER_RESET4             = 7,
-    USER_RESET5             = 8,
-    USER_RESET6             = 9,
-    USER_RESET7             = 10,
-    USER_RESET8             = 11,
-}reset_type_t;
-
 /*******************************************************************************
   * @function   system_control_io_config
   * @brief      GPIO config for EN, PG, Reset and USB control signals.
@@ -126,9 +111,9 @@ void power_control_usb(usb_ports_t usb_port, usb_state_t usb_state);
   * @function   power_control_first_startup
   * @brief      Handle SYSRES_OUT, MAN_RES and CFG_CTRL signals during startup.
   * @param      None.
-  * @retval     Type of factory reset.
+  * @retval     None.
   *****************************************************************************/
-reset_type_t power_control_first_startup(void);
+void power_control_first_startup(void);
 
 /*******************************************************************************
   * @function   power_control_usb_timeout_config

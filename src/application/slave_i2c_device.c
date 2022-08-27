@@ -293,7 +293,7 @@ static int cmd_get_ext_control_status(slave_i2c_state_t *state)
 static int cmd_get_reset(slave_i2c_state_t *state)
 {
 	debug("get_reset\n");
-	set_reply(i2c_status.reset_type);
+	set_reply(i2c_status.reset_selector);
 
 	return 0;
 }

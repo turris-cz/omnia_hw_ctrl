@@ -184,7 +184,6 @@ static int power_on(void)
 static ret_value_t light_reset(void)
 {
     ret_value_t value = OK;
-    reset_type_t reset_event = NORMAL_RESET;
     struct st_i2c_status *i2c_control = &i2c_status;
     struct st_watchdog *wdg = &watchdog;
     uint16_t ext_control = 0;
@@ -193,13 +192,11 @@ static ret_value_t light_reset(void)
 
     led_driver_reset_effect(DISABLE);
 
-    reset_event = power_control_first_startup();
+    power_control_first_startup();
 
     /* set active reset of peripherals after CPU reset on v32+ boards */
     if (OMNIA_BOARD_REVISION >= 32)
         ext_control = periph_control_rst_init();
-
-    i2c_control->reset_type = reset_event;
 
     if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
     {
