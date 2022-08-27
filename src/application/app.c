@@ -171,7 +171,7 @@ static int power_on(void)
 	power_control_set_startup_condition();
 	power_control_disable_regulators();
 
-	delay(100);
+	mdelay(100);
 
 	return power_control_enable_regulators();
 }
@@ -412,11 +412,11 @@ static void error_manager(unsigned led)
 	led_set_state(LED_COUNT, false);
 	led_set_color24(LED_COUNT, RED_COLOR);
 
-	delay(300);
+	mdelay(300);
 
 	led_set_state(led, true);
 
-	delay(300);
+	mdelay(300);
 }
 
 /*******************************************************************************

@@ -7,6 +7,8 @@
  ******************************************************************************
  ******************************************************************************
  **/
+#include "debug.h"
+#include "cpu.h"
 #include "time.h"
 #include "power_control.h"
 #include "watchdog.h"
@@ -22,6 +24,7 @@ static volatile uint32_t timingdelay;
 void time_config(void)
 {
 	if (SysTick_Config(SYS_CORE_FREQ / 1000u)) {
+		debug("Failed configuring SysTick\n");
 		/* Capture error */
 		while (1);
 	}
@@ -30,16 +33,17 @@ void time_config(void)
 }
 
 /******************************************************************************
-  * @function   delay
+  * @function   mdelay
   * @brief      Inserts a delay time.
-  * @param      nTime: specifies the delay time length, in miliseconds.
+  * @param      ms: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void delay(volatile uint32_t nTime)
+void mdelay(uint32_t ms)
 {
-	timingdelay = nTime;
+	timingdelay = ms;
 
-	while(timingdelay != 0u);
+	while (timingdelay)
+		nop();
 }
 
 /******************************************************************************
@@ -51,7 +55,7 @@ void delay(volatile uint32_t nTime)
   *****************************************************************************/
 void __irq systick_irq_handler(void)
 {
-	if (timingdelay != 0x00)
+	if (timingdelay)
 		timingdelay--;
 
 	if (!BOOTLOADER_BUILD)

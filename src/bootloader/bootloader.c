@@ -217,7 +217,7 @@ static void bootloader(void)
             power_control_io_config();
             power_control_set_startup_condition();
             power_control_disable_regulators();
-            delay(100);
+            mdelay(100);
 
             power_control_enable_regulators();
             power_control_first_startup();
@@ -293,7 +293,7 @@ static void bootloader(void)
             * stay there and causes wrong detection of mmc during boot */
             power_control_set_startup_condition();
             power_control_disable_regulators();
-            delay(100);
+            mdelay(100);
             NVIC_SystemReset();
         } break;
     }

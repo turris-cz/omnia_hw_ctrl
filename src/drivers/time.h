@@ -21,12 +21,12 @@
 void time_config(void);
 
 /******************************************************************************
-  * @function   delay
+  * @function   mdelay
   * @brief      Inserts a delay time.
-  * @param      nTime: specifies the delay time length, in miliseconds.
+  * @param      ms: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void delay(volatile uint32_t nTime);
+void mdelay(uint32_t ms);
 
 /******************************************************************************
   * @function   systick_irq_handler
