@@ -50,14 +50,19 @@ extern bool effect_reset_finished;
   *****************************************************************************/
 void led_driver_config(void);
 
+void led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b);
+
 /*******************************************************************************
-  * @function   led_set_color
+  * @function   led_set_color24
   * @brief      Save color of LED specified in parameters to be displayed in next cycle.
-  * @param      led_index: position of LED (0..11) or index >=12 -> all LEDs
-  * @param      color: LED color (RGB range).
+  * @param      led: position of LED (0..11) or led >=12 -> all LEDs
+  * @param      color: LED color (24-bit RGB).
   * @retval     None.
   *****************************************************************************/
-void led_set_color(unsigned led, uint32_t color);
+static inline void led_set_color24(unsigned led, uint32_t color)
+{
+	led_set_color(led, color >> 16, color >> 8, color);
+}
 
 void led_driver_set_gamma_correction(bool on);
 bool led_driver_get_gamma_correction(void);

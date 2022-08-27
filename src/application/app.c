@@ -471,7 +471,7 @@ static void error_manager(ret_value_t error_state)
 {
     led_set_user_mode(LED_COUNT, false);
     led_set_state(LED_COUNT, false);
-    led_set_color(LED_COUNT, RED_COLOR);
+    led_set_color24(LED_COUNT, RED_COLOR);
 
     delay(300);
 

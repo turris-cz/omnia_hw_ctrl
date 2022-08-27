@@ -60,7 +60,7 @@ static void bootloader_init(void)
     timer_deinit(USB_TIMEOUT_TIMER);
     enable_irq();
 
-    led_set_color(LED_COUNT, GREEN_COLOR);
+    led_set_color24(LED_COUNT, GREEN_COLOR);
     led_driver_reset_effect(ENABLE);
 
     gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
