@@ -65,11 +65,6 @@ typedef enum {
 } user_reg_voltage_t;
 
 typedef enum {
-	USB_OFF = 0,
-	USB_ON  = 1
-} usb_state_t;
-
-typedef enum {
 	USB3_PORT0 = 0,
 	USB3_PORT1 = 1
 } usb_port_t;
@@ -102,10 +97,10 @@ void power_control_disable_regulators(void);
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
-  * @param      usb_state: USB_ON or USB_OFF.
+  * @param      on: true or false.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_port_t usb_port, usb_state_t usb_state);
+void power_control_usb(usb_port_t usb_port, bool on);
 
 /*******************************************************************************
   * @function   power_control_first_startup

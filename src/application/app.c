@@ -271,7 +271,7 @@ static ret_value_t input_manager(void)
     {
         i2c_control->status_word |= STS_USB30_OVC;
         input_state->usb30_ovc = DEACTIVATED;
-        power_control_usb(USB3_PORT0, USB_OFF); /* USB power off */
+        power_control_usb(USB3_PORT0, false); /* USB power off */
 
         if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
             i2c_control->status_word &= (~STS_USB30_PWRON);
@@ -286,7 +286,7 @@ static ret_value_t input_manager(void)
         i2c_control->status_word |= STS_USB31_OVC;
         input_state->usb31_ovc = DEACTIVATED;
 
-        power_control_usb(USB3_PORT1, USB_OFF); /* USB power off */
+        power_control_usb(USB3_PORT1, false); /* USB power off */
 
         if(!power_control_get_usb_poweron(USB3_PORT1)) /* update status word */
             i2c_control->status_word &= (~STS_USB31_PWRON);

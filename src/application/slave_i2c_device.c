@@ -79,12 +79,12 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & CTL_USB30_PWRON)
         {
-            power_control_usb(USB3_PORT0, USB_ON);
+            power_control_usb(USB3_PORT0, true);
             i2c_control->status_word |= STS_USB30_PWRON;
         }
         else
         {
-            power_control_usb(USB3_PORT0, USB_OFF);
+            power_control_usb(USB3_PORT0, false);
             i2c_control->status_word &= (~STS_USB30_PWRON);
         }
     }
@@ -93,12 +93,12 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
     {
         if (control_byte & CTL_USB31_PWRON)
         {
-            power_control_usb(USB3_PORT1, USB_ON);
+            power_control_usb(USB3_PORT1, true);
             i2c_control->status_word |= STS_USB31_PWRON;
         }
         else
         {
-            power_control_usb(USB3_PORT1, USB_OFF);
+            power_control_usb(USB3_PORT1, false);
             i2c_control->status_word &= (~STS_USB31_PWRON);
         }
     }

@@ -91,8 +91,8 @@ void power_control_set_startup_condition(void)
 {
 	gpio_write(CFG_CTRL_PIN, 1); /* disconnect switches */
 	gpio_write(MANRES_PIN, 0); /* board reset activated */
-	power_control_usb(USB3_PORT0, USB_ON);
-	power_control_usb(USB3_PORT1, USB_ON);
+	power_control_usb(USB3_PORT0, true);
+	power_control_usb(USB3_PORT1, true);
 }
 
 typedef struct {
@@ -194,13 +194,13 @@ void power_control_disable_regulators(void)
   * @function   power_control_usb
   * @brief      Enable / disable power supply for USB.
   * @param      usb_port: USB3_PORT0 or USB3_PORT1.
-  * @param      usb_state: USB_ON or USB_OFF.
+  * @param      on: true or false.
   * @retval     None.
   *****************************************************************************/
-void power_control_usb(usb_port_t usb_port, usb_state_t usb_state)
+void power_control_usb(usb_port_t usb_port, bool on)
 {
 	gpio_write(usb_port == USB3_PORT0 ? USB30_PWRON_PIN : USB31_PWRON_PIN,
-		   usb_state != USB_ON);
+		   !on);
 }
 
 /*******************************************************************************
@@ -274,8 +274,8 @@ void __irq power_control_usb_timeout_irq_handler(void)
 	if (!timer_irq_clear_up(USB_TIMEOUT_TIMER))
 		return;
 
-	power_control_usb(USB3_PORT0, USB_ON);
-	power_control_usb(USB3_PORT1, USB_ON);
+	power_control_usb(USB3_PORT0, true);
+	power_control_usb(USB3_PORT1, true);
 
 	i2c_control->status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
 
