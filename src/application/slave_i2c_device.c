@@ -20,6 +20,7 @@
 #include "msata_pci.h"
 #include "i2c_slave.h"
 #include "memory_layout.h"
+#include "watchdog.h"
 
 static const uint8_t version[] = VERSION;
 static struct {

@@ -20,6 +20,7 @@
 #include "flash.h"
 #include "memory_layout.h"
 #include "delay.h"
+#include "watchdog.h"
 
 #define MAX_ERROR_COUNT		5
 #define SET_INTERRUPT_TO_CPU	gpio_write(INT_MCU_PIN, 0)

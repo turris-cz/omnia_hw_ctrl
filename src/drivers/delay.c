@@ -7,18 +7,12 @@
  ******************************************************************************
  ******************************************************************************
  **/
-/* Includes ------------------------------------------------------------------*/
 #include "delay.h"
 #include "power_control.h"
-
-#define WATCHDOG_ENABLE		1
-#define WATCHDOG_TIMEOUT	120000 /* ms */
+#include "watchdog.h"
 
 static volatile uint32_t timingdelay;
 
-struct st_watchdog watchdog;
-
-/* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
   * @function   delay_systimer_config
   * @brief      Setup SysTick Timer for 1 msec interrupts.
@@ -57,28 +51,9 @@ void delay(volatile uint32_t nTime)
   *****************************************************************************/
 void __irq systick_irq_handler(void)
 {
-	static uint32_t wdg_cnt;
-
 	if (timingdelay != 0x00)
-	{
 		timingdelay--;
-	}
 
-#if WATCHDOG_ENABLE
-	if (watchdog.watchdog_state == RUN)
-	{
-		wdg_cnt++;
-
-		if (wdg_cnt >= WATCHDOG_TIMEOUT)
-		{
-			power_control_set_startup_condition();
-			power_control_disable_regulators();
-			NVIC_SystemReset(); /* SW reset */
-		}
-	}
-	else
-	{
-		wdg_cnt = 0;
-	}
-#endif
+	if (!BOOTLOADER_BUILD)
+		watchdog_handler();
 }
