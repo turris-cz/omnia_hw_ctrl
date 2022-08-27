@@ -1,5 +1,6 @@
 #include "watchdog.h"
 #include "power_control.h"
+#include "time.h"
 
 #define WATCHDOG_TIMEOUT	120000 /* ms */
 
@@ -10,7 +11,7 @@ void watchdog_handler(void)
 	static uint32_t wdg_cnt;
 
 	if (watchdog.watchdog_state == RUN) {
-		wdg_cnt++;
+		wdg_cnt += JIFFY_TO_MSECS;
 
 		if (wdg_cnt >= WATCHDOG_TIMEOUT) {
 			power_control_set_startup_condition();

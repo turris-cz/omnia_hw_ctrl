@@ -28,6 +28,49 @@ static __force_inline void nop(void)
 	asm("nop\n");
 }
 
+static __force_inline void wait_for_interrupt(void)
+{
+	asm volatile("wfi\n");
+}
+
+#if defined(STM32F030X8)
+# define LOOP_TICKS		4
+#elif defined(GD32F1x0)
+# define LOOP_TICKS		3
+#else
+# error "mdelay() parameters not defined for this platform"
+#endif
+
+#define MSEC_TO_TICKS		(SYS_CORE_FREQ / 1000)
+#define MSEC_TO_LOOPS		(MSEC_TO_TICKS / LOOP_TICKS)
+
+_Static_assert(SYS_CORE_FREQ % 1000 == 0,
+	       "SYS_CORE_FREQ must be divisible by 1000");
+
+_Static_assert(MSEC_TO_TICKS % LOOP_TICKS == 0,
+	       "MSEC_TO_TICKS must be divisible by LOOP_TICKS");
+
+static __force_inline void mdelay(uint32_t ms)
+{
+	uint32_t loops;
+
+	compiletime_assert(ms < (UINT32_MAX / MSEC_TO_LOOPS),
+			   "mdelay() maximum exceeded");
+
+	if (!ms)
+		return;
+
+	loops = ms * MSEC_TO_LOOPS;
+	asm volatile(
+		"0:\n"
+		"subs %0, #1\n"
+		"bne 0b\n"
+		: "+r" (loops)
+	);
+}
+
+#undef MSEC_TO_LOOPS
+
 static __force_inline __noreturn void reset_to_address(uint32_t isr_vec_addr)
 {
 	__noreturn void (*new_reset_handler)(void);

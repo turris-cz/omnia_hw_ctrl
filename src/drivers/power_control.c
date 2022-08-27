@@ -132,7 +132,7 @@ static bool power_control_start_regulator(const regulator_t *reg)
 
 	/* wait until power-good */
 	do {
-		mdelay(DELAY_BETWEEN_READINGS);
+		msleep(DELAY_BETWEEN_READINGS);
 		if (gpio_read(reg->pg))
 			return true;
 	} while (--timeout);
@@ -336,12 +336,12 @@ void power_control_first_startup(void)
 	int sel;
 
 	gpio_write(CFG_CTRL_PIN, 1);
-	mdelay(50);
+	msleep(50);
 	gpio_write(MANRES_PIN, 1);
 
 	if (BOOTLOADER_BUILD) {
 		while (!gpio_read(SYSRES_OUT_PIN))
-			mdelay(1);
+			msleep(1);
 	} else {
 		unsigned timeout;
 
@@ -358,7 +358,7 @@ void power_control_first_startup(void)
 		 * Increase reset selector level every 10ms.
 		 */
 		while (!gpio_read(SYSRES_OUT_PIN)) {
-			mdelay(1);
+			msleep(1);
 
 			if (timeout--)
 				continue;
@@ -370,7 +370,7 @@ void power_control_first_startup(void)
 	}
 
 	/* 15ms delay after release of reset signal */
-	mdelay(15);
+	msleep(15);
 	gpio_write(CFG_CTRL_PIN, 0);
 
 	if (BOOTLOADER_BUILD)
@@ -382,13 +382,13 @@ void power_control_first_startup(void)
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
 		led_driver_set_brightness(0);
-		mdelay(300);
+		msleep(300);
 		led_driver_set_brightness(100);
-		mdelay(300);
+		msleep(300);
 		led_driver_set_brightness(0);
-		mdelay(300);
+		msleep(300);
 		led_driver_set_brightness(100);
-		mdelay(600);
+		msleep(600);
 	}
 
 	/* restore brightness and color */
