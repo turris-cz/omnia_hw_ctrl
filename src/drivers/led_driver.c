@@ -382,11 +382,8 @@ void led_driver_config(void)
 	gpio_init_outputs(pin_pushpull, pin_spd_3, 1, LED_SPI_SS_PIN);
 	spi_init(LED_SPI);
 
-	/* Configure PWM pin and timer */
-	gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1, pin_pullup,
-		       LED_PWM_PIN);
+	/* Configure PWM timer */
 	timer_init(LED_PWM_TIMER, timer_pwm, 100, LED_PWM_FREQ, 0);
-	timer_enable(LED_PWM_TIMER, true);
 
 	/* Set initial PWM brightness */
 	led_driver_set_brightness(100);
@@ -411,6 +408,15 @@ void led_driver_set_brightness(uint8_t value)
 {
 	if (value > 100)
 		value = 100;
+
+	if (value == 0 || value == 100) {
+		timer_enable(LED_PWM_TIMER, false);
+		gpio_init_outputs(pin_pushpull, pin_spd_1, !value, LED_PWM_PIN);
+	} else {
+		gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1,
+			       pin_pullup, LED_PWM_PIN);
+		timer_enable(LED_PWM_TIMER, true);
+	}
 
 	timer_set_pulse(LED_PWM_TIMER, value);
 	pwm_brightness = value;
