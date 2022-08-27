@@ -58,10 +58,10 @@
 #define SFP_nDET_PIN		PIN(D, 2, OMNIA_BOARD_REVISION >= 32)
 
 typedef enum {
-	VOLTAGE_33 = 1,
-	VOLTAGE_36 = 2,
-	VOLTAGE_45 = 3,
-	VOLTAGE_51 = 4,
+	VOLTAGE_3V3 = 1,
+	VOLTAGE_3V63 = 2,
+	VOLTAGE_4V5 = 3,
+	VOLTAGE_5V125 = 4,
 } user_reg_voltage_t;
 
 typedef enum {

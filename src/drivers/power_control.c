@@ -399,99 +399,43 @@ void power_control_first_startup(void)
 }
 
 #if USER_REGULATOR_ENABLED
-/* programming pin for user regulator */
-/* timing for logic '1' and '0' consists of only NOPs, because it must be very
-precise. Pulse for logic '1' or '0' takes only 1 us */
+# if SYS_CORE_FREQ == 48000000U
+#  define LONG_NOP	30
+#  define SHORT_NOP	6
+# elif SYS_CORE_FREQ == 72000000U
+#  define LONG_NOP	45
+#  define SHORT_NOP	9
+# else
+#  error "user regulator control parameters not defined for this platform"
+# endif
+
+static __force_inline void nop_repeat(unsigned count)
+{
+#pragma GCC unroll 1000
+	for (unsigned i = 0; i < count; ++i)
+		nop();
+}
+
+/* Programming pin for user regulator.
+ * Timing for logic '1' and '0' consists only of NOPs, because it must be very
+ * precise. Pulse for logic '1' or '0' takes only 1 us.
+ */
 static __force_inline void user_reg_prg_logic(bool val)
 {
 	if (val) {
 		gpio_write(PRG_4V5_PIN, 1);
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
+		nop_repeat(LONG_NOP);
 		gpio_write(PRG_4V5_PIN, 0);
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
+		nop_repeat(SHORT_NOP);
 	} else {
 		gpio_write(PRG_4V5_PIN, 1);
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
+		nop_repeat(SHORT_NOP);
 		gpio_write(PRG_4V5_PIN, 0);
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
-		nop();
+		nop_repeat(LONG_NOP);
 	}
 }
 
-/*******************************************************************************
-  * @function   power_control_set_voltage33
-  * @brief      Set 3.3V voltage to the user regulator.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_voltage33(void)
+static __force_inline void user_reg_write_data(uint8_t data)
 {
 	/* start condition */
 	user_reg_prg_logic(1);
@@ -509,129 +453,15 @@ static void power_control_set_voltage33(void)
 	user_reg_prg_logic(0);
 
 	/* datafield - 0xDF */
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
+	user_reg_prg_logic((data >> 7) & 1);
+	user_reg_prg_logic((data >> 6) & 1);
+	user_reg_prg_logic((data >> 5) & 1);
+	user_reg_prg_logic((data >> 4) & 1);
 
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-
-	/* stop condition */
-	user_reg_prg_logic(1);
-}
-
-/*******************************************************************************
-  * @function   power_control_set_voltage36
-  * @brief      Set 3.63V voltage to the user regulator.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_voltage36(void)
-{
-	/* start condition */
-	user_reg_prg_logic(1);
-
-	/* chip select */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-
-	/* register address */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-
-	/* datafield - 0xEF */
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-
-	/* stop condition */
-	user_reg_prg_logic(1);
-}
-
-/*******************************************************************************
-  * @function   power_control_set_voltage51
-  * @brief      Set 5.125V voltage to the user regulator.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_voltage51(void)
-{
-	/* start condition */
-	user_reg_prg_logic(1);
-
-	/* chip select */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-
-	/* register address */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-
-	/* datafield - 0xFC */
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
-
-	/* stop condition */
-	user_reg_prg_logic(1);
-}
-
-/*******************************************************************************
-  * @function   power_control_set_voltage45
-  * @brief      Set 4.5V voltage to the user regulator.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void power_control_set_voltage45(void)
-{
-	/* start condition */
-	user_reg_prg_logic(1);
-
-	/* chip select */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-
-	/* register address */
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-
-	/* datafield - 0xF8 */
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(1);
-
-	user_reg_prg_logic(1);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
-	user_reg_prg_logic(0);
+	user_reg_prg_logic((data >> 3) & 1);
+	user_reg_prg_logic((data >> 2) & 1);
+	user_reg_prg_logic((data >> 1) & 1);
+	user_reg_prg_logic((data >> 0) & 1);
 
 	/* stop condition */
 	user_reg_prg_logic(1);
@@ -646,14 +476,21 @@ static void power_control_set_voltage45(void)
 void power_control_set_voltage(user_reg_voltage_t voltage)
 {
 	/* delay at least 10us before the next sequence */
-	switch (voltage)
-	{
-		case VOLTAGE_33: power_control_set_voltage33(); break; /* 3.3V */
-		case VOLTAGE_36: power_control_set_voltage36(); break; /* 3.63V */
-		case VOLTAGE_45: power_control_set_voltage45(); break; /* 4.5V */
-		case VOLTAGE_51: power_control_set_voltage51(); break; /* 5.125V */
-		default:
-			break;
+	switch (voltage) {
+	case VOLTAGE_3V3:
+		user_reg_write_data(0xDF);
+		break;
+	case VOLTAGE_3V63:
+		user_reg_write_data(0xEF);
+		break;
+	case VOLTAGE_4V5:
+		user_reg_write_data(0xF8);
+		break;
+	case VOLTAGE_5V125:
+		user_reg_write_data(0xFC);
+		break;
+	default:
+		break;
 	}
 }
 #endif /* USER_REGULATOR_ENABLED */
