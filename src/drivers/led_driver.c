@@ -601,6 +601,7 @@ static void led_driver_knight_rider_effect_handler(void)
 			{
 				led_set_state(LED_COUNT, false);
 				led_set_color24(LED_COUNT, WHITE_COLOR);
+				led_set_state(POWER_LED, true);
 
 				led_set_user_mode(LED_COUNT, false);
 				led_driver_reset_effect(DISABLE);

@@ -394,32 +394,8 @@ void power_control_first_startup(void)
 	/* restore brightness and color */
 	led_set_state(LED_COUNT, false);
 	led_driver_set_brightness(prev_brightness);
-	led_set_color24(LED_COUNT, WHITE_COLOR);
 
 	i2c_status.reset_selector = sel;
-}
-
-/*******************************************************************************
-  * @function   power_control_set_power_led
-  * @brief      Set on power LED.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_set_power_led(void)
-{
-	led_set_color24(POWER_LED, WHITE_COLOR);
-	led_set_state(POWER_LED, true);
-}
-
-/*******************************************************************************
-  * @function   power_led_activity
-  * @brief      Set on power LED.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_led_activity(void)
-{
-	led_set_state_nocommit(POWER_LED, true);
 }
 
 #if USER_REGULATOR_ENABLED

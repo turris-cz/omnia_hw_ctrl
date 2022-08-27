@@ -143,22 +143,6 @@ bool power_control_get_usb_poweron(usb_port_t usb_port);
 void power_control_set_startup_condition(void);
 
 /*******************************************************************************
-  * @function   power_control_set_power_led
-  * @brief      Set on power LED.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_control_set_power_led(void);
-
-/*******************************************************************************
-  * @function   power_led_activity
-  * @brief      Set on power LED.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void power_led_activity(void);
-
-/*******************************************************************************
   * @function   power_control_usb_timeout_enable
   * @brief      Enable USB recovery timeout.
   * @param      None.

@@ -394,7 +394,6 @@ static ret_value_t led_manager(void)
     lan_led_activity();
     pci_led_activity();
     msata_pci_activity();
-    power_led_activity();
     led_states_commit();
 
     return OK;
