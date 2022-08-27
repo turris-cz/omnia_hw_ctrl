@@ -235,42 +235,42 @@ static ret_value_t input_manager(void)
 	debounce_check_inputs();
 
 	/* manual reset button */
-	if(input_state->man_res == ACTIVATED)
+	if(input_state->man_res)
 	{
 		value = GO_TO_LIGHT_RESET;
-		input_state->man_res = DEACTIVATED;
+		input_state->man_res = false;
 	}
 
 	/* sw reset */
-	if (input_state->sysres_out == ACTIVATED)
+	if (input_state->sysres_out)
 	{
 		value = GO_TO_LIGHT_RESET;
-		input_state->sysres_out = DEACTIVATED;
+		input_state->sysres_out = false;
 	}
 
 	/* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
-	if(input_state->pg == ACTIVATED)
+	if(input_state->pg)
 	{
 		debug("PG all regulators\n");
 		value = GO_TO_HARD_RESET;
-		input_state->pg = DEACTIVATED;
+		input_state->pg = false;
 	}
 
 #if USER_REGULATOR_ENABLED
 	/* PG signal from 4.5V user controlled regulator */
-	if(input_state->pg_4v5 == ACTIVATED)
+	if(input_state->pg_4v5)
 	{
 		debug("PG from 4V5\n");
 		value = GO_TO_HARD_RESET;
-		input_state->pg_4v5 = DEACTIVATED;
+		input_state->pg_4v5 = false;
 	}
 #endif
 
 	/* USB30 overcurrent */
-	if(input_state->usb30_ovc == ACTIVATED)
+	if(input_state->usb30_ovc)
 	{
 		i2c_control->status_word |= STS_USB30_OVC;
-		input_state->usb30_ovc = DEACTIVATED;
+		input_state->usb30_ovc = false;
 		power_control_usb(USB3_PORT0, false); /* USB power off */
 
 		if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
@@ -281,10 +281,10 @@ static ret_value_t input_manager(void)
 	}
 
 	/* USB31 overcurrent */
-	if(input_state->usb31_ovc == ACTIVATED)
+	if(input_state->usb31_ovc)
 	{
 		i2c_control->status_word |= STS_USB31_OVC;
-		input_state->usb31_ovc = DEACTIVATED;
+		input_state->usb31_ovc = false;
 
 		power_control_usb(USB3_PORT1, false); /* USB power off */
 
@@ -296,14 +296,14 @@ static ret_value_t input_manager(void)
 	}
 
 	/* front button */
-	if (input_state->button_sts == ACTIVATED)
+	if (input_state->button_sts)
 	{
 		if (button->button_mode == BUTTON_DEFAULT)
 			led_driver_step_brightness();
 		else /* user button mode */
 			button_counter_increase();
 
-		input_state->button_sts = DEACTIVATED;
+		input_state->button_sts = false;
 	}
 
 	/* in case of user button mode:
@@ -323,12 +323,12 @@ static ret_value_t input_manager(void)
 	}
 
 	/* these flags are automatically cleared in debounce function */
-	if(input_state->card_det == ACTIVATED)
+	if(input_state->card_det)
 		i2c_control->status_word |= STS_CARD_DET;
 	else
 		i2c_control->status_word &= (~STS_CARD_DET);
 
-	if(input_state->msata_ind == ACTIVATED)
+	if(input_state->msata_ind)
 		i2c_control->status_word |= STS_MSATA_IND;
 	else
 		i2c_control->status_word &= (~STS_MSATA_IND);

@@ -84,12 +84,12 @@ static void debounce_card_det(void)
 	}
 
 	if (counter == 0)
-		input_state->card_det = DEACTIVATED;
+		input_state->card_det = false;
 	else
 	{
 		if(counter >= MAX_CARD_DET_STATES)
 		{
-			input_state->card_det = ACTIVATED;
+			input_state->card_det = true;
 			counter = MAX_CARD_DET_STATES;
 		}
 	}
@@ -121,12 +121,12 @@ static void debounce_msata_ind(void)
 	}
 
 	if (counter == 0)
-		input_state->msata_ind = DEACTIVATED;
+		input_state->msata_ind = false;
 	else
 	{
 		if(counter >= MAX_MSATA_IND_STATES)
 		{
-			input_state->msata_ind = ACTIVATED;
+			input_state->msata_ind = true;
 			counter = MAX_MSATA_IND_STATES;
 		}
 	}
@@ -194,14 +194,14 @@ void debounce_check_inputs(void)
 	/* results evaluation --------------------------------------------------- */
 	if (port_changed & MAN_RES_MASK)
 	{
-		input_state->man_res = ACTIVATED;
+		input_state->man_res = true;
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
 	}
 
 	if (port_changed & SYSRES_OUT_MASK)
 	{
-		input_state->sysres_out = ACTIVATED;
+		input_state->sysres_out = true;
 	}
 
 	if (OMNIA_BOARD_REVISION < 32) {
@@ -219,24 +219,24 @@ void debounce_check_inputs(void)
 		 (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
 		 (port_changed & PG_1V2_MASK))
 	{
-		input_state->pg = ACTIVATED;
+		input_state->pg = true;
 	}
 
 	/* PG signal from 4.5V user controlled regulator */
 	if(i2c_control->status_word & STS_ENABLE_4V5)
 	{
 		if (port_changed & PG_4V5_MASK)
-			input_state->pg_4v5 = ACTIVATED;
+			input_state->pg_4v5 = true;
 	}
 
 	if (port_changed & USB30_OVC_MASK)
 	{
-		input_state->usb30_ovc = ACTIVATED;
+		input_state->usb30_ovc = true;
 	}
 
 	if (port_changed & USB31_OVC_MASK)
 	{
-		input_state->usb31_ovc = ACTIVATED;
+		input_state->usb31_ovc = true;
 	}
 
 
@@ -247,7 +247,7 @@ void debounce_check_inputs(void)
 
 	if (button_changed & BUTTON_MASK)
 	{
-		input_state->button_sts = ACTIVATED;
+		input_state->button_sts = true;
 	}
 }
 

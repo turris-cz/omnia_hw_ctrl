@@ -25,25 +25,20 @@ typedef enum button_states {
 	BUTTON_RELEASED,
 }button_state_t;
 
-enum input_states {
-	DEACTIVATED = 0,
-	ACTIVATED = 1, /* when signal reaches a defined treshold */
-};
-
 /* flags of input signals */
 struct input_sig {
-	uint8_t man_res		: 1;
-	uint8_t sysres_out	: 1;
-	uint8_t dbg_res		: 1;
-	uint8_t m_res		: 1;
-	uint8_t pg		: 1;
-	uint8_t pg_4v5		: 1;
-	uint8_t usb30_ovc	: 1;
-	uint8_t usb31_ovc	: 1;
-	uint8_t rtc_alarm	: 1;
-	uint8_t button_sts	: 1;
-	uint8_t card_det	: 1;
-	uint8_t msata_ind	: 1;
+	unsigned man_res	: 1;
+	unsigned sysres_out	: 1;
+	unsigned dbg_res	: 1;
+	unsigned m_res		: 1;
+	unsigned pg		: 1;
+	unsigned pg_4v5		: 1;
+	unsigned usb30_ovc	: 1;
+	unsigned usb31_ovc	: 1;
+	unsigned rtc_alarm	: 1;
+	unsigned button_sts	: 1;
+	unsigned card_det	: 1;
+	unsigned msata_ind	: 1;
 };
 
 struct button_def {
