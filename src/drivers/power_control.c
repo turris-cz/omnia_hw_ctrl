@@ -284,7 +284,18 @@ void __irq power_control_usb_timeout_irq_handler(void)
 
 static void increase_reset_selector_level(int *sel, uint8_t *level)
 {
+	static const uint8_t hue2rgb[128] = {
+		  0,  23,  32,  39,  45,  50,  55,  60,  64,  68,  71,  75,  78,  81,  84,  87,
+		 90,  93,  96,  98, 101, 103, 106, 108, 111, 113, 115, 117, 119, 122, 124, 126,
+		128, 130, 132, 134, 135, 137, 139, 141, 143, 145, 146, 148, 150, 151, 153, 155,
+		156, 158, 160, 161, 163, 164, 166, 167, 169, 170, 172, 173, 175, 176, 178, 179,
+		181, 182, 183, 185, 186, 188, 189, 190, 192, 193, 194, 196, 197, 198, 199, 201,
+		202, 203, 204, 206, 207, 208, 209, 211, 212, 213, 214, 215, 217, 218, 219, 220,
+		221, 222, 224, 225, 226, 227, 228, 229, 230, 231, 233, 234, 235, 236, 237, 238,
+		239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,
+	};
 	unsigned led;
+	uint8_t r, g;
 
 	if (*level == 0) {
 		(*sel)++;
@@ -296,7 +307,15 @@ static void increase_reset_selector_level(int *sel, uint8_t *level)
 
 	led = 11 - *sel;
 
-	led_set_color(led, *level, 255 - *level, 0);
+	if (*level < 128) {
+		r = hue2rgb[*level];
+		g = 255;
+	} else {
+		r = 255;
+		g = hue2rgb[255 - *level];
+	}
+
+	led_set_color(led, r, g, 0);
 	if (*level == 0)
 		led_set_state(led, true);
 
