@@ -11,8 +11,8 @@
 #include "delay.h"
 #include "power_control.h"
 
-#define WATCHDOG_ENABLE     1
-#define WATCHDOG_TIMEOUT    120000 /* ms */
+#define WATCHDOG_ENABLE		1
+#define WATCHDOG_TIMEOUT	120000 /* ms */
 
 static volatile uint32_t timingdelay;
 
@@ -27,12 +27,12 @@ struct st_watchdog watchdog;
   *****************************************************************************/
 void delay_systimer_config(void)
 {
-    if (SysTick_Config(SYS_CORE_FREQ / 1000u))
-    {
-        /* Capture error */
-        while (1);
-    }
-    NVIC_SetPriority(SysTick_IRQn, 2);
+	if (SysTick_Config(SYS_CORE_FREQ / 1000u))
+	{
+		/* Capture error */
+		while (1);
+	}
+	NVIC_SetPriority(SysTick_IRQn, 2);
 }
 
 /******************************************************************************
@@ -43,9 +43,9 @@ void delay_systimer_config(void)
   *****************************************************************************/
 void delay(volatile uint32_t nTime)
 {
-    timingdelay = nTime;
+	timingdelay = nTime;
 
-    while(timingdelay != 0u);
+	while(timingdelay != 0u);
 }
 
 /******************************************************************************
@@ -57,28 +57,28 @@ void delay(volatile uint32_t nTime)
   *****************************************************************************/
 void __irq systick_irq_handler(void)
 {
-    static uint32_t wdg_cnt;
+	static uint32_t wdg_cnt;
 
-    if (timingdelay != 0x00)
-    {
-        timingdelay--;
-    }
+	if (timingdelay != 0x00)
+	{
+		timingdelay--;
+	}
 
 #if WATCHDOG_ENABLE
-    if (watchdog.watchdog_state == RUN)
-    {
-        wdg_cnt++;
+	if (watchdog.watchdog_state == RUN)
+	{
+		wdg_cnt++;
 
-        if (wdg_cnt >= WATCHDOG_TIMEOUT)
-        {
-            power_control_set_startup_condition();
-            power_control_disable_regulators();
-            NVIC_SystemReset(); /* SW reset */
-        }
-    }
-    else
-    {
-        wdg_cnt = 0;
-    }
+		if (wdg_cnt >= WATCHDOG_TIMEOUT)
+		{
+			power_control_set_startup_condition();
+			power_control_disable_regulators();
+			NVIC_SystemReset(); /* SW reset */
+		}
+	}
+	else
+	{
+		wdg_cnt = 0;
+	}
 #endif
 }
