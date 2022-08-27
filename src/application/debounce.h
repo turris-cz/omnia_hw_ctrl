@@ -12,46 +12,46 @@
 
 #include "compiler.h"
 
-#define MAX_BUTTON_PRESSED_COUNTER      7
-#define MAX_BUTTON_DEBOUNCE_STATE       3
+#define MAX_BUTTON_PRESSED_COUNTER	7
+#define MAX_BUTTON_DEBOUNCE_STATE	3
 
 typedef enum button_modes {
-    BUTTON_DEFAULT,
-    BUTTON_USER,
+	BUTTON_DEFAULT,
+	BUTTON_USER,
 }button_mode_t;
 
 typedef enum button_states {
-    BUTTON_PRESSED,
-    BUTTON_RELEASED,
+	BUTTON_PRESSED,
+	BUTTON_RELEASED,
 }button_state_t;
 
 enum input_states {
-    DEACTIVATED = 0,
-    ACTIVATED = 1, /* when signal reaches a defined treshold */
+	DEACTIVATED = 0,
+	ACTIVATED = 1, /* when signal reaches a defined treshold */
 };
 
 /* flags of input signals */
 struct input_sig {
-    uint8_t man_res     :1;
-    uint8_t sysres_out  :1;
-    uint8_t dbg_res     :1;
-    uint8_t m_res       :1;
-    uint8_t pg          :1;
-    uint8_t pg_4v5      :1;
-    uint8_t usb30_ovc   :1;
-    uint8_t usb31_ovc   :1;
-    uint8_t rtc_alarm   :1;
-    uint8_t button_sts  :1;
-    uint8_t card_det    :1;
-    uint8_t msata_ind   :1;
+	uint8_t man_res		: 1;
+	uint8_t sysres_out	: 1;
+	uint8_t dbg_res		: 1;
+	uint8_t m_res		: 1;
+	uint8_t pg		: 1;
+	uint8_t pg_4v5		: 1;
+	uint8_t usb30_ovc	: 1;
+	uint8_t usb31_ovc	: 1;
+	uint8_t rtc_alarm	: 1;
+	uint8_t button_sts	: 1;
+	uint8_t card_det	: 1;
+	uint8_t msata_ind	: 1;
 };
 
 struct button_def {
-    button_mode_t button_mode;
-    button_state_t button_state;
-    int8_t button_pressed_counter;
-    uint16_t button_pin_state[MAX_BUTTON_DEBOUNCE_STATE];
-    uint16_t button_debounce_state;
+	button_mode_t button_mode;
+	button_state_t button_state;
+	int8_t button_pressed_counter;
+	uint16_t button_pin_state[MAX_BUTTON_DEBOUNCE_STATE];
+	uint16_t button_debounce_state;
 };
 
 extern struct input_sig debounce_input_signal;

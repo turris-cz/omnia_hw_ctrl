@@ -19,7 +19,7 @@
   *****************************************************************************/
 static void msata_pci_io_config(void)
 {
-    gpio_init_inputs(pin_pullup, CARD_DET_PIN, MSATALED_PIN, MSATAIND_PIN);
+	gpio_init_inputs(pin_pullup, CARD_DET_PIN, MSATALED_PIN, MSATAIND_PIN);
 }
 
 /*******************************************************************************
@@ -30,7 +30,7 @@ static void msata_pci_io_config(void)
   *****************************************************************************/
 void msata_pci_indication_config(void)
 {
-    msata_pci_io_config();
+	msata_pci_io_config();
 }
 
 /*******************************************************************************
@@ -41,7 +41,7 @@ void msata_pci_indication_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-    led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
+	led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
 }
 
 /*******************************************************************************
@@ -52,9 +52,8 @@ void msata_pci_activity(void)
   *****************************************************************************/
 bool msata_pci_card_detection(void)
 {
-    /* inverted due to the HW connection
-    HW connection: 1 = no card inserted, 0 = card inserted */
-    return !gpio_read(CARD_DET_PIN);
+	/* inverted due to the HW connection */
+	return !gpio_read(CARD_DET_PIN);
 }
 
 /*******************************************************************************
@@ -65,5 +64,5 @@ bool msata_pci_card_detection(void)
   *****************************************************************************/
 bool msata_pci_type_card_detection(void)
 {
-    return gpio_read(MSATAIND_PIN);
+	return gpio_read(MSATAIND_PIN);
 }
