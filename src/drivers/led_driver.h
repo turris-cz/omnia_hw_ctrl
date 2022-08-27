@@ -108,6 +108,9 @@ void led_driver_step_brightness(void);
   *****************************************************************************/
 void led_set_user_mode(unsigned led, bool set);
 
+void led_states_commit(void);
+void led_set_state_nocommit(unsigned led, bool state);
+
 /*******************************************************************************
   * @function   led_set_state
   * @brief      Set state of the LED(s)

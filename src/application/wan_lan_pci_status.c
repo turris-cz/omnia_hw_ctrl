@@ -60,7 +60,7 @@ void wan_lan_pci_config(void)
   *****************************************************************************/
 void wan_led_activity(void)
 {
-    led_set_state(WAN_LED, !gpio_read(WAN_LED0_PIN));
+    led_set_state_nocommit(WAN_LED, !gpio_read(WAN_LED0_PIN));
 }
 
 /*******************************************************************************
@@ -86,8 +86,8 @@ void pci_led_activity(void)
         pcie_led2 = pcie_led2 && pcie_pled2;
     }
 
-    led_set_state(PCI2_LED, !pcie_led2);
-    led_set_state(PCI1_LED, !pcie_led1);
+    led_set_state_nocommit(PCI2_LED, !pcie_led2);
+    led_set_state_nocommit(PCI1_LED, !pcie_led1);
 }
 
 /*******************************************************************************
@@ -103,13 +103,13 @@ void lan_led_activity(void)
     lan_led = gpio_read_port(LAN_LED_PORT) & LAN_LED_MASK;
 
     if (lan_led & LAN_C0_MASK)
-        led_set_state(LAN0_LED, !(lan_led & LAN_R0_MASK));
+        led_set_state_nocommit(LAN0_LED, !(lan_led & LAN_R0_MASK));
     if (lan_led & LAN_C1_MASK)
-        led_set_state(LAN1_LED, !(lan_led & LAN_R0_MASK));
+        led_set_state_nocommit(LAN1_LED, !(lan_led & LAN_R0_MASK));
     if (lan_led & LAN_C0_MASK)
-        led_set_state(LAN2_LED, !(lan_led & LAN_R1_MASK));
+        led_set_state_nocommit(LAN2_LED, !(lan_led & LAN_R1_MASK));
     if (lan_led & LAN_C1_MASK)
-        led_set_state(LAN3_LED, !(lan_led & LAN_R1_MASK));
+        led_set_state_nocommit(LAN3_LED, !(lan_led & LAN_R1_MASK));
     if (lan_led & LAN_C0_MASK)
-        led_set_state(LAN4_LED, !(lan_led & LAN_R2_MASK));
+        led_set_state_nocommit(LAN4_LED, !(lan_led & LAN_R2_MASK));
 }

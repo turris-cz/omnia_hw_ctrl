@@ -851,7 +851,7 @@ void power_control_set_power_led(void)
   *****************************************************************************/
 void power_led_activity(void)
 {
-    led_set_state(POWER_LED, true);
+    led_set_state_nocommit(POWER_LED, true);
 }
 
 #if USER_REGULATOR_ENABLED

@@ -454,7 +454,7 @@ static inline uint16_t led_bits(unsigned led)
 		return LED_BIT(led);
 }
 
-static void recompute_led_states(void)
+void led_states_commit(void)
 {
 	leds_states = (leds_modes_user & leds_states_user) |
 		      (~leds_modes_user & leds_states_default);
@@ -474,7 +474,15 @@ void led_set_user_mode(unsigned led, bool set)
 	else
 		leds_modes_user &= ~led_bits(led);
 
-	recompute_led_states();
+	led_states_commit();
+}
+
+void led_set_state_nocommit(unsigned led, bool state)
+{
+	if (state)
+		leds_states_default |= led_bits(led);
+	else
+		leds_states_default &= ~led_bits(led);
 }
 
 /*******************************************************************************
@@ -486,12 +494,8 @@ void led_set_user_mode(unsigned led, bool set)
   *****************************************************************************/
 void led_set_state(unsigned led, bool state)
 {
-	if (state)
-		leds_states_default |= led_bits(led);
-	else
-		leds_states_default &= ~led_bits(led);
-
-	recompute_led_states();
+	led_set_state_nocommit(led, state);
+	led_states_commit();
 }
 
 /*******************************************************************************
@@ -508,7 +512,7 @@ void led_set_state_user(unsigned led, bool state)
 	else
 		leds_states_user &= ~led_bits(led);
 
-	recompute_led_states();
+	led_states_commit();
 }
 
 /*******************************************************************************

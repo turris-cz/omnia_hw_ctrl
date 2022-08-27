@@ -41,7 +41,7 @@ void msata_pci_indication_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-    led_set_state(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
+    led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
 }
 
 /*******************************************************************************
