@@ -38,9 +38,9 @@ static const uint16_t slave_features_supported =
 	FEAT_LED_GAMMA_CORRECTION;
 
 enum boot_request_e {
-    BOOTLOADER_REQ                      = 0xAA,
-    FLASH_ERROR                         = 0x55,
-    FLASH_OK                            = 0x88
+	BOOTLOADER_REQ	= 0xAA,
+	FLASH_ERROR	= 0x55,
+	FLASH_OK	= 0x88
 };
 
 struct st_i2c_status i2c_status;
@@ -54,119 +54,119 @@ struct st_i2c_status i2c_status;
   *****************************************************************************/
 static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 {
-    struct st_i2c_status *i2c_control = &i2c_status;
-    struct button_def *button = &button_front;
-    eeprom_var_t ee_var;
+	struct st_i2c_status *i2c_control = &i2c_status;
+	struct button_def *button = &button_front;
+	eeprom_var_t ee_var;
 
-    i2c_control->state = SLAVE_I2C_OK;
+	i2c_control->state = SLAVE_I2C_OK;
 
-    if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST))
-    {
-        /* set CFG_CTRL pin to high state ASAP */
-        gpio_write(CFG_CTRL_PIN, 1);
-        /* reset of CPU */
-        gpio_write(MANRES_PIN, 0);
-        return;
-    }
+	if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST))
+	{
+		/* set CFG_CTRL pin to high state ASAP */
+		gpio_write(CFG_CTRL_PIN, 1);
+		/* reset of CPU */
+		gpio_write(MANRES_PIN, 0);
+		return;
+	}
 
-    if ((control_byte & CTL_HARD_RST) && (bit_mask & CTL_HARD_RST))
-    {
-        i2c_control->state = SLAVE_I2C_HARD_RST;
-        return;
-    }
+	if ((control_byte & CTL_HARD_RST) && (bit_mask & CTL_HARD_RST))
+	{
+		i2c_control->state = SLAVE_I2C_HARD_RST;
+		return;
+	}
 
-    if (bit_mask & CTL_USB30_PWRON)
-    {
-        if (control_byte & CTL_USB30_PWRON)
-        {
-            power_control_usb(USB3_PORT0, true);
-            i2c_control->status_word |= STS_USB30_PWRON;
-        }
-        else
-        {
-            power_control_usb(USB3_PORT0, false);
-            i2c_control->status_word &= (~STS_USB30_PWRON);
-        }
-    }
+	if (bit_mask & CTL_USB30_PWRON)
+	{
+		if (control_byte & CTL_USB30_PWRON)
+		{
+			power_control_usb(USB3_PORT0, true);
+			i2c_control->status_word |= STS_USB30_PWRON;
+		}
+		else
+		{
+			power_control_usb(USB3_PORT0, false);
+			i2c_control->status_word &= (~STS_USB30_PWRON);
+		}
+	}
 
-    if (bit_mask & CTL_USB31_PWRON)
-    {
-        if (control_byte & CTL_USB31_PWRON)
-        {
-            power_control_usb(USB3_PORT1, true);
-            i2c_control->status_word |= STS_USB31_PWRON;
-        }
-        else
-        {
-            power_control_usb(USB3_PORT1, false);
-            i2c_control->status_word &= (~STS_USB31_PWRON);
-        }
-    }
+	if (bit_mask & CTL_USB31_PWRON)
+	{
+		if (control_byte & CTL_USB31_PWRON)
+		{
+			power_control_usb(USB3_PORT1, true);
+			i2c_control->status_word |= STS_USB31_PWRON;
+		}
+		else
+		{
+			power_control_usb(USB3_PORT1, false);
+			i2c_control->status_word &= (~STS_USB31_PWRON);
+		}
+	}
 
 #if USER_REGULATOR_ENABLED
-    if (bit_mask & CTL_ENABLE_4V5)
-    {
-        if (control_byte & CTL_ENABLE_4V5)
-        {
-            gpio_write(ENABLE_4V5_PIN, 1);
-        }
-        else
-        {
-            gpio_write(ENABLE_4V5_PIN, 0);
-            i2c_control->status_word &= (~STS_ENABLE_4V5);
-        }
-    }
+	if (bit_mask & CTL_ENABLE_4V5)
+	{
+		if (control_byte & CTL_ENABLE_4V5)
+		{
+			gpio_write(ENABLE_4V5_PIN, 1);
+		}
+		else
+		{
+			gpio_write(ENABLE_4V5_PIN, 0);
+			i2c_control->status_word &= (~STS_ENABLE_4V5);
+		}
+	}
 #endif
 
-    if (bit_mask & CTL_BUTTON_MODE)
-    {
-        if (control_byte & CTL_BUTTON_MODE)
-        {
-           button->button_mode = BUTTON_USER;
-           i2c_control->status_word |= STS_BUTTON_MODE;
-        }
-        else
-        {
-           button->button_mode = BUTTON_DEFAULT;
-           button->button_pressed_counter = 0;
-           i2c_control->status_word &= (~STS_BUTTON_MODE);
-        }
-    }
+	if (bit_mask & CTL_BUTTON_MODE)
+	{
+		if (control_byte & CTL_BUTTON_MODE)
+		{
+		   button->button_mode = BUTTON_USER;
+		   i2c_control->status_word |= STS_BUTTON_MODE;
+		}
+		else
+		{
+		   button->button_mode = BUTTON_DEFAULT;
+		   button->button_pressed_counter = 0;
+		   i2c_control->status_word &= (~STS_BUTTON_MODE);
+		}
+	}
 
-    if (bit_mask & CTL_BOOTLOADER)
-    {
-        if (control_byte & CTL_BOOTLOADER)
-        {
-            ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
+	if (bit_mask & CTL_BOOTLOADER)
+	{
+		if (control_byte & CTL_BOOTLOADER)
+		{
+			ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
 
-            switch(ee_var)
-            {
-                case VAR_FLASH_COMPLETE:    debug("RST: OK\n"); break;
-                case VAR_PAGE_FULL:         debug("RST: Pg full\n"); break;
-                case VAR_NO_VALID_PAGE:     debug("RST: No Pg\n"); break;
-                default:
-                    break;
-            }
+			switch(ee_var)
+			{
+				case VAR_FLASH_COMPLETE:    debug("RST: OK\n"); break;
+				case VAR_PAGE_FULL:         debug("RST: Pg full\n"); break;
+				case VAR_NO_VALID_PAGE:     debug("RST: No Pg\n"); break;
+				default:
+					break;
+			}
 
-            i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
-        }
-    }
+			i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
+		}
+	}
 }
 
 static const struct {
-    gpio_t pin;
-    uint16_t mask;
+	gpio_t pin;
+	uint16_t mask;
 } ext_control_pins[] = {
 #define ECTRL(name) \
-    { name ## _PIN, EXT_CTL_ ## name }
-    ECTRL(nRES_MMC),
-    ECTRL(nRES_LAN),
-    ECTRL(nRES_PHY),
-    ECTRL(nPERST0),
-    ECTRL(nPERST1),
-    ECTRL(nPERST2),
-    ECTRL(PHY_SFP),
-    ECTRL(nVHV_CTRL),
+	{ name ## _PIN, EXT_CTL_ ## name }
+	ECTRL(nRES_MMC),
+	ECTRL(nRES_LAN),
+	ECTRL(nRES_PHY),
+	ECTRL(nPERST0),
+	ECTRL(nPERST1),
+	ECTRL(nPERST2),
+	ECTRL(PHY_SFP),
+	ECTRL(nVHV_CTRL),
 #undef ECTRL
 };
 
@@ -179,30 +179,30 @@ static const struct {
   *****************************************************************************/
 void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
 {
-    /* don't do anything on pre-v32 boards */
-    if (OMNIA_BOARD_REVISION < 32)
-        return;
+	/* don't do anything on pre-v32 boards */
+	if (OMNIA_BOARD_REVISION < 32)
+		return;
 
-    /* save the requested value */
-    ext_control_word = (i2c_status.ext_control_word & ~bit_mask) |
-                       (ext_control_word & bit_mask);
-    i2c_status.ext_control_word = ext_control_word;
+	/* save the requested value */
+	ext_control_word = (i2c_status.ext_control_word & ~bit_mask) |
+			   (ext_control_word & bit_mask);
+	i2c_status.ext_control_word = ext_control_word;
 
-    /*
-     * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
-     * If set, we let PHY_SFP to be set in app.c' input_manager() according to
-     * value read from SFP_nDET, so we don't change it here.
-     * If not set, we want to set PHY_SFP according to value in
-     * ext_control_word.
-     */
-    if (ext_control_word & EXT_CTL_PHY_SFP_AUTO)
-        bit_mask &= ~EXT_CTL_PHY_SFP;
-    else
-        bit_mask |= EXT_CTL_PHY_SFP;
+	/*
+	 * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
+	 * If set, we let PHY_SFP to be set in app.c' input_manager() according to
+	 * value read from SFP_nDET, so we don't change it here.
+	 * If not set, we want to set PHY_SFP according to value in
+	 * ext_control_word.
+	 */
+	if (ext_control_word & EXT_CTL_PHY_SFP_AUTO)
+		bit_mask &= ~EXT_CTL_PHY_SFP;
+	else
+		bit_mask |= EXT_CTL_PHY_SFP;
 
-    for_each_const(pin, ext_control_pins)
-        if (bit_mask & pin->mask)
-            gpio_write(pin->pin, !!(ext_control_word & pin->mask));
+	for_each_const(pin, ext_control_pins)
+		if (bit_mask & pin->mask)
+			gpio_write(pin->pin, !!(ext_control_word & pin->mask));
 }
 
 /*******************************************************************************
@@ -213,18 +213,18 @@ void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
   *****************************************************************************/
 static uint16_t slave_i2c_get_ext_control_status(void)
 {
-    uint16_t ext_control_status = 0;
+	uint16_t ext_control_status = 0;
 
-    if (OMNIA_BOARD_REVISION >= 32) {
-        for_each_const(pin, ext_control_pins)
-            if (gpio_read(pin->pin))
-                ext_control_status |= pin->mask;
-    }
+	if (OMNIA_BOARD_REVISION >= 32) {
+		for_each_const(pin, ext_control_pins)
+			if (gpio_read(pin->pin))
+				ext_control_status |= pin->mask;
+	}
 
-    /* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
-    ext_control_status |= i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
+	/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
+	ext_control_status |= i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
 
-    return ext_control_status;
+	return ext_control_status;
 }
 
 typedef struct {
