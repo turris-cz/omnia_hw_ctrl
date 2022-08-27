@@ -372,7 +372,7 @@ void led_driver_config(void)
 	leds_states_default = 0;
 	leds_states_user = LED_BITS_ALL;
 	leds_states = 0;
-	gamma_correction = false;
+	gamma_correction = !BOOTLOADER_BUILD;
 	color_levels = gamma_correction ? COLOR_LEVELS_GC : COLOR_LEVELS;
 
 	led_set_color24(LED_COUNT, WHITE_COLOR);
