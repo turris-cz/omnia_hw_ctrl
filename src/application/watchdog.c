@@ -11,9 +11,13 @@ static uint16_t timeout, counter;
 
 void watchdog_enable(bool on)
 {
+	disable_irq();
+
 	systick_counter = 0;
 	counter = timeout;
 	enabled = on;
+
+	enable_irq();
 }
 
 bool watchdog_is_enabled(void)
@@ -24,9 +28,14 @@ bool watchdog_is_enabled(void)
 void watchdog_set_timeout(uint16_t ds)
 {
 	timeout = ds;
+
 	if (enabled) {
+		disable_irq();
+
 		systick_counter = 0;
 		counter = timeout;
+
+		enable_irq();
 	}
 }
 
@@ -43,11 +52,15 @@ void watchdog_handler(void)
 	if (!enabled)
 		return;
 
+	disable_irq();
+
 	systick_counter++;
 	if (systick_counter == HZ / 10) {
 		systick_counter = 0;
 		counter--;
 	}
+
+	enable_irq();
 
 	if (!counter) {
 		power_control_set_startup_condition();

@@ -23,8 +23,6 @@ void __irq i2c_slave_irq_handler(void)
 	uint32_t isr;
 	int ret;
 
-	disable_irq();
-
 	isr = i2c->ISR;
 
 	if (isr & (I2C_ISR_TIMEOUT | I2C_ISR_ARLO | I2C_ISR_BERR))
@@ -102,6 +100,4 @@ void __irq i2c_slave_irq_handler(void)
 		/* clear */
 		i2c->ICR = I2C_ICR_ADDRCF;
 	}
-
-	enable_irq();
 }

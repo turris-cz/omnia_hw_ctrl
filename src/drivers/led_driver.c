@@ -406,6 +406,8 @@ void led_driver_config(void)
   *****************************************************************************/
 void led_driver_set_brightness(uint8_t value)
 {
+	disable_irq();
+
 	if (value > 100)
 		value = 100;
 
@@ -420,6 +422,8 @@ void led_driver_set_brightness(uint8_t value)
 
 	timer_set_pulse(LED_PWM_TIMER, value);
 	pwm_brightness = value;
+
+	enable_irq();
 }
 
 /*******************************************************************************

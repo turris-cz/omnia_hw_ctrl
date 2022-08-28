@@ -114,8 +114,8 @@ static int boot_i2c_event_cb(void *priv, uint8_t addr,
 		/* trigger flashing/comparing in boot_i2c_flash_data() */
 		if (state->receiving && state->cmd_valid &&
 		    state->cmd_len > 2) {
-			state->rx_complete = 1;
 			i2c_slave_pause(SLAVE_I2C);
+			state->rx_complete = 1;
 		} else if (!state->receiving) {
 			state->cmd_len = 0;
 			state->cmd_valid = 0;

@@ -11,8 +11,6 @@ void __irq i2c_slave_irq_handler(void)
 	uint16_t stat0;
 	int ret;
 
-	disable_irq();
-
 	stat0 = I2C_STAT0(i2c);
 
 	if ((stat0 & I2C_STAT0_AERR) ||
@@ -96,6 +94,4 @@ void __irq i2c_slave_irq_handler(void)
 		/* enable TBE/RBNE interrupts */
 		I2C_CTL1(i2c) |= I2C_CTL1_BUFIE;
 	}
-
-	enable_irq();
 }
