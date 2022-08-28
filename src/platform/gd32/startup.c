@@ -187,9 +187,7 @@ static void platform_init(void)
 		NVIC->ICPR[i] = 0xffffffff;
 	}
 
-	/* The default setting is 2 bits for pre-emption priority and 2 bits for
-	 * subpriority. Allow one more bit for subpriority. */
-	nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
+	nvic_priority_group_set(NVIC_PRIGROUP_PRE2_SUB2);
 
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)

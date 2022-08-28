@@ -151,8 +151,8 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	slave->addr2 = addr2;
 	i2c_slave_ptr[i2c_nr] = slave;
 
-	nvic_irq_enable(i2c_ev_irqn(i2c_nr), 0, irq_prio);
-	nvic_irq_enable(i2c_err_irqn(i2c_nr), 0, irq_prio);
+	nvic_irq_enable(i2c_ev_irqn(i2c_nr), irq_prio, 0);
+	nvic_irq_enable(i2c_err_irqn(i2c_nr), irq_prio, 0);
 	I2C_CTL0(i2c) = I2C_CTL0_I2CEN | I2C_CTL0_ACKEN;
 }
 

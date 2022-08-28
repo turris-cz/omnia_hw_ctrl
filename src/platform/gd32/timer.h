@@ -126,7 +126,7 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 		/* enable up interrupt */
 		TIMER_DMAINTEN(tim) = TIMER_DMAINTEN_UPIE;
 
-		nvic_irq_enable(timer_irqn(tim_nr), 0, irq_prio);
+		nvic_irq_enable(timer_irqn(tim_nr), irq_prio, 0);
 		break;
 	}
 }

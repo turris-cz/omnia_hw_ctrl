@@ -391,11 +391,11 @@ void led_driver_config(void)
 	/* Initialize timer (every tick we send one frame) */
 	timer_init(LED_TIMER, timer_interrupt,
 		   gamma_correction ? LED_TIMER_PERIOD_GC : LED_TIMER_PERIOD,
-		   LED_TIMER_FREQ, 4);
+		   LED_TIMER_FREQ, 0);
 	timer_enable(LED_TIMER, true);
 
 	/* Configure boot effect */
-	timer_init(LED_EFFECT_TIMER, timer_interrupt, 8000, 120000, 5);
+	timer_init(LED_EFFECT_TIMER, timer_interrupt, 8000, 120000, 2);
 }
 
 /*******************************************************************************
