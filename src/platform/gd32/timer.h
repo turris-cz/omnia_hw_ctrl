@@ -9,7 +9,6 @@
 
 typedef uint8_t timer_nr_t;
 
-#define DEBOUNCE_TIMER		15
 #define LED_TIMER		2
 #define LED_EFFECT_TIMER	5
 #define LED_PWM_TIMER		14

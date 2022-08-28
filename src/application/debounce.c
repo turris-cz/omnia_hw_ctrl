@@ -42,22 +42,6 @@ enum input_mask {
 struct input_sig debounce_input_signal;
 struct button_def button_front;
 
-#define DEBOUNCE_PERIOD		300
-#define DEBOUNCE_FREQ		60000
-
-/*******************************************************************************
-  * @function   debounce_timer_config
-  * @brief      Timer configuration for debouncing. Regulary interrupt every 5ms.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_timer_config(void)
-{
-	timer_init(DEBOUNCE_TIMER, timer_interrupt,
-		   DEBOUNCE_PERIOD, DEBOUNCE_FREQ, 3);
-	timer_enable(DEBOUNCE_TIMER, true);
-}
-
 /*******************************************************************************
   * @function   debounce_card_det
   * @brief      Debounce of nCARD_DET input. Called in debounce timer interrupt.
@@ -133,18 +117,15 @@ static void debounce_msata_ind(void)
 }
 
 /*******************************************************************************
-  * @function   debounce_timer_irq_handler
-  * @brief      Main debounce function. Called as timer interrupt handler.
+  * @function   debounce_handler
+  * @brief      Main debounce function. Called from SysTick handler every 5 ms.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void __irq debounce_timer_irq_handler(void)
+void debounce_handler(void)
 {
 	static uint16_t idx;
 	struct button_def *button = &button_front;
-
-	if (!timer_irq_clear_up(DEBOUNCE_TIMER))
-		return;
 
 	/* port B, pins 0-14 debounced by general function debounce_check_inputs() */
 	/* only button on PB15 is debounced here, but read the whole port */
@@ -261,7 +242,6 @@ void debounce_config(void)
 {
 	struct button_def *button = &button_front;
 
-	debounce_timer_config();
 	button->button_mode = BUTTON_DEFAULT; /* default = brightness settings */
 }
 

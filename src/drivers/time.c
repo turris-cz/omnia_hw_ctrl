@@ -11,6 +11,7 @@
 #include "cpu.h"
 #include "time.h"
 #include "power_control.h"
+#include "debounce.h"
 #include "watchdog.h"
 
 #define SYSTICK_PERIOD		(SYS_CORE_FREQ / HZ)
@@ -104,6 +105,8 @@ void __irq systick_irq_handler(void)
 {
 	jiffies++;
 
-	if (!BOOTLOADER_BUILD)
+	if (!BOOTLOADER_BUILD) {
 		watchdog_handler();
+		debounce_handler();
+	}
 }

@@ -61,12 +61,12 @@ extern struct button_def button_front;
 void debounce_config(void);
 
 /*******************************************************************************
-  * @function   debounce_timer_irq_handler
-  * @brief      Main debounce function. Called as timer interrupt handler.
+  * @function   debounce_handler
+  * @brief      Main debounce function. Called from SysTick handler every 5 ms.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_timer_irq_handler(void);
+void debounce_handler(void);
 
 /*******************************************************************************
   * @function   debounce_check_inputs

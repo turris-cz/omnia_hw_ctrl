@@ -46,7 +46,6 @@ void external_irq(void) __weak_alias(default_handler);
 void systick_irq_handler(void) __weak_alias(default_handler);
 void led_driver_irq_handler(void) __weak_alias(default_handler);
 void led_driver_effect_irq_handler(void) __weak_alias(default_handler);
-void debounce_timer_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
 void i2c_slave_irq_handler(void) __weak_alias(default_handler);
 
@@ -88,7 +87,7 @@ static __used __section(".isr_vector") void *isr_vector[] = {
 	NULL,					/* Reserved */
 	NULL,					/* TIM14 */
 	NULL,					/* TIM15 */
-	debounce_timer_irq_handler,		/* TIM16 */
+	NULL,					/* TIM16 */
 	power_control_usb_timeout_irq_handler,	/* TIM17 */
 	NULL,					/* I2C1 */
 	i2c_slave_irq_handler,			/* I2C2 */
