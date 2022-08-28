@@ -3,23 +3,17 @@
 
 #include "compiler.h"
 
-typedef enum watchdog_state {
-	STOP	= 0,
-	RUN	= 1,
-	INIT	= 2,
-} watchdog_state_t;
+/* default timeout in deciseconds, 2 minutes */
+#define WATCHDOG_DEFAULT_TIMEOUT	1200
 
-enum watchdog_status {
-	WDG_DISABLE	= 0,
-	WDG_ENABLE	= 1
-};
+void watchdog_enable(bool on);
 
-struct st_watchdog {
-	watchdog_state_t watchdog_state;
-	uint16_t watchdog_sts;
-};
+bool watchdog_is_enabled(void);
 
-extern struct st_watchdog watchdog;
+/* Sets watchdog timeout in deciseconds / pings watchdog */
+void watchdog_set_timeout(uint16_t ds);
+
+uint16_t watchdog_get_timeleft(void);
 
 void watchdog_handler(void);
 

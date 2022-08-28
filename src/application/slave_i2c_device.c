@@ -137,6 +137,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 	{
 		if (control_byte & CTL_BOOTLOADER)
 		{
+			EE_Init();
 			ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
 
 			switch(ee_var)
@@ -376,45 +377,19 @@ static int cmd_get_gamma_correction(slave_i2c_state_t *state)
 
 static int cmd_watchdog_state(slave_i2c_state_t *state)
 {
-	watchdog.watchdog_state = state->cmd[1];
+	debug("watchdog_state\n");
 
-	if (watchdog.watchdog_state) {
-		debug("watchdog_state RUN\n");
-	} else {
-		debug("watchdog_state STOP\n");
-	}
-
-	return 0;
-}
-
-static int cmd_watchdog_status(slave_i2c_state_t *state)
-{
-	watchdog.watchdog_sts = state->cmd[1];
-
-	debug("watchdog_status\n");
-	switch (EE_WriteVariable(WDG_VIRT_ADDR, watchdog.watchdog_sts)) {
-	case VAR_FLASH_COMPLETE:
-		debug("WDT: OK\n");
-		break;
-	case VAR_PAGE_FULL:
-		debug("WDT: Pg full\n");
-		break;
-	case VAR_NO_VALID_PAGE:
-		debug("WDT: No Pg\n");
-		break;
-	default:
-		break;
-	}
+	watchdog_enable(state->cmd[1]);
 
 	return 0;
 }
 
 static int cmd_get_watchdog_state(slave_i2c_state_t *state)
 {
-	uint8_t wdt_state = watchdog.watchdog_state;
+	uint8_t enabled = watchdog_is_enabled();
 
 	debug("get_watchdog_state\n");
-	set_reply(wdt_state);
+	set_reply(enabled);
 
 	return 0;
 }
@@ -482,7 +457,6 @@ static const cmdinfo_t commands[] = {
 
 	/* watchdog */
 	[CMD_WATCHDOG_STATE]		= { 2, cmd_watchdog_state },
-	[CMD_WATCHDOG_STATUS]		= { 2, cmd_watchdog_status },
 	[CMD_GET_WATCHDOG_STATE]	= { 1, cmd_get_watchdog_state },
 
 	/* version info */

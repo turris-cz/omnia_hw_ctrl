@@ -52,38 +52,9 @@ typedef enum {
   *****************************************************************************/
 static void app_mcu_init(void)
 {
-	struct st_watchdog *wdg = &watchdog;
-	eeprom_var_t ee_var;
-	uint16_t ee_data;
-
 	debug_init();
 
 	flash_init(); /* Unlock the Flash Program Erase controller */
-	EE_Init(); /* EEPROM Init */
-
-	ee_var = EE_ReadVariable(WDG_VIRT_ADDR, &ee_data);
-
-	switch(ee_var)
-	{
-		case VAR_NOT_FOUND:
-		{
-			wdg->watchdog_sts = WDG_ENABLE;
-			EE_WriteVariable(WDG_VIRT_ADDR, wdg->watchdog_sts);
-			debug("Init - WDG var not found\n");
-		} break;
-
-		case VAR_FOUND:
-		{
-			wdg->watchdog_sts = ee_data;
-			debug("Init - WDG var found\n");
-		} break;
-
-		case VAR_NO_VALID_PAGE : debug("Init - WDG-No valid page\n");
-			break;
-
-		default:
-			break;
-	}
 
 	time_config();
 	/* init ports and peripheral */
@@ -186,10 +157,7 @@ static ret_value_t light_reset(void)
 {
 	ret_value_t value = OK;
 	struct st_i2c_status *i2c_control = &i2c_status;
-	struct st_watchdog *wdg = &watchdog;
 	uint16_t ext_control = 0;
-
-	wdg->watchdog_state = INIT;
 
 	led_driver_reset_effect(DISABLE);
 
@@ -199,16 +167,8 @@ static ret_value_t light_reset(void)
 	if (OMNIA_BOARD_REVISION >= 32)
 		ext_control = periph_control_rst_init();
 
-	if((wdg->watchdog_sts == WDG_ENABLE)&&(wdg->watchdog_state == INIT))
-	{
-		wdg->watchdog_state = RUN;
-		debug("RST - WDG runs\n");
-	}
-	else
-	{
-		wdg->watchdog_state = STOP;
-		debug("RST - WDG doesnt run\n");
-	}
+	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
+	watchdog_enable(true);
 
 	led_driver_reset_effect(ENABLE);
 

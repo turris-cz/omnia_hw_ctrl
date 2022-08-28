@@ -42,7 +42,9 @@ enum commands_e {
 	CMD_GET_RESET			= 0x09,
 	CMD_GET_FW_VERSION_APP		= 0x0A, /* 20B git hash number */
 	CMD_WATCHDOG_STATE		= 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
-	CMD_WATCHDOG_STATUS		= 0x0C, /* 0 - DISABLE, 1 - ENABLE -> permanently */
+
+	/* CMD_WATCHDOG_STATUS		= 0x0C, not implemented anymore */
+
 	CMD_GET_WATCHDOG_STATE		= 0x0D,
 	CMD_GET_FW_VERSION_BOOT		= 0x0E, /* 20B git hash number */
 	CMD_GET_FW_CHECKSUM		= 0x0F, /* 4B length, 4B checksum */
