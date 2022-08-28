@@ -1,14 +1,14 @@
 /**
  ******************************************************************************
- * @file    wan_lan_pci_status.h
+ * @file    wan_lan_pci_msata.h
  * @author  CZ.NIC, z.s.p.o.
  * @date    10-August-2015
  * @brief   Header file for driver of WAN, LAN and PCIe status indication.
  ******************************************************************************
  ******************************************************************************
  **/
-#ifndef WAN_LAN_PCI_STATUS_H
-#define WAN_LAN_PCI_STATUS_H
+#ifndef WAN_LAN_PCI_MSATA_H
+#define WAN_LAN_PCI_MSATA_H
 
 #include "gpio.h"
 
@@ -33,14 +33,42 @@
 #define C2_P4_LED_PIN		PIN(A, 11)
 #define C3_P5_LED_PIN		PIN(A, 12)
 
+/* mSATA/PCI detection and LED */
+#define CARD_DET_PIN		PIN(A, 9, !DBG_ENABLE)
+#define MSATALED_PIN		PIN(A, 15)
+#define MSATAIND_PIN		PIN(C, 14)
 
 /*******************************************************************************
-  * @function   wan_lan_pci_config
-  * @brief      Main configuration function for WAN, LAN and PCIe status indication.
+  * @function   wan_lan_pci_msata_config
+  * @brief      Configuration for WAN, LAN, PCIe and mSATA status indication.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void wan_lan_pci_config(void);
+void wan_lan_pci_msata_config(void);
+
+/*******************************************************************************
+  * @function   msata_pci_activity
+  * @brief      Toggle LED according to the activity of the connected card.
+  * @param      None.
+  * @retval     None.
+  *****************************************************************************/
+void msata_pci_activity(void);
+
+/*******************************************************************************
+  * @function   msata_pci_card_detection
+  * @brief      Detect inserted card (whether is a card inserted or not)
+  * @param      None.
+  * @retval     1 - a card inserted, 0 - no card inserted.
+  *****************************************************************************/
+bool msata_pci_card_detection(void);
+
+/*******************************************************************************
+  * @function   msata_pci_type_card_detection
+  * @brief      Detect a type of inserted card - mSATA or miniPCIe
+  * @param      None.
+  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
+  *****************************************************************************/
+bool msata_pci_type_card_detection(void);
 
 /*******************************************************************************
   * @function   wan_led_activity
@@ -66,4 +94,4 @@ void pci_led_activity(void);
   *****************************************************************************/
 void lan_led_activity(void);
 
-#endif // WAN_LAN_PCI_STATUS_H
+#endif /* WAN_LAN_PCI_MSATA_H */

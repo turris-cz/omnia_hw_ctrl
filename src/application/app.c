@@ -11,9 +11,8 @@
 #include "power_control.h"
 #include "debounce.h"
 #include "led_driver.h"
-#include "msata_pci.h"
 #include "slave_i2c_device.h"
-#include "wan_lan_pci_status.h"
+#include "wan_lan_pci_msata.h"
 #include "debug.h"
 #include "eeprom.h"
 #include "cpu.h"
@@ -59,8 +58,7 @@ static void app_mcu_init(void)
 	time_config();
 	/* init ports and peripheral */
 	power_control_io_config();
-	msata_pci_indication_config();
-	wan_lan_pci_config();
+	wan_lan_pci_msata_config();
 	power_control_usb_timeout_config();
 	led_driver_config();
 	slave_i2c_config();

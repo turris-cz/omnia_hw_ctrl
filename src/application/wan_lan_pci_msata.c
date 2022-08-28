@@ -1,13 +1,13 @@
 /**
  ******************************************************************************
- * @file    wan_lan_pci_status.c
+ * @file    wan_lan_pci_msata.c
  * @author  CZ.NIC, z.s.p.o.
  * @date    10-August-2015
  * @brief   Driver for WAN, LAN and PCIe status indication.
  ******************************************************************************
  ******************************************************************************
  **/
-#include "wan_lan_pci_status.h"
+#include "wan_lan_pci_msata.h"
 #include "led_driver.h"
 #include "debug.h"
 
@@ -23,33 +23,56 @@ enum lan_led_masks {
 };
 
 /*******************************************************************************
-  * @function   wan_lan_pci_io_config
-  * @brief      GPIO configuration for WAN, LAN and PCIe indication signals.
+  * @function   wan_lan_pci_msata_config
+  * @brief      Configuration for WAN, LAN, PCIe and mSATA status indication.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void wan_lan_pci_io_config(void)
+void wan_lan_pci_msata_config(void)
 {
 	gpio_init_inputs(pin_pullup,
 			 PCI_PLED0_PIN, PCI_PLED1_PIN, PCI_PLED2_PIN,
 			 PCI_LLED1_PIN, PCI_LLED2_PIN, WAN_LED0_PIN,
-			 WAN_LED1_PIN);
+			 WAN_LED1_PIN, CARD_DET_PIN, MSATALED_PIN,
+			 MSATAIND_PIN);
 
 	gpio_init_inputs(pin_nopull,
 			 R0_P0_LED_PIN, R1_P1_LED_PIN, R2_P2_LED_PIN,
 			 C0_P3_LED_PIN, C1_LED_PIN, C2_P4_LED_PIN, C3_P5_LED_PIN);
 }
 
-
 /*******************************************************************************
-  * @function   wan_lan_pci_config
-  * @brief      Main configuration function for WAN, LAN and PCIe status indication.
+  * @function   msata_pci_activity
+  * @brief      Toggle LED according to the activity of the connected card.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void wan_lan_pci_config(void)
+void msata_pci_activity(void)
 {
-	wan_lan_pci_io_config();
+	led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
+}
+
+/*******************************************************************************
+  * @function   msata_pci_card_detection
+  * @brief      Detect inserted card (whether a card is inserted or not)
+  * @param      None.
+  * @retval     1 - a card inserted, 0 - no card inserted.
+  *****************************************************************************/
+bool msata_pci_card_detection(void)
+{
+	/* inverted due to the HW connection */
+	return !gpio_read(CARD_DET_PIN);
+}
+
+/*******************************************************************************
+  * @function   msata_pci_type_card_detection
+  * @brief      Detect a type of inserted card - mSATA or miniPCIe
+  * @param      None.
+  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
+  *****************************************************************************/
+bool msata_pci_type_card_detection(void)
+{
+	return gpio_read(MSATAIND_PIN);
 }
 
 /*******************************************************************************
