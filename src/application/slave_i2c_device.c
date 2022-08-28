@@ -35,6 +35,7 @@ static const uint16_t slave_features_supported =
 	FEAT_PERIPH_MCU |
 #endif
 	FEAT_EXT_CMDS |
+	FEAT_WDT_PING |
 	FEAT_LED_GAMMA_CORRECTION;
 
 enum boot_request_e {
@@ -394,6 +395,26 @@ static int cmd_get_watchdog_state(slave_i2c_state_t *state)
 	return 0;
 }
 
+static int cmd_set_wdt_timeout(slave_i2c_state_t *state)
+{
+	uint8_t *args = &state->cmd[1];
+
+	debug("set_wdt_timeout\n");
+	watchdog_set_timeout(args[0] | (args[1] << 8));
+
+	return 0;
+}
+
+static int cmd_get_wdt_timeleft(slave_i2c_state_t *state)
+{
+	uint16_t timeleft = watchdog_get_timeleft();
+
+	debug("get_wdt_timeleft\n");
+	set_reply(timeleft);
+
+	return 0;
+}
+
 static int cmd_get_version(slave_i2c_state_t *state)
 {
 	debug("get_version\n");
@@ -458,6 +479,8 @@ static const cmdinfo_t commands[] = {
 	/* watchdog */
 	[CMD_SET_WATCHDOG_STATE]	= { 2, cmd_set_watchdog_state },
 	[CMD_GET_WATCHDOG_STATE]	= { 1, cmd_get_watchdog_state },
+	[CMD_SET_WDT_TIMEOUT]		= { 3, cmd_set_wdt_timeout },
+	[CMD_GET_WDT_TIMELEFT]		= { 1, cmd_get_wdt_timeleft },
 
 	/* version info */
 	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },
