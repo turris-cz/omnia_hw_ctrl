@@ -55,4 +55,18 @@
 	} while (0)
 #define __compiletime_error(message) __attribute__((__error__(message)))
 
+#define MAX(a, b)				\
+	({					\
+		__auto_type ___a = (a);		\
+		__auto_type ___b = (b);		\
+		___a > ___b ? ___a : ___b;	\
+	})
+
+#define MIN(a, b)				\
+	({					\
+		__auto_type ___a = (a);		\
+		__auto_type ___b = (b);		\
+		___a < ___b ? ___a : ___b;	\
+	})
+
 #endif /* COMPILER_H */
