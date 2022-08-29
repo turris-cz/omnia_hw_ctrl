@@ -1,6 +1,7 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -53,7 +54,5 @@
 			prefix ## suffix();					\
 	} while (0)
 #define __compiletime_error(message) __attribute__((__error__(message)))
-
-#define NULL ((void *)0)
 
 #endif /* COMPILER_H */
