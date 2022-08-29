@@ -26,7 +26,7 @@ typedef enum {
 
 typedef struct {
 	i2c_slave_event_t state;
-	uint8_t addr, addr1, addr2;
+	uint8_t addr;
 	uint8_t val;
 	bool paused;
 	void *priv;
@@ -147,8 +147,6 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	I2C_CTL1(i2c) |= I2C_CTL1_EVIE | I2C_CTL1_ERRIE;
 
 	slave->state = I2C_SLAVE_STOP;
-	slave->addr1 = addr1;
-	slave->addr2 = addr2;
 	i2c_slave_ptr[i2c_nr] = slave;
 
 	nvic_enable_irq(i2c_ev_irqn(i2c_nr), irq_prio);

@@ -79,9 +79,11 @@ void __irq i2c_slave_irq_handler(void)
 		stat1 = I2C_STAT1(i2c);
 
 		if (stat1 & I2C_STAT1_DUMODF)
-			slave->addr = slave->addr2;
+			slave->addr = FIELD_GET(I2C_SADDR1_ADDRESS2,
+						I2C_SADDR1(i2c));
 		else
-			slave->addr = slave->addr1;
+			slave->addr = FIELD_GET(I2C_SADDR0_ADDRESS,
+						I2C_SADDR0(i2c));
 
 		if (stat1 & I2C_STAT1_TR) {
 			slave->state = I2C_SLAVE_READ_REQUESTED;
