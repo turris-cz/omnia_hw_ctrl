@@ -4,6 +4,7 @@
 #include "stm32f0xx_tim.h"
 #include "stm32f0xx_rcc.h"
 #include "compiler.h"
+#include "cpu.h"
 
 typedef uint8_t timer_nr_t;
 
@@ -100,14 +101,9 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	TIM_ARRPreloadConfig(tim, ENABLE);
 
 	if (type == timer_interrupt) {
-		NVIC_InitTypeDef nvinit = {
-			.NVIC_IRQChannel = timer_irqn(tim_nr),
-			.NVIC_IRQChannelPriority = irq_prio,
-			.NVIC_IRQChannelCmd = ENABLE,
-		};
-
 		tim->DIER = TIM_IT_Update;
-		NVIC_Init(&nvinit);
+
+		nvic_enable_irq(timer_irqn(tim_nr), irq_prio);
 	}
 
 	if (type == timer_pwm)

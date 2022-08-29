@@ -2,11 +2,11 @@
 #define I2C_H
 
 #include "gd32f1x0_rcu.h"
-#include "gd32f1x0_misc.h"
 #include "gd32f1x0_i2c.h"
 #include "compiler.h"
 #include "bits.h"
 #include "gpio.h"
+#include "cpu.h"
 
 typedef uint8_t i2c_nr_t;
 
@@ -151,8 +151,8 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	slave->addr2 = addr2;
 	i2c_slave_ptr[i2c_nr] = slave;
 
-	nvic_irq_enable(i2c_ev_irqn(i2c_nr), irq_prio, 0);
-	nvic_irq_enable(i2c_err_irqn(i2c_nr), irq_prio, 0);
+	nvic_enable_irq(i2c_ev_irqn(i2c_nr), irq_prio);
+	nvic_enable_irq(i2c_err_irqn(i2c_nr), irq_prio);
 	I2C_CTL0(i2c) = I2C_CTL0_I2CEN | I2C_CTL0_ACKEN;
 }
 

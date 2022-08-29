@@ -1,8 +1,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include "cpu.h"
 #include "gd32f1x0_timer.h"
-#include "gd32f1x0_misc.h"
 #include "gd32f1x0_rcu.h"
 #include "compiler.h"
 #include "debug.h"
@@ -126,7 +126,7 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 		/* enable up interrupt */
 		TIMER_DMAINTEN(tim) = TIMER_DMAINTEN_UPIE;
 
-		nvic_irq_enable(timer_irqn(tim_nr), irq_prio, 0);
+		nvic_enable_irq(timer_irqn(tim_nr), irq_prio);
 		break;
 	}
 }

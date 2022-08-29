@@ -3,6 +3,14 @@
 
 #include "compiler.h"
 
+#if defined(STM32F030X8)
+# include "stm32f0xx.h"
+#elif defined(GD32F1x0)
+# include "gd32f1x0.h"
+#else
+# error "unknown platform"
+#endif
+
 static __force_inline void enable_irq(void)
 {
 	asm volatile("cpsie i\n" : : : "memory");
@@ -31,6 +39,12 @@ static __force_inline void nop(void)
 static __force_inline void wait_for_interrupt(void)
 {
 	asm volatile("wfi\n");
+}
+
+static inline void nvic_enable_irq(IRQn_Type irq, uint8_t prio)
+{
+	NVIC_SetPriority(irq, prio);
+	NVIC_EnableIRQ(irq);
 }
 
 #if defined(STM32F030X8)

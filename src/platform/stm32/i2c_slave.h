@@ -6,6 +6,7 @@
 #include "compiler.h"
 #include "bits.h"
 #include "gpio.h"
+#include "cpu.h"
 
 typedef uint8_t i2c_nr_t;
 
@@ -103,11 +104,6 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 		.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
 		.I2C_Timing = 0x10800000, /* 100kHz for 48MHz system clock */
 	};
-	NVIC_InitTypeDef nvinit = {
-		.NVIC_IRQChannel = i2c_irqn(i2c_nr),
-		.NVIC_IRQChannelPriority = irq_prio,
-		.NVIC_IRQChannelCmd = ENABLE,
-	};
 
 	i2c_rcc_config(i2c_nr, 0);
 	I2C_DeInit(i2c);
@@ -135,7 +131,8 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	i2c_slave_ptr[i2c_nr - 1] = slave;
 
 	I2C_Cmd(i2c, ENABLE);
-	NVIC_Init(&nvinit);
+
+	nvic_enable_irq(i2c_irqn(i2c_nr), irq_prio);
 }
 
 /* should be called only from slave callback, disable I2C interrupts

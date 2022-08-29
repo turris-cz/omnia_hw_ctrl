@@ -1,5 +1,4 @@
 SRCS_PLAT_gd32	= $(wildcard src/platform/gd32/*.c)
-SRCS_PLAT_gd32	+= src/platform/gd32/gd_lib/src/gd32f1x0_misc.c
 SRCS_PLAT_gd32	+= src/platform/gd32/gd_lib/src/gd32f1x0_fmc.c
 
 ISR_VECTOR_LENGTH_gd32	= 0x110

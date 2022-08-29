@@ -6,7 +6,6 @@ SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_exti.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_i2c.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_syscfg.c
-SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_misc.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_spi.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_flash.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_usart.c
