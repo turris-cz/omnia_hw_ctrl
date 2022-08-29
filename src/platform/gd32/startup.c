@@ -1,5 +1,4 @@
 #include "gd32f1x0.h"
-#include "gd32f1x0_misc.h"
 #include "gd32f1x0_rcu.h"
 #include "compiler.h"
 #include "cpu.h"
@@ -187,8 +186,8 @@ static void platform_init(void)
 		NVIC->ICPR[i] = 0xffffffff;
 	}
 
-	/* 2 bits for pre-emption priority, 2 bits for subpriority */
-	NVIC_SetPriorityGrouping(5);
+	/* 4 bits for pre-emption priority, 0 bits for subpriority */
+	NVIC_SetPriorityGrouping(3);
 
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)
