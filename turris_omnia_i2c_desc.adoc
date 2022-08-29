@@ -21,7 +21,7 @@ enum commands_e {
     CMD_GET_BRIGHTNESS         = 0x08,
     CMD_GET_RESET              = 0x09,
     CMD_GET_FW_VERSION_APP     = 0x0A, /* 20B git hash number */
-    CMD_WATCHDOG_STATE         = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
+    CMD_SET_WATCHDOG_STATE     = 0x0B, /* 0 - STOP, 1 - RUN -> must be stopped in less than 2 mins after reset */
 
     /* CMD_WATCHDOG_STATUS     = 0x0C, not implemented anymore */
 
@@ -433,7 +433,7 @@ NOTE: LED numbers are reversed. LED11 (the first LED from the left) is POWER_LED
 ***	b -> byte data type
 
 
-=== CMD_WATCHDOG_STATE
+=== CMD_SET_WATCHDOG_STATE
 * 2 states: run (= 1) / stop (= 0)
 * Watchdog must be stopped in less than 2 minutes after reset (otherwise reset appears)
 * It should "solve" a freezing of the router when the DDR training sequence fails

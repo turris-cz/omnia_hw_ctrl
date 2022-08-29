@@ -375,7 +375,7 @@ static int cmd_get_gamma_correction(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_watchdog_state(slave_i2c_state_t *state)
+static int cmd_set_watchdog_state(slave_i2c_state_t *state)
 {
 	debug("watchdog_state\n");
 
@@ -456,7 +456,7 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_GAMMA_CORRECTION]	= { 1, cmd_get_gamma_correction, LED_ADDR_ONLY },
 
 	/* watchdog */
-	[CMD_WATCHDOG_STATE]		= { 2, cmd_watchdog_state },
+	[CMD_SET_WATCHDOG_STATE]	= { 2, cmd_set_watchdog_state },
 	[CMD_GET_WATCHDOG_STATE]	= { 1, cmd_get_watchdog_state },
 
 	/* version info */
