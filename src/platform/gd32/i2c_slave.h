@@ -158,12 +158,12 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
  * after end of transaction */
 static __force_inline void i2c_slave_pause(i2c_nr_t i2c_nr)
 {
-	i2c_slave_ptr[i2c_nr]->paused = 1;
+	i2c_slave_ptr[i2c_nr]->paused = true;
 }
 
 static __force_inline void i2c_slave_resume(i2c_nr_t i2c_nr)
 {
-	i2c_slave_ptr[i2c_nr]->paused = 0;
+	i2c_slave_ptr[i2c_nr]->paused = false;
 	I2C_CTL1(i2c_to_plat(i2c_nr)) |= I2C_CTL1_EVIE | I2C_CTL1_ERRIE;
 }
 
