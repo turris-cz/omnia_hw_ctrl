@@ -10,7 +10,7 @@ HOSTCFLAGS	= -O2
 
 CFLAGS		= -ggdb -Os -fno-pie -ffreestanding -Wall -Wextra -Warray-bounds -nostdlib -ffunction-sections -fdata-sections
 CPPFLAGS	= -DVERSION="{ $(shell git rev-parse HEAD | sed 's/\(..\)/0x\1, /g' | sed -r 's/,\s+$$//') }"
-CPPFLAGS	+= -Isrc/include -Isrc/drivers -Isrc/application -Isrc/platform/common
+CPPFLAGS	+= -Isrc/include -Isrc/lib -Isrc/drivers -Isrc/application -Isrc/platform/common
 CPPFLAGS_app	= -DBOOTLOADER_BUILD=0
 CPPFLAGS_boot	= -DBOOTLOADER_BUILD=1
 
@@ -19,14 +19,15 @@ LDSCRIPT_boot	= src/bootloader/bootloader.lds
 LDFLAGS		= -T$(LDSCRIPT) -Wl,-Map=$(LDMAP),--cref -nostartfiles -no-pie -Xlinker --gc-sections
 
 SRCS_DEBUG	= src/drivers/debug.c
-SRCS_DRIVERS	= $(filter-out $(SRCS_DEBUG),$(wildcard src/drivers/*.c))
+SRCS_COMMON	= $(filter-out $(SRCS_DEBUG),$(wildcard src/drivers/*.c))
+SRCS_COMMON	+= $(wildcard src/lib/*.c)
 SRCS_APP	= $(wildcard src/application/*.c)
 SRCS_BOOT	= $(wildcard src/bootloader/*.c)
 
 HOSTTOOLS = crc32tool genflashimg stm32tool
 
 ifeq ($(DBG_ENABLE), 1)
-	SRCS_DRIVERS += $(SRCS_DEBUG)
+	SRCS_COMMON += $(SRCS_DEBUG)
 	CPPFLAGS += -DDBG_ENABLE=1
 	DEBUG_INFO_PRINT = \
 		@echo -e "\n======================================================="; \
@@ -87,8 +88,8 @@ define LinkScriptRule
 endef
 
 define PlatBuildVariant
-  SRCS_APP_$(1) = $$(SRCS_DRIVERS) $$(SRCS_APP) $$(SRCS_PLAT_$(1))
-  SRCS_BOOT_$(1) = $$(SRCS_DRIVERS) $$(SRCS_BOOT) $$(SRCS_PLAT_$(1))
+  SRCS_APP_$(1) = $$(SRCS_COMMON) $$(SRCS_APP) $$(SRCS_PLAT_$(1))
+  SRCS_BOOT_$(1) = $$(SRCS_COMMON) $$(SRCS_BOOT) $$(SRCS_PLAT_$(1))
   OBJS_APP_$(1) = $$(addprefix build.$(1)/app/,$$(SRCS_APP_$(1):.c=.o))
   OBJS_BOOT_$(1) = $$(addprefix build.$(1)/boot/,$$(SRCS_BOOT_$(1):.c=.o))
   LDSCRIPT_app_$(1) = build.$(1)/app/$$(LDSCRIPT_app)
