@@ -1,4 +1,5 @@
 #include "i2c_slave.h"
+#include "debug.h"
 #include "cpu.h"
 
 i2c_slave_t *i2c_slave_ptr[2];
@@ -20,14 +21,17 @@ void __irq i2c_slave_irq_handler(void)
 	i2c_nr_t i2c_nr = i2c_nr_in_irq();
 	i2c_slave_t *slave = i2c_slave_ptr[i2c_nr - 1];
 	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
+	bool handled = true;
 	uint32_t isr;
 	int ret;
 
 	isr = i2c->ISR;
 
-	if (isr & (I2C_ISR_TIMEOUT | I2C_ISR_ARLO | I2C_ISR_BERR))
-		/* TODO: reset of the i2c peripheral on error */
+	if (isr & (I2C_ISR_TIMEOUT | I2C_ISR_ARLO | I2C_ISR_BERR)) {
 		i2c->ICR = I2C_ICR_TIMOUTCF | I2C_ICR_ARLOCF | I2C_ICR_BERRCF;
+		debug("i2c bus error, resetting (ISR = %#010x)\n", isr);
+		i2c_slave_reset(i2c_nr);
+	}
 
 	/* Stop detection flag */
 	else if (slave->state != I2C_SLAVE_STOP && (isr & I2C_ISR_STOPF)) {
@@ -99,5 +103,19 @@ void __irq i2c_slave_irq_handler(void)
 
 		/* clear */
 		i2c->ICR = I2C_ICR_ADDRCF;
+	} else {
+		handled = false;
+	}
+
+	if (handled) {
+		slave->timeout = I2C_SLAVE_TIMEOUT_JIFFIES;
+		slave->unhandled = 0;
+	} else {
+		slave->unhandled++;
+	}
+
+	if (slave->unhandled == I2C_SLAVE_UNHANDLED_LIMIT) {
+		/* too many unhandled interrupts, reset */
+		i2c_slave_reset(i2c_nr);
 	}
 }

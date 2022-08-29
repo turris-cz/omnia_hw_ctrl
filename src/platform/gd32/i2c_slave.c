@@ -1,4 +1,5 @@
 #include "i2c_slave.h"
+#include "debug.h"
 #include "cpu.h"
 
 i2c_slave_t *i2c_slave_ptr[2];
@@ -8,13 +9,18 @@ void __irq i2c_slave_irq_handler(void)
 	i2c_nr_t i2c_nr = i2c_nr_in_irq();
 	i2c_slave_t *slave = i2c_slave_ptr[i2c_nr];
 	uint32_t i2c = i2c_to_plat(i2c_nr);
+	bool handled = true;
 	uint16_t stat0;
 	int ret;
 
 	stat0 = I2C_STAT0(i2c);
 
-	if ((stat0 & I2C_STAT0_AERR) ||
-	    (slave->state != I2C_SLAVE_STOP && (stat0 & I2C_STAT0_STPDET))) {
+	if (stat0 & I2C_STAT0_BERR) {
+		debug("i2c bus error, resetting (STAT0 = %#06x)\n", stat0);
+		i2c_slave_reset(i2c_nr);
+	} else if ((stat0 & I2C_STAT0_AERR) ||
+		   (slave->state != I2C_SLAVE_STOP &&
+		    (stat0 & I2C_STAT0_STPDET))) {
 		/*
 		 * Acknowledge not received (stop during transmit)
 		 * or Stop detection flag (stop during receive)
@@ -95,5 +101,19 @@ void __irq i2c_slave_irq_handler(void)
 
 		/* enable TBE/RBNE interrupts */
 		I2C_CTL1(i2c) |= I2C_CTL1_BUFIE;
+	} else {
+		handled = false;
+	}
+
+	if (handled) {
+		slave->timeout = I2C_SLAVE_TIMEOUT_JIFFIES;
+		slave->unhandled = 0;
+	} else {
+		slave->unhandled++;
+	}
+
+	if (slave->unhandled == I2C_SLAVE_UNHANDLED_LIMIT) {
+		/* too many unhandled interrupts, reset */
+		i2c_slave_reset(i2c_nr);
 	}
 }

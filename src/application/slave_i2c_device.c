@@ -548,7 +548,9 @@ static int slave_i2c_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 			/* decrease button counter */
 			button_counter_decrease(FIELD_GET(STS_BUTTON_COUNTER_MASK, i2c_status.status_word));
 		}
+		fallthrough;
 
+	case I2C_SLAVE_RESET:
 		state->cmd_len = 0;
 		state->reply_len = 0;
 		state->reply_idx = 0;

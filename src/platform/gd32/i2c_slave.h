@@ -4,11 +4,17 @@
 #include "gd32f1x0_rcu.h"
 #include "gd32f1x0_i2c.h"
 #include "compiler.h"
+#include "debug.h"
 #include "bits.h"
 #include "gpio.h"
+#include "time.h"
 #include "cpu.h"
 
 typedef uint8_t i2c_nr_t;
+
+#define I2C_SLAVE_TIMEOUT_MS		35
+#define I2C_SLAVE_TIMEOUT_JIFFIES	(I2C_SLAVE_TIMEOUT_MS / JIFFY_TO_MSECS)
+#define I2C_SLAVE_UNHANDLED_LIMIT	100
 
 #define I2C1_PINS_ALT_FN	0
 #define I2C1_SCL_PIN		PIN(F, 6)
@@ -17,17 +23,19 @@ typedef uint8_t i2c_nr_t;
 #define SLAVE_I2C		1
 
 typedef enum {
+	I2C_SLAVE_STOP = 0,
 	I2C_SLAVE_READ_REQUESTED,
 	I2C_SLAVE_WRITE_REQUESTED,
 	I2C_SLAVE_READ_PROCESSED,
 	I2C_SLAVE_WRITE_RECEIVED,
-	I2C_SLAVE_STOP,
+	I2C_SLAVE_RESET,
 } i2c_slave_event_t;
 
 typedef struct {
 	i2c_slave_event_t state;
 	uint8_t addr;
 	uint8_t val;
+	uint8_t timeout, unhandled;
 	bool paused;
 	void *priv;
 	int (*cb)(void *priv, uint8_t addr, i2c_slave_event_t event, uint8_t *val);
@@ -148,11 +156,24 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 
 	slave->state = I2C_SLAVE_STOP;
 	slave->paused = false;
+	slave->unhandled = 0;
 	i2c_slave_ptr[i2c_nr] = slave;
 
 	nvic_enable_irq(i2c_ev_irqn(i2c_nr), irq_prio);
 	nvic_enable_irq(i2c_err_irqn(i2c_nr), irq_prio);
 	I2C_CTL0(i2c) = I2C_CTL0_I2CEN | I2C_CTL0_ACKEN;
+}
+
+static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
+{
+	i2c_slave_t *slave = i2c_slave_ptr[i2c_nr];
+	uint32_t i2c = i2c_to_plat(i2c_nr);
+
+	slave->cb(slave->priv, slave->addr, I2C_SLAVE_RESET, &slave->val);
+	i2c_slave_init(i2c_nr, slave,
+		       FIELD_GET(I2C_SADDR0_ADDRESS, I2C_SADDR0(i2c)),
+		       FIELD_GET(I2C_SADDR1_ADDRESS2, I2C_SADDR1(i2c)),
+		       NVIC_GetPriority(i2c_ev_irqn(i2c_nr)));
 }
 
 /* should be called only from slave callback, disable I2C interrupts
@@ -166,6 +187,24 @@ static __force_inline void i2c_slave_resume(i2c_nr_t i2c_nr)
 {
 	i2c_slave_ptr[i2c_nr]->paused = false;
 	I2C_CTL1(i2c_to_plat(i2c_nr)) |= I2C_CTL1_EVIE | I2C_CTL1_ERRIE;
+}
+
+static __force_inline void i2c_slave_recovery_handler(i2c_nr_t i2c_nr)
+{
+	i2c_slave_t *slave = i2c_slave_ptr[i2c_nr];
+
+	disable_irq();
+
+	if (slave->state != I2C_SLAVE_STOP) {
+		if (slave->timeout) {
+			slave->timeout--;
+		} else {
+			debug("i2c timed out, resetting\n");
+			i2c_slave_reset(i2c_nr);
+		}
+	}
+
+	enable_irq();
 }
 
 void i2c_slave_irq_handler(void);

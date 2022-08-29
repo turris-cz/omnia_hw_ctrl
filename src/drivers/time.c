@@ -13,6 +13,7 @@
 #include "power_control.h"
 #include "debounce.h"
 #include "watchdog.h"
+#include "i2c_slave.h"
 
 #define SYSTICK_PERIOD		(SYS_CORE_FREQ / HZ)
 
@@ -109,4 +110,5 @@ void __irq systick_irq_handler(void)
 		watchdog_handler();
 		debounce_handler();
 	}
+	i2c_slave_recovery_handler(SLAVE_I2C);
 }

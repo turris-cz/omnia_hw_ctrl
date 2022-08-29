@@ -121,6 +121,15 @@ static int boot_i2c_event_cb(void *priv, uint8_t addr,
 			state->cmd_valid = 0;
 		}
 		break;
+
+	case I2C_SLAVE_RESET:
+		state->cmd_len = 0;
+		state->cmd_valid = 0;
+		state->receiving = 0;
+		state->rx_complete = 0;
+		state->tx_idx = 0;
+		state->tx_addr = 0;
+		break;
 	}
 
 	return 0;
