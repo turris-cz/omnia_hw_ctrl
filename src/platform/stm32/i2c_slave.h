@@ -128,6 +128,7 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	i2c->CR2 = (i2c->CR2 & ~I2C_CR2_NBYTES) | FIELD_PREP(I2C_CR2_NBYTES, 1);
 
 	slave->state = I2C_SLAVE_STOP;
+	slave->paused = false;
 	i2c_slave_ptr[i2c_nr - 1] = slave;
 
 	I2C_Cmd(i2c, ENABLE);
