@@ -18,13 +18,13 @@
 #if DBG_ENABLE
 void debug_init(void);
 
-void debug(const char *buffer);
+void debug(const char *fmt, ...);
 #else
 static inline void debug_init(void)
 {
 }
 
-static inline void debug(const char *)
+static inline void debug(const char *, ...)
 {
 }
 #endif
