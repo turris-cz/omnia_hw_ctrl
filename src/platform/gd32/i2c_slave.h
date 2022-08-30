@@ -36,7 +36,7 @@ typedef struct {
 	uint8_t addr;
 	uint8_t val;
 	uint8_t timeout, unhandled;
-	bool paused;
+	bool paused, eof;
 	void *priv;
 	int (*cb)(void *priv, uint8_t addr, i2c_slave_event_t event, uint8_t *val);
 } i2c_slave_t;

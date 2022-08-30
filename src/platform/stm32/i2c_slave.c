@@ -66,11 +66,15 @@ void __irq i2c_slave_irq_handler(void)
 	else if ((slave->state == I2C_SLAVE_READ_REQUESTED ||
 		  slave->state == I2C_SLAVE_READ_PROCESSED) &&
 		 (isr & I2C_ISR_TXIS)) {
-		ret = slave->cb(slave->priv, slave->addr, slave->state,
-				&slave->val);
+		if (!slave->eof) {
+			ret = slave->cb(slave->priv, slave->addr, slave->state,
+					&slave->val);
+			if (ret)
+				slave->eof = true;
+		}
 
 		/* if no more reply bytes are available, write 0xff to master */
-		if (ret)
+		if (slave->eof)
 			i2c->TXDR = 0xff;
 		else
 			i2c->TXDR = slave->val;
@@ -84,6 +88,7 @@ void __irq i2c_slave_irq_handler(void)
 
 		if (isr & I2C_ISR_DIR) {
 			slave->state = I2C_SLAVE_READ_REQUESTED;
+			slave->eof = false;
 
 			/* disable slave byte control, enable TX interrupts */
 			i2c->CR1 = (i2c->CR1 & ~I2C_CR1_SBC) | I2C_CR1_TXIE;

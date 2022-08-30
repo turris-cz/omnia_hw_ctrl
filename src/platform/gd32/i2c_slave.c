@@ -66,11 +66,15 @@ void __irq i2c_slave_irq_handler(void)
 		    (stat0 & I2C_STAT0_TBE)) {
 		/* Data empty during transmitting */
 
-		ret = slave->cb(slave->priv, slave->addr, slave->state,
-				&slave->val);
+		if (!slave->eof) {
+			ret = slave->cb(slave->priv, slave->addr, slave->state,
+					&slave->val);
+			if (ret)
+				slave->eof = true;
+		}
 
 		/* if no more reply bytes are available, write 0xff to master */
-		if (ret)
+		if (slave->eof)
 			I2C_DATA(i2c) = 0xff;
 		else
 			I2C_DATA(i2c) = slave->val;
@@ -93,6 +97,7 @@ void __irq i2c_slave_irq_handler(void)
 
 		if (stat1 & I2C_STAT1_TR) {
 			slave->state = I2C_SLAVE_READ_REQUESTED;
+			slave->eof = false;
 		} else {
 			slave->state = I2C_SLAVE_WRITE_REQUESTED;
 			slave->cb(slave->priv, slave->addr, slave->state,
