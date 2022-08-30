@@ -1,6 +1,5 @@
 SRCS_PLAT_stm32	= $(wildcard src/platform/stm32/*.c)
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/cmsis_boot/system_stm32f0xx.c
-SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_tim.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_flash.c
 
 ISR_VECTOR_LENGTH_stm32	= 0xC0

@@ -1,7 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "stm32f0xx_tim.h"
 #include "compiler.h"
 #include "cpu.h"
 
@@ -92,12 +91,6 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 				      uint8_t irq_prio)
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);
-	TIM_TimeBaseInitTypeDef init = {
-		.TIM_Period = period - 1,
-		.TIM_Prescaler = (TIMER_PARENT_FREQ / freq) - 1,
-		.TIM_ClockDivision = TIM_CKD_DIV1,
-		.TIM_CounterMode = TIM_CounterMode_Up,
-	};
 
 	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
 			   "Requested frequency unachievable");
@@ -106,30 +99,24 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	timer_reset(tim_nr);
 	timer_clk_config(tim_nr, 1);
 
-	TIM_TimeBaseInit(tim, &init);
+	tim->CR1 = TIM_CR1_ARPE;
+	tim->ARR = period - 1;
+	tim->PSC = (TIMER_PARENT_FREQ / freq) - 1;
+	tim->EGR = TIM_EGR_UG;
 
-	if (type == timer_pwm) {
-		TIM_OCInitTypeDef ocinit = {
-			.TIM_OCMode = TIM_OCMode_PWM1,
-			.TIM_OutputState = TIM_OutputState_Enable,
-			.TIM_Pulse = 0,
-			.TIM_OCPolarity = TIM_OCPolarity_Low,
-		};
+	switch (type) {
+	case timer_pwm:
+		tim->CCMR1 = (TIM_OCMode_PWM1 << 8) | TIM_CCMR1_OC2PE;
+		tim->CCER = TIM_CCER_CC2P | TIM_CCER_CC2E;
+		tim->BDTR |= TIM_BDTR_MOE;
+		break;
 
-		TIM_OC2Init(tim, &ocinit);
-		TIM_OC2PreloadConfig(tim, TIM_OCPreload_Enable);
-	}
-
-	TIM_ARRPreloadConfig(tim, ENABLE);
-
-	if (type == timer_interrupt) {
-		tim->DIER = TIM_IT_Update;
+	case timer_interrupt:
+		tim->DIER = TIM_DIER_UIE;
 
 		nvic_enable_irq(timer_irqn(tim_nr), irq_prio);
+		break;
 	}
-
-	if (type == timer_pwm)
-		TIM_CtrlPWMOutputs(tim, ENABLE);
 }
 
 static __force_inline void timer_deinit(timer_nr_t tim_nr)
@@ -139,16 +126,21 @@ static __force_inline void timer_deinit(timer_nr_t tim_nr)
 
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 {
-	TIM_Cmd(timer_to_plat(tim_nr), on);
+	TIM_TypeDef *tim = timer_to_plat(tim_nr);
+
+	if (on)
+		tim->CR1 |= TIM_CR1_CEN;
+	else
+		tim->CR1 &= ~TIM_CR1_CEN;
 }
 
 static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);
-	bool up = tim->SR & TIM_IT_Update;
+	bool up = tim->SR & TIM_SR_UIF;
 
 	if (up)
-		tim->SR = ~(uint16_t)TIM_IT_Update;
+		tim->SR = ~TIM_SR_UIF;
 
 	return up;
 }
