@@ -54,23 +54,16 @@ static __force_inline void spi_reset(spi_nr_t spi_nr)
 static inline void spi_init(spi_nr_t spi_nr)
 {
 	SPI_TypeDef *spi = spi_to_plat(spi_nr);
-	SPI_InitTypeDef init = {
-		.SPI_Direction = SPI_Direction_1Line_Tx,
-		.SPI_Mode = SPI_Mode_Master,
-		.SPI_DataSize = SPI_DataSize_16b,
-		.SPI_CPOL = SPI_CPOL_Low,
-		.SPI_CPHA = SPI_CPHA_1Edge,
-		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2,
-		.SPI_FirstBit = SPI_FirstBit_MSB,
-	};
 
 	spi_clk_config(spi_nr, 0);
 	spi_reset(spi_nr);
 	spi_clk_config(spi_nr, 1);
 
-	SPI_Init(spi, &init);
-	SPI_Cmd(spi, ENABLE);
+	spi->CR1 = SPI_Direction_1Line_Tx | SPI_FirstBit_MSB | SPI_CPOL_Low |
+		   SPI_CPHA_1Edge | SPI_NSS_Soft | SPI_BaudRatePrescaler_2 |
+		   SPI_Mode_Master;
+	spi->CR2 = SPI_DataSize_16b;
+	spi->CR1 |= SPI_CR1_SPE;
 }
 
 static __force_inline void spi_send16(spi_nr_t spi_nr, uint16_t data)
