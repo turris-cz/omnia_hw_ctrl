@@ -131,11 +131,6 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	}
 }
 
-static __force_inline void timer_deinit(timer_nr_t tim_nr)
-{
-	timer_reset(tim_nr);
-}
-
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 {
 	if (on)

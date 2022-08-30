@@ -56,7 +56,7 @@ static void bootloader_init(void)
 
 	flash_init(); /* Unlock the Flash Program Erase controller */
 	EE_Init(); /* EEPROM Init */
-	timer_deinit(USB_TIMEOUT_TIMER);
+	timer_reset(USB_TIMEOUT_TIMER);
 	enable_irq();
 
 	led_set_color24(LED_COUNT, GREEN_COLOR);
