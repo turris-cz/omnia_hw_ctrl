@@ -122,15 +122,6 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 				  uint8_t addr1, uint8_t addr2, uint8_t irq_prio)
 {
 	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
-	I2C_InitTypeDef init = {
-		.I2C_Mode = I2C_Mode_I2C,
-		.I2C_AnalogFilter = I2C_AnalogFilter_Enable,
-		.I2C_DigitalFilter = 0x00,
-		.I2C_OwnAddress1 = addr1 << 1,
-		.I2C_Ack = I2C_Ack_Enable,
-		.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
-		.I2C_Timing = 0x10800000, /* 100kHz for 48MHz system clock */
-	};
 
 	i2c_clk_config(i2c_nr, 0);
 	i2c_reset(i2c_nr);
@@ -138,28 +129,33 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 
 	i2c_init_pins(i2c_nr);
 
-	I2C_Init(i2c, &init);
+	/* 100kHz for 48MHz system clock */
+	i2c->TIMINGR = 0x10800000;
 
-	if (addr2) {
-		I2C_OwnAddress2Config(i2c, addr2 << 1, I2C_OA2_Mask01);
-		I2C_DualAddressCmd(i2c, ENABLE);
-	}
+	/* Analog filter enable.
+	 * Mode I2C.
+	 * Slave byte control enable.
+	 * Enable address match, transfer complete, stop and transmit interrupt.
+	 */
+	i2c->CR1 = I2C_AnalogFilter_Enable | I2C_Mode_I2C | I2C_CR1_SBC |
+		   I2C_CR1_ADDRIE | I2C_CR1_ERRIE | I2C_CR1_STOPIE;
 
-	I2C_SlaveByteControlCmd(i2c, ENABLE);
-	I2C_ReloadCmd(i2c, ENABLE);
+	/* Reload enable, NBYTES = 1. */
+	i2c->CR2 = I2C_CR2_RELOAD | FIELD_PREP(I2C_CR2_NBYTES, 1);
 
-	/* Address match, transfer complete, stop and transmit interrupt */
-	I2C_ITConfig(i2c, I2C_IT_ADDRI | I2C_IT_ERRI | I2C_IT_STOPI, ENABLE);
-
-	/* set NBYTES to 1 */
-	i2c->CR2 = (i2c->CR2 & ~I2C_CR2_NBYTES) | FIELD_PREP(I2C_CR2_NBYTES, 1);
+	i2c->OAR1 = I2C_AcknowledgedAddress_7bit | (addr1 << 1) |
+		    I2C_OAR1_OA1EN;
+	if (addr2)
+		i2c->OAR2 = I2C_OAR2_OA2EN | (addr2 << 1) |
+			    (I2C_OA2_Mask01 << 8);
 
 	slave->state = I2C_SLAVE_STOP;
 	slave->paused = false;
 	slave->unhandled = 0;
 	i2c_slave_ptr[i2c_nr - 1] = slave;
 
-	I2C_Cmd(i2c, ENABLE);
+	/* peripheral enable */
+	i2c->CR1 |= I2C_CR1_PE;
 
 	nvic_enable_irq(i2c_irqn(i2c_nr), irq_prio);
 }
