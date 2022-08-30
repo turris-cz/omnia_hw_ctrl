@@ -1,6 +1,5 @@
 SRCS_PLAT_stm32	= $(wildcard src/platform/stm32/*.c)
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/cmsis_boot/system_stm32f0xx.c
-SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_rcc.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_gpio.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_tim.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_exti.c
@@ -8,7 +7,6 @@ SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_syscfg.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_spi.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_flash.c
-SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_usart.c
 
 ISR_VECTOR_LENGTH_stm32	= 0xC0
 APP_POS_stm32		= 0x5000

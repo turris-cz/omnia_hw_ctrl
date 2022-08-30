@@ -68,14 +68,7 @@ static __force_inline void usart_init_pins(usart_nr_t usart_nr)
 static inline void usart_init(usart_nr_t usart_nr, uint32_t baud_rate)
 {
 	USART_TypeDef *usart = usart_to_plat(usart_nr);
-	USART_InitTypeDef init = {
-		.USART_BaudRate = baud_rate,
-		.USART_WordLength = USART_WordLength_8b,
-		.USART_StopBits = USART_StopBits_1,
-		.USART_Parity = USART_Parity_No,
-		.USART_HardwareFlowControl = USART_HardwareFlowControl_None,
-		.USART_Mode = USART_Mode_Rx | USART_Mode_Tx,
-	};
+	uint32_t uclk, udiv;
 
 	usart_clk_config(usart_nr, 0);
 	usart_reset(usart_nr);
@@ -83,8 +76,25 @@ static inline void usart_init(usart_nr_t usart_nr, uint32_t baud_rate)
 
 	usart_init_pins(usart_nr);
 
-	USART_Init(usart, &init);
-	USART_Cmd(usart, ENABLE);
+	/*
+	 * RCC_ClocksTypeDef RCC_ClocksStatus;
+	 * RCC_GetClocksFreq(&RCC_ClocksStatus);
+	 * if (usart_nr == 1)
+	 *   uclk = RCC_ClocksStatus.USART1CLK_Frequency;
+	 * else if (usart_nr == 2)
+	 *   uclk = RCC_ClocksStatus.USART2CLK_Frequency;
+	 * else if (usart_nr == 3)
+	 *   uclk = RCC_ClocksStatus.USART3CLK_Frequency;
+	 * else
+	 *   uclk =  RCC_ClocksStatus.PCLK_Frequency;
+	 */
+	uclk = 48000000;
+	udiv = (uclk + baud_rate / 2) / baud_rate;
+	usart->BRR = udiv;
+	usart->CR1 = USART_Mode_Rx | USART_Mode_Tx | USART_Parity_No |
+		     USART_WordLength_8b | USART_StopBits_1;
+	usart->CR3 = USART_HardwareFlowControl_None;
+	usart->CR1 |= USART_CR1_UE;
 }
 
 static __force_inline void usart_tx(usart_nr_t usart_nr, uint8_t data)
