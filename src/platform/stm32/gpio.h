@@ -160,13 +160,6 @@ static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,
 				  pin_pull_t pull, bool init_val,
 				  unsigned int len, const gpio_t *pins)
 {
-	GPIO_InitTypeDef init = {
-		.GPIO_Mode = mode,
-		.GPIO_OType = otype,
-		.GPIO_Speed = spd,
-		.GPIO_PuPd = pull,
-	};
-
 	/* initialize port clock */
 	gpio_init_port_clks(len, pins);
 
@@ -177,14 +170,25 @@ static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,
 	/* initialize individual pins */
 	for (unsigned int i = 0; i < len; ++i) {
 		if (pins[i] != PIN_INVALID) {
-			/* set alt func if alt mode */
-			if (mode == pin_mode_alt)
-				GPIO_PinAFConfig(pin_port_to_plat(pins[i]),
-						 pin_nr(pins[i]), alt_fn);
+			GPIO_TypeDef *plat = pin_port_to_plat(pins[i]);
+			uint8_t nr = pin_nr(pins[i]);
 
-			/* initialize pin */
-			init.GPIO_Pin = BIT(pin_nr(pins[i]));
-			GPIO_Init(pin_port_to_plat(pins[i]), &init);
+			/* set alt func if alt mode */
+			if (mode == pin_mode_alt) {
+				uint8_t r = nr >> 3, pos = (nr & 7) * 4;
+
+				plat->AFR[r] = (plat->AFR[r] & ~(0xf << pos)) |
+					       ((alt_fn & 0xf) << pos);
+			}
+
+			plat->OSPEEDR = (plat->OSPEEDR & ~(0x3 << (nr * 2))) |
+					(spd << (nr * 2));
+			plat->OTYPER = (plat->OTYPER & ~(0x1 << nr)) |
+					(otype << nr);
+			plat->MODER = (plat->MODER & ~(0x3 << (nr * 2))) |
+				      (mode << (nr * 2));
+			plat->PUPDR = (plat->PUPDR & ~(0x3 << (nr * 2))) |
+				      (pull << (nr * 2));
 		}
 	}
 }

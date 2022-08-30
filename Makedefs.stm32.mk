@@ -1,6 +1,5 @@
 SRCS_PLAT_stm32	= $(wildcard src/platform/stm32/*.c)
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/cmsis_boot/system_stm32f0xx.c
-SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_gpio.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_tim.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_exti.c
 SRCS_PLAT_stm32	+= src/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/src/stm32f0xx_i2c.c
