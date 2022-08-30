@@ -135,7 +135,8 @@ static void configure_isr_vector(void)
 {
 	if (BOOTLOADER_BUILD) {
 		/* remap flash to 0x00000000 to map ISR vector there */
-		SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_Flash);
+		SYSCFG->CFGR1 = (SYSCFG->CFGR1 & ~SYSCFG_CFGR1_MEM_MODE) |
+				SYSCFG_MemoryRemap_Flash;
 		return;
 	}
 
@@ -146,5 +147,6 @@ static void configure_isr_vector(void)
 		*dst++ = *src++;
 
 	/* remap RAM to 0x00000000 to map ISR vector there */
-	SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
+	SYSCFG->CFGR1 = (SYSCFG->CFGR1 & ~SYSCFG_CFGR1_MEM_MODE) |
+			SYSCFG_MemoryRemap_SRAM;
 }
