@@ -22,7 +22,7 @@
 #include "cpu.h"
 #include "crc32.h"
 
-typedef enum bootloader_states {
+typedef enum {
     POWER_ON,
     STARTUP_MANAGER,
     RESET_MANAGER,
@@ -31,7 +31,7 @@ typedef enum bootloader_states {
     RESET_TO_APPLICATION
 } boot_state_t;
 
-typedef enum bootloader_return_val {
+typedef enum {
     GO_TO_POWER_ON,
     GO_TO_STARTUP_MANAGER,
     GO_TO_RESET_MANAGER,
