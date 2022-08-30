@@ -4,3 +4,5 @@ build.*/
 tools/crc32tool
 tools/genflashimg
 tools/stm32tool
+.color_coded
+*.patch
