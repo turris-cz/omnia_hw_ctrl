@@ -83,12 +83,12 @@ static uint16_t app_get_status_word(void)
 	/* GET_FEATURES command is supported */
 	status_word |= STS_FEATURES_SUPPORTED;
 
-	#if USER_REGULATOR_ENABLED
-		if (gpio_read_output(ENABLE_4V5_PIN))
-			status_word |= STS_ENABLE_4V5;
-	#else
-		status_word |= STS_USER_REGULATOR_NOT_SUPPORTED;
-	#endif
+#if USER_REGULATOR_ENABLED
+	if (gpio_read_output(ENABLE_4V5_PIN))
+		status_word |= STS_ENABLE_4V5;
+#else
+	status_word |= STS_USER_REGULATOR_NOT_SUPPORTED;
+#endif
 
 	if (msata_pci_card_detection())
 		status_word |= STS_CARD_DET;
