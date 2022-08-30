@@ -106,7 +106,7 @@ static __force_inline uint16_t gpio_read_port(port_t port)
 static __force_inline bool gpio_read_output(gpio_t pin)
 {
 	if (pin == PIN_INVALID)
-		return 0;
+		return false;
 
 	return !!(GPIO_OCTL(pin_port_to_plat(pin)) & BIT(pin_nr(pin)));
 }

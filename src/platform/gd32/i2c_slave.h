@@ -139,9 +139,9 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 
 	i2c_init_pins(i2c_nr);
 
-	i2c_clk_config(i2c_nr, 0);
+	i2c_clk_config(i2c_nr, false);
 	i2c_reset(i2c_nr);
-	i2c_clk_config(i2c_nr, 1);
+	i2c_clk_config(i2c_nr, true);
 
 	/* clock at 72 MHz */
 	I2C_CTL1(i2c) = FIELD_PREP(I2C_CTL1_I2CCLK, 72);

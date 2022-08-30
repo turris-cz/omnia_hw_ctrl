@@ -98,9 +98,9 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	compiletime_assert(SYS_CORE_FREQ % freq == 0,
 			   "Requested frequency unachievable");
 
-	timer_clk_config(tim_nr, 0);
+	timer_clk_config(tim_nr, false);
 	timer_reset(tim_nr);
-	timer_clk_config(tim_nr, 1);
+	timer_clk_config(tim_nr, true);
 
 	/* auto reload shadow */
 	TIMER_CTL0(tim) = TIMER_CTL0_ARSE;

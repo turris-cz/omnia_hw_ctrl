@@ -9,7 +9,7 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 {
 	/* we don't support unaligned length yet */
 	if (len % 4)
-		return 0;
+		return false;
 
 	RCC->AHBENR |= RCC_AHBENR_CRCEN;
 
@@ -24,7 +24,7 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 
 	RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
 
-	return 1;
+	return true;
 }
 
 #endif /* CRC32_H */

@@ -71,9 +71,9 @@ static inline void usart_init(usart_nr_t usart_nr, uint32_t baud_rate)
 	uint32_t usart = usart_to_plat(usart_nr);
 	uint32_t uclk, udiv;
 
-	usart_clk_config(usart_nr, 0);
+	usart_clk_config(usart_nr, false);
 	usart_reset(usart_nr);
-	usart_clk_config(usart_nr, 1);
+	usart_clk_config(usart_nr, true);
 
 	usart_init_pins(usart_nr);
 

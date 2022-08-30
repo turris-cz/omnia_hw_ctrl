@@ -123,9 +123,9 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 {
 	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
 
-	i2c_clk_config(i2c_nr, 0);
+	i2c_clk_config(i2c_nr, false);
 	i2c_reset(i2c_nr);
-	i2c_clk_config(i2c_nr, 1);
+	i2c_clk_config(i2c_nr, true);
 
 	i2c_init_pins(i2c_nr);
 

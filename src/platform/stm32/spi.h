@@ -55,9 +55,9 @@ static inline void spi_init(spi_nr_t spi_nr)
 {
 	SPI_TypeDef *spi = spi_to_plat(spi_nr);
 
-	spi_clk_config(spi_nr, 0);
+	spi_clk_config(spi_nr, false);
 	spi_reset(spi_nr);
-	spi_clk_config(spi_nr, 1);
+	spi_clk_config(spi_nr, true);
 
 	spi->CR1 = SPI_Direction_1Line_Tx | SPI_FirstBit_MSB | SPI_CPOL_Low |
 		   SPI_CPHA_1Edge | SPI_NSS_Soft | SPI_BaudRatePrescaler_2 |

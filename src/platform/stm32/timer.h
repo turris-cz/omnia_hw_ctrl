@@ -95,9 +95,9 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
 			   "Requested frequency unachievable");
 
-	timer_clk_config(tim_nr, 0);
+	timer_clk_config(tim_nr, false);
 	timer_reset(tim_nr);
-	timer_clk_config(tim_nr, 1);
+	timer_clk_config(tim_nr, true);
 
 	tim->CR1 = TIM_CR1_ARPE;
 	tim->ARR = period - 1;

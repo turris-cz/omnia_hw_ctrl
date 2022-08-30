@@ -49,18 +49,18 @@ static __force_inline bool flash_program_halfword(uint32_t addr, uint16_t data)
   * @brief  This function does an erase of all user flash area
   * @param  start_page: start of user flash area
   * @param  len: length in bytes
-  * @retval 0: user flash area successfully erased
-  *         -1: error occurred
+  * @retval true: user flash area successfully erased
+  *         false: error occurred
   *****************************************************************************/
-static __force_inline int flash_erase(uint32_t start_page, uint16_t len)
+static __force_inline bool flash_erase(uint32_t start_page, uint16_t len)
 {
 	for (uint32_t page = start_page;
 	     page < start_page + len;
 	     page += FLASH_PAGE_SIZE)
 		if (!flash_erase_page(page))
-			return -1;
+			return false;
 
-	return 0;
+	return true;
 }
 
 /*******************************************************************************
@@ -69,11 +69,10 @@ static __force_inline int flash_erase(uint32_t start_page, uint16_t len)
   * @param  address: start address for writing data buffer, 4-aligned
   * @param  data: pointer on data buffer
   * @param  length: length of data buffer (unit is 8-bit word), 4-aligned
-  * @retval 0: Data successfully written to Flash memory
-  *         -1: Error occurred while writing data in Flash memory
-  *         -2: Written Data in flash memory is different from expected one
+  * @retval true: Data successfully written to Flash memory
+  *         false: Error occurred while writing data in Flash memory
   *****************************************************************************/
-static __force_inline int flash_write(uint32_t address, uint8_t *data, uint16_t length)
+static __force_inline bool flash_write(uint32_t address, uint8_t *data, uint16_t length)
 {
 	uint32_t end = address + length;
 
@@ -82,13 +81,13 @@ static __force_inline int flash_write(uint32_t address, uint8_t *data, uint16_t 
 				(data[1] << 8) | data[0];
 
 		if (!flash_program_word(address, word))
-			return -1; /* error writing */
+			return false; /* error writing */
 
 		if (*(volatile uint32_t *)address != word)
-			return -2; /* error comparing */
+			return false; /* error comparing */
 	}
 
-	return 0;
+	return true;
 }
 
 #endif /* __FLASH_H */

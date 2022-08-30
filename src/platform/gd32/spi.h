@@ -57,9 +57,9 @@ static inline void spi_init(spi_nr_t spi_nr)
 {
 	uint32_t spi = spi_to_plat(spi_nr);
 
-	spi_clk_config(spi_nr, 0);
+	spi_clk_config(spi_nr, false);
 	spi_reset(spi_nr);
-	spi_clk_config(spi_nr, 1);
+	spi_clk_config(spi_nr, true);
 
 	SPI_CTL0(spi) = SPI_CTL0_MSTMOD | SPI_CK_PL_LOW_PH_1EDGE |
 			SPI_CTL0_SWNSS | SPI_CTL0_SWNSSEN | SPI_PSC_4 |
