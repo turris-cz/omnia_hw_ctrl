@@ -53,28 +53,23 @@ static void debounce_card_det(void)
 	uint8_t state;
 	struct input_sig *input_state = &debounce_input_signal;
 
-	state = !(msata_pci_card_detection());
+	state = !msata_pci_card_detection();
 
-	if (state) /* signal released */
-	{
+	if (state) {
+		/* signal released */
 		if (counter > 0)
 			counter--;
-	}
-	else /* signal falls to low */
-	{
+	} else {
+		/* signal falls to low */
 		if (counter < MAX_CARD_DET_STATES)
 			counter++;
 	}
 
-	if (counter == 0)
+	if (counter == 0) {
 		input_state->card_det = false;
-	else
-	{
-		if(counter >= MAX_CARD_DET_STATES)
-		{
-			input_state->card_det = true;
-			counter = MAX_CARD_DET_STATES;
-		}
+	} else if (counter >= MAX_CARD_DET_STATES) {
+		input_state->card_det = true;
+		counter = MAX_CARD_DET_STATES;
 	}
 }
 
@@ -92,26 +87,21 @@ static void debounce_msata_ind(void)
 
 	state = !(msata_pci_type_card_detection());
 
-	if (state) /* signal released */
-	{
+	if (state) {
+		/* signal released */
 		if (counter > 0)
 			counter--;
-	}
-	else /* signal falls to low */
-	{
+	} else {
+		/* signal falls to low */
 		if (counter < MAX_MSATA_IND_STATES)
 			counter++;
 	}
 
-	if (counter == 0)
+	if (counter == 0) {
 		input_state->msata_ind = false;
-	else
-	{
-		if(counter >= MAX_MSATA_IND_STATES)
-		{
-			input_state->msata_ind = true;
-			counter = MAX_MSATA_IND_STATES;
-		}
+	} else if (counter >= MAX_MSATA_IND_STATES) {
+		input_state->msata_ind = true;
+		counter = MAX_MSATA_IND_STATES;
 	}
 }
 
@@ -147,7 +137,7 @@ void debounce_handler(void)
   *****************************************************************************/
 void debounce_check_inputs(void)
 {
-	uint16_t i, port_changed, button_changed;
+	uint16_t port_changed, button_changed;
 	static uint16_t last_button_debounce_state;
 	struct input_sig *input_state = &debounce_input_signal;
 	struct button_def *button = &button_front;
@@ -164,29 +154,26 @@ void debounce_check_inputs(void)
 	last_button_debounce_state = button->button_debounce_state;
 	button->button_debounce_state = BUTTON_MASK;
 
-	for (i = 0; i < MAX_BUTTON_DEBOUNCE_STATE; i++)
-	{
-		button->button_debounce_state = button->button_debounce_state & button->button_pin_state[i];
-	}
+	for (int i = 0; i < MAX_BUTTON_DEBOUNCE_STATE; i++)
+		button->button_debounce_state = button->button_debounce_state &
+						button->button_pin_state[i];
 
-	button_changed = (button->button_debounce_state ^ last_button_debounce_state) & button->button_debounce_state;
+	button_changed = (button->button_debounce_state ^
+			  last_button_debounce_state) &
+			 button->button_debounce_state;
 
 	/* results evaluation --------------------------------------------------- */
-	if (port_changed & MAN_RES_MASK)
-	{
+	if (port_changed & MAN_RES_MASK) {
 		input_state->man_res = true;
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
 	}
 
 	if (port_changed & SYSRES_OUT_MASK)
-	{
 		input_state->sysres_out = true;
-	}
 
 	if (OMNIA_BOARD_REVISION < 32) {
-		if (port_changed & DBG_RES_MASK)
-		{
+		if (port_changed & DBG_RES_MASK) {
 			/* no reaction necessary */
 		}
 
@@ -195,40 +182,28 @@ void debounce_check_inputs(void)
 	}
 
 	if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
-		 (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
-		 (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
-		 (port_changed & PG_1V2_MASK))
-	{
+	    (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
+	    (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
+	    (port_changed & PG_1V2_MASK))
 		input_state->pg = true;
-	}
 
 	/* PG signal from 4.5V user controlled regulator */
-	if(i2c_control->status_word & STS_ENABLE_4V5)
-	{
-		if (port_changed & PG_4V5_MASK)
-			input_state->pg_4v5 = true;
-	}
+	if ((i2c_control->status_word & STS_ENABLE_4V5) &&
+	    (port_changed & PG_4V5_MASK))
+		input_state->pg_4v5 = true;
 
 	if (port_changed & USB30_OVC_MASK)
-	{
 		input_state->usb30_ovc = true;
-	}
 
 	if (port_changed & USB31_OVC_MASK)
-	{
 		input_state->usb31_ovc = true;
-	}
 
-
-	if (port_changed & RTC_ALARM_MASK)
-	{
+	if (port_changed & RTC_ALARM_MASK) {
 		/* no reaction necessary */
 	}
 
 	if (button_changed & BUTTON_MASK)
-	{
 		input_state->button_sts = true;
-	}
 }
 
 /*******************************************************************************
@@ -241,7 +216,8 @@ void debounce_config(void)
 {
 	struct button_def *button = &button_front;
 
-	button->button_mode = BUTTON_DEFAULT; /* default = brightness settings */
+	/* default = brightness settings */
+	button->button_mode = BUTTON_DEFAULT;
 }
 
 /*******************************************************************************

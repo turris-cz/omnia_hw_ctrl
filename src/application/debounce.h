@@ -18,12 +18,12 @@
 typedef enum button_modes {
 	BUTTON_DEFAULT,
 	BUTTON_USER,
-}button_mode_t;
+} button_mode_t;
 
 typedef enum button_states {
 	BUTTON_PRESSED,
 	BUTTON_RELEASED,
-}button_state_t;
+} button_state_t;
 
 /* flags of input signals */
 struct input_sig {

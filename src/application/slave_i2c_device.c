@@ -60,8 +60,7 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 
 	i2c_control->state = SLAVE_I2C_OK;
 
-	if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST))
-	{
+	if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST)) {
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
 		/* reset of CPU */
@@ -69,84 +68,73 @@ static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
 		return;
 	}
 
-	if ((control_byte & CTL_HARD_RST) && (bit_mask & CTL_HARD_RST))
-	{
+	if ((control_byte & CTL_HARD_RST) && (bit_mask & CTL_HARD_RST)) {
 		i2c_control->state = SLAVE_I2C_HARD_RST;
 		return;
 	}
 
-	if (bit_mask & CTL_USB30_PWRON)
-	{
-		if (control_byte & CTL_USB30_PWRON)
-		{
+	if (bit_mask & CTL_USB30_PWRON) {
+		if (control_byte & CTL_USB30_PWRON) {
 			power_control_usb(USB3_PORT0, true);
 			i2c_control->status_word |= STS_USB30_PWRON;
-		}
-		else
-		{
+		} else {
 			power_control_usb(USB3_PORT0, false);
-			i2c_control->status_word &= (~STS_USB30_PWRON);
+			i2c_control->status_word &= ~STS_USB30_PWRON;
 		}
 	}
 
-	if (bit_mask & CTL_USB31_PWRON)
-	{
-		if (control_byte & CTL_USB31_PWRON)
-		{
+	if (bit_mask & CTL_USB31_PWRON) {
+		if (control_byte & CTL_USB31_PWRON) {
 			power_control_usb(USB3_PORT1, true);
 			i2c_control->status_word |= STS_USB31_PWRON;
-		}
-		else
-		{
+		} else {
 			power_control_usb(USB3_PORT1, false);
-			i2c_control->status_word &= (~STS_USB31_PWRON);
+			i2c_control->status_word &= ~STS_USB31_PWRON;
 		}
 	}
 
 #if USER_REGULATOR_ENABLED
-	if (bit_mask & CTL_ENABLE_4V5)
-	{
-		if (control_byte & CTL_ENABLE_4V5)
-		{
+	if (bit_mask & CTL_ENABLE_4V5) {
+		if (control_byte & CTL_ENABLE_4V5) {
 			gpio_write(ENABLE_4V5_PIN, 1);
-		}
-		else
-		{
+		} else {
 			gpio_write(ENABLE_4V5_PIN, 0);
-			i2c_control->status_word &= (~STS_ENABLE_4V5);
+			i2c_control->status_word &= ~STS_ENABLE_4V5;
 		}
 	}
 #endif
 
-	if (bit_mask & CTL_BUTTON_MODE)
-	{
-		if (control_byte & CTL_BUTTON_MODE)
-		{
-		   button->button_mode = BUTTON_USER;
-		   i2c_control->status_word |= STS_BUTTON_MODE;
-		}
-		else
-		{
-		   button->button_mode = BUTTON_DEFAULT;
-		   button->button_pressed_counter = 0;
-		   i2c_control->status_word &= (~STS_BUTTON_MODE);
+	if (bit_mask & CTL_BUTTON_MODE) {
+		if (control_byte & CTL_BUTTON_MODE) {
+			button->button_mode = BUTTON_USER;
+			i2c_control->status_word |= STS_BUTTON_MODE;
+		} else {
+			button->button_mode = BUTTON_DEFAULT;
+			button->button_pressed_counter = 0;
+			i2c_control->status_word &= ~STS_BUTTON_MODE;
 		}
 	}
 
-	if (bit_mask & CTL_BOOTLOADER)
-	{
-		if (control_byte & CTL_BOOTLOADER)
-		{
+	if (bit_mask & CTL_BOOTLOADER) {
+		if (control_byte & CTL_BOOTLOADER) {
 			EE_Init();
 			ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
 
-			switch(ee_var)
-			{
-				case VAR_FLASH_COMPLETE:    debug("RST: OK\n"); break;
-				case VAR_PAGE_FULL:         debug("RST: Pg full\n"); break;
-				case VAR_NO_VALID_PAGE:     debug("RST: No Pg\n"); break;
-				default:
-					break;
+			switch (ee_var) {
+			case VAR_FLASH_COMPLETE:
+				debug("RST: OK\n");
+				break;
+
+			case VAR_PAGE_FULL:
+				debug("RST: Pg full\n");
+				break;
+
+			case VAR_NO_VALID_PAGE:
+				debug("RST: No Pg\n");
+				break;
+
+			default:
+				break;
 			}
 
 			i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;

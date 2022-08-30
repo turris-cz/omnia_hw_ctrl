@@ -84,7 +84,7 @@ static uint16_t app_get_status_word(void)
 	status_word |= STS_FEATURES_SUPPORTED;
 
 	#if USER_REGULATOR_ENABLED
-		if(gpio_read_output(ENABLE_4V5_PIN))
+		if (gpio_read_output(ENABLE_4V5_PIN))
 			status_word |= STS_ENABLE_4V5;
 	#else
 		status_word |= STS_USER_REGULATOR_NOT_SUPPORTED;
@@ -194,22 +194,19 @@ static ret_value_t input_manager(void)
 	debounce_check_inputs();
 
 	/* manual reset button */
-	if(input_state->man_res)
-	{
+	if (input_state->man_res) {
 		value = GO_TO_LIGHT_RESET;
 		input_state->man_res = false;
 	}
 
 	/* sw reset */
-	if (input_state->sysres_out)
-	{
+	if (input_state->sysres_out) {
 		value = GO_TO_LIGHT_RESET;
 		input_state->sysres_out = false;
 	}
 
 	/* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
-	if(input_state->pg)
-	{
+	if (input_state->pg) {
 		debug("PG all regulators\n");
 		value = GO_TO_HARD_RESET;
 		input_state->pg = false;
@@ -217,8 +214,7 @@ static ret_value_t input_manager(void)
 
 #if USER_REGULATOR_ENABLED
 	/* PG signal from 4.5V user controlled regulator */
-	if(input_state->pg_4v5)
-	{
+	if (input_state->pg_4v5) {
 		debug("PG from 4V5\n");
 		value = GO_TO_HARD_RESET;
 		input_state->pg_4v5 = false;
@@ -226,40 +222,40 @@ static ret_value_t input_manager(void)
 #endif
 
 	/* USB30 overcurrent */
-	if(input_state->usb30_ovc)
-	{
+	if (input_state->usb30_ovc) {
 		i2c_control->status_word |= STS_USB30_OVC;
 		input_state->usb30_ovc = false;
 		power_control_usb(USB3_PORT0, false); /* USB power off */
 
-		if(!power_control_get_usb_poweron(USB3_PORT0))  /* update status word */
-			i2c_control->status_word &= (~STS_USB30_PWRON);
+		/* update status word */
+		if (!power_control_get_usb_poweron(USB3_PORT0))
+			i2c_control->status_word &= ~STS_USB30_PWRON;
 
 		/* USB timeout set to 1 sec */
 		power_control_usb_timeout_enable();
 	}
 
 	/* USB31 overcurrent */
-	if(input_state->usb31_ovc)
-	{
+	if (input_state->usb31_ovc) {
 		i2c_control->status_word |= STS_USB31_OVC;
 		input_state->usb31_ovc = false;
 
 		power_control_usb(USB3_PORT1, false); /* USB power off */
 
-		if(!power_control_get_usb_poweron(USB3_PORT1)) /* update status word */
-			i2c_control->status_word &= (~STS_USB31_PWRON);
+		/* update status word */
+		if (!power_control_get_usb_poweron(USB3_PORT1))
+			i2c_control->status_word &= ~STS_USB31_PWRON;
 
 		/* USB timeout set to 1 sec */
 		power_control_usb_timeout_enable();
 	}
 
 	/* front button */
-	if (input_state->button_sts)
-	{
+	if (input_state->button_sts) {
 		if (button->button_mode == BUTTON_DEFAULT)
 			led_driver_step_brightness();
-		else /* user button mode */
+		else
+			/* user button mode */
 			button_counter_increase();
 
 		input_state->button_sts = false;
@@ -267,37 +263,33 @@ static ret_value_t input_manager(void)
 
 	/* in case of user button mode:
 	 * store information in status_word - how many times a button was pressed  */
-	if(button->button_mode != BUTTON_DEFAULT)
-	{
-		if (button->button_pressed_counter)
-		{
+	if (button->button_mode != BUTTON_DEFAULT) {
+		if (button->button_pressed_counter) {
 			i2c_control->status_word &= ~STS_BUTTON_COUNTER_MASK;
 			i2c_control->status_word |= (button->button_pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
 			i2c_control->status_word |= STS_BUTTON_PRESSED;
-		}
-		else
-		{
-			i2c_control->status_word &= (~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK));
+		} else {
+			i2c_control->status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
 		}
 	}
 
 	/* these flags are automatically cleared in debounce function */
-	if(input_state->card_det)
+	if (input_state->card_det)
 		i2c_control->status_word |= STS_CARD_DET;
 	else
-		i2c_control->status_word &= (~STS_CARD_DET);
+		i2c_control->status_word &= ~STS_CARD_DET;
 
-	if(input_state->msata_ind)
+	if (input_state->msata_ind)
 		i2c_control->status_word |= STS_MSATA_IND;
 	else
-		i2c_control->status_word &= (~STS_MSATA_IND);
+		i2c_control->status_word &= ~STS_MSATA_IND;
 
 
 	if (OMNIA_BOARD_REVISION >= 32) {
 		if (gpio_read(SFP_nDET_PIN))
 			i2c_control->ext_status_dword |= EXT_STS_SFP_nDET;
 		else
-			i2c_control->ext_status_dword &= (~(EXT_STS_SFP_nDET));
+			i2c_control->ext_status_dword &= ~(EXT_STS_SFP_nDET);
 
 		disable_irq();
 		if (i2c_control->ext_control_word & EXT_CTL_PHY_SFP_AUTO)
@@ -328,12 +320,22 @@ static ret_value_t i2c_manager(void)
 
 	last_status_word = i2c_control->status_word;
 
-	switch(i2c_control->state)
-	{
-		case SLAVE_I2C_LIGHT_RST:           value = GO_TO_LIGHT_RESET; break;
-		case SLAVE_I2C_HARD_RST:            value = GO_TO_HARD_RESET; break;
-		case SLAVE_I2C_GO_TO_BOOTLOADER:    value = GO_TO_BOOTLOADER; break;
-		default:                            value = OK; break;
+	switch (i2c_control->state) {
+	case SLAVE_I2C_LIGHT_RST:
+		value = GO_TO_LIGHT_RESET;
+		break;
+
+	case SLAVE_I2C_HARD_RST:
+		value = GO_TO_HARD_RESET;
+		break;
+
+	case SLAVE_I2C_GO_TO_BOOTLOADER:
+		value = GO_TO_BOOTLOADER;
+		break;
+
+	default:
+		value = OK;
+		break;
 	}
 
 	i2c_control->state = SLAVE_I2C_OK;
@@ -390,91 +392,88 @@ static void app_mcu_cyclic(void)
 	static int err;
 	static uint8_t error_counter;
 
-	switch(next_state)
-	{
-		case POWER_ON:
-		{
-			err = power_on();
+	switch (next_state) {
+	case POWER_ON:
+		err = power_on();
 
-			if (!err)
-				next_state = LIGHT_RESET;
-			else
-				next_state = ERROR_STATE;
+		if (!err)
+			next_state = LIGHT_RESET;
+		else
+			next_state = ERROR_STATE;
+		break;
+
+	case LIGHT_RESET:
+		val = light_reset();
+
+		next_state = INPUT_MANAGER;
+		break;
+
+	case HARD_RESET:
+		NVIC_SystemReset();
+		break;
+
+	case ERROR_STATE:
+		error_manager(-err - 1);
+		error_counter++;
+
+		if (error_counter >= MAX_ERROR_COUNT) {
+			next_state = HARD_RESET;
+			error_counter = 0;
+		} else {
+			next_state = ERROR_STATE;
 		}
 		break;
 
-		case LIGHT_RESET:
-		{
-			val = light_reset();
+	case INPUT_MANAGER:
+		val = input_manager();
 
-			next_state = INPUT_MANAGER;
+		switch (val) {
+		case GO_TO_LIGHT_RESET:
+			next_state = LIGHT_RESET;
+			break;
+
+		case GO_TO_HARD_RESET:
+			next_state = HARD_RESET;
+			break;
+
+		default:
+			next_state = I2C_MANAGER;
+			break;
 		}
 		break;
 
-		case HARD_RESET:
-		{
-			NVIC_SystemReset();
+	case I2C_MANAGER:
+		val = i2c_manager();
+
+		switch (val) {
+		case GO_TO_LIGHT_RESET:
+			next_state = LIGHT_RESET;
+			break;
+
+		case GO_TO_HARD_RESET:
+			next_state = HARD_RESET;
+			break;
+
+		case GO_TO_BOOTLOADER:
+			next_state = BOOTLOADER;
+			break;
+
+		default:
+			next_state = LED_MANAGER;
+			break;
 		}
 		break;
 
-		case ERROR_STATE:
-		{
-			error_manager(-err - 1);
-			error_counter++;
+	case LED_MANAGER:
+		if (effect_reset_finished)
+			led_manager();
 
-			if(error_counter >= MAX_ERROR_COUNT)
-			{
-				next_state = HARD_RESET;
-				error_counter = 0;
-			}
-			else
-			{
-				next_state = ERROR_STATE;
-			}
-		}
+		next_state = INPUT_MANAGER;
 		break;
 
-		case INPUT_MANAGER:
-		{
-			val = input_manager();
-
-			switch(val)
-			{
-				case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
-				case GO_TO_HARD_RESET: next_state = HARD_RESET; break;
-				default: next_state = I2C_MANAGER; break;
-			}
-		}
+	case BOOTLOADER:
+		reset_to_address(BOOTLOADER_BEGIN);
 		break;
-
-		case I2C_MANAGER:
-		{
-			val = i2c_manager();
-
-			switch(val)
-			{
-				case GO_TO_LIGHT_RESET: next_state = LIGHT_RESET; break;
-				case GO_TO_HARD_RESET:  next_state = HARD_RESET; break;
-				case GO_TO_BOOTLOADER:  next_state = BOOTLOADER; break;
-				default: next_state = LED_MANAGER; break;
-			}
-		}
-		break;
-
-		case LED_MANAGER:
-		{
-			if (effect_reset_finished)
-			{
-				led_manager();
-			}
-			next_state = INPUT_MANAGER;
-		}
-		break;
-
-		case BOOTLOADER:
-		{
-			reset_to_address(BOOTLOADER_BEGIN);
-		} break;
 	}
 }
 
