@@ -3,7 +3,6 @@
 
 #include <stdarg.h>
 #include "stm32f0xx_gpio.h"
-#include "stm32f0xx_rcc.h"
 #include "compiler.h"
 #include "bits.h"
 
@@ -60,11 +59,11 @@ static __force_inline uint8_t pin_nr(gpio_t pin)
 static __force_inline uint32_t port_clk_bit(port_t port)
 {
 	switch (port) {
-	case PORT_A: return RCC_AHBPeriph_GPIOA;
-	case PORT_B: return RCC_AHBPeriph_GPIOB;
-	case PORT_C: return RCC_AHBPeriph_GPIOC;
-	case PORT_D: return RCC_AHBPeriph_GPIOD;
-	case PORT_F: return RCC_AHBPeriph_GPIOF;
+	case PORT_A: return RCC_AHBENR_GPIOAEN;
+	case PORT_B: return RCC_AHBENR_GPIOBEN;
+	case PORT_C: return RCC_AHBENR_GPIOCEN;
+	case PORT_D: return RCC_AHBENR_GPIODEN;
+	case PORT_F: return RCC_AHBENR_GPIOFEN;
 	default: unreachable();
 	}
 }
@@ -153,7 +152,7 @@ static inline void gpio_init_port_clks(unsigned int len, const gpio_t *pins)
 		if (pins[i] != PIN_INVALID)
 			clk_bits |= port_clk_bit(pin_port(pins[i]));
 
-	RCC_AHBPeriphClockCmd(clk_bits, ENABLE);
+	RCC->AHBENR |= clk_bits;
 }
 
 static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,

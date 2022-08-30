@@ -1,7 +1,7 @@
 #ifndef CRC32_H
 #define CRC32_H
 
-#include "stm32f0xx_rcc.h"
+#include "stm32f0xx.h"
 #include "compiler.h"
 
 static inline bool crc32(uint32_t *res, uint32_t init,
@@ -11,7 +11,7 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 	if (len % 4)
 		return 0;
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, 1);
+	RCC->AHBENR |= RCC_AHBENR_CRCEN;
 
 	CRC->INIT = init;
 	CRC->CR = CRC_CR_RESET;
@@ -22,7 +22,7 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 
 	*res = CRC->DR;
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, 0);
+	RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
 
 	return 1;
 }

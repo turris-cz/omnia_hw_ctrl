@@ -22,15 +22,35 @@ static __force_inline USART_TypeDef *usart_to_plat(usart_nr_t usart_nr)
 	}
 }
 
-static __force_inline void usart_rcc_config(usart_nr_t usart_nr, bool on)
+static __force_inline void usart_clk_config(usart_nr_t usart_nr, bool on)
 {
 	switch (usart_nr) {
-	case 1:
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, on);
+#define _USART_CLK_CFG(_bus, _n)							\
+	case _n:									\
+		if (on)									\
+			RCC->_bus ## ENR |= RCC_ ## _bus ## ENR_USART ## _n ## EN;	\
+		else									\
+			RCC->_bus ## ENR &= ~RCC_ ## _bus ## ENR_USART ## _n ## EN;	\
 		break;
-	case 2:
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, on);
+	_USART_CLK_CFG(APB2, 1)
+	_USART_CLK_CFG(APB1, 2)
+#undef _USART_CLK_CFG
+	default:
+		unreachable();
+	}
+}
+
+static __force_inline void usart_reset(usart_nr_t usart_nr)
+{
+	switch (usart_nr) {
+#define _USART_RESET(_bus, _n)								\
+	case _n:									\
+		RCC->_bus ## RSTR |= RCC_ ## _bus ## RSTR_USART ## _n ## RST;		\
+		RCC->_bus ## RSTR &= ~RCC_ ## _bus ## RSTR_USART ## _n ## RST;;		\
 		break;
+	_USART_RESET(APB2, 1)
+	_USART_RESET(APB1, 2)
+#undef _USART_RESET
 	default:
 		unreachable();
 	}
@@ -57,9 +77,9 @@ static inline void usart_init(usart_nr_t usart_nr, uint32_t baud_rate)
 		.USART_Mode = USART_Mode_Rx | USART_Mode_Tx,
 	};
 
-	usart_rcc_config(usart_nr, 0);
-	USART_DeInit(usart);
-	usart_rcc_config(usart_nr, 1);
+	usart_clk_config(usart_nr, 0);
+	usart_reset(usart_nr);
+	usart_clk_config(usart_nr, 1);
 
 	usart_init_pins(usart_nr);
 

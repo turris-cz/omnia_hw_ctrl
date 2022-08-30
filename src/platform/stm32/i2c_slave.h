@@ -2,7 +2,6 @@
 #define I2C_H
 
 #include "stm32f0xx_i2c.h"
-#include "stm32f0xx_rcc.h"
 #include "compiler.h"
 #include "debug.h"
 #include "bits.h"
@@ -52,15 +51,35 @@ static __force_inline I2C_TypeDef *i2c_to_plat(i2c_nr_t i2c_nr)
 	}
 }
 
-static __force_inline void i2c_rcc_config(i2c_nr_t i2c_nr, bool on)
+static __force_inline void i2c_clk_config(i2c_nr_t i2c_nr, bool on)
 {
 	switch (i2c_nr) {
-	case 1:
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, on);
+#define _I2C_CLK_CFG(_bus, _n)								\
+	case _n:									\
+		if (on)									\
+			RCC->_bus ## ENR |= RCC_ ## _bus ## ENR_I2C ## _n ## EN;	\
+		else									\
+			RCC->_bus ## ENR &= ~RCC_ ## _bus ## ENR_I2C ## _n ## EN;	\
 		break;
-	case 2:
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, on);
+	_I2C_CLK_CFG(APB1, 1)
+	_I2C_CLK_CFG(APB1, 2)
+#undef _I2C_CLK_CFG
+	default:
+		unreachable();
+	}
+}
+
+static __force_inline void i2c_reset(i2c_nr_t i2c_nr)
+{
+	switch (i2c_nr) {
+#define _I2C_RESET(_bus, _n)								\
+	case _n:									\
+		RCC->_bus ## RSTR |= RCC_ ## _bus ## RSTR_I2C ## _n ## RST;		\
+		RCC->_bus ## RSTR &= ~RCC_ ## _bus ## RSTR_I2C ## _n ## RST;		\
 		break;
+	_I2C_RESET(APB1, 1)
+	_I2C_RESET(APB1, 2)
+#undef _I2C_RESET
 	default:
 		unreachable();
 	}
@@ -113,9 +132,9 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 		.I2C_Timing = 0x10800000, /* 100kHz for 48MHz system clock */
 	};
 
-	i2c_rcc_config(i2c_nr, 0);
-	I2C_DeInit(i2c);
-	i2c_rcc_config(i2c_nr, 1);
+	i2c_clk_config(i2c_nr, 0);
+	i2c_reset(i2c_nr);
+	i2c_clk_config(i2c_nr, 1);
 
 	i2c_init_pins(i2c_nr);
 

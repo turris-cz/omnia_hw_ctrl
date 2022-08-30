@@ -2,7 +2,6 @@
 #define TIMER_H
 
 #include "stm32f0xx_tim.h"
-#include "stm32f0xx_rcc.h"
 #include "compiler.h"
 #include "cpu.h"
 
@@ -20,20 +19,43 @@ typedef enum {
 	timer_pwm,
 } timer_type_t;
 
-static __force_inline void timer_rcc_config(timer_nr_t tim_nr, bool on)
+static __force_inline void timer_clk_config(timer_nr_t tim_nr, bool on)
 {
 	switch (tim_nr) {
-#define _TIMER_RCC_CFG(_bus, _n)							\
+#define _TIMER_CLK_CFG(_bus, _n)							\
 	case _n:									\
-		RCC_ ## _bus ## PeriphClockCmd(RCC_ ## _bus ## Periph_TIM ## _n, on);	\
+		if (on)									\
+			RCC->_bus ## ENR |= RCC_ ## _bus ## ENR_TIM ## _n ## EN;	\
+		else									\
+			RCC->_bus ## ENR &= ~RCC_ ## _bus ## ENR_TIM ## _n ## EN;	\
 		break;
-	_TIMER_RCC_CFG(APB2, 15)
-	_TIMER_RCC_CFG(APB2, 16)
-	_TIMER_RCC_CFG(APB2, 17)
-	_TIMER_RCC_CFG(APB1, 3)
-	_TIMER_RCC_CFG(APB1, 6)
-	_TIMER_RCC_CFG(APB1, 14)
-#undef _TIMER_RCC_CFG
+	_TIMER_CLK_CFG(APB2, 15)
+	_TIMER_CLK_CFG(APB2, 16)
+	_TIMER_CLK_CFG(APB2, 17)
+	_TIMER_CLK_CFG(APB1, 3)
+	_TIMER_CLK_CFG(APB1, 6)
+	_TIMER_CLK_CFG(APB1, 14)
+#undef _TIMER_CLK_CFG
+	default:
+		unreachable();
+	}
+}
+
+static __force_inline void timer_reset(timer_nr_t timer_nr)
+{
+	switch (timer_nr) {
+#define _TIMER_RESET(_bus, _n)								\
+	case _n:									\
+		RCC->_bus ## RSTR |= RCC_ ## _bus ## RSTR_TIM ## _n ## RST;		\
+		RCC->_bus ## RSTR &= ~RCC_ ## _bus ## RSTR_TIM ## _n ## RST;		\
+		break;
+	_TIMER_RESET(APB2, 15)
+	_TIMER_RESET(APB2, 16)
+	_TIMER_RESET(APB2, 17)
+	_TIMER_RESET(APB1, 3)
+	_TIMER_RESET(APB1, 6)
+	_TIMER_RESET(APB1, 14)
+#undef _TIMER_RESET
 	default:
 		unreachable();
 	}
@@ -80,9 +102,9 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
 			   "Requested frequency unachievable");
 
-	timer_rcc_config(tim_nr, 0);
-	TIM_DeInit(tim);
-	timer_rcc_config(tim_nr, 1);
+	timer_clk_config(tim_nr, 0);
+	timer_reset(tim_nr);
+	timer_clk_config(tim_nr, 1);
 
 	TIM_TimeBaseInit(tim, &init);
 
@@ -112,7 +134,7 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 
 static __force_inline void timer_deinit(timer_nr_t tim_nr)
 {
-	TIM_DeInit(timer_to_plat(tim_nr));
+	timer_reset(tim_nr);
 }
 
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)

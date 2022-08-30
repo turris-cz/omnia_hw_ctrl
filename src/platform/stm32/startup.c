@@ -1,6 +1,5 @@
 #include "stm32f0xx.h"
 #include "stm32f0xx_syscfg.h"
-#include "stm32f0xx_rcc.h"
 #include "compiler.h"
 #include "memory_layout.h"
 
@@ -116,20 +115,20 @@ static void platform_init(void)
 		return;
 
 	/* PORTs reset */
-	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB |
-			      RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD |
-			      RCC_AHBPeriph_GPIOF, ENABLE);
+	RCC->AHBRSTR |= RCC_AHBRSTR_GPIOARST | RCC_AHBRSTR_GPIOBRST |
+			RCC_AHBRSTR_GPIOCRST | RCC_AHBRSTR_GPIODRST |
+			RCC_AHBRSTR_GPIOFRST;
 
 	/* SYSCFG reset */
-	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	RCC->APB2RSTR |= RCC_APB2RSTR_SYSCFGRST;
 
 	/* disable PORTs reset */
-	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB |
-			      RCC_AHBPeriph_GPIOC | RCC_AHBPeriph_GPIOD |
-			      RCC_AHBPeriph_GPIOF, DISABLE);
+	RCC->AHBRSTR &= ~(RCC_AHBRSTR_GPIOARST | RCC_AHBRSTR_GPIOBRST |
+			  RCC_AHBRSTR_GPIOCRST | RCC_AHBRSTR_GPIODRST |
+			  RCC_AHBRSTR_GPIOFRST);
 
 	/* disable SYSCFG reset */
-	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, DISABLE);
+	RCC->APB2RSTR &= ~RCC_APB2RSTR_SYSCFGRST;
 }
 
 static void configure_isr_vector(void)
