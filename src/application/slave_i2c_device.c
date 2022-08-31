@@ -9,6 +9,7 @@
  **/
 /* Includes ------------------------------------------------------------------*/
 #include "compiler.h"
+#include "string.h"
 #include "slave_i2c_device.h"
 #include "debug.h"
 #include "led_driver.h"
@@ -68,9 +69,16 @@ typedef struct {
 	uint8_t cmd_len, reply_len, reply_idx;
 } slave_i2c_state_t;
 
-#define set_reply(x)						\
-	__builtin_memcpy(state->reply, &(x), sizeof(x));	\
-	state->reply_len = sizeof(x);
+static inline void _set_reply(slave_i2c_state_t *state, const void *reply,
+			      uint32_t len)
+{
+	compiletime_assert(len <= sizeof(state->reply), "reply too long");
+
+	memcpy(state->reply, reply, len);
+	state->reply_len = len;
+}
+
+#define set_reply(x) _set_reply(state, &(x), sizeof(x))
 
 static int cmd_get_features(slave_i2c_state_t *state)
 {
