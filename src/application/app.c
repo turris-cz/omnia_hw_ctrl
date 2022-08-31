@@ -11,7 +11,7 @@
 #include "power_control.h"
 #include "debounce.h"
 #include "led_driver.h"
-#include "slave_i2c_device.h"
+#include "i2c_iface.h"
 #include "wan_lan_pci_msata.h"
 #include "debug.h"
 #include "eeprom.h"
@@ -61,7 +61,7 @@ static void app_mcu_init(void)
 	wan_lan_pci_msata_config();
 	power_control_usb_timeout_config();
 	led_driver_config();
-	slave_i2c_config();
+	i2c_iface_config();
 
 	/* new features for Omnia32 */
 	if (OMNIA_BOARD_REVISION >= 32)

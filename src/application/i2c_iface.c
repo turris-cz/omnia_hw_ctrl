@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    slave_i2c_device.c
+ * @file    i2c_iface.c
  * @author  CZ.NIC, z.s.p.o.
  * @date    18-August-2015
  * @brief   Driver for IC2 communication with master device (main CPU).
@@ -10,7 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "compiler.h"
 #include "string.h"
-#include "slave_i2c_device.h"
+#include "i2c_iface.h"
 #include "debug.h"
 #include "led_driver.h"
 #include "wan_lan_pci_msata.h"
@@ -67,9 +67,9 @@ typedef struct {
 	uint8_t cmd[10];
 	uint8_t reply[20];
 	uint8_t cmd_len, reply_len, reply_idx;
-} slave_i2c_state_t;
+} i2c_iface_state_t;
 
-static inline void _set_reply(slave_i2c_state_t *state, const void *reply,
+static inline void _set_reply(i2c_iface_state_t *state, const void *reply,
 			      uint32_t len)
 {
 	compiletime_assert(len <= sizeof(state->reply), "reply too long");
@@ -80,7 +80,7 @@ static inline void _set_reply(slave_i2c_state_t *state, const void *reply,
 
 #define set_reply(x) _set_reply(state, &(x), sizeof(x))
 
-static int cmd_get_features(slave_i2c_state_t *state)
+static int cmd_get_features(i2c_iface_state_t *state)
 {
 	debug("get_features\n");
 	set_reply(slave_features_supported);
@@ -88,7 +88,7 @@ static int cmd_get_features(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_status(slave_i2c_state_t *state)
+static int cmd_get_status(i2c_iface_state_t *state)
 {
 	debug("get_status\n");
 	set_reply(i2c_iface.status_word);
@@ -108,7 +108,7 @@ static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
 	}
 }
 
-static int cmd_general_control(slave_i2c_state_t *state)
+static int cmd_general_control(i2c_iface_state_t *state)
 {
 	struct button_def *button = &button_front;
 	uint8_t ctrl, mask, set;
@@ -188,7 +188,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_ext_status(slave_i2c_state_t *state)
+static int cmd_get_ext_status(i2c_iface_state_t *state)
 {
 	debug("get_ext_status\n");
 	set_reply(i2c_iface.ext_status_dword);
@@ -196,7 +196,7 @@ static int cmd_get_ext_status(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_ext_control(slave_i2c_state_t *state)
+static int cmd_ext_control(i2c_iface_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 	uint16_t ext_ctrl, mask;
@@ -233,7 +233,7 @@ static int cmd_ext_control(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_ext_control_status(slave_i2c_state_t *state)
+static int cmd_get_ext_control_status(i2c_iface_state_t *state)
 {
 	uint16_t ext_ctrl_st = 0;
 
@@ -252,7 +252,7 @@ static int cmd_get_ext_control_status(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_reset(slave_i2c_state_t *state)
+static int cmd_get_reset(i2c_iface_state_t *state)
 {
 	debug("get_reset\n");
 	set_reply(i2c_iface.reset_selector);
@@ -261,7 +261,7 @@ static int cmd_get_reset(slave_i2c_state_t *state)
 }
 
 #if USER_REGULATOR_ENABLED
-static int cmd_user_voltage(slave_i2c_state_t *state)
+static int cmd_user_voltage(i2c_iface_state_t *state)
 {
 	debug("user_voltage\n");
 	power_control_set_voltage(state->cmd[1]);
@@ -270,7 +270,7 @@ static int cmd_user_voltage(slave_i2c_state_t *state)
 }
 #endif
 
-static int cmd_led_mode(slave_i2c_state_t *state)
+static int cmd_led_mode(i2c_iface_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -280,7 +280,7 @@ static int cmd_led_mode(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_led_state(slave_i2c_state_t *state)
+static int cmd_led_state(i2c_iface_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -290,7 +290,7 @@ static int cmd_led_state(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_led_color(slave_i2c_state_t *state)
+static int cmd_led_color(i2c_iface_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -300,7 +300,7 @@ static int cmd_led_color(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_set_brightness(slave_i2c_state_t *state)
+static int cmd_set_brightness(i2c_iface_state_t *state)
 {
 	debug("set_brightness\n");
 	led_driver_set_brightness(state->cmd[1]);
@@ -308,7 +308,7 @@ static int cmd_set_brightness(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_brightness(slave_i2c_state_t *state)
+static int cmd_get_brightness(i2c_iface_state_t *state)
 {
 	uint8_t brightness = led_driver_get_brightness();
 
@@ -318,7 +318,7 @@ static int cmd_get_brightness(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_set_gamma_correction(slave_i2c_state_t *state)
+static int cmd_set_gamma_correction(i2c_iface_state_t *state)
 {
 	debug("set_gamma_correction\n");
 	led_driver_set_gamma_correction(state->cmd[1] & BIT(0));
@@ -326,7 +326,7 @@ static int cmd_set_gamma_correction(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_gamma_correction(slave_i2c_state_t *state)
+static int cmd_get_gamma_correction(i2c_iface_state_t *state)
 {
 	uint8_t gamma_correction = led_driver_get_gamma_correction();
 
@@ -336,7 +336,7 @@ static int cmd_get_gamma_correction(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_set_watchdog_state(slave_i2c_state_t *state)
+static int cmd_set_watchdog_state(i2c_iface_state_t *state)
 {
 	debug("watchdog_state\n");
 
@@ -345,7 +345,7 @@ static int cmd_set_watchdog_state(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_watchdog_state(slave_i2c_state_t *state)
+static int cmd_get_watchdog_state(i2c_iface_state_t *state)
 {
 	uint8_t enabled = watchdog_is_enabled();
 
@@ -355,7 +355,7 @@ static int cmd_get_watchdog_state(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_set_wdt_timeout(slave_i2c_state_t *state)
+static int cmd_set_wdt_timeout(i2c_iface_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -365,7 +365,7 @@ static int cmd_set_wdt_timeout(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_wdt_timeleft(slave_i2c_state_t *state)
+static int cmd_get_wdt_timeleft(i2c_iface_state_t *state)
 {
 	uint16_t timeleft = watchdog_get_timeleft();
 
@@ -375,7 +375,7 @@ static int cmd_get_wdt_timeleft(slave_i2c_state_t *state)
 	return 0;
 }
 
-static int cmd_get_version(slave_i2c_state_t *state)
+static int cmd_get_version(i2c_iface_state_t *state)
 {
 	debug("get_version\n");
 
@@ -404,7 +404,7 @@ static int cmd_get_version(slave_i2c_state_t *state)
 
 typedef struct {
 	uint8_t len;
-	int (*handler)(slave_i2c_state_t *state);
+	int (*handler)(i2c_iface_state_t *state);
 	enum {
 		MCU_ADDR_ONLY = 0,
 		LED_ADDR_ONLY,
@@ -448,7 +448,7 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_FW_CHECKSUM]		= { 1, cmd_get_version },
 };
 
-static int handle_cmd(uint8_t addr, slave_i2c_state_t *state)
+static int handle_cmd(uint8_t addr, i2c_iface_state_t *state)
 {
 	uint8_t cmdidx = state->cmd[0];
 	const cmdinfo_t *cmd;
@@ -473,10 +473,10 @@ static int handle_cmd(uint8_t addr, slave_i2c_state_t *state)
 		return -1;
 }
 
-static int slave_i2c_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
+static int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 			      uint8_t *val)
 {
-	slave_i2c_state_t *state = priv;
+	i2c_iface_state_t *state = priv;
 
 	switch (event) {
 	case I2C_SLAVE_READ_PROCESSED:
@@ -521,20 +521,20 @@ static int slave_i2c_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 	return 0;
 }
 
-static slave_i2c_state_t slave_i2c_state;
+static i2c_iface_state_t i2c_iface_state;
 
 static i2c_slave_t i2c_slave = {
-	.cb = slave_i2c_event_cb,
-	.priv = &slave_i2c_state,
+	.cb = i2c_iface_event_cb,
+	.priv = &i2c_iface_state,
 };
 
 /*******************************************************************************
-  * @function   slave_i2c_config
+  * @function   i2c_iface_config
   * @brief      Configuration of I2C peripheral and its timeout.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_config(void)
+void i2c_iface_config(void)
 {
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
 		       LED_CONTROLLER_I2C_ADDR, 1);

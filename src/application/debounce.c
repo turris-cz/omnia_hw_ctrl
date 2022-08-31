@@ -13,7 +13,7 @@
 #include "led_driver.h"
 #include "wan_lan_pci_msata.h"
 #include "debug.h"
-#include "slave_i2c_device.h"
+#include "i2c_iface.h"
 #include "timer.h"
 
 enum input_mask {

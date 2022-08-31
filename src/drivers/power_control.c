@@ -12,7 +12,7 @@
 #include "power_control.h"
 #include "time.h"
 #include "led_driver.h"
-#include "slave_i2c_device.h"
+#include "i2c_iface.h"
 #include "debug.h"
 #include "timer.h"
 

@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    slave_i2c_device.h
+ * @file    i2c_iface.h
  * @author  CZ.NIC, z.s.p.o.
  * @date    18-August-2015
  * @brief   Header for I2C driver.
@@ -8,8 +8,8 @@
  ******************************************************************************
  **/
 
-#ifndef SLAVE_I2C_DEVICE_H
-#define SLAVE_I2C_DEVICE_H
+#ifndef I2C_IFACE_H
+#define I2C_IFACE_H
 
 #include "bits.h"
 
@@ -312,12 +312,12 @@ enum ext_ctl_e {
 */
 
 /*******************************************************************************
-  * @function   slave_i2c_config
+  * @function   i2c_iface_config
   * @brief      Configuration of I2C peripheral as a slave.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void slave_i2c_config(void);
+void i2c_iface_config(void);
 
-#endif /* SLAVE_I2C_DEVICE_H */
+#endif /* I2C_IFACE_H */
 
