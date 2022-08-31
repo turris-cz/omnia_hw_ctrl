@@ -43,7 +43,7 @@ enum boot_request_e {
 	FLASH_OK	= 0x88
 };
 
-struct st_i2c_status i2c_status;
+i2c_iface_t i2c_iface;
 
 static const struct {
 	gpio_t pin;
@@ -83,7 +83,7 @@ static int cmd_get_features(slave_i2c_state_t *state)
 static int cmd_get_status(slave_i2c_state_t *state)
 {
 	debug("get_status\n");
-	set_reply(i2c_status.status_word);
+	set_reply(i2c_iface.status_word);
 
 	return 0;
 }
@@ -94,9 +94,9 @@ static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
 	if (mask & ctrl_bit) {
 		power_control_usb(port, ctrl & ctrl_bit);
 		if (ctrl & ctrl_bit)
-			i2c_status.status_word |= sts_bit;
+			i2c_iface.status_word |= sts_bit;
 		else
-			i2c_status.status_word &= ~sts_bit;
+			i2c_iface.status_word &= ~sts_bit;
 	}
 }
 
@@ -111,8 +111,6 @@ static int cmd_general_control(slave_i2c_state_t *state)
 
 	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
 
-	i2c_status.state = SLAVE_I2C_OK;
-
 	if (set & CTL_LIGHT_RST) {
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
@@ -122,7 +120,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 	}
 
 	if (set & CTL_HARD_RST) {
-		i2c_status.state = SLAVE_I2C_HARD_RST;
+		i2c_iface.req = I2C_IFACE_REQ_HARD_RESET;
 		return 0;
 	}
 
@@ -137,7 +135,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 			gpio_write(ENABLE_4V5_PIN, 1);
 		} else {
 			gpio_write(ENABLE_4V5_PIN, 0);
-			i2c_status.status_word &= ~STS_ENABLE_4V5;
+			i2c_iface.status_word &= ~STS_ENABLE_4V5;
 		}
 	}
 #endif
@@ -145,11 +143,11 @@ static int cmd_general_control(slave_i2c_state_t *state)
 	if (mask & CTL_BUTTON_MODE) {
 		if (ctrl & CTL_BUTTON_MODE) {
 			button->button_mode = BUTTON_USER;
-			i2c_status.status_word |= STS_BUTTON_MODE;
+			i2c_iface.status_word |= STS_BUTTON_MODE;
 		} else {
 			button->button_mode = BUTTON_DEFAULT;
 			button->button_pressed_counter = 0;
-			i2c_status.status_word &= ~STS_BUTTON_MODE;
+			i2c_iface.status_word &= ~STS_BUTTON_MODE;
 		}
 	}
 
@@ -176,7 +174,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 			break;
 		}
 
-		i2c_status.state = SLAVE_I2C_GO_TO_BOOTLOADER;
+		i2c_iface.req = I2C_IFACE_REQ_BOOTLOADER;
 	}
 
 	return 0;
@@ -185,7 +183,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 static int cmd_get_ext_status(slave_i2c_state_t *state)
 {
 	debug("get_ext_status\n");
-	set_reply(i2c_status.ext_status_dword);
+	set_reply(i2c_iface.ext_status_dword);
 
 	return 0;
 }
@@ -205,8 +203,8 @@ static int cmd_ext_control(slave_i2c_state_t *state)
 		return 0;
 
 	/* save the requested value */
-	ext_ctrl = (i2c_status.ext_control_word & ~mask) | (ext_ctrl & mask);
-	i2c_status.ext_control_word = ext_ctrl;
+	ext_ctrl = (i2c_iface.ext_control_word & ~mask) | (ext_ctrl & mask);
+	i2c_iface.ext_control_word = ext_ctrl;
 
 	/*
 	 * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
@@ -238,7 +236,7 @@ static int cmd_get_ext_control_status(slave_i2c_state_t *state)
 	}
 
 	/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
-	ext_ctrl_st |= i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
+	ext_ctrl_st |= i2c_iface.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
 
 	debug("get_ext_control_status st=%#06x\n", ext_ctrl_st);
 	set_reply(ext_ctrl_st);
@@ -249,7 +247,7 @@ static int cmd_get_ext_control_status(slave_i2c_state_t *state)
 static int cmd_get_reset(slave_i2c_state_t *state)
 {
 	debug("get_reset\n");
-	set_reply(i2c_status.reset_selector);
+	set_reply(i2c_iface.reset_selector);
 
 	return 0;
 }
@@ -498,10 +496,10 @@ static int slave_i2c_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 	case I2C_SLAVE_STOP:
 		/* delete button status and counter bit from status_word */
 		if (state->cmd[0] == CMD_GET_STATUS_WORD) {
-			i2c_status.status_word &= ~STS_BUTTON_PRESSED;
+			i2c_iface.status_word &= ~STS_BUTTON_PRESSED;
 
 			/* decrease button counter */
-			button_counter_decrease(FIELD_GET(STS_BUTTON_COUNTER_MASK, i2c_status.status_word));
+			button_counter_decrease(FIELD_GET(STS_BUTTON_COUNTER_MASK, i2c_iface.status_word));
 		}
 		fallthrough;
 

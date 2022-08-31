@@ -275,7 +275,7 @@ void __irq power_control_usb_timeout_irq_handler(void)
 	power_control_usb(USB3_PORT0, true);
 	power_control_usb(USB3_PORT1, true);
 
-	i2c_status.status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
+	i2c_iface.status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
 
 	power_control_usb_timeout_disable();
 }
@@ -393,7 +393,7 @@ void power_control_first_startup(void)
 	led_set_state(LED_COUNT, false);
 	led_driver_set_brightness(prev_brightness);
 
-	i2c_status.reset_selector = sel;
+	i2c_iface.reset_selector = sel;
 }
 
 #if USER_REGULATOR_ENABLED

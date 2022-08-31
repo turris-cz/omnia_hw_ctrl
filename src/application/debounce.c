@@ -187,7 +187,7 @@ void debounce_check_inputs(void)
 		input_state->pg = true;
 
 	/* PG signal from 4.5V user controlled regulator */
-	if ((i2c_status.status_word & STS_ENABLE_4V5) &&
+	if ((i2c_iface.status_word & STS_ENABLE_4V5) &&
 	    (port_changed & PG_4V5_MASK))
 		input_state->pg_4v5 = true;
 

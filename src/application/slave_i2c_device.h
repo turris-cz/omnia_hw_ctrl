@@ -13,22 +13,24 @@
 
 #include "bits.h"
 
-typedef enum slave_i2c_states {
-	SLAVE_I2C_OK,
-	SLAVE_I2C_LIGHT_RST,
-	SLAVE_I2C_HARD_RST,
-	SLAVE_I2C_GO_TO_BOOTLOADER
-}slave_i2c_states_t;
+typedef enum {
+	I2C_IFACE_REQ_NONE,
+	I2C_IFACE_REQ_LIGHT_RESET,
+	I2C_IFACE_REQ_HARD_RESET,
+	I2C_IFACE_REQ_BOOTLOADER,
+} i2c_iface_req_t;
 
-struct st_i2c_status {
+typedef struct {
 	uint16_t status_word;
 	uint16_t ext_control_word;
 	uint32_t ext_status_dword;
 	uint8_t reset_selector;
-	slave_i2c_states_t state;             // reported in main state machine
-};
 
-extern struct st_i2c_status i2c_status;
+	/* reported in main state machine */
+	i2c_iface_req_t req;
+} i2c_iface_t;
+
+extern i2c_iface_t i2c_iface;
 
 enum commands_e {
 	CMD_GET_STATUS_WORD		= 0x01, /* slave sends status word back */
