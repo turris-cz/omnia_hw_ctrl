@@ -318,10 +318,6 @@ static ret_value_t i2c_manager(void)
 	last_status_word = i2c_iface.status_word;
 
 	switch (i2c_iface.req) {
-	case I2C_IFACE_REQ_LIGHT_RESET:
-		value = GO_TO_LIGHT_RESET;
-		break;
-
 	case I2C_IFACE_REQ_HARD_RESET:
 		value = GO_TO_HARD_RESET;
 		break;
@@ -443,10 +439,6 @@ static void app_mcu_cyclic(void)
 		val = i2c_manager();
 
 		switch (val) {
-		case GO_TO_LIGHT_RESET:
-			next_state = LIGHT_RESET;
-			break;
-
 		case GO_TO_HARD_RESET:
 			next_state = HARD_RESET;
 			break;
