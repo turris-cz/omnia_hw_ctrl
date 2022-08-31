@@ -257,6 +257,7 @@ static ret_value_t input_manager(void)
 	/* in case of user button mode:
 	 * store information in status_word - how many times a button was pressed  */
 	if (button.user_mode) {
+		disable_irq();
 		if (button.pressed_counter) {
 			i2c_iface.status_word &= ~STS_BUTTON_COUNTER_MASK;
 			i2c_iface.status_word |= (button.pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
@@ -264,6 +265,7 @@ static ret_value_t input_manager(void)
 		} else {
 			i2c_iface.status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
 		}
+		enable_irq();
 	}
 
 	/* these flags are automatically cleared in input handler */

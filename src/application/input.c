@@ -34,8 +34,10 @@ button_t button;
 static void button_pressed(void)
 {
 	if (button.user_mode) {
+		disable_irq();
 		if (button.pressed_counter < MAX_BUTTON_PRESSED_COUNTER)
 			button.pressed_counter++;
+		enable_irq();
 	} else {
 		led_driver_step_brightness();
 	}
@@ -132,8 +134,10 @@ void input_signals_handler(void)
   *****************************************************************************/
 void button_counter_decrease(uint8_t value)
 {
+	disable_irq();
 	if (value <= button.pressed_counter)
 		button.pressed_counter -= value;
 	else
 		button.pressed_counter = 0;
+	enable_irq();
 }
