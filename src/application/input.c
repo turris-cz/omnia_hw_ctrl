@@ -27,7 +27,7 @@ enum input_mask {
 };
 
 input_state_t input_state;
-struct button_def button_front;
+button_t button;
 
 /*******************************************************************************
   * @function   button_debounce_handler
@@ -38,11 +38,10 @@ struct button_def button_front;
 void button_debounce_handler(void)
 {
 	static uint16_t idx;
-	struct button_def *button = &button_front;
 
 	/* port B, pins 0-14 debounced by general function input_signals_handler() */
 	/* only button on PB15 is debounced here, but read the whole port */
-	button->button_pin_state[idx] = ~gpio_read_port(PORT_B);
+	button.pin_state[idx] = ~gpio_read_port(PORT_B);
 	idx++;
 
 	if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
@@ -59,7 +58,6 @@ void input_signals_handler(void)
 {
 	uint16_t port_changed, button_changed;
 	static uint16_t last_button_debounce_state;
-	struct button_def *button = &button_front;
 
 	/* PB0-14 */
 
@@ -68,16 +66,15 @@ void input_signals_handler(void)
 
 	/* PB15 ------------------------------------------------------------------
 	 * button debounce */
-	last_button_debounce_state = button->button_debounce_state;
-	button->button_debounce_state = BUTTON_MASK;
+	last_button_debounce_state = button.debounce_state;
+	button.debounce_state = BUTTON_MASK;
 
 	for (int i = 0; i < MAX_BUTTON_DEBOUNCE_STATE; i++)
-		button->button_debounce_state = button->button_debounce_state &
-						button->button_pin_state[i];
+		button.debounce_state = button.debounce_state &
+					button.pin_state[i];
 
-	button_changed = (button->button_debounce_state ^
-			  last_button_debounce_state) &
-			 button->button_debounce_state;
+	button_changed = (button.debounce_state ^ last_button_debounce_state) &
+			 button.debounce_state;
 
 	input_state.card_det = msata_pci_card_detection();
 	input_state.msata_ind = msata_pci_type_card_detection();
@@ -127,20 +124,6 @@ void input_signals_handler(void)
 }
 
 /*******************************************************************************
-  * @function   input_config
-  * @brief      Input configuration.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void input_config(void)
-{
-	struct button_def *button = &button_front;
-
-	/* default = brightness settings */
-	button->button_mode = BUTTON_DEFAULT;
-}
-
-/*******************************************************************************
   * @function   button_counter_decrease
   * @brief      Decrease button counter by the current value in i2c status structure.
   * @param      value: decrease the button counter by this parameter
@@ -148,13 +131,10 @@ void input_config(void)
   *****************************************************************************/
 void button_counter_decrease(uint8_t value)
 {
-	struct button_def *button = &button_front;
-
-	button->button_pressed_counter -= value;
-
-	/* limitation */
-	if (button->button_pressed_counter < 0)
-		button->button_pressed_counter = 0;
+	if (value <= button.pressed_counter)
+		button.pressed_counter -= value;
+	else
+		button.pressed_counter = 0;
 }
 
 /*******************************************************************************
@@ -165,11 +145,9 @@ void button_counter_decrease(uint8_t value)
   *****************************************************************************/
 void button_counter_increase(void)
 {
-	struct button_def *button = &button_front;
-
-	button->button_pressed_counter++;
+	button.pressed_counter++;
 
 	/* limitation */
-	if (button->button_pressed_counter > MAX_BUTTON_PRESSED_COUNTER)
-		button->button_pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
+	if (button.pressed_counter > MAX_BUTTON_PRESSED_COUNTER)
+		button.pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
 }

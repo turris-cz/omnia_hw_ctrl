@@ -100,7 +100,6 @@ static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
 
 static int cmd_general_control(i2c_iface_state_t *state)
 {
-	struct button_def *button = &button_front;
 	uint8_t ctrl, mask, set;
 
 	ctrl = state->cmd[1];
@@ -140,11 +139,11 @@ static int cmd_general_control(i2c_iface_state_t *state)
 
 	if (mask & CTL_BUTTON_MODE) {
 		if (ctrl & CTL_BUTTON_MODE) {
-			button->button_mode = BUTTON_USER;
+			button.user_mode = true;
 			i2c_iface.status_word |= STS_BUTTON_MODE;
 		} else {
-			button->button_mode = BUTTON_DEFAULT;
-			button->button_pressed_counter = 0;
+			button.user_mode = false;
+			button.pressed_counter = 0;
 			i2c_iface.status_word &= ~STS_BUTTON_MODE;
 		}
 	}

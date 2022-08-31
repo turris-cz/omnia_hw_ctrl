@@ -6,16 +6,6 @@
 #define MAX_BUTTON_PRESSED_COUNTER	7
 #define MAX_BUTTON_DEBOUNCE_STATE	3
 
-typedef enum button_modes {
-	BUTTON_DEFAULT,
-	BUTTON_USER,
-} button_mode_t;
-
-typedef enum button_states {
-	BUTTON_PRESSED,
-	BUTTON_RELEASED,
-} button_state_t;
-
 /* flags of input signals */
 typedef struct {
 	unsigned man_res	: 1;
@@ -32,24 +22,15 @@ typedef struct {
 	unsigned msata_ind	: 1;
 } input_state_t;
 
-struct button_def {
-	button_mode_t button_mode;
-	button_state_t button_state;
-	int8_t button_pressed_counter;
-	uint16_t button_pin_state[MAX_BUTTON_DEBOUNCE_STATE];
-	uint16_t button_debounce_state;
-};
+typedef struct {
+	bool user_mode;
+	uint8_t pressed_counter;
+	uint16_t pin_state[MAX_BUTTON_DEBOUNCE_STATE];
+	uint16_t debounce_state;
+} button_t;
 
 extern input_state_t input_state;
-extern struct button_def button_front;
-
-/*******************************************************************************
-  * @function   input_config
-  * @brief      Input configuration.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void input_config(void);
+extern button_t button;
 
 /*******************************************************************************
   * @function   button_debounce_handler

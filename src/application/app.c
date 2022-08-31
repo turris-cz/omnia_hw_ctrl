@@ -177,7 +177,7 @@ static ret_value_t light_reset(void)
 
 	led_driver_reset_effect(ENABLE);
 
-	input_config(); /* start evaluation of inputs */
+	button.user_mode = false;
 	i2c_iface.status_word = app_get_status_word();
 	i2c_iface.ext_status_dword = app_get_ext_status_dword();
 	i2c_iface.ext_control_word = ext_control | EXT_CTL_PHY_SFP_AUTO;
@@ -194,7 +194,6 @@ static ret_value_t light_reset(void)
 static ret_value_t input_manager(void)
 {
 	ret_value_t value = OK;
-	struct button_def *button = &button_front;
 
 	input_signals_handler();
 
@@ -257,21 +256,20 @@ static ret_value_t input_manager(void)
 
 	/* front button */
 	if (input_state.button_sts) {
-		if (button->button_mode == BUTTON_DEFAULT)
-			led_driver_step_brightness();
-		else
-			/* user button mode */
+		if (button.user_mode)
 			button_counter_increase();
+		else
+			led_driver_step_brightness();
 
 		input_state.button_sts = false;
 	}
 
 	/* in case of user button mode:
 	 * store information in status_word - how many times a button was pressed  */
-	if (button->button_mode != BUTTON_DEFAULT) {
-		if (button->button_pressed_counter) {
+	if (button.user_mode) {
+		if (button.pressed_counter) {
 			i2c_iface.status_word &= ~STS_BUTTON_COUNTER_MASK;
-			i2c_iface.status_word |= (button->button_pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
+			i2c_iface.status_word |= (button.pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
 			i2c_iface.status_word |= STS_BUTTON_PRESSED;
 		} else {
 			i2c_iface.status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
