@@ -61,12 +61,12 @@ extern struct button_def button_front;
 void debounce_config(void);
 
 /*******************************************************************************
-  * @function   debounce_handler
-  * @brief      Main debounce function. Called from SysTick handler every 5 ms.
+  * @function   button_debounce_handler
+  * @brief      Button debounce function. Called from SysTick handler every 5 ms.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_handler(void);
+void button_debounce_handler(void);
 
 /*******************************************************************************
   * @function   debounce_check_inputs

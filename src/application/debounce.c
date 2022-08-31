@@ -35,83 +35,16 @@ enum input_mask {
 	BUTTON_MASK	= 0x8000,
 };
 
-#define MAX_CARD_DET_STATES	5
-#define MAX_MSATA_IND_STATES	5
-
 struct input_sig debounce_input_signal;
 struct button_def button_front;
 
 /*******************************************************************************
-  * @function   debounce_card_det
-  * @brief      Debounce of nCARD_DET input. Called in debounce timer interrupt.
+  * @function   button_debounce_handler
+  * @brief      Button debounce function. Called from SysTick handler every 5 ms.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void debounce_card_det(void)
-{
-	static uint16_t counter;
-	uint8_t state;
-	struct input_sig *input_state = &debounce_input_signal;
-
-	state = !msata_pci_card_detection();
-
-	if (state) {
-		/* signal released */
-		if (counter > 0)
-			counter--;
-	} else {
-		/* signal falls to low */
-		if (counter < MAX_CARD_DET_STATES)
-			counter++;
-	}
-
-	if (counter == 0) {
-		input_state->card_det = false;
-	} else if (counter >= MAX_CARD_DET_STATES) {
-		input_state->card_det = true;
-		counter = MAX_CARD_DET_STATES;
-	}
-}
-
-/*******************************************************************************
-  * @function   debounce_msata_ind
-  * @brief      Debounce of MSATAIND input. Called in debounce timer interrupt.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void debounce_msata_ind(void)
-{
-	static uint16_t counter;
-	uint8_t state;
-	struct input_sig *input_state = &debounce_input_signal;
-
-	state = !(msata_pci_type_card_detection());
-
-	if (state) {
-		/* signal released */
-		if (counter > 0)
-			counter--;
-	} else {
-		/* signal falls to low */
-		if (counter < MAX_MSATA_IND_STATES)
-			counter++;
-	}
-
-	if (counter == 0) {
-		input_state->msata_ind = false;
-	} else if (counter >= MAX_MSATA_IND_STATES) {
-		input_state->msata_ind = true;
-		counter = MAX_MSATA_IND_STATES;
-	}
-}
-
-/*******************************************************************************
-  * @function   debounce_handler
-  * @brief      Main debounce function. Called from SysTick handler every 5 ms.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void debounce_handler(void)
+void button_debounce_handler(void)
 {
 	static uint16_t idx;
 	struct button_def *button = &button_front;
@@ -123,10 +56,6 @@ void debounce_handler(void)
 
 	if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
 		idx = 0;
-
-	/* other inputs handled by general function debounce_check_inputs() */
-	debounce_card_det();
-	debounce_msata_ind();
 }
 
 /*******************************************************************************
@@ -160,6 +89,9 @@ void debounce_check_inputs(void)
 	button_changed = (button->button_debounce_state ^
 			  last_button_debounce_state) &
 			 button->button_debounce_state;
+
+	input_state->card_det = msata_pci_card_detection();
+	input_state->msata_ind = msata_pci_type_card_detection();
 
 	/* results evaluation --------------------------------------------------- */
 	if (port_changed & MAN_RES_MASK) {
