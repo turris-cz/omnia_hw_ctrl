@@ -53,7 +53,7 @@
 #define USB30_OVC_PIN		PIN(B, 12)
 #define USB31_OVC_PIN		PIN(B, 13)
 #define RTC_ALARM_PIN		PIN(B, 14, OMNIA_BOARD_REVISION < 32)
-#define LED_BRT_PIN		PIN(B, 15)
+#define FRONT_BTN_PIN		PIN(B, 15)
 /* v32 specific inputs */
 #define SFP_nDET_PIN		PIN(D, 2, OMNIA_BOARD_REVISION >= 32)
 
