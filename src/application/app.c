@@ -9,7 +9,7 @@
  **/
 /* Includes ------------------------------------------------------------------*/
 #include "power_control.h"
-#include "debounce.h"
+#include "input.h"
 #include "led_driver.h"
 #include "i2c_iface.h"
 #include "wan_lan_pci_msata.h"
@@ -177,7 +177,7 @@ static ret_value_t light_reset(void)
 
 	led_driver_reset_effect(ENABLE);
 
-	debounce_config(); /* start evaluation of inputs */
+	input_config(); /* start evaluation of inputs */
 	i2c_iface.status_word = app_get_status_word();
 	i2c_iface.ext_status_dword = app_get_ext_status_dword();
 	i2c_iface.ext_control_word = ext_control | EXT_CTL_PHY_SFP_AUTO;
@@ -194,43 +194,42 @@ static ret_value_t light_reset(void)
 static ret_value_t input_manager(void)
 {
 	ret_value_t value = OK;
-	struct input_sig *input_state = &debounce_input_signal;
 	struct button_def *button = &button_front;
 
-	debounce_check_inputs();
+	input_signals_handler();
 
 	/* manual reset button */
-	if (input_state->man_res) {
+	if (input_state.man_res) {
 		value = GO_TO_LIGHT_RESET;
-		input_state->man_res = false;
+		input_state.man_res = false;
 	}
 
 	/* sw reset */
-	if (input_state->sysres_out) {
+	if (input_state.sysres_out) {
 		value = GO_TO_LIGHT_RESET;
-		input_state->sysres_out = false;
+		input_state.sysres_out = false;
 	}
 
 	/* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
-	if (input_state->pg) {
+	if (input_state.pg) {
 		debug("PG all regulators\n");
 		value = GO_TO_HARD_RESET;
-		input_state->pg = false;
+		input_state.pg = false;
 	}
 
 #if USER_REGULATOR_ENABLED
 	/* PG signal from 4.5V user controlled regulator */
-	if (input_state->pg_4v5) {
+	if (input_state.pg_4v5) {
 		debug("PG from 4V5\n");
 		value = GO_TO_HARD_RESET;
-		input_state->pg_4v5 = false;
+		input_state.pg_4v5 = false;
 	}
 #endif
 
 	/* USB30 overcurrent */
-	if (input_state->usb30_ovc) {
+	if (input_state.usb30_ovc) {
 		i2c_iface.status_word |= STS_USB30_OVC;
-		input_state->usb30_ovc = false;
+		input_state.usb30_ovc = false;
 		power_control_usb(USB3_PORT0, false); /* USB power off */
 
 		/* update status word */
@@ -242,9 +241,9 @@ static ret_value_t input_manager(void)
 	}
 
 	/* USB31 overcurrent */
-	if (input_state->usb31_ovc) {
+	if (input_state.usb31_ovc) {
 		i2c_iface.status_word |= STS_USB31_OVC;
-		input_state->usb31_ovc = false;
+		input_state.usb31_ovc = false;
 
 		power_control_usb(USB3_PORT1, false); /* USB power off */
 
@@ -257,14 +256,14 @@ static ret_value_t input_manager(void)
 	}
 
 	/* front button */
-	if (input_state->button_sts) {
+	if (input_state.button_sts) {
 		if (button->button_mode == BUTTON_DEFAULT)
 			led_driver_step_brightness();
 		else
 			/* user button mode */
 			button_counter_increase();
 
-		input_state->button_sts = false;
+		input_state.button_sts = false;
 	}
 
 	/* in case of user button mode:
@@ -279,13 +278,13 @@ static ret_value_t input_manager(void)
 		}
 	}
 
-	/* these flags are automatically cleared in debounce function */
-	if (input_state->card_det)
+	/* these flags are automatically cleared in input handler */
+	if (input_state.card_det)
 		i2c_iface.status_word |= STS_CARD_DET;
 	else
 		i2c_iface.status_word &= ~STS_CARD_DET;
 
-	if (input_state->msata_ind)
+	if (input_state.msata_ind)
 		i2c_iface.status_word |= STS_MSATA_IND;
 	else
 		i2c_iface.status_word &= ~STS_MSATA_IND;

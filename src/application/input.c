@@ -1,13 +1,4 @@
-/**
- ******************************************************************************
- * @file    debounce.c
- * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
- * @brief   Debounce switches and inputs from PG signals
- ******************************************************************************
- ******************************************************************************
- **/
-#include "debounce.h"
+#include "input.h"
 #include "power_control.h"
 #include "time.h"
 #include "led_driver.h"
@@ -35,7 +26,7 @@ enum input_mask {
 	BUTTON_MASK	= 0x8000,
 };
 
-struct input_sig debounce_input_signal;
+input_state_t input_state;
 struct button_def button_front;
 
 /*******************************************************************************
@@ -49,7 +40,7 @@ void button_debounce_handler(void)
 	static uint16_t idx;
 	struct button_def *button = &button_front;
 
-	/* port B, pins 0-14 debounced by general function debounce_check_inputs() */
+	/* port B, pins 0-14 debounced by general function input_signals_handler() */
 	/* only button on PB15 is debounced here, but read the whole port */
 	button->button_pin_state[idx] = ~gpio_read_port(PORT_B);
 	idx++;
@@ -59,20 +50,18 @@ void button_debounce_handler(void)
 }
 
 /*******************************************************************************
-  * @function   debounce_check_inputs
+  * @function   input_signals_handler
   * @brief      Check input signal.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_check_inputs(void)
+void input_signals_handler(void)
 {
 	uint16_t port_changed, button_changed;
 	static uint16_t last_button_debounce_state;
-	struct input_sig *input_state = &debounce_input_signal;
 	struct button_def *button = &button_front;
 
-	/* PB0-14 ----------------------------------------------------------------
-	 * No debounce is used now (we need a reaction immediately) */
+	/* PB0-14 */
 
 	/* read the whole port */
 	port_changed = ~gpio_read_port(PORT_B);
@@ -90,18 +79,18 @@ void debounce_check_inputs(void)
 			  last_button_debounce_state) &
 			 button->button_debounce_state;
 
-	input_state->card_det = msata_pci_card_detection();
-	input_state->msata_ind = msata_pci_type_card_detection();
+	input_state.card_det = msata_pci_card_detection();
+	input_state.msata_ind = msata_pci_type_card_detection();
 
 	/* results evaluation --------------------------------------------------- */
 	if (port_changed & MAN_RES_MASK) {
-		input_state->man_res = true;
+		input_state.man_res = true;
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
 	}
 
 	if (port_changed & SYSRES_OUT_MASK)
-		input_state->sysres_out = true;
+		input_state.sysres_out = true;
 
 	if (OMNIA_BOARD_REVISION < 32) {
 		if (port_changed & DBG_RES_MASK) {
@@ -116,34 +105,34 @@ void debounce_check_inputs(void)
 	    (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
 	    (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
 	    (port_changed & PG_1V2_MASK))
-		input_state->pg = true;
+		input_state.pg = true;
 
 	/* PG signal from 4.5V user controlled regulator */
 	if ((i2c_iface.status_word & STS_ENABLE_4V5) &&
 	    (port_changed & PG_4V5_MASK))
-		input_state->pg_4v5 = true;
+		input_state.pg_4v5 = true;
 
 	if (port_changed & USB30_OVC_MASK)
-		input_state->usb30_ovc = true;
+		input_state.usb30_ovc = true;
 
 	if (port_changed & USB31_OVC_MASK)
-		input_state->usb31_ovc = true;
+		input_state.usb31_ovc = true;
 
 	if (port_changed & RTC_ALARM_MASK) {
 		/* no reaction necessary */
 	}
 
 	if (button_changed & BUTTON_MASK)
-		input_state->button_sts = true;
+		input_state.button_sts = true;
 }
 
 /*******************************************************************************
-  * @function   debounce_config
-  * @brief      Debouncer configuration.
+  * @function   input_config
+  * @brief      Input configuration.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_config(void)
+void input_config(void)
 {
 	struct button_def *button = &button_front;
 

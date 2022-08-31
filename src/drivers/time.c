@@ -11,7 +11,7 @@
 #include "cpu.h"
 #include "time.h"
 #include "power_control.h"
-#include "debounce.h"
+#include "input.h"
 #include "watchdog.h"
 #include "i2c_slave.h"
 

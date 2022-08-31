@@ -16,7 +16,7 @@
 #include "led_driver.h"
 #include "flash.h"
 #include "memory_layout.h"
-#include "debounce.h"
+#include "input.h"
 #include "gpio.h"
 #include "timer.h"
 #include "cpu.h"

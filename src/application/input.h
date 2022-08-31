@@ -1,14 +1,5 @@
-/**
- ******************************************************************************
- * @file    debounce.h
- * @author  CZ.NIC, z.s.p.o.
- * @date    21-July-2015
- * @brief   Header file for debounce.c
- ******************************************************************************
- ******************************************************************************
- **/
-#ifndef __DEBOUNCE_H
-#define __DEBOUNCE_H
+#ifndef __INPUT_H
+#define __INPUT_H
 
 #include "compiler.h"
 
@@ -26,7 +17,7 @@ typedef enum button_states {
 } button_state_t;
 
 /* flags of input signals */
-struct input_sig {
+typedef struct {
 	unsigned man_res	: 1;
 	unsigned sysres_out	: 1;
 	unsigned dbg_res	: 1;
@@ -39,7 +30,7 @@ struct input_sig {
 	unsigned button_sts	: 1;
 	unsigned card_det	: 1;
 	unsigned msata_ind	: 1;
-};
+} input_state_t;
 
 struct button_def {
 	button_mode_t button_mode;
@@ -49,16 +40,16 @@ struct button_def {
 	uint16_t button_debounce_state;
 };
 
-extern struct input_sig debounce_input_signal;
+extern input_state_t input_state;
 extern struct button_def button_front;
 
 /*******************************************************************************
-  * @function   debounce_config
-  * @brief      Debouncer configuration.
+  * @function   input_config
+  * @brief      Input configuration.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_config(void);
+void input_config(void);
 
 /*******************************************************************************
   * @function   button_debounce_handler
@@ -69,12 +60,12 @@ void debounce_config(void);
 void button_debounce_handler(void);
 
 /*******************************************************************************
-  * @function   debounce_check_inputs
+  * @function   input_signals_handler
   * @brief      Check input signal.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void debounce_check_inputs(void);
+void input_signals_handler(void);
 
 /*******************************************************************************
   * @function   button_counter_increase
@@ -92,4 +83,4 @@ void button_counter_increase(void);
   *****************************************************************************/
 void button_counter_decrease(uint8_t value);
 
-#endif // __DEBOUNCE_H
+#endif /* __INPUT_H */

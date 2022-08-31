@@ -15,7 +15,7 @@
 #include "led_driver.h"
 #include "wan_lan_pci_msata.h"
 #include "power_control.h"
-#include "debounce.h"
+#include "input.h"
 #include "eeprom.h"
 #include "memory_layout.h"
 #include "watchdog.h"
