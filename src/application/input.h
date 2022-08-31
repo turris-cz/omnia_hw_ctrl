@@ -3,9 +3,6 @@
 
 #include "compiler.h"
 
-#define MAX_BUTTON_PRESSED_COUNTER	7
-#define MAX_BUTTON_DEBOUNCE_STATE	3
-
 /* flags of input signals */
 typedef struct {
 	unsigned man_res	: 1;
@@ -17,7 +14,6 @@ typedef struct {
 	unsigned usb30_ovc	: 1;
 	unsigned usb31_ovc	: 1;
 	unsigned rtc_alarm	: 1;
-	unsigned button_sts	: 1;
 	unsigned card_det	: 1;
 	unsigned msata_ind	: 1;
 } input_state_t;
@@ -25,8 +21,7 @@ typedef struct {
 typedef struct {
 	bool user_mode;
 	uint8_t pressed_counter;
-	uint16_t pin_state[MAX_BUTTON_DEBOUNCE_STATE];
-	uint16_t debounce_state;
+	bool state;
 } button_t;
 
 extern input_state_t input_state;
@@ -47,14 +42,6 @@ void button_debounce_handler(void);
   * @retval     None.
   *****************************************************************************/
 void input_signals_handler(void);
-
-/*******************************************************************************
-  * @function   button_counter_increase
-  * @brief      Increase button counter.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void button_counter_increase(void);
 
 /*******************************************************************************
   * @function   button_counter_decrease

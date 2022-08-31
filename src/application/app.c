@@ -254,16 +254,6 @@ static ret_value_t input_manager(void)
 		power_control_usb_timeout_enable();
 	}
 
-	/* front button */
-	if (input_state.button_sts) {
-		if (button.user_mode)
-			button_counter_increase();
-		else
-			led_driver_step_brightness();
-
-		input_state.button_sts = false;
-	}
-
 	/* in case of user button mode:
 	 * store information in status_word - how many times a button was pressed  */
 	if (button.user_mode) {

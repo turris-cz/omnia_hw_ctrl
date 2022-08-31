@@ -7,6 +7,9 @@
 #include "i2c_iface.h"
 #include "timer.h"
 
+#define MAX_BUTTON_PRESSED_COUNTER	7
+#define MAX_BUTTON_DEBOUNCE_STATE	3
+
 enum input_mask {
 	MAN_RES_MASK	= 0x0001,
 	SYSRES_OUT_MASK	= 0x0002,
@@ -23,11 +26,20 @@ enum input_mask {
 	USB30_OVC_MASK	= 0x1000,
 	USB31_OVC_MASK	= 0x2000,
 	RTC_ALARM_MASK	= 0x4000,
-	BUTTON_MASK	= 0x8000,
 };
 
 input_state_t input_state;
 button_t button;
+
+static void button_pressed(void)
+{
+	if (button.user_mode) {
+		if (button.pressed_counter < MAX_BUTTON_PRESSED_COUNTER)
+			button.pressed_counter++;
+	} else {
+		led_driver_step_brightness();
+	}
+}
 
 /*******************************************************************************
   * @function   button_debounce_handler
@@ -37,15 +49,21 @@ button_t button;
   *****************************************************************************/
 void button_debounce_handler(void)
 {
-	static uint16_t idx;
+	static uint8_t state_cnt[2];
+	bool state, prev_state;
 
-	/* port B, pins 0-14 debounced by general function input_signals_handler() */
-	/* only button on PB15 is debounced here, but read the whole port */
-	button.pin_state[idx] = ~gpio_read_port(PORT_B);
-	idx++;
+	state = !gpio_read(FRONT_BTN_PIN);
 
-	if (idx >= MAX_BUTTON_DEBOUNCE_STATE)
-		idx = 0;
+	state_cnt[!state] = 0;
+	if (state_cnt[state] < MAX_BUTTON_DEBOUNCE_STATE) {
+		state_cnt[state]++;
+		if (state_cnt[state] == MAX_BUTTON_DEBOUNCE_STATE) {
+			prev_state = button.state;
+			button.state = state;
+			if (!prev_state && state)
+				button_pressed();
+		}
+	}
 }
 
 /*******************************************************************************
@@ -56,25 +74,11 @@ void button_debounce_handler(void)
   *****************************************************************************/
 void input_signals_handler(void)
 {
-	uint16_t port_changed, button_changed;
-	static uint16_t last_button_debounce_state;
+	uint16_t port_changed;
 
 	/* PB0-14 */
-
 	/* read the whole port */
 	port_changed = ~gpio_read_port(PORT_B);
-
-	/* PB15 ------------------------------------------------------------------
-	 * button debounce */
-	last_button_debounce_state = button.debounce_state;
-	button.debounce_state = BUTTON_MASK;
-
-	for (int i = 0; i < MAX_BUTTON_DEBOUNCE_STATE; i++)
-		button.debounce_state = button.debounce_state &
-					button.pin_state[i];
-
-	button_changed = (button.debounce_state ^ last_button_debounce_state) &
-			 button.debounce_state;
 
 	input_state.card_det = msata_pci_card_detection();
 	input_state.msata_ind = msata_pci_type_card_detection();
@@ -118,9 +122,6 @@ void input_signals_handler(void)
 	if (port_changed & RTC_ALARM_MASK) {
 		/* no reaction necessary */
 	}
-
-	if (button_changed & BUTTON_MASK)
-		input_state.button_sts = true;
 }
 
 /*******************************************************************************
@@ -135,19 +136,4 @@ void button_counter_decrease(uint8_t value)
 		button.pressed_counter -= value;
 	else
 		button.pressed_counter = 0;
-}
-
-/*******************************************************************************
-  * @function   button_counter_increase
-  * @brief      Increase button counter.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void button_counter_increase(void)
-{
-	button.pressed_counter++;
-
-	/* limitation */
-	if (button.pressed_counter > MAX_BUTTON_PRESSED_COUNTER)
-		button.pressed_counter = MAX_BUTTON_PRESSED_COUNTER;
 }
