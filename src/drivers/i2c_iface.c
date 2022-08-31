@@ -17,7 +17,6 @@
 #include "power_control.h"
 #include "debounce.h"
 #include "eeprom.h"
-#include "i2c_slave.h"
 #include "memory_layout.h"
 #include "watchdog.h"
 
@@ -26,9 +25,6 @@ static struct {
 	uint32_t length;
 	uint32_t crcsum;
 } app_checksum __section(".crcsum");
-
-#define MCU_I2C_ADDR			0x2a
-#define LED_CONTROLLER_I2C_ADDR		0x2b
 
 static const uint16_t slave_features_supported =
 #if OMNIA_BOARD_REVISION >= 32
@@ -62,12 +58,6 @@ static const struct {
 	ECTRL(nVHV_CTRL),
 #undef ECTRL
 };
-
-typedef struct {
-	uint8_t cmd[10];
-	uint8_t reply[20];
-	uint8_t cmd_len, reply_len, reply_idx;
-} i2c_iface_state_t;
 
 static inline void _set_reply(i2c_iface_state_t *state, const void *reply,
 			      uint32_t len)
@@ -473,8 +463,8 @@ static int handle_cmd(uint8_t addr, i2c_iface_state_t *state)
 		return -1;
 }
 
-static int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
-			      uint8_t *val)
+int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
+		       uint8_t *val)
 {
 	i2c_iface_state_t *state = priv;
 
@@ -519,23 +509,4 @@ static int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 	}
 
 	return 0;
-}
-
-static i2c_iface_state_t i2c_iface_state;
-
-static i2c_slave_t i2c_slave = {
-	.cb = i2c_iface_event_cb,
-	.priv = &i2c_iface_state,
-};
-
-/*******************************************************************************
-  * @function   i2c_iface_config
-  * @brief      Configuration of I2C peripheral and its timeout.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void i2c_iface_config(void)
-{
-	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
-		       LED_CONTROLLER_I2C_ADDR, 1);
 }

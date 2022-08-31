@@ -43,6 +43,13 @@ typedef enum {
 	BOOTLOADER
 } states_t;
 
+static i2c_iface_state_t i2c_iface_state;
+
+static i2c_slave_t i2c_slave = {
+	.cb = i2c_iface_event_cb,
+	.priv = &i2c_iface_state,
+};
+
 /*******************************************************************************
   * @function   app_mcu_init
   * @brief      Initialization of MCU and its ports and peripherals.
@@ -61,7 +68,8 @@ static void app_mcu_init(void)
 	wan_lan_pci_msata_config();
 	power_control_usb_timeout_config();
 	led_driver_config();
-	i2c_iface_config();
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
+		       LED_CONTROLLER_I2C_ADDR, 1);
 
 	/* new features for Omnia32 */
 	if (OMNIA_BOARD_REVISION >= 32)

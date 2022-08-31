@@ -12,6 +12,10 @@
 #define I2C_IFACE_H
 
 #include "bits.h"
+#include "i2c_slave.h"
+
+#define MCU_I2C_ADDR			0x2a
+#define LED_CONTROLLER_I2C_ADDR		0x2b
 
 typedef enum {
 	I2C_IFACE_REQ_NONE,
@@ -30,6 +34,15 @@ typedef struct {
 } i2c_iface_t;
 
 extern i2c_iface_t i2c_iface;
+
+typedef struct {
+	uint8_t cmd[10];
+	uint8_t reply[20];
+	uint8_t cmd_len, reply_len, reply_idx;
+} i2c_iface_state_t;
+
+int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
+		       uint8_t *val);
 
 enum commands_e {
 	CMD_GET_STATUS_WORD		= 0x01, /* slave sends status word back */
@@ -310,14 +323,6 @@ enum ext_ctl_e {
  *  3.B     |  16..23 |   green color [0..255]
  *  4.B     |  24..31 |   blue color [0..255]
 */
-
-/*******************************************************************************
-  * @function   i2c_iface_config
-  * @brief      Configuration of I2C peripheral as a slave.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void i2c_iface_config(void);
 
 #endif /* I2C_IFACE_H */
 
