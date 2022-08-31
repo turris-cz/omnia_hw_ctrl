@@ -45,107 +45,10 @@ enum boot_request_e {
 
 struct st_i2c_status i2c_status;
 
-/*******************************************************************************
-  * @function   slave_i2c_check_control_byte
-  * @brief      Decodes a control byte and perform suitable reaction.
-  * @param      control_byte: control byte sent from master (CPU)
-  * @param      bit_mask: 0 - dont care bit, 1 - write bit
-  * @retval     None.
-  *****************************************************************************/
-static void slave_i2c_check_control_byte(uint8_t control_byte, uint8_t bit_mask)
-{
-	struct st_i2c_status *i2c_control = &i2c_status;
-	struct button_def *button = &button_front;
-	eeprom_var_t ee_var;
-
-	i2c_control->state = SLAVE_I2C_OK;
-
-	if ((control_byte & CTL_LIGHT_RST) && (bit_mask & CTL_LIGHT_RST)) {
-		/* set CFG_CTRL pin to high state ASAP */
-		gpio_write(CFG_CTRL_PIN, 1);
-		/* reset of CPU */
-		gpio_write(MANRES_PIN, 0);
-		return;
-	}
-
-	if ((control_byte & CTL_HARD_RST) && (bit_mask & CTL_HARD_RST)) {
-		i2c_control->state = SLAVE_I2C_HARD_RST;
-		return;
-	}
-
-	if (bit_mask & CTL_USB30_PWRON) {
-		if (control_byte & CTL_USB30_PWRON) {
-			power_control_usb(USB3_PORT0, true);
-			i2c_control->status_word |= STS_USB30_PWRON;
-		} else {
-			power_control_usb(USB3_PORT0, false);
-			i2c_control->status_word &= ~STS_USB30_PWRON;
-		}
-	}
-
-	if (bit_mask & CTL_USB31_PWRON) {
-		if (control_byte & CTL_USB31_PWRON) {
-			power_control_usb(USB3_PORT1, true);
-			i2c_control->status_word |= STS_USB31_PWRON;
-		} else {
-			power_control_usb(USB3_PORT1, false);
-			i2c_control->status_word &= ~STS_USB31_PWRON;
-		}
-	}
-
-#if USER_REGULATOR_ENABLED
-	if (bit_mask & CTL_ENABLE_4V5) {
-		if (control_byte & CTL_ENABLE_4V5) {
-			gpio_write(ENABLE_4V5_PIN, 1);
-		} else {
-			gpio_write(ENABLE_4V5_PIN, 0);
-			i2c_control->status_word &= ~STS_ENABLE_4V5;
-		}
-	}
-#endif
-
-	if (bit_mask & CTL_BUTTON_MODE) {
-		if (control_byte & CTL_BUTTON_MODE) {
-			button->button_mode = BUTTON_USER;
-			i2c_control->status_word |= STS_BUTTON_MODE;
-		} else {
-			button->button_mode = BUTTON_DEFAULT;
-			button->button_pressed_counter = 0;
-			i2c_control->status_word &= ~STS_BUTTON_MODE;
-		}
-	}
-
-	if (bit_mask & CTL_BOOTLOADER) {
-		if (control_byte & CTL_BOOTLOADER) {
-			EE_Init();
-			ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
-
-			switch (ee_var) {
-			case VAR_FLASH_COMPLETE:
-				debug("RST: OK\n");
-				break;
-
-			case VAR_PAGE_FULL:
-				debug("RST: Pg full\n");
-				break;
-
-			case VAR_NO_VALID_PAGE:
-				debug("RST: No Pg\n");
-				break;
-
-			default:
-				break;
-			}
-
-			i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
-		}
-	}
-}
-
 static const struct {
 	gpio_t pin;
 	uint16_t mask;
-} ext_control_pins[] = {
+} ext_ctrl_pins[] = {
 #define ECTRL(name) \
 	{ name ## _PIN, EXT_CTL_ ## name }
 	ECTRL(nRES_MMC),
@@ -158,63 +61,6 @@ static const struct {
 	ECTRL(nVHV_CTRL),
 #undef ECTRL
 };
-
-/*******************************************************************************
-  * @function   slave_i2c_ext_control
-  * @brief      Decodes an extended control word and performs suitable reaction.
-  * @param      ext_control_word: extended control word sent from master (CPU)
-  * @param      bit_mask: 0 - dont care bit, 1 - write bit
-  * @retval     None.
-  *****************************************************************************/
-void slave_i2c_ext_control(uint16_t ext_control_word, uint16_t bit_mask)
-{
-	/* don't do anything on pre-v32 boards */
-	if (OMNIA_BOARD_REVISION < 32)
-		return;
-
-	/* save the requested value */
-	ext_control_word = (i2c_status.ext_control_word & ~bit_mask) |
-			   (ext_control_word & bit_mask);
-	i2c_status.ext_control_word = ext_control_word;
-
-	/*
-	 * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
-	 * If set, we let PHY_SFP to be set in app.c' input_manager() according to
-	 * value read from SFP_nDET, so we don't change it here.
-	 * If not set, we want to set PHY_SFP according to value in
-	 * ext_control_word.
-	 */
-	if (ext_control_word & EXT_CTL_PHY_SFP_AUTO)
-		bit_mask &= ~EXT_CTL_PHY_SFP;
-	else
-		bit_mask |= EXT_CTL_PHY_SFP;
-
-	for_each_const(pin, ext_control_pins)
-		if (bit_mask & pin->mask)
-			gpio_write(pin->pin, !!(ext_control_word & pin->mask));
-}
-
-/*******************************************************************************
-  * @function   slave_i2c_get_ext_control_status
-  * @brief      Get extended control status (peripheral's resets, ...).
-  * @param      None.
-  * @retval     ext_control_status.
-  *****************************************************************************/
-static uint16_t slave_i2c_get_ext_control_status(void)
-{
-	uint16_t ext_control_status = 0;
-
-	if (OMNIA_BOARD_REVISION >= 32) {
-		for_each_const(pin, ext_control_pins)
-			if (gpio_read(pin->pin))
-				ext_control_status |= pin->mask;
-	}
-
-	/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
-	ext_control_status |= i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
-
-	return ext_control_status;
-}
 
 typedef struct {
 	uint8_t cmd[10];
@@ -242,10 +88,97 @@ static int cmd_get_status(slave_i2c_state_t *state)
 	return 0;
 }
 
+static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
+			     uint8_t ctrl_bit, uint16_t sts_bit)
+{
+	if (mask & ctrl_bit) {
+		power_control_usb(port, ctrl & ctrl_bit);
+		if (ctrl & ctrl_bit)
+			i2c_status.status_word |= sts_bit;
+		else
+			i2c_status.status_word &= ~sts_bit;
+	}
+}
+
 static int cmd_general_control(slave_i2c_state_t *state)
 {
-	debug("general_control\n");
-	slave_i2c_check_control_byte(state->cmd[1], state->cmd[2]);
+	struct st_i2c_status *i2c_control = &i2c_status;
+	struct button_def *button = &button_front;
+	uint8_t ctrl, mask, set;
+
+	ctrl = state->cmd[1];
+	mask = state->cmd[2];
+	set = ctrl & mask;
+
+	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
+
+	i2c_control->state = SLAVE_I2C_OK;
+
+	if (set & CTL_LIGHT_RST) {
+		/* set CFG_CTRL pin to high state ASAP */
+		gpio_write(CFG_CTRL_PIN, 1);
+		/* reset of CPU */
+		gpio_write(MANRES_PIN, 0);
+		return 0;
+	}
+
+	if (set & CTL_HARD_RST) {
+		i2c_control->state = SLAVE_I2C_HARD_RST;
+		return 0;
+	}
+
+	handle_usb_power(ctrl, mask, USB3_PORT0, CTL_USB30_PWRON,
+			 STS_USB30_PWRON);
+	handle_usb_power(ctrl, mask, USB3_PORT1, CTL_USB31_PWRON,
+			 STS_USB31_PWRON);
+
+#if USER_REGULATOR_ENABLED
+	if (mask & CTL_ENABLE_4V5) {
+		if (ctrl & CTL_ENABLE_4V5) {
+			gpio_write(ENABLE_4V5_PIN, 1);
+		} else {
+			gpio_write(ENABLE_4V5_PIN, 0);
+			i2c_control->status_word &= ~STS_ENABLE_4V5;
+		}
+	}
+#endif
+
+	if (mask & CTL_BUTTON_MODE) {
+		if (ctrl & CTL_BUTTON_MODE) {
+			button->button_mode = BUTTON_USER;
+			i2c_control->status_word |= STS_BUTTON_MODE;
+		} else {
+			button->button_mode = BUTTON_DEFAULT;
+			button->button_pressed_counter = 0;
+			i2c_control->status_word &= ~STS_BUTTON_MODE;
+		}
+	}
+
+	if (set & CTL_BOOTLOADER) {
+		eeprom_var_t ee_var;
+
+		EE_Init();
+		ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
+
+		switch (ee_var) {
+		case VAR_FLASH_COMPLETE:
+			debug("RST: OK\n");
+			break;
+
+		case VAR_PAGE_FULL:
+			debug("RST: Pg full\n");
+			break;
+
+		case VAR_NO_VALID_PAGE:
+			debug("RST: No Pg\n");
+			break;
+
+		default:
+			break;
+		}
+
+		i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
+	}
 
 	return 0;
 }
@@ -261,20 +194,55 @@ static int cmd_get_ext_status(slave_i2c_state_t *state)
 static int cmd_ext_control(slave_i2c_state_t *state)
 {
 	uint8_t *args = &state->cmd[1];
+	uint16_t ext_ctrl, mask;
 
-	debug("ext_control\n");
-	slave_i2c_ext_control(args[0] | (args[1] << 8),
-			      args[2] | (args[3] << 8));
+	ext_ctrl = args[0] | (args[1] << 8);
+	mask = args[2] | (args[3] << 8);
+
+	debug("ext_control ctrl=%#06x mask=%#06x\n", ext_ctrl, mask);
+
+	/* don't do anything on pre-v32 boards */
+	if (OMNIA_BOARD_REVISION < 32)
+		return 0;
+
+	/* save the requested value */
+	ext_ctrl = (i2c_status.ext_control_word & ~mask) | (ext_ctrl & mask);
+	i2c_status.ext_control_word = ext_ctrl;
+
+	/*
+	 * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
+	 * If set, we let PHY_SFP to be set in app.c' input_manager() according to
+	 * value read from SFP_nDET, so we don't change it here.
+	 * If not set, we want to set PHY_SFP according to value in
+	 * ext_ctrl.
+	 */
+	if (ext_ctrl & EXT_CTL_PHY_SFP_AUTO)
+		mask &= ~EXT_CTL_PHY_SFP;
+	else
+		mask |= EXT_CTL_PHY_SFP;
+
+	for_each_const(pin, ext_ctrl_pins)
+		if (mask & pin->mask)
+			gpio_write(pin->pin, !!(ext_ctrl & pin->mask));
 
 	return 0;
 }
 
 static int cmd_get_ext_control_status(slave_i2c_state_t *state)
 {
-	uint16_t ext_ctrl = slave_i2c_get_ext_control_status();
+	uint16_t ext_ctrl_st = 0;
 
-	debug("get_ext_control_status\n");
-	set_reply(ext_ctrl);
+	if (OMNIA_BOARD_REVISION >= 32) {
+		for_each_const(pin, ext_ctrl_pins)
+			if (gpio_read(pin->pin))
+				ext_ctrl_st |= pin->mask;
+	}
+
+	/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
+	ext_ctrl_st |= i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
+
+	debug("get_ext_control_status st=%#06x\n", ext_ctrl_st);
+	set_reply(ext_ctrl_st);
 
 	return 0;
 }
