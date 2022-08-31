@@ -154,7 +154,6 @@ static int power_on(void)
 static ret_value_t light_reset(void)
 {
 	ret_value_t value = OK;
-	struct st_i2c_status *i2c_control = &i2c_status;
 	uint16_t ext_control = 0;
 
 	led_driver_reset_effect(DISABLE);
@@ -171,9 +170,9 @@ static ret_value_t light_reset(void)
 	led_driver_reset_effect(ENABLE);
 
 	debounce_config(); /* start evaluation of inputs */
-	i2c_control->status_word = app_get_status_word();
-	i2c_control->ext_status_dword = app_get_ext_status_dword();
-	i2c_control->ext_control_word = ext_control | EXT_CTL_PHY_SFP_AUTO;
+	i2c_status.status_word = app_get_status_word();
+	i2c_status.ext_status_dword = app_get_ext_status_dword();
+	i2c_status.ext_control_word = ext_control | EXT_CTL_PHY_SFP_AUTO;
 
 	return value;
 }
@@ -188,7 +187,6 @@ static ret_value_t input_manager(void)
 {
 	ret_value_t value = OK;
 	struct input_sig *input_state = &debounce_input_signal;
-	struct st_i2c_status *i2c_control = &i2c_status;
 	struct button_def *button = &button_front;
 
 	debounce_check_inputs();
@@ -223,13 +221,13 @@ static ret_value_t input_manager(void)
 
 	/* USB30 overcurrent */
 	if (input_state->usb30_ovc) {
-		i2c_control->status_word |= STS_USB30_OVC;
+		i2c_status.status_word |= STS_USB30_OVC;
 		input_state->usb30_ovc = false;
 		power_control_usb(USB3_PORT0, false); /* USB power off */
 
 		/* update status word */
 		if (!power_control_get_usb_poweron(USB3_PORT0))
-			i2c_control->status_word &= ~STS_USB30_PWRON;
+			i2c_status.status_word &= ~STS_USB30_PWRON;
 
 		/* USB timeout set to 1 sec */
 		power_control_usb_timeout_enable();
@@ -237,14 +235,14 @@ static ret_value_t input_manager(void)
 
 	/* USB31 overcurrent */
 	if (input_state->usb31_ovc) {
-		i2c_control->status_word |= STS_USB31_OVC;
+		i2c_status.status_word |= STS_USB31_OVC;
 		input_state->usb31_ovc = false;
 
 		power_control_usb(USB3_PORT1, false); /* USB power off */
 
 		/* update status word */
 		if (!power_control_get_usb_poweron(USB3_PORT1))
-			i2c_control->status_word &= ~STS_USB31_PWRON;
+			i2c_status.status_word &= ~STS_USB31_PWRON;
 
 		/* USB timeout set to 1 sec */
 		power_control_usb_timeout_enable();
@@ -265,36 +263,36 @@ static ret_value_t input_manager(void)
 	 * store information in status_word - how many times a button was pressed  */
 	if (button->button_mode != BUTTON_DEFAULT) {
 		if (button->button_pressed_counter) {
-			i2c_control->status_word &= ~STS_BUTTON_COUNTER_MASK;
-			i2c_control->status_word |= (button->button_pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
-			i2c_control->status_word |= STS_BUTTON_PRESSED;
+			i2c_status.status_word &= ~STS_BUTTON_COUNTER_MASK;
+			i2c_status.status_word |= (button->button_pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
+			i2c_status.status_word |= STS_BUTTON_PRESSED;
 		} else {
-			i2c_control->status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
+			i2c_status.status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
 		}
 	}
 
 	/* these flags are automatically cleared in debounce function */
 	if (input_state->card_det)
-		i2c_control->status_word |= STS_CARD_DET;
+		i2c_status.status_word |= STS_CARD_DET;
 	else
-		i2c_control->status_word &= ~STS_CARD_DET;
+		i2c_status.status_word &= ~STS_CARD_DET;
 
 	if (input_state->msata_ind)
-		i2c_control->status_word |= STS_MSATA_IND;
+		i2c_status.status_word |= STS_MSATA_IND;
 	else
-		i2c_control->status_word &= ~STS_MSATA_IND;
+		i2c_status.status_word &= ~STS_MSATA_IND;
 
 
 	if (OMNIA_BOARD_REVISION >= 32) {
 		if (gpio_read(SFP_nDET_PIN))
-			i2c_control->ext_status_dword |= EXT_STS_SFP_nDET;
+			i2c_status.ext_status_dword |= EXT_STS_SFP_nDET;
 		else
-			i2c_control->ext_status_dword &= ~(EXT_STS_SFP_nDET);
+			i2c_status.ext_status_dword &= ~(EXT_STS_SFP_nDET);
 
 		disable_irq();
-		if (i2c_control->ext_control_word & EXT_CTL_PHY_SFP_AUTO)
+		if (i2c_status.ext_control_word & EXT_CTL_PHY_SFP_AUTO)
 			gpio_write(PHY_SFP_PIN,
-				   !!(i2c_control->ext_status_dword & EXT_STS_SFP_nDET));
+				   !!(i2c_status.ext_status_dword & EXT_STS_SFP_nDET));
 		enable_irq();
 	}
 
@@ -309,18 +307,17 @@ static ret_value_t input_manager(void)
   *****************************************************************************/
 static ret_value_t i2c_manager(void)
 {
-	struct st_i2c_status *i2c_control = &i2c_status;
 	static uint16_t last_status_word;
 	ret_value_t value = OK;
 
-	if (i2c_control->status_word != last_status_word)
+	if (i2c_status.status_word != last_status_word)
 		SET_INTERRUPT_TO_CPU;
 	else
 		RESET_INTERRUPT_TO_CPU;
 
-	last_status_word = i2c_control->status_word;
+	last_status_word = i2c_status.status_word;
 
-	switch (i2c_control->state) {
+	switch (i2c_status.state) {
 	case SLAVE_I2C_LIGHT_RST:
 		value = GO_TO_LIGHT_RESET;
 		break;
@@ -338,7 +335,7 @@ static ret_value_t i2c_manager(void)
 		break;
 	}
 
-	i2c_control->state = SLAVE_I2C_OK;
+	i2c_status.state = SLAVE_I2C_OK;
 
 	return value;
 }

@@ -102,7 +102,6 @@ static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
 
 static int cmd_general_control(slave_i2c_state_t *state)
 {
-	struct st_i2c_status *i2c_control = &i2c_status;
 	struct button_def *button = &button_front;
 	uint8_t ctrl, mask, set;
 
@@ -112,7 +111,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 
 	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
 
-	i2c_control->state = SLAVE_I2C_OK;
+	i2c_status.state = SLAVE_I2C_OK;
 
 	if (set & CTL_LIGHT_RST) {
 		/* set CFG_CTRL pin to high state ASAP */
@@ -123,7 +122,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 	}
 
 	if (set & CTL_HARD_RST) {
-		i2c_control->state = SLAVE_I2C_HARD_RST;
+		i2c_status.state = SLAVE_I2C_HARD_RST;
 		return 0;
 	}
 
@@ -138,7 +137,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 			gpio_write(ENABLE_4V5_PIN, 1);
 		} else {
 			gpio_write(ENABLE_4V5_PIN, 0);
-			i2c_control->status_word &= ~STS_ENABLE_4V5;
+			i2c_status.status_word &= ~STS_ENABLE_4V5;
 		}
 	}
 #endif
@@ -146,11 +145,11 @@ static int cmd_general_control(slave_i2c_state_t *state)
 	if (mask & CTL_BUTTON_MODE) {
 		if (ctrl & CTL_BUTTON_MODE) {
 			button->button_mode = BUTTON_USER;
-			i2c_control->status_word |= STS_BUTTON_MODE;
+			i2c_status.status_word |= STS_BUTTON_MODE;
 		} else {
 			button->button_mode = BUTTON_DEFAULT;
 			button->button_pressed_counter = 0;
-			i2c_control->status_word &= ~STS_BUTTON_MODE;
+			i2c_status.status_word &= ~STS_BUTTON_MODE;
 		}
 	}
 
@@ -177,7 +176,7 @@ static int cmd_general_control(slave_i2c_state_t *state)
 			break;
 		}
 
-		i2c_control->state = SLAVE_I2C_GO_TO_BOOTLOADER;
+		i2c_status.state = SLAVE_I2C_GO_TO_BOOTLOADER;
 	}
 
 	return 0;

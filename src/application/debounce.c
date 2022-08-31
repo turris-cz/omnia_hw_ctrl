@@ -141,7 +141,6 @@ void debounce_check_inputs(void)
 	static uint16_t last_button_debounce_state;
 	struct input_sig *input_state = &debounce_input_signal;
 	struct button_def *button = &button_front;
-	struct st_i2c_status *i2c_control = &i2c_status;
 
 	/* PB0-14 ----------------------------------------------------------------
 	 * No debounce is used now (we need a reaction immediately) */
@@ -188,7 +187,7 @@ void debounce_check_inputs(void)
 		input_state->pg = true;
 
 	/* PG signal from 4.5V user controlled regulator */
-	if ((i2c_control->status_word & STS_ENABLE_4V5) &&
+	if ((i2c_status.status_word & STS_ENABLE_4V5) &&
 	    (port_changed & PG_4V5_MASK))
 		input_state->pg_4v5 = true;
 
