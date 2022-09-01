@@ -33,8 +33,8 @@ void wan_lan_pci_msata_config(void)
 	gpio_init_inputs(pin_pullup,
 			 PCI_PLED0_PIN, PCI_PLED1_PIN, PCI_PLED2_PIN,
 			 PCI_LLED1_PIN, PCI_LLED2_PIN, WAN_LED0_PIN,
-			 WAN_LED1_PIN, CARD_DET_PIN, MSATALED_PIN,
-			 MSATAIND_PIN);
+			 WAN_LED1_PIN, CARD_DET_PIN, MSATA_LED_PIN,
+			 MSATA_IND_PIN);
 
 	gpio_init_inputs(pin_nopull,
 			 R0_P0_LED_PIN, R1_P1_LED_PIN, R2_P2_LED_PIN,
@@ -49,7 +49,7 @@ void wan_lan_pci_msata_config(void)
   *****************************************************************************/
 void msata_pci_activity(void)
 {
-	led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATALED_PIN));
+	led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATA_LED_PIN));
 }
 
 /*******************************************************************************
@@ -72,7 +72,7 @@ bool msata_pci_card_detection(void)
   *****************************************************************************/
 bool msata_pci_type_card_detection(void)
 {
-	return gpio_read(MSATAIND_PIN);
+	return gpio_read(MSATA_IND_PIN);
 }
 
 /*******************************************************************************

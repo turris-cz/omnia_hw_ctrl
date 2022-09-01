@@ -35,8 +35,8 @@
 
 /* mSATA/PCI detection and LED */
 #define CARD_DET_PIN		PIN(A, 9, !DBG_ENABLE)
-#define MSATALED_PIN		PIN(A, 15)
-#define MSATAIND_PIN		PIN(C, 14)
+#define MSATA_LED_PIN		PIN(A, 15)
+#define MSATA_IND_PIN		PIN(C, 14)
 
 /*******************************************************************************
   * @function   wan_lan_pci_msata_config
