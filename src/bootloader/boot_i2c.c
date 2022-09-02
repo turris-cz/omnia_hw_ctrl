@@ -58,7 +58,8 @@ static int boot_i2c_event_cb(void *priv, uint8_t addr,
 {
 	boot_i2c_state_t *state = priv;
 
-	if (addr != I2C_SLAVE_ADDRESS)
+	if (!(addr == I2C_SLAVE_ADDRESS ||
+	      (!addr && event == I2C_SLAVE_RESET)))
 		return -1;
 
 	switch (event) {

@@ -656,10 +656,12 @@ int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 
 	case I2C_SLAVE_STOP:
 	case I2C_SLAVE_RESET:
-		if (event == I2C_SLAVE_STOP && state->on_success)
-			state->on_success(state);
-		else if (event == I2C_SLAVE_RESET && state->on_failure)
-			state->on_failure(state);
+		if (addr) {
+			if (event == I2C_SLAVE_STOP && state->on_success)
+				state->on_success(state);
+			else if (event == I2C_SLAVE_RESET && state->on_failure)
+				state->on_failure(state);
+		}
 
 		state->cmd_len = 0;
 		state->reply_len = 0;

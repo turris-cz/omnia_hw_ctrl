@@ -132,8 +132,9 @@ static __force_inline void i2c_init_pins(i2c_nr_t i2c_nr)
 		       pin_pullup, I2C1_SCL_PIN, I2C1_SDA_PIN);
 }
 
-static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
-				  uint8_t addr1, uint8_t addr2, uint8_t irq_prio)
+static inline void _i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
+				   uint8_t addr1, uint8_t addr2,
+				   uint8_t irq_prio, bool reset_event)
 {
 	uint32_t i2c = i2c_to_plat(i2c_nr);
 
@@ -159,9 +160,19 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	slave->unhandled = 0;
 	i2c_slave_ptr[i2c_nr] = slave;
 
+	if (reset_event)
+		slave->cb(slave->priv, 0, I2C_SLAVE_RESET, NULL);
+
 	nvic_enable_irq(i2c_ev_irqn(i2c_nr), irq_prio);
 	nvic_enable_irq(i2c_err_irqn(i2c_nr), irq_prio);
 	I2C_CTL0(i2c) = I2C_CTL0_I2CEN | I2C_CTL0_ACKEN;
+}
+
+static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
+				  uint8_t addr1, uint8_t addr2,
+				  uint8_t irq_prio)
+{
+	_i2c_slave_init(i2c_nr, slave, addr1, addr2, irq_prio, true);
 }
 
 static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
@@ -170,10 +181,10 @@ static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
 	uint32_t i2c = i2c_to_plat(i2c_nr);
 
 	slave->cb(slave->priv, slave->addr, I2C_SLAVE_RESET, &slave->val);
-	i2c_slave_init(i2c_nr, slave,
-		       FIELD_GET(I2C_SADDR0_ADDRESS, I2C_SADDR0(i2c)),
-		       FIELD_GET(I2C_SADDR1_ADDRESS2, I2C_SADDR1(i2c)),
-		       NVIC_GetPriority(i2c_ev_irqn(i2c_nr)));
+	_i2c_slave_init(i2c_nr, slave,
+			FIELD_GET(I2C_SADDR0_ADDRESS, I2C_SADDR0(i2c)),
+			FIELD_GET(I2C_SADDR1_ADDRESS2, I2C_SADDR1(i2c)),
+			NVIC_GetPriority(i2c_ev_irqn(i2c_nr)), false);
 }
 
 /* should be called only from slave callback, disable I2C interrupts

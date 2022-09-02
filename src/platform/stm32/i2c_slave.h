@@ -118,8 +118,9 @@ static __force_inline void i2c_init_pins(i2c_nr_t i2c_nr)
 		       pin_nopull, I2C2_SCL_PIN, I2C2_SDA_PIN);
 }
 
-static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
-				  uint8_t addr1, uint8_t addr2, uint8_t irq_prio)
+static inline void _i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
+				   uint8_t addr1, uint8_t addr2,
+				   uint8_t irq_prio, bool reset_event)
 {
 	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
 
@@ -154,10 +155,20 @@ static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	slave->unhandled = 0;
 	i2c_slave_ptr[i2c_nr - 1] = slave;
 
+	if (reset_event)
+		slave->cb(slave->priv, 0, I2C_SLAVE_RESET, &slave->val);
+
 	/* peripheral enable */
 	i2c->CR1 |= I2C_CR1_PE;
 
 	nvic_enable_irq(i2c_irqn(i2c_nr), irq_prio);
+}
+
+static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
+				  uint8_t addr1, uint8_t addr2,
+				  uint8_t irq_prio)
+{
+	_i2c_slave_init(i2c_nr, slave, addr1, addr2, irq_prio, true);
 }
 
 #define I2C_OAR_OA_7B		0xfe
@@ -168,10 +179,10 @@ static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
 	I2C_TypeDef *i2c = i2c_to_plat(i2c_nr);
 
 	slave->cb(slave->priv, slave->addr, I2C_SLAVE_RESET, &slave->val);
-	i2c_slave_init(i2c_nr, slave,
-		       FIELD_GET(I2C_OAR_OA_7B, i2c->OAR1),
-		       FIELD_GET(I2C_OAR_OA_7B, i2c->OAR2),
-		       NVIC_GetPriority(i2c_irqn(i2c_nr)));
+	_i2c_slave_init(i2c_nr, slave,
+			FIELD_GET(I2C_OAR_OA_7B, i2c->OAR1),
+			FIELD_GET(I2C_OAR_OA_7B, i2c->OAR2),
+			NVIC_GetPriority(i2c_irqn(i2c_nr)), false);
 }
 
 /* should be called only from slave callback, disable I2C interrupts
