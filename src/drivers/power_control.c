@@ -363,6 +363,11 @@ void power_control_first_startup(void)
 
 			increase_reset_selector_level(&sel, &level);
 		}
+
+		if (sel < 0)
+			sel = 0;
+
+		i2c_iface.reset_selector = sel;
 	}
 
 	/* 15ms delay after release of reset signal */
@@ -371,9 +376,6 @@ void power_control_first_startup(void)
 
 	if (BOOTLOADER_BUILD)
 		return;
-
-	if (sel < 0)
-		sel = 0;
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
@@ -390,8 +392,6 @@ void power_control_first_startup(void)
 	/* restore brightness and color */
 	led_set_state(LED_COUNT, false);
 	led_driver_set_brightness(prev_brightness);
-
-	i2c_iface.reset_selector = sel;
 }
 
 #if USER_REGULATOR_ENABLED
