@@ -170,7 +170,7 @@ input_req_t input_signals_handler(void)
 			intr |= INT_SFP_nDET;
 
 		/* change PHY/SFP switch if in automatic mode */
-		if (i2c_iface.ext_control_word & EXT_CTL_PHY_SFP_AUTO)
+		if (i2c_iface.phy_sfp_auto)
 			gpio_write(PHY_SFP_PIN, sfp_ndet);
 	}
 

@@ -257,21 +257,32 @@ static int cmd_ext_control(i2c_iface_state_t *state)
 	if (OMNIA_BOARD_REVISION < 32)
 		return 0;
 
-	/* save the requested value */
-	ext_ctrl = (i2c_iface.ext_control_word & ~mask) | (ext_ctrl & mask);
-	i2c_iface.ext_control_word = ext_ctrl;
-
 	/*
 	 * PHY_SFP_AUTO isn't a GPIO, rather an internal setting.
 	 * If set, we let PHY_SFP to be set in app.c' input_manager() according to
 	 * value read from SFP_nDET, so we don't change it here.
-	 * If not set, we want to set PHY_SFP according to value in
-	 * ext_ctrl.
+	 * If not set, we want to set PHY_SFP according to the last configured
+	 * value. This is why we also need to remember the last configure value.
 	 */
-	if (ext_ctrl & EXT_CTL_PHY_SFP_AUTO)
+	if (mask & EXT_CTL_PHY_SFP)
+		i2c_iface.phy_sfp = ext_ctrl & EXT_CTL_PHY_SFP;
+	if (mask & EXT_CTL_PHY_SFP_AUTO)
+		i2c_iface.phy_sfp_auto = ext_ctrl & EXT_CTL_PHY_SFP_AUTO;
+
+	if (i2c_iface.phy_sfp_auto) {
+		/* Drop PHY_SFP from mask if automatic switching enabled,
+		 * so that the for cycle below does not touch it.
+		 */
 		mask &= ~EXT_CTL_PHY_SFP;
-	else
+	} else if (!(mask & EXT_CTL_PHY_SFP)) {
+		/* Add PHY_SFP to mask and set it in ext_ctrl according to
+		 * remembered value.
+		 */
 		mask |= EXT_CTL_PHY_SFP;
+		ext_ctrl &= ~EXT_CTL_PHY_SFP;
+		if (i2c_iface.phy_sfp)
+			ext_ctrl |= EXT_CTL_PHY_SFP;
+	}
 
 	for_each_const(pin, ext_ctrl_pins)
 		if (mask & pin->mask)
@@ -282,19 +293,22 @@ static int cmd_ext_control(i2c_iface_state_t *state)
 
 static int cmd_get_ext_control_status(i2c_iface_state_t *state)
 {
-	uint16_t ext_ctrl_st = 0;
+	uint16_t ext_ctrl = 0;
 
 	if (OMNIA_BOARD_REVISION >= 32) {
 		for_each_const(pin, ext_ctrl_pins)
 			if (gpio_read(pin->pin))
-				ext_ctrl_st |= pin->mask;
+				ext_ctrl |= pin->mask;
+
+		/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about
+		 * behavior
+		 */
+		if (i2c_iface.phy_sfp_auto)
+			ext_ctrl |= EXT_CTL_PHY_SFP_AUTO;
 	}
 
-	/* PHY_SFP_AUTO isn't a GPIO, rather an internal setting about behavior */
-	ext_ctrl_st |= i2c_iface.ext_control_word & EXT_CTL_PHY_SFP_AUTO;
-
-	debug("get_ext_control_status st=%#06x\n", ext_ctrl_st);
-	set_reply(ext_ctrl_st);
+	debug("get_ext_control_status st=%#06x\n", ext_ctrl);
+	set_reply(ext_ctrl);
 
 	return 0;
 }

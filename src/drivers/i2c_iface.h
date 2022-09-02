@@ -25,7 +25,7 @@ typedef enum {
 } i2c_iface_req_t;
 
 typedef struct {
-	uint16_t ext_control_word;
+	bool phy_sfp, phy_sfp_auto;
 	uint8_t reset_selector;
 	uint32_t rising, rising_mask;
 	uint32_t falling, falling_mask;

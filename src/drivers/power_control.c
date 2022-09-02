@@ -512,14 +512,12 @@ void periph_control_io_config(void)
   * @function   periph_control_rst_init
   * @brief      Set reset init states for peripherals for Omnia32
   * @param      None.
-  * @retval     The corresponding initial settings for extended control word.
+  * @retval     None.
   *****************************************************************************/
-uint16_t periph_control_rst_init(void)
+void periph_control_rst_init(void)
 {
 	gpio_write_multi(0, nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN, nPERST0_PIN,
 			 nPERST1_PIN, nPERST2_PIN);
 
 	gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
-
-	return EXT_CTL_PHY_SFP | EXT_CTL_nVHV_CTRL;
 }

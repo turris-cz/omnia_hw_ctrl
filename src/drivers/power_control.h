@@ -186,9 +186,9 @@ void periph_control_io_config(void);
   * @function   periph_control_rst_init
   * @brief      Set reset init states for peripherals for Omnia32
   * @param      None.
-  * @retval     The corresponding initial settings for extended control word.
+  * @retval     None.
   *****************************************************************************/
-uint16_t periph_control_rst_init(void);
+void periph_control_rst_init(void);
 
 #endif // POWER_CONTROL_H
 
