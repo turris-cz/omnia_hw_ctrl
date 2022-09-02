@@ -66,8 +66,6 @@ static void app_mcu_init(void)
 	wan_lan_pci_msata_config();
 	power_control_usb_timeout_config();
 	led_driver_config();
-	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
-		       LED_CONTROLLER_I2C_ADDR, 1);
 
 	/* new features for Omnia32 */
 	if (OMNIA_BOARD_REVISION >= 32)
@@ -104,6 +102,12 @@ static ret_value_t light_reset(void)
 
 	led_driver_reset_effect(DISABLE);
 
+	disable_irq();
+	i2c_iface_init();
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
+		       LED_CONTROLLER_I2C_ADDR, 1);
+	enable_irq();
+
 	power_control_first_startup();
 
 	/* set active reset of peripherals after CPU reset on v32+ boards */
@@ -116,7 +120,6 @@ static ret_value_t light_reset(void)
 	led_driver_reset_effect(ENABLE);
 
 	input_signals_config();
-	i2c_iface_init();
 
 	return value;
 }
