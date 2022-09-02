@@ -148,7 +148,7 @@ static int cmd_get_status(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_general_control(i2c_iface_priv_t *state)
+static void on_general_control_success(i2c_iface_priv_t *state)
 {
 	uint8_t ctrl, mask, set;
 
@@ -163,12 +163,12 @@ static int cmd_general_control(i2c_iface_priv_t *state)
 		gpio_write(CFG_CTRL_PIN, 1);
 		/* reset of CPU */
 		gpio_write(MANRES_PIN, 0);
-		return 0;
+		return;
 	}
 
 	if (set & CTL_HARD_RST) {
 		i2c_iface.req = I2C_IFACE_REQ_HARD_RESET;
-		return 0;
+		return;
 	}
 
 	if (mask & CTL_USB30_PWRON)
@@ -226,6 +226,11 @@ static int cmd_general_control(i2c_iface_priv_t *state)
 
 		i2c_iface.req = I2C_IFACE_REQ_BOOTLOADER;
 	}
+}
+
+static int cmd_general_control(i2c_iface_priv_t *state)
+{
+	state->on_success = on_general_control_success;
 
 	return 0;
 }
