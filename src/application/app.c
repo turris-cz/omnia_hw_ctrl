@@ -24,13 +24,6 @@
 #define MAX_ERROR_COUNT		5
 
 typedef enum {
-	OK			= 0,
-	GO_TO_LIGHT_RESET	= 1,
-	GO_TO_HARD_RESET	= 2,
-	GO_TO_BOOTLOADER	= 3,
-} ret_value_t;
-
-typedef enum {
 	POWER_ON,
 	LIGHT_RESET,
 	HARD_RESET,
@@ -39,7 +32,7 @@ typedef enum {
 	I2C_MANAGER,
 	LED_MANAGER,
 	BOOTLOADER
-} states_t;
+} state_t;
 
 static i2c_iface_priv_t i2c_iface_priv;
 
@@ -49,12 +42,12 @@ static i2c_slave_t i2c_slave = {
 };
 
 /*******************************************************************************
-  * @function   app_mcu_init
+  * @function   app_init
   * @brief      Initialization of MCU and its ports and peripherals.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void app_mcu_init(void)
+static void app_init(void)
 {
 	debug_init();
 
@@ -94,12 +87,10 @@ static int power_on(void)
   * @function   light_reset
   * @brief      Perform light reset of the board.
   * @param      None.
-  * @retval     value: next_state.
+  * @retval     None.
   *****************************************************************************/
-static ret_value_t light_reset(void)
+static void light_reset(void)
 {
-	ret_value_t value = OK;
-
 	led_driver_reset_effect(DISABLE);
 
 	disable_irq();
@@ -120,47 +111,21 @@ static ret_value_t light_reset(void)
 	led_driver_reset_effect(ENABLE);
 
 	input_signals_config();
-
-	return value;
-}
-
-/*******************************************************************************
-  * @function   i2c_manager
-  * @brief      Handle I2C communication.
-  * @param      None.
-  * @retval     value: next_state.
-  *****************************************************************************/
-static ret_value_t i2c_manager(void)
-{
-	i2c_iface_write_irq_pin();
-
-	switch (i2c_iface.req) {
-	case I2C_IFACE_REQ_HARD_RESET:
-		return GO_TO_HARD_RESET;
-
-	case I2C_IFACE_REQ_BOOTLOADER:
-		return GO_TO_BOOTLOADER;
-
-	default:
-		return OK;
-	}
 }
 
 /*******************************************************************************
   * @function   led_manager
   * @brief      System LED activity (WAN, LAN, WiFi...).
   * @param      None.
-  * @retval     next_state.
+  * @retval     None.
   *****************************************************************************/
-static ret_value_t led_manager(void)
+static void led_manager(void)
 {
 	wan_led_activity();
 	lan_led_activity();
 	pci_led_activity();
 	msata_pci_activity();
 	led_states_commit();
-
-	return OK;
 }
 
 /*******************************************************************************
@@ -182,104 +147,88 @@ static void error_manager(unsigned led)
 	msleep(300);
 }
 
-/*******************************************************************************
-  * @function   app_mcu_cyclic
-  * @brief      Main cyclic function.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void app_mcu_cyclic(void)
-{
-	static states_t next_state = POWER_ON;
-	static ret_value_t val = OK;
-	static int err;
-	static uint8_t error_counter;
-
-	switch (next_state) {
-	case POWER_ON:
-		err = power_on();
-
-		if (!err)
-			next_state = LIGHT_RESET;
-		else
-			next_state = ERROR_STATE;
-		break;
-
-	case LIGHT_RESET:
-		val = light_reset();
-
-		next_state = INPUT_MANAGER;
-		break;
-
-	case HARD_RESET:
-		NVIC_SystemReset();
-		break;
-
-	case ERROR_STATE:
-		error_manager(-err - 1);
-		error_counter++;
-
-		if (error_counter >= MAX_ERROR_COUNT) {
-			next_state = HARD_RESET;
-			error_counter = 0;
-		} else {
-			next_state = ERROR_STATE;
-		}
-		break;
-
-	case INPUT_MANAGER:
-		switch (input_signals_handler()) {
-		case INPUT_REQ_LIGHT_RESET:
-			next_state = LIGHT_RESET;
-			break;
-
-		case INPUT_REQ_HARD_RESET:
-			next_state = HARD_RESET;
-			break;
-
-		default:
-			next_state = I2C_MANAGER;
-			break;
-		}
-		break;
-
-	case I2C_MANAGER:
-		val = i2c_manager();
-
-		switch (val) {
-		case GO_TO_HARD_RESET:
-			next_state = HARD_RESET;
-			break;
-
-		case GO_TO_BOOTLOADER:
-			next_state = BOOTLOADER;
-			break;
-
-		default:
-			next_state = LED_MANAGER;
-			break;
-		}
-		break;
-
-	case LED_MANAGER:
-		if (effect_reset_finished)
-			led_manager();
-
-		next_state = INPUT_MANAGER;
-		break;
-
-	case BOOTLOADER:
-		reset_to_address(BOOTLOADER_BEGIN);
-		break;
-	}
-}
-
 void main(void)
 {
+	state_t next_state = POWER_ON;
+	uint8_t error_counter = 0;
+	int err;
+
 	enable_irq();
 
-	app_mcu_init();
+	app_init();
 
-	while (1)
-		app_mcu_cyclic();
+	while (1) {
+		switch (next_state) {
+		case POWER_ON:
+			err = power_on();
+
+			if (!err)
+				next_state = LIGHT_RESET;
+			else
+				next_state = ERROR_STATE;
+			break;
+
+		case LIGHT_RESET:
+			light_reset();
+
+			next_state = INPUT_MANAGER;
+			break;
+
+		case HARD_RESET:
+			NVIC_SystemReset();
+			unreachable();
+
+		case ERROR_STATE:
+			error_manager(-err - 1);
+			error_counter++;
+
+			if (error_counter >= MAX_ERROR_COUNT)
+				next_state = HARD_RESET;
+			break;
+
+		case INPUT_MANAGER:
+			switch (input_signals_handler()) {
+			case INPUT_REQ_LIGHT_RESET:
+				next_state = LIGHT_RESET;
+				break;
+
+			case INPUT_REQ_HARD_RESET:
+				next_state = HARD_RESET;
+				break;
+
+			default:
+				next_state = I2C_MANAGER;
+				break;
+			}
+			break;
+
+		case I2C_MANAGER:
+			i2c_iface_write_irq_pin();
+
+			switch (i2c_iface.req) {
+			case I2C_IFACE_REQ_HARD_RESET:
+				next_state = HARD_RESET;
+				break;
+
+			case I2C_IFACE_REQ_BOOTLOADER:
+				next_state = BOOTLOADER;
+				break;
+
+			default:
+				next_state = LED_MANAGER;
+				break;
+			}
+			break;
+
+		case LED_MANAGER:
+			if (effect_reset_finished)
+				led_manager();
+
+			next_state = INPUT_MANAGER;
+			break;
+
+		case BOOTLOADER:
+			reset_to_address(BOOTLOADER_BEGIN);
+		}
+	}
 }
