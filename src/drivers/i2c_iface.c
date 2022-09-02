@@ -32,7 +32,8 @@ static const uint16_t slave_features_supported =
 #endif
 	FEAT_EXT_CMDS |
 	FEAT_WDT_PING |
-	FEAT_LED_GAMMA_CORRECTION;
+	FEAT_LED_GAMMA_CORRECTION |
+	FEAT_NEW_INT_API;
 
 enum boot_request_e {
 	BOOTLOADER_REQ	= 0xAA,
@@ -41,6 +42,37 @@ enum boot_request_e {
 };
 
 i2c_iface_t i2c_iface;
+
+static const struct {
+	gpio_t pin;
+	uint16_t bit;
+	bool invert;
+} sts_pins[] = {
+#define STS(name, inv) \
+	{ name ## _PIN, STS_ ## name, inv }
+	STS(CARD_DET, true),
+	STS(MSATA_IND, false),
+	STS(USB30_OVC, true),
+	STS(USB31_OVC, true),
+	STS(USB30_PWRON, true),
+	STS(USB31_PWRON, true),
+#if USER_REGULATOR_ENABLED
+	STS(ENABLE_4V5, false),
+#endif
+#undef STS
+};
+
+static const struct {
+	gpio_t pin;
+	uint32_t bit;
+} ext_sts_pins[] = {
+#define ESTS(name) \
+	{ name ## _PIN, EXT_STS_ ## name }
+#if OMNIA_BOARD_REVISION >= 32
+	ESTS(SFP_nDET),
+#endif
+#undef ESTS
+};
 
 static const struct {
 	gpio_t pin;
@@ -78,24 +110,42 @@ static int cmd_get_features(i2c_iface_state_t *state)
 	return 0;
 }
 
-static int cmd_get_status(i2c_iface_state_t *state)
+static void on_get_status_success(i2c_iface_state_t *state)
 {
-	debug("get_status\n");
-	set_reply(i2c_iface.status_word);
+	uint16_t reply;
+	uint8_t cntr;
 
-	return 0;
+	/* decrease replied button counter by the value that was successfully
+	 * sent to master
+	 */
+	reply = state->reply[0] | (state->reply[1] << 8);
+	cntr = FIELD_GET(STS_BUTTON_COUNTER_MASK, reply);
+
+	button_counter_decrease(cntr);
 }
 
-static void handle_usb_power(uint8_t ctrl, uint8_t mask, usb_port_t port,
-			     uint8_t ctrl_bit, uint16_t sts_bit)
+static int cmd_get_status(i2c_iface_state_t *state)
 {
-	if (mask & ctrl_bit) {
-		power_control_usb(port, ctrl & ctrl_bit);
-		if (ctrl & ctrl_bit)
-			i2c_iface.status_word |= sts_bit;
-		else
-			i2c_iface.status_word &= ~sts_bit;
-	}
+	uint16_t status = STS_MCU_TYPE | STS_FEATURES_SUPPORTED;
+
+	if (!USER_REGULATOR_ENABLED)
+		status |= STS_USER_REGULATOR_NOT_SUPPORTED;
+
+	for_each_const(pin, sts_pins)
+		status |= (gpio_read(pin->pin) ^ pin->invert) ? pin->bit : 0;
+
+	status |= FIELD_PREP(STS_BUTTON_COUNTER_MASK, button.pressed_counter);
+	if (button.user_mode)
+		status |= STS_BUTTON_MODE;
+	if (button.state)
+		status |= STS_BUTTON_PRESSED;
+
+	debug("get_status %#06x\n", status);
+	set_reply(status);
+
+	state->on_success = on_get_status_success;
+
+	return 0;
 }
 
 static int cmd_general_control(i2c_iface_state_t *state)
@@ -121,31 +171,34 @@ static int cmd_general_control(i2c_iface_state_t *state)
 		return 0;
 	}
 
-	handle_usb_power(ctrl, mask, USB3_PORT0, CTL_USB30_PWRON,
-			 STS_USB30_PWRON);
-	handle_usb_power(ctrl, mask, USB3_PORT1, CTL_USB31_PWRON,
-			 STS_USB31_PWRON);
+	if (mask & CTL_USB30_PWRON)
+		power_control_usb(USB3_PORT0, ctrl & CTL_USB30_PWRON);
+
+	if (mask & CTL_USB31_PWRON)
+		power_control_usb(USB3_PORT1, ctrl & CTL_USB31_PWRON);
 
 #if USER_REGULATOR_ENABLED
-	if (mask & CTL_ENABLE_4V5) {
-		if (ctrl & CTL_ENABLE_4V5) {
-			gpio_write(ENABLE_4V5_PIN, 1);
-		} else {
-			gpio_write(ENABLE_4V5_PIN, 0);
-			i2c_iface.status_word &= ~STS_ENABLE_4V5;
-		}
-	}
+	if (mask & CTL_ENABLE_4V5)
+		gpio_write(ENABLE_4V5_PIN, ctrl & CTL_ENABLE_4V5);
 #endif
 
 	if (mask & CTL_BUTTON_MODE) {
+		disable_irq();
+		button.user_mode = ctrl & CTL_BUTTON_MODE;
 		if (ctrl & CTL_BUTTON_MODE) {
+			if (!button.user_mode && button.state) {
+				i2c_iface.rising |= INT_BUTTON_PRESSED;
+				i2c_iface_write_irq_pin();
+			}
 			button.user_mode = true;
-			i2c_iface.status_word |= STS_BUTTON_MODE;
 		} else {
 			button.user_mode = false;
 			button.pressed_counter = 0;
-			i2c_iface.status_word &= ~STS_BUTTON_MODE;
+			i2c_iface.rising &= ~INT_BUTTON_PRESSED;
+			i2c_iface.falling &= ~INT_BUTTON_PRESSED;
+			i2c_iface_write_irq_pin();
 		}
+		enable_irq();
 	}
 
 	if (set & CTL_BOOTLOADER) {
@@ -179,8 +232,13 @@ static int cmd_general_control(i2c_iface_state_t *state)
 
 static int cmd_get_ext_status(i2c_iface_state_t *state)
 {
-	debug("get_ext_status\n");
-	set_reply(i2c_iface.ext_status_dword);
+	uint32_t ext_status = 0;
+
+	for_each_const(pin, ext_sts_pins)
+		ext_status |= gpio_read(pin->pin) ? pin->bit : 0;
+
+	debug("get_ext_status %#010x\n", ext_status);
+	set_reply(ext_status);
 
 	return 0;
 }
@@ -237,6 +295,94 @@ static int cmd_get_ext_control_status(i2c_iface_state_t *state)
 
 	debug("get_ext_control_status st=%#06x\n", ext_ctrl_st);
 	set_reply(ext_ctrl_st);
+
+	return 0;
+}
+
+/* Interleaves bytes from two 32-bit values:
+ *   v1 = abcd
+ *   v2 = ABCD
+ *   dst = aAbBcCdD
+ */
+static void interleave(uint8_t *dst, uint32_t v1, uint32_t v2)
+{
+	for (int i = 0; i < 4; ++i) {
+		dst[2 * i] = v1 >> (8 * i);
+		dst[2 * i + 1] = v2 >> (8 * i);
+	}
+}
+
+/* Deinterleaves bytes into two 32-bit values:
+ *   src = aAbBcCdD
+ *   *v1 = abcd
+ *   *v2 = ABCD
+ */
+static void deinterleave(const uint8_t *src, uint32_t *v1, uint32_t *v2)
+{
+	*v1 = *v2 = 0;
+
+	for (int i = 0; i < 4; ++i) {
+		*v1 |= src[2 * i] << (8 * i);
+		*v2 |= src[2 * i + 1] << (8 * i);
+	}
+}
+
+static void on_get_int_and_clear_failure(i2c_iface_state_t *state)
+{
+	uint32_t rising, falling;
+
+	debug("get_int_and_clear failed, setting flags back\n");
+
+	deinterleave(state->reply, &rising, &falling);
+
+	i2c_iface.rising |= rising;
+	i2c_iface.falling |= falling;
+
+	i2c_iface_write_irq_pin();
+}
+
+static int cmd_get_int_and_clear(i2c_iface_state_t *state)
+{
+	uint8_t intr[8];
+
+	interleave(intr, i2c_iface.rising, i2c_iface.falling);
+	set_reply(intr);
+
+	debug("cmd_get_int_and_clear rising=%#010x falling=%#010x\n",
+	      i2c_iface.rising, i2c_iface.falling);
+
+	/* Clear now. If the I2C transaction fails, we will set the cleared
+	 * values again in on_get_int_and_clear_failure().
+	 */
+	i2c_iface.rising = i2c_iface.falling = 0;
+	i2c_iface_write_irq_pin();
+
+	state->on_failure = on_get_int_and_clear_failure;
+
+	return 0;
+}
+
+static int cmd_get_int_mask(i2c_iface_state_t *state)
+{
+	uint8_t mask[8];
+
+	interleave(mask, i2c_iface.rising_mask, i2c_iface.falling_mask);
+	set_reply(mask);
+
+	debug("cmd_get_int_mask rising=%#010x falling=%#010x\n",
+	      i2c_iface.rising_mask, i2c_iface.falling_mask);
+
+	return 0;
+}
+
+static int cmd_set_int_mask(i2c_iface_state_t *state)
+{
+	uint8_t *args = &state->cmd[1];
+
+	deinterleave(args, &i2c_iface.rising_mask, &i2c_iface.falling_mask);
+
+	debug("cmd_set_int_mask rising=%#010x falling=%#010x\n",
+	      i2c_iface.rising_mask, i2c_iface.falling_mask);
 
 	return 0;
 }
@@ -414,6 +560,10 @@ static const cmdinfo_t commands[] = {
 	[CMD_USER_VOLTAGE]		= { 2, cmd_user_voltage },
 #endif
 
+	[CMD_GET_INT_AND_CLEAR]		= { 1, cmd_get_int_and_clear },
+	[CMD_GET_INT_MASK]		= { 1, cmd_get_int_mask },
+	[CMD_SET_INT_MASK]		= { 9, cmd_set_int_mask },
+
 	/* LEDs */
 	[CMD_LED_MODE]			= { 2, cmd_led_mode, BOTH_ADDRS },
 	[CMD_LED_STATE]			= { 2, cmd_led_state, BOTH_ADDRS },
@@ -491,19 +641,17 @@ int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 		return handle_cmd(addr, state);
 
 	case I2C_SLAVE_STOP:
-		/* delete button status and counter bit from status_word */
-		if (state->cmd[0] == CMD_GET_STATUS_WORD) {
-			i2c_iface.status_word &= ~STS_BUTTON_PRESSED;
-
-			/* decrease button counter */
-			button_counter_decrease(FIELD_GET(STS_BUTTON_COUNTER_MASK, i2c_iface.status_word));
-		}
-		fallthrough;
-
 	case I2C_SLAVE_RESET:
+		if (event == I2C_SLAVE_STOP && state->on_success)
+			state->on_success(state);
+		else if (event == I2C_SLAVE_RESET && state->on_failure)
+			state->on_failure(state);
+
 		state->cmd_len = 0;
 		state->reply_len = 0;
 		state->reply_idx = 0;
+		state->on_success = NULL;
+		state->on_failure = NULL;
 		break;
 	}
 

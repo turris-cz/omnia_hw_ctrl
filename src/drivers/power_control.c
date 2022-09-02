@@ -275,8 +275,6 @@ void __irq power_control_usb_timeout_irq_handler(void)
 	power_control_usb(USB3_PORT0, true);
 	power_control_usb(USB3_PORT1, true);
 
-	i2c_iface.status_word |= STS_USB30_PWRON | STS_USB31_PWRON;
-
 	power_control_usb_timeout_disable();
 }
 #endif

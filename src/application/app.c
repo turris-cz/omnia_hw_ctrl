@@ -22,8 +22,6 @@
 #include "watchdog.h"
 
 #define MAX_ERROR_COUNT		5
-#define SET_INTERRUPT_TO_CPU	gpio_write(INT_MCU_PIN, 0)
-#define RESET_INTERRUPT_TO_CPU	gpio_write(INT_MCU_PIN, 1)
 
 typedef enum {
 	OK			= 0,
@@ -79,65 +77,6 @@ static void app_mcu_init(void)
 }
 
 /*******************************************************************************
-  * @function   app_get_status_word
-  * @brief      Set status word after reset.
-  * @param      None.
-  * @retval     system_status_word.
-  *****************************************************************************/
-static uint16_t app_get_status_word(void)
-{
-	uint16_t status_word = STS_MCU_TYPE;
-
-	/* GET_FEATURES command is supported */
-	status_word |= STS_FEATURES_SUPPORTED;
-
-#if USER_REGULATOR_ENABLED
-	if (gpio_read_output(ENABLE_4V5_PIN))
-		status_word |= STS_ENABLE_4V5;
-#else
-	status_word |= STS_USER_REGULATOR_NOT_SUPPORTED;
-#endif
-
-	if (msata_pci_card_detection())
-		status_word |= STS_CARD_DET;
-
-	if (msata_pci_type_card_detection())
-		status_word |= STS_MSATA_IND;
-
-	if (power_control_get_usb_overcurrent(USB3_PORT0))
-		status_word |= STS_USB30_OVC;
-
-	if (power_control_get_usb_overcurrent(USB3_PORT1))
-		status_word |= STS_USB31_OVC;
-
-	if (power_control_get_usb_poweron(USB3_PORT0))
-		status_word |= STS_USB30_PWRON;
-
-	if (power_control_get_usb_poweron(USB3_PORT1))
-		status_word |= STS_USB31_PWRON;
-
-	return status_word;
-}
-
-/*******************************************************************************
-  * @function   app_get_ext_status_dword
-  * @brief      Get value for extended status word after reset.
-  * @param      None.
-  * @retval     features.
-  *****************************************************************************/
-static uint32_t app_get_ext_status_dword(void)
-{
-	uint32_t ext_status_dword = 0;
-
-	if (OMNIA_BOARD_REVISION >= 32) {
-		if (gpio_read(SFP_nDET_PIN))
-			ext_status_dword |= EXT_STS_SFP_nDET;
-	}
-
-	return ext_status_dword;
-}
-
-/*******************************************************************************
   * @function   power_on
   * @brief      Start the board / enable dc-dc regulators.
   * @param      None.
@@ -177,121 +116,8 @@ static ret_value_t light_reset(void)
 
 	led_driver_reset_effect(ENABLE);
 
-	button.user_mode = false;
-	i2c_iface.status_word = app_get_status_word();
-	i2c_iface.ext_status_dword = app_get_ext_status_dword();
+	input_signals_config();
 	i2c_iface.ext_control_word = ext_control | EXT_CTL_PHY_SFP_AUTO;
-
-	return value;
-}
-
-/*******************************************************************************
-  * @function   input_manager
-  * @brief      Evaluate input signals and their reaction.
-  * @param      None.
-  * @retval     value: next_state.
-  *****************************************************************************/
-static ret_value_t input_manager(void)
-{
-	ret_value_t value = OK;
-
-	input_signals_handler();
-
-	/* manual reset button */
-	if (input_state.man_res) {
-		value = GO_TO_LIGHT_RESET;
-		input_state.man_res = false;
-	}
-
-	/* sw reset */
-	if (input_state.sysres_out) {
-		value = GO_TO_LIGHT_RESET;
-		input_state.sysres_out = false;
-	}
-
-	/* PG signals from all DC/DC regulator (except of 4.5V user regulator) */
-	if (input_state.pg) {
-		debug("PG all regulators\n");
-		value = GO_TO_HARD_RESET;
-		input_state.pg = false;
-	}
-
-#if USER_REGULATOR_ENABLED
-	/* PG signal from 4.5V user controlled regulator */
-	if (input_state.pg_4v5) {
-		debug("PG from 4V5\n");
-		value = GO_TO_HARD_RESET;
-		input_state.pg_4v5 = false;
-	}
-#endif
-
-	/* USB30 overcurrent */
-	if (input_state.usb30_ovc) {
-		i2c_iface.status_word |= STS_USB30_OVC;
-		input_state.usb30_ovc = false;
-		power_control_usb(USB3_PORT0, false); /* USB power off */
-
-		/* update status word */
-		if (!power_control_get_usb_poweron(USB3_PORT0))
-			i2c_iface.status_word &= ~STS_USB30_PWRON;
-
-		/* USB timeout set to 1 sec */
-		power_control_usb_timeout_enable();
-	}
-
-	/* USB31 overcurrent */
-	if (input_state.usb31_ovc) {
-		i2c_iface.status_word |= STS_USB31_OVC;
-		input_state.usb31_ovc = false;
-
-		power_control_usb(USB3_PORT1, false); /* USB power off */
-
-		/* update status word */
-		if (!power_control_get_usb_poweron(USB3_PORT1))
-			i2c_iface.status_word &= ~STS_USB31_PWRON;
-
-		/* USB timeout set to 1 sec */
-		power_control_usb_timeout_enable();
-	}
-
-	/* in case of user button mode:
-	 * store information in status_word - how many times a button was pressed  */
-	if (button.user_mode) {
-		disable_irq();
-		if (button.pressed_counter) {
-			i2c_iface.status_word &= ~STS_BUTTON_COUNTER_MASK;
-			i2c_iface.status_word |= (button.pressed_counter << 13) & STS_BUTTON_COUNTER_MASK;
-			i2c_iface.status_word |= STS_BUTTON_PRESSED;
-		} else {
-			i2c_iface.status_word &= ~(STS_BUTTON_PRESSED | STS_BUTTON_COUNTER_MASK);
-		}
-		enable_irq();
-	}
-
-	/* these flags are automatically cleared in input handler */
-	if (input_state.card_det)
-		i2c_iface.status_word |= STS_CARD_DET;
-	else
-		i2c_iface.status_word &= ~STS_CARD_DET;
-
-	if (input_state.msata_ind)
-		i2c_iface.status_word |= STS_MSATA_IND;
-	else
-		i2c_iface.status_word &= ~STS_MSATA_IND;
-
-
-	if (OMNIA_BOARD_REVISION >= 32) {
-		if (gpio_read(SFP_nDET_PIN))
-			i2c_iface.ext_status_dword |= EXT_STS_SFP_nDET;
-		else
-			i2c_iface.ext_status_dword &= ~(EXT_STS_SFP_nDET);
-
-		disable_irq();
-		if (i2c_iface.ext_control_word & EXT_CTL_PHY_SFP_AUTO)
-			gpio_write(PHY_SFP_PIN,
-				   !!(i2c_iface.ext_status_dword & EXT_STS_SFP_nDET));
-		enable_irq();
-	}
 
 	return value;
 }
@@ -304,33 +130,18 @@ static ret_value_t input_manager(void)
   *****************************************************************************/
 static ret_value_t i2c_manager(void)
 {
-	static uint16_t last_status_word;
-	ret_value_t value = OK;
-
-	if (i2c_iface.status_word != last_status_word)
-		SET_INTERRUPT_TO_CPU;
-	else
-		RESET_INTERRUPT_TO_CPU;
-
-	last_status_word = i2c_iface.status_word;
+	i2c_iface_write_irq_pin();
 
 	switch (i2c_iface.req) {
 	case I2C_IFACE_REQ_HARD_RESET:
-		value = GO_TO_HARD_RESET;
-		break;
+		return GO_TO_HARD_RESET;
 
 	case I2C_IFACE_REQ_BOOTLOADER:
-		value = GO_TO_BOOTLOADER;
-		break;
+		return GO_TO_BOOTLOADER;
 
 	default:
-		value = OK;
-		break;
+		return OK;
 	}
-
-	i2c_iface.req = I2C_IFACE_REQ_NONE;
-
-	return value;
 }
 
 /*******************************************************************************
@@ -415,14 +226,12 @@ static void app_mcu_cyclic(void)
 		break;
 
 	case INPUT_MANAGER:
-		val = input_manager();
-
-		switch (val) {
-		case GO_TO_LIGHT_RESET:
+		switch (input_signals_handler()) {
+		case INPUT_REQ_LIGHT_RESET:
 			next_state = LIGHT_RESET;
 			break;
 
-		case GO_TO_HARD_RESET:
+		case INPUT_REQ_HARD_RESET:
 			next_state = HARD_RESET;
 			break;
 

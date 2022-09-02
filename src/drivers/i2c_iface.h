@@ -13,6 +13,7 @@
 
 #include "bits.h"
 #include "i2c_slave.h"
+#include "power_control.h"
 
 #define MCU_I2C_ADDR			0x2a
 #define LED_CONTROLLER_I2C_ADDR		0x2b
@@ -24,22 +25,34 @@ typedef enum {
 } i2c_iface_req_t;
 
 typedef struct {
-	uint16_t status_word;
 	uint16_t ext_control_word;
-	uint32_t ext_status_dword;
 	uint8_t reset_selector;
+	uint32_t rising, rising_mask;
+	uint32_t falling, falling_mask;
 
 	/* reported in main state machine */
 	i2c_iface_req_t req;
 } i2c_iface_t;
 
-extern i2c_iface_t i2c_iface;
+typedef struct i2c_iface_state_s i2c_iface_state_t;
 
-typedef struct {
+struct i2c_iface_state_s {
 	uint8_t cmd[10];
 	uint8_t reply[20];
 	uint8_t cmd_len, reply_len, reply_idx;
-} i2c_iface_state_t;
+	void (*on_success)(i2c_iface_state_t *state);
+	void (*on_failure)(i2c_iface_state_t *state);
+};
+
+extern i2c_iface_t i2c_iface;
+
+static inline void i2c_iface_write_irq_pin(void)
+{
+	bool active = (i2c_iface.rising & i2c_iface.rising_mask) ||
+		      (i2c_iface.falling & i2c_iface.falling_mask);
+
+	gpio_write(INT_MCU_PIN, !active);
+}
 
 int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 		       uint8_t *val);
@@ -174,7 +187,7 @@ enum int_e {
 	INT_USB30_OVC		= BIT(2),
 	INT_USB31_OVC		= BIT(3),
 	INT_BUTTON_PRESSED	= BIT(4),
-	INT_SFP_NDET		= BIT(5),
+	INT_SFP_nDET		= BIT(5),
 
 	INT_LED_STATES_MASK	= GENMASK(31, 12),
 	INT_WLAN0_MSATA_LED	= BIT(12),
@@ -343,7 +356,7 @@ enum int_e {
  *      2   |   INT_USB30_OVC           |   STS_USB30_OVC
  *      3   |   INT_USB31_OVC           |   STS_USB31_OVC
  *      4   |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
- *      5   |   INT_SFP_NDET            |   EXT_STS_SFP_NDET
+ *      5   |   INT_SFP_nDET            |   EXT_STS_SFP_nDET
  *  6..11   |   reserved
  * 12..31   |   LED states interrupts   |   EXT_STS_*_LED*
  *

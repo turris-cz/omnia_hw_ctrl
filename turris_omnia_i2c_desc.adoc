@@ -287,7 +287,7 @@ enum commands_e {
  *      2   |   INT_USB30_OVC           |   STS_USB30_OVC
  *      3   |   INT_USB31_OVC           |   STS_USB31_OVC
  *      4   |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
- *      5   |   INT_SFP_NDET            |   EXT_STS_SFP_NDET
+ *      5   |   INT_SFP_nDET            |   EXT_STS_SFP_nDET
  *  6..11   |   reserved
  * 12..31   |   LED states interrupts   |   EXT_STS_*_LED*
  *

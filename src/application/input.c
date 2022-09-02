@@ -10,25 +10,6 @@
 #define MAX_BUTTON_PRESSED_COUNTER	7
 #define MAX_BUTTON_DEBOUNCE_STATE	3
 
-enum input_mask {
-	MAN_RES_MASK	= 0x0001,
-	SYSRES_OUT_MASK	= 0x0002,
-	DBG_RES_MASK	= 0x0004,
-	MRES_MASK	= 0x0008,
-	PG_5V_MASK	= 0x0010,
-	PG_3V3_MASK	= 0x0020,
-	PG_1V35_MASK	= 0x0040,
-	PG_4V5_MASK	= 0x0080,
-	PG_1V8_MASK	= 0x0100,
-	PG_1V5_MASK	= 0x0200,
-	PG_1V2_MASK	= 0x0400,
-	PG_VTT_MASK	= 0x0800,
-	USB30_OVC_MASK	= 0x1000,
-	USB31_OVC_MASK	= 0x2000,
-	RTC_ALARM_MASK	= 0x4000,
-};
-
-input_state_t input_state;
 button_t button;
 
 static void button_pressed(void)
@@ -69,64 +50,6 @@ void button_debounce_handler(void)
 }
 
 /*******************************************************************************
-  * @function   input_signals_handler
-  * @brief      Check input signal.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void input_signals_handler(void)
-{
-	uint16_t port_changed;
-
-	/* PB0-14 */
-	/* read the whole port */
-	port_changed = ~gpio_read_port(PORT_B);
-
-	input_state.card_det = msata_pci_card_detection();
-	input_state.msata_ind = msata_pci_type_card_detection();
-
-	/* results evaluation --------------------------------------------------- */
-	if (port_changed & MAN_RES_MASK) {
-		input_state.man_res = true;
-		/* set CFG_CTRL pin to high state ASAP */
-		gpio_write(CFG_CTRL_PIN, 1);
-	}
-
-	if (port_changed & SYSRES_OUT_MASK)
-		input_state.sysres_out = true;
-
-	if (OMNIA_BOARD_REVISION < 32) {
-		if (port_changed & DBG_RES_MASK) {
-			/* no reaction necessary */
-		}
-
-		/* reaction: follow MRES signal */
-		gpio_write(RES_RAM_PIN, !(port_changed & MRES_MASK));
-	}
-
-	if ((port_changed & PG_5V_MASK) || (port_changed & PG_3V3_MASK) ||
-	    (port_changed & PG_1V35_MASK) || (port_changed & PG_VTT_MASK) ||
-	    (port_changed & PG_1V8_MASK) || (port_changed & PG_1V5_MASK) ||
-	    (port_changed & PG_1V2_MASK))
-		input_state.pg = true;
-
-	/* PG signal from 4.5V user controlled regulator */
-	if ((i2c_iface.status_word & STS_ENABLE_4V5) &&
-	    (port_changed & PG_4V5_MASK))
-		input_state.pg_4v5 = true;
-
-	if (port_changed & USB30_OVC_MASK)
-		input_state.usb30_ovc = true;
-
-	if (port_changed & USB31_OVC_MASK)
-		input_state.usb31_ovc = true;
-
-	if (port_changed & RTC_ALARM_MASK) {
-		/* no reaction necessary */
-	}
-}
-
-/*******************************************************************************
   * @function   button_counter_decrease
   * @brief      Decrease button counter by the current value in i2c status structure.
   * @param      value: decrease the button counter by this parameter
@@ -140,4 +63,123 @@ void button_counter_decrease(uint8_t value)
 	else
 		button.pressed_counter = 0;
 	enable_irq();
+}
+
+static void handle_usb_overcurrent(usb_port_t port)
+{
+	power_control_usb(port, false);
+	power_control_usb_timeout_enable();
+}
+
+/* Previously read values are needed for computing rising and falling edge */
+static uint8_t prev_intr;
+
+void input_signals_config(void)
+{
+	prev_intr = 0;
+
+	if (!gpio_read(CARD_DET_PIN))
+		prev_intr |= INT_CARD_DET;
+
+	if (gpio_read(MSATA_IND_PIN))
+		prev_intr |= INT_MSATA_IND;
+
+	if (OMNIA_BOARD_REVISION >= 32) {
+		bool sfp_ndet = gpio_read(SFP_nDET_PIN);
+
+		if (sfp_ndet)
+			prev_intr |= INT_SFP_nDET;
+
+		/* Initialize PHY/SFP switch */
+		gpio_write(PHY_SFP_PIN, sfp_ndet);
+	}
+
+	disable_irq();
+
+	button.user_mode = false;
+	button.state = false;
+	button.pressed_counter = 0;
+
+	enable_irq();
+}
+
+/*******************************************************************************
+  * @function   input_signals_handler
+  * @brief      Check input signal.
+  * @retval     Next state.
+  *****************************************************************************/
+input_req_t input_signals_handler(void)
+{
+	uint8_t intr = 0;
+	uint16_t low;
+
+	low = ~gpio_read_port(PORT_B);
+
+	if (low & pin_bit(MANRES_PIN)) {
+		/* set CFG_CTRL pin to high state ASAP */
+		gpio_write(CFG_CTRL_PIN, 1);
+
+		return INPUT_REQ_LIGHT_RESET;
+	}
+
+	if (low & pin_bit(SYSRES_OUT_PIN))
+		return INPUT_REQ_LIGHT_RESET;
+
+	/* reaction: follow MRES signal */
+	gpio_write(RES_RAM_PIN, low & pin_bit(MRES_PIN));
+
+	if (low & (pin_bit(PG_5V_PIN) | pin_bit(PG_3V3_PIN) |
+		   pin_bit(PG_1V35_PIN) | pin_bit(PG_1V8_PIN) |
+		   pin_bit(PG_1V5_PIN) | pin_bit(PG_1V2_PIN) |
+		   pin_bit(PG_VTT_PIN))) {
+		debug("PG fell low\n");
+		return INPUT_REQ_HARD_RESET;
+	}
+
+	if (gpio_read_output(ENABLE_4V5_PIN) &&
+	    (low & pin_bit(PG_4V5_PIN))) {
+		debug("PG_4V5 fell low\n");
+		return INPUT_REQ_HARD_RESET;
+	}
+
+	if (low & pin_bit(USB30_OVC_PIN)) {
+		intr |= INT_USB30_OVC;
+		handle_usb_overcurrent(USB3_PORT0);
+	}
+
+	if (low & pin_bit(USB31_OVC_PIN)) {
+		intr |= INT_USB31_OVC;
+		handle_usb_overcurrent(USB3_PORT1);
+	}
+
+	if (!gpio_read(CARD_DET_PIN))
+		intr |= INT_CARD_DET;
+
+	if (gpio_read(MSATA_IND_PIN))
+		intr |= INT_MSATA_IND;
+
+	disable_irq();
+
+	if (button.user_mode && button.state)
+		intr |= INT_BUTTON_PRESSED;
+
+	if (OMNIA_BOARD_REVISION >= 32) {
+		bool sfp_ndet = gpio_read(SFP_nDET_PIN);
+
+		if (sfp_ndet)
+			intr |= INT_SFP_nDET;
+
+		/* change PHY/SFP switch if in automatic mode */
+		if (i2c_iface.ext_control_word & EXT_CTL_PHY_SFP_AUTO)
+			gpio_write(PHY_SFP_PIN, sfp_ndet);
+	}
+
+	/* compute rising / falling edges */
+	i2c_iface.rising |= ~prev_intr & intr;
+	i2c_iface.falling |= prev_intr & ~intr;
+	enable_irq();
+
+	prev_intr = intr;
+
+	return INPUT_REQ_NONE;
 }
