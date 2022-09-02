@@ -40,6 +40,11 @@ enum commands_e {
     CMD_EXT_CONTROL            = 0x12,
     CMD_GET_EXT_CONTROL_STATUS = 0x13,
 
+    /* available if NEW_INT_API bit set in features */
+    CMD_GET_INT_AND_CLEAR      = 0x14,
+    CMD_GET_INT_MASK           = 0x15,
+    CMD_SET_INT_MASK           = 0x16,
+
     /* available if WDT_PING bit set in features */
     CMD_SET_WDT_TIMEOUT        = 0x20,
     CMD_GET_WDT_TIMELEFT       = 0x21,
@@ -113,7 +118,9 @@ enum commands_e {
  *                                     11 -> reserved
  *      5   |   LED_GAMMA_CORRECTION : 1 - LEDs gamma correction is supported
  *                                     0 - otherwise
- *  6..15   |   reserved
+ *      6   |   NEW_INT_API          : 1 - CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and CMD_SET_INT_MASK commands supported
+ *                                     0 - interrupt is asserted when status_word changes
+ *  7..15   |   reserved
 */
 
 * Example of a reading of features from Linux:
@@ -260,6 +267,86 @@ enum commands_e {
 *** 0x2A -> I2C address of the slave
 *** 0x13 -> "address of the register" = command
 ***	w -> word data type
+
+
+=== CMD_GET_INT_AND_CLEAR
+* Get and clear interrupt status.
+* Available only if NEW_INT_API bit is set in features.
+* Read only
+* Returns 8 bytes of data, but it is possible to read fewer, if the application
+  is only interested in the interrupt flags that are in the beginning of the
+  result.
+
+[source,C]
+/*
+ * Bit meanings in interrupt status and interrupt mask:
+ *  Bit Nr. |   Meanings                |   Corresponds to
+ * ---------|---------------------------|--------------------
+ *      0   |   INT_CARD_DET            |   STS_CARD_DET
+ *      1   |   INT_MSATA_IND           |   STS_MSATA_IND
+ *      2   |   INT_USB30_OVC           |   STS_USB30_OVC
+ *      3   |   INT_USB31_OVC           |   STS_USB31_OVC
+ *      4   |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
+ *      5   |   INT_SFP_NDET            |   EXT_STS_SFP_NDET
+ *  6..11   |   reserved
+ * 12..31   |   LED states interrupts   |   EXT_STS_*_LED*
+ *
+ * IMPORTANT:
+ *   The interrupt related commands (CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and
+ *   CMD_SET_INT_MASK) return/expect 8 bytes of data: 32 bits for rising edge
+ *   and 32 bits for falling edge.
+ *   The important thing is that this 8 bytes ARE ENCODED IN INTERLEAVED ORDER:
+ *
+ *     r[0], f[0], r[1], f[1], r[2], f[2], r[3], f[3]
+ *
+ *   instead of the expected order
+ *
+ *     r[0..4], f[0..4]
+ *
+ *   (where x[0] contain bits 0..7, x[1] bits 8..15, etc., and r contains rising
+ *    edge set/mask, f contain falling edge set/mask).
+ *
+ *   This interleaved order is used to allow for more efficient interrupt status
+ *   reading: when the application is interested in only the first 6 interrupts,
+ *   it is possible to read just the first two bytes of the reply of
+ *   CMD_GET_INT_AND_CLEAR, and stop the I2C transaction after those 2 bytes.
+ *   The two bytes contain rising and falling edge states of interrupts 0..7.
+ *
+ *   Reading only first 2 bytes of the reply instead of all 8 bytes saves time /
+ *   makes the interrupt handler faster, since I2C bus is slow.
+ *
+ *   It is possible to write simple macros to get the bit position for a
+ *   rising / falling interrupt flag in the interleaved order:
+ *
+ *       #define RISING_BITNR(n)  ((2 * ((n) / 8)) * 8 + ((n) % 8))
+ *       #define FALLING_BITNR(n) (RISING_BITNR(n) + 8)
+ *       #define __bf_shf(x)      (__builtin_ffsll(x) - 1)
+ *       #define RISING_BIT(f)    BIT(RISING_BITNR(__bf_shf((f))))
+ *       #define FALLING_BIT(f)    BIT(FALLING_BITNR(__bf_shf((f))))
+ *
+ *       enum int_interleaved_e {
+ *           INT_CARD_DET_RISING    = RISING_BIT(INT_CARD_DET),
+ *           INT_CARD_DET_FALLING   = FALLING_BIT(INT_CARD_DET),
+ *           INT_MSATA_IND_RISING   = RISING_BIT(INT_INT_MSATA_IND),
+ *           INT_MSATA_IND_FALLING  = FALLING_BIT(INT_INT_MSATA_IND),
+ *           ...
+ *       };
+ */
+
+
+=== CMD_GET_INT_MASK
+* Get the interrupt mask.
+* Available only if NEW_INT_API bit is set in features.
+* Read only
+* Bit meaning same as for the CMD_GET_INT_AND_CLEAR command, but the bits
+  represent which interrupts are enabled.
+
+
+=== CMD_SET_INT_MASK
+* Set the interrupt mask.
+* Available only if NEW_INT_API bit is set in features.
+* Write only
+* Bit meaning same as for the CMD_GET_INT_MASK command.
 
 
 === CMD_LED_MODE

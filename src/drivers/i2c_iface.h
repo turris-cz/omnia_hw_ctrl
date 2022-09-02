@@ -74,6 +74,11 @@ enum commands_e {
 	CMD_EXT_CONTROL			= 0x12,
 	CMD_GET_EXT_CONTROL_STATUS	= 0x13,
 
+	/* available if NEW_INT_API bit set in features */
+	CMD_GET_INT_AND_CLEAR		= 0x14,
+	CMD_GET_INT_MASK		= 0x15,
+	CMD_SET_INT_MASK		= 0x16,
+
 	/* available if WDT_PING bit set in features */
 	CMD_SET_WDT_TIMEOUT		= 0x20,
 	CMD_GET_WDT_TIMELEFT		= 0x21,
@@ -123,6 +128,7 @@ enum features_e {
 	FEAT_LED_STATE_EXT		= FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 1),
 	FEAT_LED_STATE_EXT_V32		= FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 2),
 	FEAT_LED_GAMMA_CORRECTION	= BIT(5),
+	FEAT_NEW_INT_API		= BIT(6),
 };
 
 enum ext_sts_dword_e {
@@ -160,6 +166,37 @@ enum ext_ctl_e {
 	EXT_CTL_PHY_SFP			= BIT(6),
 	EXT_CTL_PHY_SFP_AUTO		= BIT(7),
 	EXT_CTL_nVHV_CTRL		= BIT(8),
+};
+
+enum int_e {
+	INT_CARD_DET		= BIT(0),
+	INT_MSATA_IND		= BIT(1),
+	INT_USB30_OVC		= BIT(2),
+	INT_USB31_OVC		= BIT(3),
+	INT_BUTTON_PRESSED	= BIT(4),
+	INT_SFP_NDET		= BIT(5),
+
+	INT_LED_STATES_MASK	= GENMASK(31, 12),
+	INT_WLAN0_MSATA_LED	= BIT(12),
+	INT_WLAN1_LED		= BIT(13),
+	INT_WLAN2_LED		= BIT(14),
+	INT_WPAN0_LED		= BIT(15),
+	INT_WPAN1_LED		= BIT(16),
+	INT_WPAN2_LED		= BIT(17),
+	INT_WAN_LED0		= BIT(18),
+	INT_WAN_LED1		= BIT(19),
+	INT_LAN0_LED0		= BIT(20),
+	INT_LAN0_LED1		= BIT(21),
+	INT_LAN1_LED0		= BIT(22),
+	INT_LAN1_LED1		= BIT(23),
+	INT_LAN2_LED0		= BIT(24),
+	INT_LAN2_LED1		= BIT(25),
+	INT_LAN3_LED0		= BIT(26),
+	INT_LAN3_LED1		= BIT(27),
+	INT_LAN4_LED0		= BIT(28),
+	INT_LAN4_LED1		= BIT(29),
+	INT_LAN5_LED0		= BIT(30),
+	INT_LAN5_LED1		= BIT(31),
 };
 
 /*
@@ -203,7 +240,9 @@ enum ext_ctl_e {
  *                                     11 -> reserved
  *      5   |   LED_GAMMA_CORRECTION : 1 - LEDs gamma correction is supported
  *                                     0 - otherwise
- *  6..15   |   reserved
+ *      6   |   NEW_INT_API          : 1 - CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and CMD_SET_INT_MASK commands supported
+ *                                     0 - interrupt is asserted when status_word changes
+ *  7..15   |   reserved
 */
 
 /*
@@ -294,6 +333,61 @@ enum ext_ctl_e {
  *      8   |   nVHV_CTRL    : 1 - VHV control not active, 0 - VHV control voltage active
  *  9..15   |   reserved
 */
+
+/*
+ * Bit meanings in interrupt status and interrupt mask:
+ *  Bit Nr. |   Meanings                |   Corresponds to
+ * ---------|---------------------------|--------------------
+ *      0   |   INT_CARD_DET            |   STS_CARD_DET
+ *      1   |   INT_MSATA_IND           |   STS_MSATA_IND
+ *      2   |   INT_USB30_OVC           |   STS_USB30_OVC
+ *      3   |   INT_USB31_OVC           |   STS_USB31_OVC
+ *      4   |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
+ *      5   |   INT_SFP_NDET            |   EXT_STS_SFP_NDET
+ *  6..11   |   reserved
+ * 12..31   |   LED states interrupts   |   EXT_STS_*_LED*
+ *
+ * IMPORTANT:
+ *   The interrupt related commands (CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and
+ *   CMD_SET_INT_MASK) return/expect 8 bytes of data: 32 bits for rising edge
+ *   and 32 bits for falling edge.
+ *   The important thing is that this 8 bytes ARE ENCODED IN INTERLEAVED ORDER:
+ *
+ *     r[0], f[0], r[1], f[1], r[2], f[2], r[3], f[3]
+ *
+ *   instead of the expected order
+ *
+ *     r[0..4], f[0..4]
+ *
+ *   (where x[0] contain bits 0..7, x[1] bits 8..15, etc., and r contains rising
+ *    edge set/mask, f contain falling edge set/mask).
+ *
+ *   This interleaved order is used to allow for more efficient interrupt status
+ *   reading: when the application is interested in only the first 6 interrupts,
+ *   it is possible to read just the first two bytes of the reply of
+ *   CMD_GET_INT_AND_CLEAR, and stop the I2C transaction after those 2 bytes.
+ *   The two bytes contain rising and falling edge states of interrupts 0..7.
+ *
+ *   Reading only first 2 bytes of the reply instead of all 8 bytes saves time /
+ *   makes the interrupt handler faster, since I2C bus is slow.
+ *
+ *   It is possible to write simple macros to get the bit position for a
+ *   rising / falling interrupt flag in the interleaved order:
+ *
+ *       #define RISING_BITNR(n)  ((2 * ((n) / 8)) * 8 + ((n) % 8))
+ *       #define FALLING_BITNR(n) (RISING_BITNR(n) + 8)
+ *       #define __bf_shf(x)      (__builtin_ffsll(x) - 1)
+ *       #define RISING_BIT(f)    BIT(RISING_BITNR(__bf_shf((f))))
+ *       #define FALLING_BIT(f)    BIT(FALLING_BITNR(__bf_shf((f))))
+ *
+ *       enum int_interleaved_e {
+ *           INT_CARD_DET_RISING    = RISING_BIT(INT_CARD_DET),
+ *           INT_CARD_DET_FALLING   = FALLING_BIT(INT_CARD_DET),
+ *           INT_MSATA_IND_RISING   = RISING_BIT(INT_INT_MSATA_IND),
+ *           INT_MSATA_IND_FALLING  = FALLING_BIT(INT_INT_MSATA_IND),
+ *           ...
+ *       };
+ */
 
 /*
  * Bit meanings in led mode byte:
