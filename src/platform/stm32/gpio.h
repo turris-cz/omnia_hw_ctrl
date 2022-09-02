@@ -56,6 +56,14 @@ static __force_inline uint8_t pin_nr(gpio_t pin)
 	return pin & 0xf;
 }
 
+static __force_inline uint16_t pin_bit(gpio_t pin)
+{
+	if (pin == PIN_INVALID)
+		return 0;
+	else
+		return BIT(pin_nr(pin));
+}
+
 static __force_inline uint32_t port_clk_bit(port_t port)
 {
 	switch (port) {
@@ -90,7 +98,7 @@ static __force_inline bool gpio_read(gpio_t pin)
 	if (pin == PIN_INVALID)
 		return 0;
 
-	return !!(pin_port_to_plat(pin)->IDR & BIT(pin_nr(pin)));
+	return !!(pin_port_to_plat(pin)->IDR & pin_bit(pin));
 }
 
 static __force_inline uint16_t gpio_read_port(port_t port)
@@ -103,7 +111,7 @@ static __force_inline bool gpio_read_output(gpio_t pin)
 	if (pin == PIN_INVALID)
 		return 0;
 
-	return !!(pin_port_to_plat(pin)->ODR & BIT(pin_nr(pin)));
+	return !!(pin_port_to_plat(pin)->ODR & pin_bit(pin));
 }
 
 static __force_inline void gpio_write(gpio_t pin, bool value)
@@ -112,9 +120,9 @@ static __force_inline void gpio_write(gpio_t pin, bool value)
 		return;
 
 	if (value)
-		pin_port_to_plat(pin)->BSRR = BIT(pin_nr(pin));
+		pin_port_to_plat(pin)->BSRR = pin_bit(pin);
 	else
-		pin_port_to_plat(pin)->BRR = BIT(pin_nr(pin));
+		pin_port_to_plat(pin)->BRR = pin_bit(pin);
 }
 
 static inline void gpio_write_multi_list(bool value, unsigned int len,
@@ -123,8 +131,7 @@ static inline void gpio_write_multi_list(bool value, unsigned int len,
 	uint16_t bits[NPORTS] = {};
 
 	for (unsigned int i = 0; i < len; ++i)
-		if (pins[i] != PIN_INVALID)
-			bits[pin_port(pins[i])] |= BIT(pin_nr(pins[i]));
+		bits[pin_port(pins[i])] |= pin_bit(pins[i]);
 
 	for (unsigned int i = 0; i < NPORTS; ++i) {
 		if (!bits[i])
