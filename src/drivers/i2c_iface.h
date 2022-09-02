@@ -34,14 +34,14 @@ typedef struct {
 	i2c_iface_req_t req;
 } i2c_iface_t;
 
-typedef struct i2c_iface_state_s i2c_iface_state_t;
+typedef struct i2c_iface_priv_s i2c_iface_priv_t;
 
-struct i2c_iface_state_s {
+struct i2c_iface_priv_s {
 	uint8_t cmd[10];
 	uint8_t reply[20];
 	uint8_t cmd_len, reply_len, reply_idx;
-	void (*on_success)(i2c_iface_state_t *state);
-	void (*on_failure)(i2c_iface_state_t *state);
+	void (*on_success)(i2c_iface_priv_t *state);
+	void (*on_failure)(i2c_iface_priv_t *state);
 };
 
 extern i2c_iface_t i2c_iface;

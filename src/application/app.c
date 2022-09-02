@@ -41,11 +41,11 @@ typedef enum {
 	BOOTLOADER
 } states_t;
 
-static i2c_iface_state_t i2c_iface_state;
+static i2c_iface_priv_t i2c_iface_priv;
 
 static i2c_slave_t i2c_slave = {
 	.cb = i2c_iface_event_cb,
-	.priv = &i2c_iface_state,
+	.priv = &i2c_iface_priv,
 };
 
 /*******************************************************************************
