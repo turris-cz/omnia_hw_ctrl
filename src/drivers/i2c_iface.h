@@ -36,6 +36,18 @@ typedef struct {
 
 extern i2c_iface_t i2c_iface;
 
+static inline void i2c_iface_init(void)
+{
+	i2c_iface.phy_sfp = true;
+	i2c_iface.phy_sfp_auto = true;
+	i2c_iface.reset_selector = 0;
+	i2c_iface.rising = 0;
+	i2c_iface.rising_mask = 0;
+	i2c_iface.falling = 0;
+	i2c_iface.falling_mask = 0;
+	i2c_iface.req = I2C_IFACE_REQ_NONE;
+}
+
 static inline void i2c_iface_write_irq_pin(void)
 {
 	bool active = (i2c_iface.rising & i2c_iface.rising_mask) ||

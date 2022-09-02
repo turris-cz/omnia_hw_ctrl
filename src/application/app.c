@@ -116,8 +116,7 @@ static ret_value_t light_reset(void)
 	led_driver_reset_effect(ENABLE);
 
 	input_signals_config();
-	i2c_iface.phy_sfp = true;
-	i2c_iface.phy_sfp_auto = true;
+	i2c_iface_init();
 
 	return value;
 }
