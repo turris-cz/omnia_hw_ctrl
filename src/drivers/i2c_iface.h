@@ -34,16 +34,6 @@ typedef struct {
 	i2c_iface_req_t req;
 } i2c_iface_t;
 
-typedef struct i2c_iface_priv_s i2c_iface_priv_t;
-
-struct i2c_iface_priv_s {
-	uint8_t cmd[10];
-	uint8_t reply[20];
-	uint8_t cmd_len, reply_len, reply_idx;
-	void (*on_success)(i2c_iface_priv_t *state);
-	void (*on_failure)(i2c_iface_priv_t *state);
-};
-
 extern i2c_iface_t i2c_iface;
 
 static inline void i2c_iface_write_irq_pin(void)
@@ -56,6 +46,16 @@ static inline void i2c_iface_write_irq_pin(void)
 
 int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
 		       uint8_t *val);
+
+typedef struct i2c_iface_priv_s i2c_iface_priv_t;
+
+struct i2c_iface_priv_s {
+	uint8_t cmd[10];
+	uint8_t reply[20];
+	uint8_t cmd_len, reply_len, reply_idx;
+	void (*on_success)(i2c_iface_priv_t *state);
+	void (*on_failure)(i2c_iface_priv_t *state);
+};
 
 enum commands_e {
 	CMD_GET_STATUS_WORD		= 0x01, /* slave sends status word back */
