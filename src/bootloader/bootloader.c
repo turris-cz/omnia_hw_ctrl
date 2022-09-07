@@ -211,6 +211,15 @@ static void bootloader(void)
 
 		power_control_enable_regulators();
 		power_control_first_startup();
+
+		/* set active reset of peripherals after CPU reset on v32+
+		 * boards
+		 */
+		if (OMNIA_BOARD_REVISION >= 32) {
+			periph_control_io_config();
+			periph_control_rst_init();
+		}
+
 		power_supply_failure = 1;
 		next_state = FLASH_MANAGER;
 		break;
