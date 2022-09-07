@@ -327,53 +327,44 @@ static void increase_reset_selector_level(int *sel, uint8_t *level)
 void power_control_first_startup(void)
 {
 	uint8_t prev_brightness, level;
+	unsigned timeout;
 	int sel;
 
 	gpio_write(CFG_CTRL_PIN, 1);
 	msleep(50);
 	gpio_write(MANRES_PIN, 1);
 
-	if (BOOTLOADER_BUILD) {
-		while (!gpio_read(SYSRES_OUT_PIN))
-			msleep(1);
-	} else {
-		unsigned timeout;
+	/* save brightness value to restore it */
+	prev_brightness = led_driver_get_brightness();
+	led_set_state(LED_COUNT, false);
+	led_driver_set_brightness(100);
 
-		/* save brightness value to restore it */
-		prev_brightness = led_driver_get_brightness();
-		led_set_state(LED_COUNT, false);
-		led_driver_set_brightness(100);
+	timeout = RESET_SELECTOR_LEVEL_TIMEOUT;
+	level = 0;
+	sel = -1;
+
+	/* Read main board reset signal every 1ms.
+	 * Increase reset selector level every 10ms.
+	 */
+	while (!gpio_read(SYSRES_OUT_PIN)) {
+		msleep(1);
+
+		if (timeout--)
+			continue;
 
 		timeout = RESET_SELECTOR_LEVEL_TIMEOUT;
-		level = 0;
-		sel = -1;
 
-		/* Read main board reset signal every 1ms.
-		 * Increase reset selector level every 10ms.
-		 */
-		while (!gpio_read(SYSRES_OUT_PIN)) {
-			msleep(1);
-
-			if (timeout--)
-				continue;
-
-			timeout = RESET_SELECTOR_LEVEL_TIMEOUT;
-
-			increase_reset_selector_level(&sel, &level);
-		}
-
-		if (sel < 0)
-			sel = 0;
-
-		i2c_iface.reset_selector = sel;
+		increase_reset_selector_level(&sel, &level);
 	}
+
+	if (sel < 0)
+		sel = 0;
+
+	i2c_iface.reset_selector = sel;
 
 	/* 15ms delay after release of reset signal */
 	msleep(15);
 	gpio_write(CFG_CTRL_PIN, 0);
-
-	if (BOOTLOADER_BUILD)
-		return;
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {

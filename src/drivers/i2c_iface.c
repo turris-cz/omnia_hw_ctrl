@@ -580,6 +580,7 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_EXT_STATUS_DWORD]	= { 1, cmd_get_ext_status },
 	[CMD_EXT_CONTROL]		= { 5, cmd_ext_control },
 	[CMD_GET_EXT_CONTROL_STATUS]	= { 1, cmd_get_ext_control_status },
+	[CMD_GET_RESET]			= { 1, cmd_get_reset },
 #if USER_REGULATOR_ENABLED
 	[CMD_USER_VOLTAGE]		= { 2, cmd_user_voltage },
 #endif
@@ -589,8 +590,6 @@ static const cmdinfo_t commands[] = {
 	[CMD_SET_INT_MASK]		= { 9, cmd_set_int_mask },
 
 #if !BOOTLOADER_BUILD
-	[CMD_GET_RESET]			= { 1, cmd_get_reset },
-
 	/* LEDs */
 	[CMD_LED_MODE]			= { 2, cmd_led_mode, BOTH_ADDRS },
 	[CMD_LED_STATE]			= { 2, cmd_led_state, BOTH_ADDRS },
