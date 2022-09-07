@@ -181,5 +181,7 @@ input_req_t input_signals_handler(void)
 
 	prev_intr = intr;
 
+	i2c_iface_write_irq_pin();
+
 	return INPUT_REQ_NONE;
 }

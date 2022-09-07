@@ -31,8 +31,8 @@ static __maybe_unused struct {
 static const uint16_t slave_features_supported =
 	FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
 	FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
-	FEAT_IF(NEW_INT_API, !BOOTLOADER_BUILD) |
 	FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
+	FEAT_NEW_INT_API |
 	FEAT_WDT_PING |
 	FEAT_EXT_CMDS;
 
@@ -122,8 +122,7 @@ static void on_get_status_success(i2c_iface_priv_t *state)
 	reply = state->reply[0] | (state->reply[1] << 8);
 	cntr = FIELD_GET(STS_BUTTON_COUNTER_MASK, reply);
 
-	if (!BOOTLOADER_BUILD)
-		button_counter_decrease(cntr);
+	button_counter_decrease(cntr);
 }
 
 static __maybe_unused int cmd_get_status(i2c_iface_priv_t *state)
@@ -136,14 +135,11 @@ static __maybe_unused int cmd_get_status(i2c_iface_priv_t *state)
 	for_each_const(pin, sts_pins)
 		status |= (gpio_read(pin->pin) ^ pin->invert) ? pin->bit : 0;
 
-	if (!BOOTLOADER_BUILD) {
-		status |= FIELD_PREP(STS_BUTTON_COUNTER_MASK,
-				     button.pressed_counter);
-		if (button.user_mode)
-			status |= STS_BUTTON_MODE;
-		if (button.state)
-			status |= STS_BUTTON_PRESSED;
-	}
+	status |= FIELD_PREP(STS_BUTTON_COUNTER_MASK, button.pressed_counter);
+	if (button.user_mode)
+		status |= STS_BUTTON_MODE;
+	if (button.state)
+		status |= STS_BUTTON_PRESSED;
 
 	debug("get_status %#06x\n", status);
 	set_reply(status);
@@ -163,28 +159,27 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 
 	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
 
+	/* these are ignored in bootloader */
+	if (!BOOTLOADER_BUILD) {
+		if (set & CTL_LIGHT_RST) {
+			/* set CFG_CTRL pin to high state ASAP */
+			gpio_write(CFG_CTRL_PIN, 1);
+			/* reset of CPU */
+			gpio_write(MANRES_PIN, 0);
+			return;
+		}
+
+		if (set & CTL_HARD_RST) {
+			i2c_iface.req = I2C_IFACE_REQ_HARD_RESET;
+			return;
+		}
+	}
+
 	if (mask & CTL_USB30_PWRON)
 		power_control_usb(USB3_PORT0, ctrl & CTL_USB30_PWRON);
 
 	if (mask & CTL_USB31_PWRON)
 		power_control_usb(USB3_PORT1, ctrl & CTL_USB31_PWRON);
-
-	/* the rest is ignored in bootloader */
-	if (BOOTLOADER_BUILD)
-		return;
-
-	if (set & CTL_LIGHT_RST) {
-		/* set CFG_CTRL pin to high state ASAP */
-		gpio_write(CFG_CTRL_PIN, 1);
-		/* reset of CPU */
-		gpio_write(MANRES_PIN, 0);
-		return;
-	}
-
-	if (set & CTL_HARD_RST) {
-		i2c_iface.req = I2C_IFACE_REQ_HARD_RESET;
-		return;
-	}
 
 #if USER_REGULATOR_ENABLED
 	if (mask & CTL_ENABLE_4V5)
@@ -210,7 +205,7 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 		enable_irq();
 	}
 
-	if (set & CTL_BOOTLOADER) {
+	if (!BOOTLOADER_BUILD && (set & CTL_BOOTLOADER)) {
 		eeprom_var_t ee_var;
 
 		EE_Init();
@@ -585,8 +580,6 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_EXT_STATUS_DWORD]	= { 1, cmd_get_ext_status },
 	[CMD_EXT_CONTROL]		= { 5, cmd_ext_control },
 	[CMD_GET_EXT_CONTROL_STATUS]	= { 1, cmd_get_ext_control_status },
-#if !BOOTLOADER_BUILD
-	[CMD_GET_RESET]			= { 1, cmd_get_reset },
 #if USER_REGULATOR_ENABLED
 	[CMD_USER_VOLTAGE]		= { 2, cmd_user_voltage },
 #endif
@@ -594,6 +587,9 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_INT_AND_CLEAR]		= { 1, cmd_get_int_and_clear },
 	[CMD_GET_INT_MASK]		= { 1, cmd_get_int_mask },
 	[CMD_SET_INT_MASK]		= { 9, cmd_set_int_mask },
+
+#if !BOOTLOADER_BUILD
+	[CMD_GET_RESET]			= { 1, cmd_get_reset },
 
 	/* LEDs */
 	[CMD_LED_MODE]			= { 2, cmd_led_mode, BOTH_ADDRS },

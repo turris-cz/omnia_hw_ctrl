@@ -260,7 +260,6 @@ void power_control_usb_timeout_disable(void)
 	timer_set_counter(USB_TIMEOUT_TIMER, 0);
 }
 
-#if !BOOTLOADER_BUILD
 /*******************************************************************************
   * @function   power_control_usb_timeout_irq_handler
   * @brief      Handle USB timeout.
@@ -277,7 +276,6 @@ void __irq power_control_usb_timeout_irq_handler(void)
 
 	power_control_usb_timeout_disable();
 }
-#endif
 
 static void increase_reset_selector_level(int *sel, uint8_t *level)
 {

@@ -26,16 +26,17 @@
 typedef enum {
 	POWER_ON,
 	STARTUP_MANAGER,
-	RESET_MANAGER,
+	INPUT_MANAGER,
 	FLASH_MANAGER,
 	START_APPLICATION,
 	RESET_TO_APPLICATION,
+	HARD_RESET,
 } boot_state_t;
 
 typedef enum {
 	GO_TO_POWER_ON,
 	GO_TO_STARTUP_MANAGER,
-	GO_TO_RESET_MANAGER,
+	GO_TO_INPUT_MANAGER,
 	GO_TO_FLASH,
 	GO_TO_APPLICATION,
 } boot_value_t;
@@ -108,7 +109,7 @@ static boot_value_t startup_manager(void)
 {
 	eeprom_var_t ee_var;
 	uint16_t ee_data;
-	boot_value_t retval = GO_TO_RESET_MANAGER;
+	boot_value_t retval = GO_TO_INPUT_MANAGER;
 
 	ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
 
@@ -174,11 +175,10 @@ static boot_value_t startup_manager(void)
 static void bootloader(void)
 {
 	static boot_state_t next_state = STARTUP_MANAGER;
-	static boot_value_t val = GO_TO_RESET_MANAGER;
+	static boot_value_t val = GO_TO_INPUT_MANAGER;
 	static flash_i2c_state_t flash_sts = FLASH_CMD_NOT_RECEIVED;
 	static uint8_t flash_confirmed;
 	static uint8_t power_supply_failure; /* if power supply disconnection occurred */
-	uint8_t system_reset;
 
 	switch (next_state) {
 	case STARTUP_MANAGER:
@@ -207,6 +207,7 @@ static void bootloader(void)
 
 	case POWER_ON:
 		power_control_io_config();
+		power_control_usb_timeout_config();
 		if (OMNIA_BOARD_REVISION >= 32)
 			periph_control_io_config();
 
@@ -226,6 +227,8 @@ static void bootloader(void)
 		watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
 		watchdog_enable(true);
 
+		input_signals_config();
+
 		power_supply_failure = 1;
 		next_state = FLASH_MANAGER;
 		break;
@@ -236,12 +239,12 @@ static void bootloader(void)
 		switch (flash_sts) {
 		case FLASH_CMD_RECEIVED:
 			/* flashing has just started */
-			next_state = RESET_MANAGER;
+			next_state = INPUT_MANAGER;
 			break;
 
 		case FLASH_CMD_NOT_RECEIVED:
 			/* nothing has received */
-			next_state = RESET_MANAGER;
+			next_state = INPUT_MANAGER;
 			break;
 
 		case FLASH_WRITE_OK:
@@ -251,26 +254,32 @@ static void bootloader(void)
 				flash_confirmed = 1;
 			}
 
-			next_state = RESET_MANAGER;
+			next_state = INPUT_MANAGER;
 			debug("F_CONF\n");
 			break;
 
 		case FLASH_WRITE_ERROR:
 			/* flashing was corrupted */
 			/* flag FLASH_NOT_CONFIRMED is already set */
-			next_state = RESET_MANAGER;
+			next_state = INPUT_MANAGER;
 			break;
 		}
 		break;
 
-	case RESET_MANAGER:
-		system_reset = gpio_read(SYSRES_OUT_PIN);
-
-		/* reset is active low */
-		if (!system_reset)
+	case INPUT_MANAGER:
+		switch (input_signals_handler()) {
+		case INPUT_REQ_LIGHT_RESET:
 			next_state = RESET_TO_APPLICATION;
-		else
+			break;
+
+		case INPUT_REQ_HARD_RESET:
+			next_state = HARD_RESET;
+			break;
+
+		default:
 			next_state = FLASH_MANAGER;
+			break;
+		}
 		break;
 
 	case START_APPLICATION:
@@ -290,8 +299,11 @@ static void bootloader(void)
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
 		msleep(100);
+		fallthrough;
+
+	case HARD_RESET:
 		NVIC_SystemReset();
-		break;
+		unreachable();
 	}
 }
 

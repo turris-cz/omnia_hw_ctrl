@@ -193,8 +193,6 @@ void main(void)
 			break;
 
 		case I2C_MANAGER:
-			i2c_iface_write_irq_pin();
-
 			switch (i2c_iface.req) {
 			case I2C_IFACE_REQ_HARD_RESET:
 				next_state = HARD_RESET;

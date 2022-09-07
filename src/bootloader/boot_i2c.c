@@ -163,6 +163,7 @@ static i2c_slave_t i2c_slave = {
   *****************************************************************************/
 void boot_i2c_config(void)
 {
+	i2c_iface_init();
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, BOOTLOADER_I2C_ADDR,
 		       1);
 }

@@ -410,6 +410,10 @@ void led_driver_set_brightness(uint8_t value)
 	if (value > 100)
 		value = 100;
 
+	/* don't allow zero brightness in bootloader */
+	if (BOOTLOADER_BUILD && value == 0)
+		value = 1;
+
 	if (value == 0 || value == 100) {
 		timer_enable(LED_PWM_TIMER, false);
 		gpio_init_outputs(pin_pushpull, pin_spd_1, !value, LED_PWM_PIN);
@@ -446,7 +450,14 @@ uint8_t led_driver_get_brightness(void)
   *****************************************************************************/
 void led_driver_step_brightness(void)
 {
-	static const uint8_t brightnesses[] = { 100, 70, 40, 25, 12, 5, 1, 0 };
+	static const uint8_t brightnesses[] = {
+#if BOOTLOADER_BUILD
+		/* don't allow zero brightness in bootloader */
+		100, 70, 40, 25, 12, 5, 1,
+#else
+		100, 70, 40, 25, 12, 5, 1, 0,
+#endif
+	};
 	static uint8_t step = 1;
 
 	pwm_brightness = brightnesses[step++];
