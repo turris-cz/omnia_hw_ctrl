@@ -46,6 +46,7 @@ void pendsv_handler(void) __weak_alias(default_handler);
 void external_irq(void) __weak_alias(default_handler);
 
 void systick_irq_handler(void) __weak_alias(default_handler);
+void flash_irq_handler(void) __weak_alias(default_handler);
 void led_driver_irq_handler(void) __weak_alias(default_handler);
 void led_driver_effect_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
@@ -71,7 +72,7 @@ static __used __section(".isr_vector") void *isr_vector[] = {
 	NULL,					/* Window WatchDog */
 	NULL,					/* LVD through EXTI Line detecion */
 	NULL,					/* RTC */
-	NULL,					/* FLASH */
+	flash_irq_handler,			/* FLASH */
 	NULL,					/* RCU */
 	NULL,					/* EXTI Line 0 and 1 */
 	NULL,					/* EXTI Line 2 and 3 */

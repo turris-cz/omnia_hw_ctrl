@@ -21,6 +21,7 @@ LDFLAGS		= -T$(LDSCRIPT) -Wl,-Map=$(LDMAP),--cref -nostartfiles -no-pie -Xlinker
 SRCS_DEBUG	= src/drivers/debug.c
 SRCS_COMMON	= $(filter-out $(SRCS_DEBUG),$(wildcard src/drivers/*.c))
 SRCS_COMMON	+= $(wildcard src/lib/*.c)
+SRCS_COMMON	+= $(wildcard src/platform/common/*.c)
 SRCS_APP	= $(wildcard src/application/*.c)
 SRCS_BOOT	= $(wildcard src/bootloader/*.c)
 

@@ -176,9 +176,9 @@ static void bootloader(void)
 {
 	static boot_state_t next_state = STARTUP_MANAGER;
 	static boot_value_t val = GO_TO_INPUT_MANAGER;
-	static flash_i2c_state_t flash_sts = FLASH_CMD_NOT_RECEIVED;
-	static uint8_t flash_confirmed;
-	static uint8_t power_supply_failure; /* if power supply disconnection occurred */
+	static boot_i2c_result_t i2c_result = FLASH_CMD_NOT_RECEIVED;
+	static bool flash_confirmed;
+	static bool power_supply_failure; /* if power supply disconnection occurred */
 
 	switch (next_state) {
 	case STARTUP_MANAGER:
@@ -233,14 +233,14 @@ static void bootloader(void)
 
 		input_signals_config();
 
-		power_supply_failure = 1;
+		power_supply_failure = true;
 		next_state = FLASH_MANAGER;
 		break;
 
 	case FLASH_MANAGER:
-		flash_sts = boot_i2c_flash_data();
+		i2c_result = boot_i2c_result();
 
-		switch (flash_sts) {
+		switch (i2c_result) {
 		case FLASH_CMD_RECEIVED:
 			/* flashing has just started */
 			next_state = INPUT_MANAGER;
@@ -255,11 +255,11 @@ static void bootloader(void)
 			/* flashing was successfull */
 			if (!flash_confirmed) {
 				EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-				flash_confirmed = 1;
+				flash_confirmed = true;
+				debug("F_CONF\n");
 			}
 
 			next_state = INPUT_MANAGER;
-			debug("F_CONF\n");
 			break;
 
 		case FLASH_WRITE_ERROR:
@@ -293,7 +293,7 @@ static void bootloader(void)
 	case RESET_TO_APPLICATION:
 		/* power supply wasnt disconnected and no command for flashing was received */
 		if (!power_supply_failure &&
-		    flash_sts == FLASH_CMD_NOT_RECEIVED) {
+		    i2c_result == FLASH_CMD_NOT_RECEIVED) {
 			/* we have old, but valid FW */
 			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
 		}

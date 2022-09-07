@@ -1,13 +1,3 @@
-/**
- ******************************************************************************
- * @file    slave_i2c_device.c
- * @author  CZ.NIC, z.s.p.o.
- * @date    18-August-2015
- * @brief   Driver for IC2 communication with master device (main CPU).
- ******************************************************************************
- ******************************************************************************
- **/
-/* Includes ------------------------------------------------------------------*/
 #include "debug.h"
 #include "led_driver.h"
 #include "power_control.h"
@@ -33,9 +23,9 @@ typedef struct {
 	uint8_t tx_idx;
 	uint16_t tx_addr;
 	bool flash_erased;
-	bool rx_complete;
 	bool receiving;
 	bool cmd_valid;
+	boot_i2c_result_t result;
 	i2c_iface_priv_t mcu_cmd_iface;
 } boot_i2c_iface_priv_t;
 
@@ -50,6 +40,61 @@ static bool has_valid_addr(const boot_i2c_iface_priv_t *state)
 
 	return (addr & (PKT_SIZE - 1)) == 0 &&
 	       ((uint32_t)addr + PKT_SIZE) <= APPLICATION_MAX_SIZE;
+}
+
+static void handle_cmd(boot_i2c_iface_priv_t *state);
+
+static void write_callback(bool success, void *priv)
+{
+	boot_i2c_iface_priv_t *state = priv;
+
+	if (!success)
+		debug("app write failed\n");
+
+	state->cmd_len = 0;
+	state->cmd_valid = false;
+	i2c_slave_resume(SLAVE_I2C);
+}
+
+static void erase_callback(bool success, void *priv)
+{
+	boot_i2c_iface_priv_t *state = priv;
+
+	state->flash_erased = success;
+	if (success) {
+		flash_async_write(APPLICATION_BEGIN + get_addr(state),
+				  &state->cmd[2], PKT_SIZE, write_callback,
+				  state);
+	} else {
+		debug("app erase failed\n");
+		i2c_slave_resume(SLAVE_I2C);
+	}
+}
+
+static void handle_cmd(boot_i2c_iface_priv_t *state)
+{
+	if (!state->flash_erased) {
+		i2c_slave_pause(SLAVE_I2C);
+		flash_async_erase(APPLICATION_BEGIN, APPLICATION_MAX_SIZE,
+				  erase_callback, state);
+		state->result = FLASH_CMD_RECEIVED;
+	} else if (get_addr(state) == ADDR_CMP) {
+		if (state->cmd[2] == FILE_CMP_OK)
+			state->result = FLASH_WRITE_OK;
+		else
+			state->result = FLASH_WRITE_ERROR;
+
+		state->flash_erased = false;
+		state->tx_addr = 0;
+		state->cmd_len = 0;
+		state->cmd_valid = false;
+	} else {
+		i2c_slave_pause(SLAVE_I2C);
+		flash_async_write(APPLICATION_BEGIN + get_addr(state),
+				  &state->cmd[2], PKT_SIZE, write_callback,
+				  state);
+		state->result = FLASH_CMD_RECEIVED;
+	}
 }
 
 static int boot_i2c_iface_event_cb(void *priv, uint8_t addr,
@@ -76,7 +121,7 @@ static int boot_i2c_iface_event_cb(void *priv, uint8_t addr,
 
 	switch (event) {
 	case I2C_SLAVE_READ_REQUESTED:
-		state->receiving = 0;
+		state->receiving = false;
 		state->tx_idx = 0;
 		if (state->cmd_len == 2 && has_valid_addr(state)) {
 			state->tx_addr = get_addr(state);
@@ -97,26 +142,26 @@ static int boot_i2c_iface_event_cb(void *priv, uint8_t addr,
 
 	case I2C_SLAVE_WRITE_REQUESTED:
 		state->cmd_len = 0;
-		state->cmd_valid = 0;
-		state->receiving = 1;
+		state->cmd_valid = false;
+		state->receiving = true;
 		break;
 
 	case I2C_SLAVE_WRITE_RECEIVED:
-		state->cmd_valid = 1;
+		state->cmd_valid = true;
 
 		if (state->cmd_len < sizeof(state->cmd))
 			state->cmd[state->cmd_len++] = *val;
 		else
-			state->cmd_valid = 0;
+			state->cmd_valid = false;
 
 		/* check address validity */
 		if (state->cmd_len == 2 && get_addr(state) != ADDR_CMP &&
 		    !has_valid_addr(state))
-			state->cmd_valid = 0;
+			state->cmd_valid = false;
 
 		/* ADDR_CMP command may contain only one data byte */
 		if (state->cmd_len > 3 && get_addr(state) == ADDR_CMP)
-			state->cmd_valid = 0;
+			state->cmd_valid = false;
 
 		if (!state->cmd_valid)
 			return -1;
@@ -127,21 +172,20 @@ static int boot_i2c_iface_event_cb(void *priv, uint8_t addr,
 		/* trigger flashing/comparing in boot_i2c_flash_data() */
 		if (state->receiving && state->cmd_valid &&
 		    state->cmd_len > 2) {
-			i2c_slave_pause(SLAVE_I2C);
-			state->rx_complete = 1;
+			handle_cmd(state);
 		} else if (!state->receiving) {
 			state->cmd_len = 0;
-			state->cmd_valid = 0;
+			state->cmd_valid = false;
 		}
 		break;
 
 	case I2C_SLAVE_RESET:
 		state->cmd_len = 0;
-		state->cmd_valid = 0;
-		state->receiving = 0;
-		state->rx_complete = 0;
+		state->cmd_valid = false;
+		state->receiving = false;
 		state->tx_idx = 0;
 		state->tx_addr = 0;
+		state->result = FLASH_CMD_NOT_RECEIVED;
 		break;
 	}
 
@@ -155,12 +199,6 @@ static i2c_slave_t i2c_slave = {
 	.priv = &boot_i2c_iface_priv,
 };
 
-/*******************************************************************************
-  * @function   boot_i2c_config
-  * @brief      Configuration of I2C peripheral and its timeout.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
 void boot_i2c_config(void)
 {
 	i2c_iface_init();
@@ -168,44 +206,7 @@ void boot_i2c_config(void)
 		       1);
 }
 
-/*******************************************************************************
-  * @function   boot_i2c_flash_data
-  * @brief      Flash received data.
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-flash_i2c_state_t boot_i2c_flash_data(void)
+boot_i2c_result_t boot_i2c_result(void)
 {
-	boot_i2c_iface_priv_t *state = &boot_i2c_iface_priv;
-	flash_i2c_state_t ret;
-
-	if (!state->rx_complete)
-		return FLASH_CMD_NOT_RECEIVED;
-
-	if (!state->flash_erased) {
-		flash_erase(APPLICATION_BEGIN, APPLICATION_MAX_SIZE);
-		state->flash_erased = 1;
-	}
-
-	if (get_addr(state) == ADDR_CMP) {
-		if (state->cmd[2] == FILE_CMP_OK)
-			ret = FLASH_WRITE_OK;
-		else
-			ret = FLASH_WRITE_ERROR;
-
-		state->flash_erased = 0;
-		state->tx_addr = 0;
-	} else {
-		flash_write(APPLICATION_BEGIN + get_addr(state),
-			    &state->cmd[2], PKT_SIZE);
-		ret = FLASH_CMD_RECEIVED;
-	}
-
-	state->cmd_len = 0;
-	state->cmd_valid = 0;
-	state->rx_complete = 0;
-
-	i2c_slave_resume(SLAVE_I2C);
-
-	return ret;
+	return boot_i2c_iface_priv.result;
 }
