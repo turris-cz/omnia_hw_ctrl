@@ -49,13 +49,14 @@ static void bootloader_init(void)
 {
 	debug_init();
 
+	flash_init(); /* Unlock the Flash Program Erase controller */
+	EE_Init(); /* EEPROM Init */
+
 	/* peripheral initialization*/
 	time_config();
 	led_driver_config();
 	boot_i2c_config();
 
-	flash_init(); /* Unlock the Flash Program Erase controller */
-	EE_Init(); /* EEPROM Init */
 	timer_reset(USB_TIMEOUT_TIMER);
 	enable_irq();
 
@@ -64,7 +65,7 @@ static void bootloader_init(void)
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
-	debug("Init\n");
+	debug("Bootloader init\n");
 }
 
 static bool check_app_crc(void)
@@ -205,6 +206,9 @@ static void bootloader(void)
 
 	case POWER_ON:
 		power_control_io_config();
+		if (OMNIA_BOARD_REVISION >= 32)
+			periph_control_io_config();
+
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
 		msleep(100);
@@ -215,10 +219,8 @@ static void bootloader(void)
 		/* set active reset of peripherals after CPU reset on v32+
 		 * boards
 		 */
-		if (OMNIA_BOARD_REVISION >= 32) {
-			periph_control_io_config();
+		if (OMNIA_BOARD_REVISION >= 32)
 			periph_control_rst_init();
-		}
 
 		power_supply_failure = 1;
 		next_state = FLASH_MANAGER;
