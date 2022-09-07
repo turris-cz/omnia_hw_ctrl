@@ -21,6 +21,7 @@
 #include "timer.h"
 #include "cpu.h"
 #include "crc32.h"
+#include "watchdog.h"
 
 typedef enum {
 	POWER_ON,
@@ -221,6 +222,9 @@ static void bootloader(void)
 		 */
 		if (OMNIA_BOARD_REVISION >= 32)
 			periph_control_rst_init();
+
+		watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
+		watchdog_enable(true);
 
 		power_supply_failure = 1;
 		next_state = FLASH_MANAGER;

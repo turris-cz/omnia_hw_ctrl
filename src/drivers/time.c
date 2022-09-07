@@ -106,9 +106,8 @@ void __irq systick_irq_handler(void)
 {
 	jiffies++;
 
-	if (!BOOTLOADER_BUILD) {
-		watchdog_handler();
+	watchdog_handler();
+	if (!BOOTLOADER_BUILD)
 		button_debounce_handler();
-	}
 	i2c_slave_recovery_handler(SLAVE_I2C);
 }

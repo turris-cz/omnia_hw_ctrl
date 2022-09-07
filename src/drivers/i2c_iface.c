@@ -30,10 +30,10 @@ static __maybe_unused struct {
 
 static const uint16_t slave_features_supported =
 	FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
-	FEAT_IF(WDT_PING, !BOOTLOADER_BUILD) |
 	FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
 	FEAT_IF(NEW_INT_API, !BOOTLOADER_BUILD) |
 	FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
+	FEAT_WDT_PING |
 	FEAT_EXT_CMDS;
 
 enum boot_request_e {
@@ -606,17 +606,18 @@ static const cmdinfo_t commands[] = {
 	[CMD_SET_GAMMA_CORRECTION]	= { 2, cmd_set_gamma_correction, LED_ADDR_ONLY },
 	[CMD_GET_GAMMA_CORRECTION]	= { 1, cmd_get_gamma_correction, LED_ADDR_ONLY },
 
+	/* version info */
+	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },
+	[CMD_GET_FW_CHECKSUM]		= { 1, cmd_get_version },
+#endif /* !BOOTLOADER_BUILD */
+	[CMD_GET_FW_VERSION_BOOT]	= { 1, cmd_get_version },
+
 	/* watchdog */
 	[CMD_SET_WATCHDOG_STATE]	= { 2, cmd_set_watchdog_state },
 	[CMD_GET_WATCHDOG_STATE]	= { 1, cmd_get_watchdog_state },
 	[CMD_SET_WDT_TIMEOUT]		= { 3, cmd_set_wdt_timeout },
 	[CMD_GET_WDT_TIMELEFT]		= { 1, cmd_get_wdt_timeleft },
 
-	/* version info */
-	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },
-	[CMD_GET_FW_CHECKSUM]		= { 1, cmd_get_version },
-#endif /* !BOOTLOADER_BUILD */
-	[CMD_GET_FW_VERSION_BOOT]	= { 1, cmd_get_version },
 };
 
 static int handle_cmd(uint8_t addr, i2c_iface_priv_t *state)
