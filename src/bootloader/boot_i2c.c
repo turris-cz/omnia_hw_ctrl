@@ -13,7 +13,7 @@
 #include "power_control.h"
 #include "eeprom.h"
 #include "flash.h"
-#include "i2c_slave.h"
+#include "i2c_iface.h"
 #include "boot_i2c.h"
 #include "bootloader.h"
 #include "gpio.h"
@@ -22,8 +22,6 @@
 __attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
 
 #define PKT_SIZE		128
-
-#define I2C_SLAVE_ADDRESS	0x2c
 
 #define FILE_CMP_OK		0xBB
 #define FILE_CMP_ERROR		0xDD
@@ -38,14 +36,15 @@ typedef struct {
 	bool rx_complete;
 	bool receiving;
 	bool cmd_valid;
-} boot_i2c_state_t;
+	i2c_iface_priv_t mcu_cmd_iface;
+} boot_i2c_iface_priv_t;
 
-static uint16_t get_addr(const boot_i2c_state_t *state)
+static uint16_t get_addr(const boot_i2c_iface_priv_t *state)
 {
 	return (state->cmd[0] << 8) | state->cmd[1];
 }
 
-static bool has_valid_addr(const boot_i2c_state_t *state)
+static bool has_valid_addr(const boot_i2c_iface_priv_t *state)
 {
 	uint16_t addr = get_addr(state);
 
@@ -53,13 +52,26 @@ static bool has_valid_addr(const boot_i2c_state_t *state)
 	       ((uint32_t)addr + PKT_SIZE) <= APPLICATION_MAX_SIZE;
 }
 
-static int boot_i2c_event_cb(void *priv, uint8_t addr,
-			     i2c_slave_event_t event, uint8_t *val)
+static int boot_i2c_iface_event_cb(void *priv, uint8_t addr,
+				   i2c_slave_event_t event, uint8_t *val)
 {
-	boot_i2c_state_t *state = priv;
+	boot_i2c_iface_priv_t *state = priv;
 
-	if (!(addr == I2C_SLAVE_ADDRESS ||
-	      (!addr && event == I2C_SLAVE_RESET)))
+	if (!addr && event == I2C_SLAVE_RESET)
+		/* if this is an early reset, reset the MCU command interface
+		 * and also the bootloader interface
+		 */
+		i2c_iface_event_cb(&state->mcu_cmd_iface, 0, event, val);
+
+	else if (addr == MCU_I2C_ADDR)
+		/* if this is a command for MCU I2C interface, handle MCU
+		 * command interface
+		 */
+		return i2c_iface_event_cb(&state->mcu_cmd_iface,
+					  addr, event, val);
+
+	else if (addr != BOOTLOADER_I2C_ADDR)
+		/* otherwise it must be command for bootloader I2C interface */
 		return -1;
 
 	switch (event) {
@@ -136,11 +148,11 @@ static int boot_i2c_event_cb(void *priv, uint8_t addr,
 	return 0;
 }
 
-static boot_i2c_state_t boot_i2c_state;
+static boot_i2c_iface_priv_t boot_i2c_iface_priv;
 
 static i2c_slave_t i2c_slave = {
-	.cb = boot_i2c_event_cb,
-	.priv = &boot_i2c_state,
+	.cb = boot_i2c_iface_event_cb,
+	.priv = &boot_i2c_iface_priv,
 };
 
 /*******************************************************************************
@@ -151,7 +163,8 @@ static i2c_slave_t i2c_slave = {
   *****************************************************************************/
 void boot_i2c_config(void)
 {
-	i2c_slave_init(SLAVE_I2C, &i2c_slave, I2C_SLAVE_ADDRESS, 0, 1);
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, BOOTLOADER_I2C_ADDR,
+		       1);
 }
 
 /*******************************************************************************
@@ -162,7 +175,7 @@ void boot_i2c_config(void)
   *****************************************************************************/
 flash_i2c_state_t boot_i2c_flash_data(void)
 {
-	boot_i2c_state_t *state = &boot_i2c_state;
+	boot_i2c_iface_priv_t *state = &boot_i2c_iface_priv;
 	flash_i2c_state_t ret;
 
 	if (!state->rx_complete)

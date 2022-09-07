@@ -17,6 +17,7 @@
 
 #define MCU_I2C_ADDR			0x2a
 #define LED_CONTROLLER_I2C_ADDR		0x2b
+#define BOOTLOADER_I2C_ADDR		0x2c
 
 typedef enum {
 	I2C_IFACE_REQ_NONE,
@@ -154,6 +155,7 @@ enum features_e {
 	FEAT_LED_STATE_EXT_V32		= FIELD_PREP(FEAT_LED_STATE_EXT_MASK, 2),
 	FEAT_LED_GAMMA_CORRECTION	= BIT(5),
 	FEAT_NEW_INT_API		= BIT(6),
+	FEAT_BOOTLOADER			= BIT(7),
 };
 
 enum ext_sts_dword_e {
@@ -267,7 +269,8 @@ enum int_e {
  *                                     0 - otherwise
  *      6   |   NEW_INT_API          : 1 - CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and CMD_SET_INT_MASK commands supported
  *                                     0 - interrupt is asserted when status_word changes
- *  7..15   |   reserved
+ *      7   |   BOOTLOADER           : 1 - MCU firmware is in bootloader, 0 - MCU firmware is in application
+ *  8..15   |   reserved
 */
 
 /*

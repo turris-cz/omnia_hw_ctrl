@@ -20,20 +20,21 @@
 #include "memory_layout.h"
 #include "watchdog.h"
 
-static const uint8_t version[] = VERSION;
-static struct {
+static __maybe_unused const uint8_t version[] = VERSION;
+static __maybe_unused struct {
 	uint32_t length;
 	uint32_t crcsum;
 } app_checksum __section(".crcsum");
 
+#define FEAT_IF(feat, cond) ((cond) ? FEAT_ ## feat : 0)
+
 static const uint16_t slave_features_supported =
-#if OMNIA_BOARD_REVISION >= 32
-	FEAT_PERIPH_MCU |
-#endif
-	FEAT_EXT_CMDS |
-	FEAT_WDT_PING |
-	FEAT_LED_GAMMA_CORRECTION |
-	FEAT_NEW_INT_API;
+	FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
+	FEAT_IF(WDT_PING, !BOOTLOADER_BUILD) |
+	FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
+	FEAT_IF(NEW_INT_API, !BOOTLOADER_BUILD) |
+	FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
+	FEAT_EXT_CMDS;
 
 enum boot_request_e {
 	BOOTLOADER_REQ	= 0xAA,
@@ -102,7 +103,7 @@ static inline void _set_reply(i2c_iface_priv_t *state, const void *reply,
 
 #define set_reply(x) _set_reply(state, &(x), sizeof(x))
 
-static int cmd_get_features(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_features(i2c_iface_priv_t *state)
 {
 	debug("get_features\n");
 	set_reply(slave_features_supported);
@@ -121,10 +122,11 @@ static void on_get_status_success(i2c_iface_priv_t *state)
 	reply = state->reply[0] | (state->reply[1] << 8);
 	cntr = FIELD_GET(STS_BUTTON_COUNTER_MASK, reply);
 
-	button_counter_decrease(cntr);
+	if (!BOOTLOADER_BUILD)
+		button_counter_decrease(cntr);
 }
 
-static int cmd_get_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_status(i2c_iface_priv_t *state)
 {
 	uint16_t status = STS_MCU_TYPE | STS_FEATURES_SUPPORTED;
 
@@ -134,11 +136,14 @@ static int cmd_get_status(i2c_iface_priv_t *state)
 	for_each_const(pin, sts_pins)
 		status |= (gpio_read(pin->pin) ^ pin->invert) ? pin->bit : 0;
 
-	status |= FIELD_PREP(STS_BUTTON_COUNTER_MASK, button.pressed_counter);
-	if (button.user_mode)
-		status |= STS_BUTTON_MODE;
-	if (button.state)
-		status |= STS_BUTTON_PRESSED;
+	if (!BOOTLOADER_BUILD) {
+		status |= FIELD_PREP(STS_BUTTON_COUNTER_MASK,
+				     button.pressed_counter);
+		if (button.user_mode)
+			status |= STS_BUTTON_MODE;
+		if (button.state)
+			status |= STS_BUTTON_PRESSED;
+	}
 
 	debug("get_status %#06x\n", status);
 	set_reply(status);
@@ -158,6 +163,16 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 
 	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
 
+	if (mask & CTL_USB30_PWRON)
+		power_control_usb(USB3_PORT0, ctrl & CTL_USB30_PWRON);
+
+	if (mask & CTL_USB31_PWRON)
+		power_control_usb(USB3_PORT1, ctrl & CTL_USB31_PWRON);
+
+	/* the rest is ignored in bootloader */
+	if (BOOTLOADER_BUILD)
+		return;
+
 	if (set & CTL_LIGHT_RST) {
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
@@ -170,12 +185,6 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 		i2c_iface.req = I2C_IFACE_REQ_HARD_RESET;
 		return;
 	}
-
-	if (mask & CTL_USB30_PWRON)
-		power_control_usb(USB3_PORT0, ctrl & CTL_USB30_PWRON);
-
-	if (mask & CTL_USB31_PWRON)
-		power_control_usb(USB3_PORT1, ctrl & CTL_USB31_PWRON);
 
 #if USER_REGULATOR_ENABLED
 	if (mask & CTL_ENABLE_4V5)
@@ -228,14 +237,14 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 	}
 }
 
-static int cmd_general_control(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_general_control(i2c_iface_priv_t *state)
 {
 	state->on_success = on_general_control_success;
 
 	return 0;
 }
 
-static int cmd_get_ext_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_ext_status(i2c_iface_priv_t *state)
 {
 	uint32_t ext_status = 0;
 
@@ -248,7 +257,7 @@ static int cmd_get_ext_status(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_ext_control(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_ext_control(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 	uint16_t ext_ctrl, mask;
@@ -296,7 +305,7 @@ static int cmd_ext_control(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_ext_control_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_ext_control_status(i2c_iface_priv_t *state)
 {
 	uint16_t ext_ctrl = 0;
 
@@ -360,7 +369,7 @@ static void on_get_int_and_clear_failure(i2c_iface_priv_t *state)
 	i2c_iface_write_irq_pin();
 }
 
-static int cmd_get_int_and_clear(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_int_and_clear(i2c_iface_priv_t *state)
 {
 	uint8_t intr[8];
 
@@ -381,7 +390,7 @@ static int cmd_get_int_and_clear(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_int_mask(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_int_mask(i2c_iface_priv_t *state)
 {
 	uint8_t mask[8];
 
@@ -394,7 +403,7 @@ static int cmd_get_int_mask(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_set_int_mask(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_int_mask(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -406,7 +415,7 @@ static int cmd_set_int_mask(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_reset(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_reset(i2c_iface_priv_t *state)
 {
 	debug("get_reset\n");
 	set_reply(i2c_iface.reset_selector);
@@ -415,7 +424,7 @@ static int cmd_get_reset(i2c_iface_priv_t *state)
 }
 
 #if USER_REGULATOR_ENABLED
-static int cmd_user_voltage(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_user_voltage(i2c_iface_priv_t *state)
 {
 	debug("user_voltage\n");
 	power_control_set_voltage(state->cmd[1]);
@@ -424,7 +433,7 @@ static int cmd_user_voltage(i2c_iface_priv_t *state)
 }
 #endif
 
-static int cmd_led_mode(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_mode(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -434,7 +443,7 @@ static int cmd_led_mode(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_led_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_state(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -444,7 +453,7 @@ static int cmd_led_state(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_led_color(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_color(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -454,7 +463,7 @@ static int cmd_led_color(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_set_brightness(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_brightness(i2c_iface_priv_t *state)
 {
 	debug("set_brightness\n");
 	led_driver_set_brightness(state->cmd[1]);
@@ -462,7 +471,7 @@ static int cmd_set_brightness(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_brightness(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_brightness(i2c_iface_priv_t *state)
 {
 	uint8_t brightness = led_driver_get_brightness();
 
@@ -472,7 +481,7 @@ static int cmd_get_brightness(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_set_gamma_correction(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_gamma_correction(i2c_iface_priv_t *state)
 {
 	debug("set_gamma_correction\n");
 	led_driver_set_gamma_correction(state->cmd[1] & BIT(0));
@@ -480,7 +489,7 @@ static int cmd_set_gamma_correction(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_gamma_correction(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_gamma_correction(i2c_iface_priv_t *state)
 {
 	uint8_t gamma_correction = led_driver_get_gamma_correction();
 
@@ -490,7 +499,7 @@ static int cmd_get_gamma_correction(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_set_watchdog_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_watchdog_state(i2c_iface_priv_t *state)
 {
 	debug("watchdog_state\n");
 
@@ -499,7 +508,7 @@ static int cmd_set_watchdog_state(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_watchdog_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_watchdog_state(i2c_iface_priv_t *state)
 {
 	uint8_t enabled = watchdog_is_enabled();
 
@@ -509,7 +518,7 @@ static int cmd_get_watchdog_state(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_set_wdt_timeout(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_wdt_timeout(i2c_iface_priv_t *state)
 {
 	uint8_t *args = &state->cmd[1];
 
@@ -519,7 +528,7 @@ static int cmd_set_wdt_timeout(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_wdt_timeleft(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_wdt_timeleft(i2c_iface_priv_t *state)
 {
 	uint16_t timeleft = watchdog_get_timeleft();
 
@@ -529,7 +538,7 @@ static int cmd_get_wdt_timeleft(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static int cmd_get_version(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_version(i2c_iface_priv_t *state)
 {
 	debug("get_version\n");
 
@@ -539,6 +548,7 @@ static int cmd_get_version(i2c_iface_priv_t *state)
 		__builtin_memcpy(state->reply, (void *)BOOTLOADER_VERSION_POS, 20);
 		break;
 
+#if !BOOTLOADER_BUILD
 	case CMD_GET_FW_VERSION_APP:
 		state->reply_len = 20;
 		__builtin_memcpy(state->reply, version, 20);
@@ -548,6 +558,7 @@ static int cmd_get_version(i2c_iface_priv_t *state)
 		state->reply_len = 8;
 		__builtin_memcpy(state->reply, &app_checksum, 8);
 		break;
+#endif
 
 	default:
 		unreachable();
@@ -574,6 +585,7 @@ static const cmdinfo_t commands[] = {
 	[CMD_GET_EXT_STATUS_DWORD]	= { 1, cmd_get_ext_status },
 	[CMD_EXT_CONTROL]		= { 5, cmd_ext_control },
 	[CMD_GET_EXT_CONTROL_STATUS]	= { 1, cmd_get_ext_control_status },
+#if !BOOTLOADER_BUILD
 	[CMD_GET_RESET]			= { 1, cmd_get_reset },
 #if USER_REGULATOR_ENABLED
 	[CMD_USER_VOLTAGE]		= { 2, cmd_user_voltage },
@@ -602,8 +614,9 @@ static const cmdinfo_t commands[] = {
 
 	/* version info */
 	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },
-	[CMD_GET_FW_VERSION_BOOT]	= { 1, cmd_get_version },
 	[CMD_GET_FW_CHECKSUM]		= { 1, cmd_get_version },
+#endif /* !BOOTLOADER_BUILD */
+	[CMD_GET_FW_VERSION_BOOT]	= { 1, cmd_get_version },
 };
 
 static int handle_cmd(uint8_t addr, i2c_iface_priv_t *state)

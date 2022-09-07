@@ -42,6 +42,7 @@
 #define __weak_alias(x) __weak __attribute__((__alias__(#x)))
 #define __section(x) __attribute__((__section__(x)))
 #define __used __attribute__((__used__))
+#define __maybe_unused __attribute__((__unused__))
 
 #define compiletime_assert(condition, msg) \
 	_compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
