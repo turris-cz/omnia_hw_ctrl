@@ -79,6 +79,39 @@ static uint8_t *read_mcu_code(const char *path, uint32_t *size)
 	return buf;
 }
 
+static __attribute__((__noreturn__)) void test(int n, char **args)
+{
+	unsigned long val;
+	uint32_t crc = 0;
+	char *end;
+
+	for (int i = 0; i < n; ++i) {
+		val = strtoul(args[i], &end, 0);
+
+		if (*end != '\0' || errno == ERANGE) {
+			fprintf(stderr, "Invalid value %s\n", args[i]);
+			exit(EXIT_FAILURE);
+		}
+
+		crc = crc32_one(crc, val >> 24);
+		crc = crc32_one(crc, val >> 16);
+		crc = crc32_one(crc, val >> 8);
+		crc = crc32_one(crc, val);
+	}
+
+	printf("0x%08x\n", crc);
+
+	exit(EXIT_SUCCESS);
+}
+
+static __attribute__((__noreturn__)) void usage(void)
+{
+	fprintf(stderr,
+		"Usage: crc32tool <offset> omnia_hw_ctrl.bin.nocrc >omnia_hw_ctrl.bin\n"
+		"                 --test <32bit value>...\n\n");
+	exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv)
 {
 	unsigned long offset;
@@ -86,10 +119,14 @@ int main(int argc, char **argv)
 	uint32_t size;
 	uint8_t *buf;
 
-	if (argc != 3) {
-		fprintf(stderr, "Usage: crc32tool <offset> omnia_hw_ctrl.bin.nocrc >omnia_hw_ctrl.bin\n\n");
-		exit(EXIT_FAILURE);
-	}
+	if (argc < 2)
+		usage();
+
+	if (!strcmp(argv[1], "--test"))
+		test(argc - 2, argv + 2);
+
+	if (argc != 3)
+		usage();
 
 	if (isatty(STDOUT_FILENO)) {
 		fprintf(stderr, "stdout must not be a tty\n");
