@@ -219,7 +219,7 @@ static void bootloader(void)
 		led_driver_reset_effect(DISABLE);
 		power_control_first_startup();
 
-		led_set_color24(LED_COUNT, GREEN_COLOR);
+		led_set_color24(LED_COUNT, RED_COLOR);
 		led_driver_reset_effect(ENABLE);
 
 		/* set active reset of peripherals after CPU reset on v32+
