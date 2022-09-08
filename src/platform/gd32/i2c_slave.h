@@ -198,6 +198,10 @@ static __force_inline void i2c_slave_resume(i2c_nr_t i2c_nr)
 {
 	i2c_slave_ptr[i2c_nr]->paused = false;
 	I2C_CTL1(i2c_to_plat(i2c_nr)) |= I2C_CTL1_EVIE | I2C_CTL1_ERRIE;
+	nvic_enable_irq(i2c_ev_irqn(i2c_nr),
+		        NVIC_GetPriority(i2c_ev_irqn(i2c_nr)));
+	nvic_enable_irq(i2c_err_irqn(i2c_nr),
+		        NVIC_GetPriority(i2c_err_irqn(i2c_nr)));
 }
 
 static __force_inline void i2c_slave_recovery_handler(i2c_nr_t i2c_nr)
