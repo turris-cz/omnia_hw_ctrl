@@ -11,6 +11,20 @@
 # error "unknown platform"
 #endif
 
+static inline uint32_t get_unaligned16(const void *ptr)
+{
+	const uint8_t *p = ptr;
+
+	return (p[1] << 8) | p[0];
+}
+
+static inline uint32_t get_unaligned32(const void *ptr)
+{
+	const uint8_t *p = ptr;
+
+	return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
+}
+
 static __force_inline void enable_irq(void)
 {
 	asm volatile("cpsie i\n" : : : "memory");

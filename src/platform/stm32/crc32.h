@@ -3,9 +3,10 @@
 
 #include "stm32f0xx.h"
 #include "compiler.h"
+#include "cpu.h"
 
 static inline bool crc32(uint32_t *res, uint32_t init,
-			 const uint32_t *addr, uint16_t len)
+			 const void *src, uint16_t len)
 {
 	/* we don't support unaligned length yet */
 	if (len % 4)
@@ -16,7 +17,8 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 	CRC->INIT = init;
 	CRC->CR = CRC_CR_RESET;
 	while (len > 0) {
-		CRC->DR = *addr++;
+		CRC->DR = get_unaligned32(src);
+		src += 4;
 		len -= 4;
 	}
 
