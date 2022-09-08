@@ -60,14 +60,38 @@ static inline void i2c_iface_write_irq_pin(void)
 int i2c_iface_event_cb(void *ptr, uint8_t addr, i2c_slave_event_t event,
 		       uint8_t *val);
 
+typedef enum {
+	FLASHING_LOCKED = 0,
+	FLASHING_EXPECT_SIZE_AND_CSUM,
+	FLASHING_EXPECT_PROGRAM,
+	FLASHING_BUSY,
+	FLASHING_DONE,
+	FLASHING_ERR_ERASING,
+	FLASHING_ERR_PROGRAMMING,
+} flashing_state_t;
+
+typedef struct {
+	flashing_state_t state;
+	uint32_t cmd_csum;
+	uint32_t image_csum;
+	uint32_t partial_csum, new_partial_csum;
+	uint16_t image_size, flashed;
+	uint8_t buf[128];
+} flashing_priv_t;
+
 typedef struct i2c_iface_priv_s i2c_iface_priv_t;
 
+int cmd_flash(i2c_iface_priv_t *priv);
+
 struct i2c_iface_priv_s {
-	uint8_t cmd[10];
+	uint8_t cmd[139]; /* maximum command length for flashing + 1 to catch invalid message */
 	uint8_t reply[20];
 	uint8_t cmd_len, reply_len, reply_idx;
 	void (*on_success)(i2c_iface_priv_t *priv);
 	void (*on_failure)(i2c_iface_priv_t *priv);
+
+	/* flashing */
+	flashing_priv_t flashing;
 };
 
 enum commands_e {
@@ -105,6 +129,9 @@ enum commands_e {
 	CMD_GET_INT_MASK		= 0x15,
 	CMD_SET_INT_MASK		= 0x16,
 
+	/* available if FLASHING bit set in features */
+	CMD_FLASH			= 0x19,
+
 	/* available if WDT_PING bit set in features */
 	CMD_SET_WDT_TIMEOUT		= 0x20,
 	CMD_GET_WDT_TIMELEFT		= 0x21,
@@ -113,6 +140,13 @@ enum commands_e {
 	/* available only if LED_GAMMA_CORRECTION bit set in features */
 	CMD_SET_GAMMA_CORRECTION	= 0x30,
 	CMD_GET_GAMMA_CORRECTION	= 0x31,
+};
+
+enum flashing_commands_e {
+	FLASH_CMD_UNLOCK		= 0x01,
+	FLASH_CMD_SIZE_AND_CSUM		= 0x02,
+	FLASH_CMD_PROGRAM		= 0x03,
+	FLASH_CMD_RESET			= 0x04,
 };
 
 enum sts_word_e {
@@ -156,6 +190,7 @@ enum features_e {
 	FEAT_LED_GAMMA_CORRECTION	= BIT(5),
 	FEAT_NEW_INT_API		= BIT(6),
 	FEAT_BOOTLOADER			= BIT(7),
+	FEAT_FLASHING			= BIT(8),
 };
 
 enum ext_sts_dword_e {
@@ -270,7 +305,9 @@ enum int_e {
  *      6   |   NEW_INT_API          : 1 - CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and CMD_SET_INT_MASK commands supported
  *                                     0 - interrupt is asserted when status_word changes
  *      7   |   BOOTLOADER           : 1 - MCU firmware is in bootloader, 0 - MCU firmware is in application
- *  8..15   |   reserved
+ *      8   |   FLASHING             : 1 - CMD_FLASH is supported with new flahsing protocol,
+ *                                     0 - only old flashing protocol at address 0x2c is supported
+ *  9..15   |   reserved
 */
 
 /*

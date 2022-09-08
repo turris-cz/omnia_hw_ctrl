@@ -48,7 +48,8 @@ static const struct {
 		FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
 		FEAT_NEW_INT_API |
 		FEAT_WDT_PING |
-		FEAT_EXT_CMDS,
+		FEAT_EXT_CMDS |
+		FEAT_FLASHING,
 	.status_features =
 		STS_MCU_TYPE |
 		STS_FEATURES_SUPPORTED |
@@ -133,12 +134,21 @@ static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 		uint32_t features;
 		uint32_t csum;
 
-		if (priv->cmd[1] == 0xbb)
+		if (priv->cmd[1] == 0xbb) {
+			if (!BOOTLOADER_BUILD &&
+			    priv->flashing.state == FLASHING_BUSY)
+				return -1;
+
 			ptr = (const void *)BOOTLOADER_FEATURES;
-		else if (priv->cmd[1] == 0xaa)
+		} else if (priv->cmd[1] == 0xaa) {
+			if (BOOTLOADER_BUILD &&
+			    priv->flashing.state == FLASHING_BUSY)
+				return -1;
+
 			ptr = (const void *)APPLICATION_FEATURES;
-		else
+		} else {
 			return -1;
+		}
 
 		if (ptr->magic != FEATURES_MAGIC)
 			return -1;
@@ -282,6 +292,17 @@ static void on_general_control_success(i2c_iface_priv_t *priv)
 
 static __maybe_unused int cmd_general_control(i2c_iface_priv_t *priv)
 {
+	uint8_t ctrl, mask, set;
+
+	ctrl = priv->cmd[1];
+	mask = priv->cmd[2];
+	set = ctrl & mask;
+
+	if (!BOOTLOADER_BUILD &&
+	    (set & (CTL_LIGHT_RST | CTL_HARD_RST | CTL_BOOTLOADER))
+	    && priv->flashing.state == FLASHING_BUSY)
+		return -1;
+
 	priv->on_success = on_general_control_success;
 
 	return 0;
@@ -587,6 +608,10 @@ static __maybe_unused int cmd_get_version(i2c_iface_priv_t *priv)
 
 	switch (priv->cmd[0]) {
 	case CMD_GET_FW_VERSION_BOOT:
+		if (!BOOTLOADER_BUILD &&
+		    priv->flashing.state == FLASHING_BUSY)
+			return -1;
+
 		priv->reply_len = 20;
 		__builtin_memcpy(priv->reply, (void *)BOOTLOADER_VERSION_POS, 20);
 		break;
@@ -648,6 +673,9 @@ static const cmdinfo_t commands[] = {
 	/* LEDs, commands only available at LED controller I2C address */
 	[CMD_SET_GAMMA_CORRECTION]	= { 2, cmd_set_gamma_correction, LED_ADDR_ONLY },
 	[CMD_GET_GAMMA_CORRECTION]	= { 1, cmd_get_gamma_correction, LED_ADDR_ONLY },
+
+	/* flashing */
+	[CMD_FLASH]			= { 0, cmd_flash },
 
 	/* version info */
 	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },

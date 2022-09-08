@@ -121,7 +121,9 @@ enum commands_e {
  *      6   |   NEW_INT_API          : 1 - CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and CMD_SET_INT_MASK commands supported
  *                                     0 - interrupt is asserted when status_word changes
  *      7   |   BOOTLOADER           : 1 - MCU firmware is in bootloader, 0 - MCU firmware is in application
- *  8..15   |   reserved
+ *      8   |   FLASHING             : 1 - CMD_FLASH is supported with new flahsing protocol,
+ *                                     0 - only old flashing protocol at address 0x2c is supported
+ *  9..15   |   reserved
 */
 
 * Example of a reading of features from Linux:
