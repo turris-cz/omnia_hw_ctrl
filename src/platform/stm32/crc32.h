@@ -12,6 +12,11 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 	if (len % 4)
 		return false;
 
+	if (!len) {
+		*res = init;
+		return true;
+	}
+
 	RCC->AHBENR |= RCC_AHBENR_CRCEN;
 
 	CRC->INIT = init;

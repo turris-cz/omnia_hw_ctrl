@@ -13,6 +13,11 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 	if (len % 4)
 		return false;
 
+	if (!len) {
+		*res = init;
+		return true;
+	}
+
 	RCU_AHBEN |= RCU_AHBEN_CRCEN;
 
 	CRC_IDATA = init;
