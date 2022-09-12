@@ -55,6 +55,7 @@ static void bootloader_init(void)
 	EE_Init(); /* EEPROM Init */
 
 	/* peripheral initialization*/
+	crc32_enable();
 	time_config();
 	led_driver_config();
 	boot_i2c_config();

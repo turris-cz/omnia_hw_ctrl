@@ -1,7 +1,7 @@
 #ifndef CRC32_H
 #define CRC32_H
 
-#include "stm32f0xx.h"
+#include "crc32_plat.h"
 #include "compiler.h"
 #include "cpu.h"
 
@@ -12,24 +12,17 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 	if (len % 4)
 		return false;
 
-	if (!len) {
-		*res = init;
-		return true;
-	}
+	*res = init;
 
-	RCC->AHBENR |= RCC_AHBENR_CRCEN;
-
-	CRC->INIT = init;
-	CRC->CR = CRC_CR_RESET;
 	while (len > 0) {
-		CRC->DR = get_unaligned32(src);
-		src += 4;
-		len -= 4;
+		uint16_t now = MIN(len, 128);
+
+		disable_irq();
+		*res = crc32_plat(*res, src, now);
+		enable_irq();
+		src += now;
+		len -= now;
 	}
-
-	*res = CRC->DR;
-
-	RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
 
 	return true;
 }

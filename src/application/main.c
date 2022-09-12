@@ -10,6 +10,7 @@
 #include "memory_layout.h"
 #include "time.h"
 #include "watchdog.h"
+#include "crc32.h"
 
 #define MAX_ERROR_COUNT		5
 
@@ -45,6 +46,7 @@ static void app_init(void)
 
 	time_config();
 	/* init ports and peripheral */
+	crc32_enable();
 	power_control_io_config();
 	wan_lan_pci_msata_config();
 	power_control_usb_timeout_config();
