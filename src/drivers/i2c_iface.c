@@ -20,7 +20,10 @@
 #include "memory_layout.h"
 #include "watchdog.h"
 
-static __maybe_unused const uint8_t version[] = VERSION;
+#if BOOTLOADER_BUILD
+__attribute__((__section__(".boot_version")))
+#endif
+static __used const uint8_t version[] = VERSION;
 static __maybe_unused struct {
 	uint32_t length;
 	uint32_t crcsum;

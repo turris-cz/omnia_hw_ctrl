@@ -9,8 +9,6 @@
 #include "gpio.h"
 #include "memory_layout.h"
 
-__attribute__((section(".boot_version"))) uint8_t version[20] = VERSION;
-
 #define PKT_SIZE		128
 
 #define FILE_CMP_OK		0xBB
