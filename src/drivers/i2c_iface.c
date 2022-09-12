@@ -674,14 +674,14 @@ static const cmdinfo_t commands[] = {
 	[CMD_SET_GAMMA_CORRECTION]	= { 2, cmd_set_gamma_correction, LED_ADDR_ONLY },
 	[CMD_GET_GAMMA_CORRECTION]	= { 1, cmd_get_gamma_correction, LED_ADDR_ONLY },
 
-	/* flashing */
-	[CMD_FLASH]			= { 0, cmd_flash },
-
 	/* version info */
 	[CMD_GET_FW_VERSION_APP]	= { 1, cmd_get_version },
 	[CMD_GET_FW_CHECKSUM]		= { 1, cmd_get_version },
 #endif /* !BOOTLOADER_BUILD */
 	[CMD_GET_FW_VERSION_BOOT]	= { 1, cmd_get_version },
+
+	/* flashing */
+	[CMD_FLASH]			= { 0, cmd_flash },
 
 	/* watchdog */
 	[CMD_SET_WATCHDOG_STATE]	= { 2, cmd_set_watchdog_state },

@@ -7,7 +7,6 @@
  ******************************************************************************
  ******************************************************************************
  **/
-#include "boot_i2c.h"
 #include "power_control.h"
 #include "time.h"
 #include "eeprom.h"
@@ -20,6 +19,7 @@
 #include "gpio.h"
 #include "timer.h"
 #include "cpu.h"
+#include "i2c_iface.h"
 #include "crc32.h"
 #include "watchdog.h"
 
@@ -27,7 +27,6 @@ typedef enum {
 	POWER_ON,
 	STARTUP_MANAGER,
 	INPUT_MANAGER,
-	FLASH_MANAGER,
 	START_APPLICATION,
 	RESET_TO_APPLICATION,
 	HARD_RESET,
@@ -40,6 +39,13 @@ typedef enum {
 	GO_TO_FLASH,
 	GO_TO_APPLICATION,
 } boot_value_t;
+
+static i2c_iface_priv_t i2c_iface_priv;
+
+static i2c_slave_t i2c_slave = {
+	.cb = i2c_iface_event_cb,
+	.priv = &i2c_iface_priv,
+};
 
 /*******************************************************************************
   * @function   bootloader_init
@@ -58,7 +64,8 @@ static void bootloader_init(void)
 	crc32_enable();
 	time_config();
 	led_driver_config();
-	boot_i2c_config();
+	i2c_iface_init();
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 1);
 
 	timer_reset(USB_TIMEOUT_TIMER);
 	enable_irq();
@@ -127,12 +134,14 @@ static boot_value_t startup_manager(void)
 		switch (ee_data) {
 		case BOOTLOADER_REQ:
 			retval = GO_TO_FLASH;
+			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
 			debug("req\n");
 			break;
 
 		case FLASH_NOT_CONFIRMED:
 			/* error */
 			retval = GO_TO_POWER_ON;
+			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
 			debug("ERR\n");
 			break;
 
@@ -177,9 +186,6 @@ static void bootloader(void)
 {
 	static boot_state_t next_state = STARTUP_MANAGER;
 	static boot_value_t val = GO_TO_INPUT_MANAGER;
-	static boot_i2c_result_t i2c_result = FLASH_CMD_NOT_RECEIVED;
-	static bool flash_confirmed;
-	static bool power_supply_failure; /* if power supply disconnection occurred */
 
 	switch (next_state) {
 	case STARTUP_MANAGER:
@@ -187,7 +193,6 @@ static void bootloader(void)
 
 		switch (val) {
 		case GO_TO_POWER_ON:
-			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
 			next_state = POWER_ON;
 			break;
 
@@ -196,8 +201,8 @@ static void bootloader(void)
 			break;
 
 		case GO_TO_FLASH:
-			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_NOT_CONFIRMED);
-			next_state = FLASH_MANAGER;
+			input_signals_config();
+			next_state = INPUT_MANAGER;
 			break;
 
 		default:
@@ -234,41 +239,7 @@ static void bootloader(void)
 
 		input_signals_config();
 
-		power_supply_failure = true;
-		next_state = FLASH_MANAGER;
-		break;
-
-	case FLASH_MANAGER:
-		i2c_result = boot_i2c_result();
-
-		switch (i2c_result) {
-		case FLASH_CMD_RECEIVED:
-			/* flashing has just started */
-			next_state = INPUT_MANAGER;
-			break;
-
-		case FLASH_CMD_NOT_RECEIVED:
-			/* nothing has received */
-			next_state = INPUT_MANAGER;
-			break;
-
-		case FLASH_WRITE_OK:
-			/* flashing was successfull */
-			if (!flash_confirmed) {
-				EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-				flash_confirmed = true;
-				debug("F_CONF\n");
-			}
-
-			next_state = INPUT_MANAGER;
-			break;
-
-		case FLASH_WRITE_ERROR:
-			/* flashing was corrupted */
-			/* flag FLASH_NOT_CONFIRMED is already set */
-			next_state = INPUT_MANAGER;
-			break;
-		}
+		next_state = INPUT_MANAGER;
 		break;
 
 	case INPUT_MANAGER:
@@ -282,7 +253,7 @@ static void bootloader(void)
 			break;
 
 		default:
-			next_state = FLASH_MANAGER;
+			next_state = INPUT_MANAGER;
 			break;
 		}
 		break;
@@ -292,13 +263,6 @@ static void bootloader(void)
 		break;
 
 	case RESET_TO_APPLICATION:
-		/* power supply wasnt disconnected and no command for flashing was received */
-		if (!power_supply_failure &&
-		    i2c_result == FLASH_CMD_NOT_RECEIVED) {
-			/* we have old, but valid FW */
-			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-		}
-
 		/* shutdown regulators before reset, otherwise power supply can
 		* stay there and causes wrong detection of mmc during boot */
 		power_control_set_startup_condition();
