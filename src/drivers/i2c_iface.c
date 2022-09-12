@@ -92,18 +92,18 @@ static const struct {
 #undef ECTRL
 };
 
-static inline void _set_reply(i2c_iface_priv_t *state, const void *reply,
+static inline void _set_reply(i2c_iface_priv_t *priv, const void *reply,
 			      uint32_t len)
 {
-	compiletime_assert(len <= sizeof(state->reply), "reply too long");
+	compiletime_assert(len <= sizeof(priv->reply), "reply too long");
 
-	memcpy(state->reply, reply, len);
-	state->reply_len = len;
+	memcpy(priv->reply, reply, len);
+	priv->reply_len = len;
 }
 
-#define set_reply(x) _set_reply(state, &(x), sizeof(x))
+#define set_reply(x) _set_reply(priv, &(x), sizeof(x))
 
-static __maybe_unused int cmd_get_features(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 {
 	debug("get_features\n");
 	set_reply(slave_features_supported);
@@ -111,7 +111,7 @@ static __maybe_unused int cmd_get_features(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static void on_get_status_success(i2c_iface_priv_t *state)
+static void on_get_status_success(i2c_iface_priv_t *priv)
 {
 	uint16_t reply;
 	uint8_t cntr;
@@ -119,13 +119,13 @@ static void on_get_status_success(i2c_iface_priv_t *state)
 	/* decrease replied button counter by the value that was successfully
 	 * sent to master
 	 */
-	reply = state->reply[0] | (state->reply[1] << 8);
+	reply = priv->reply[0] | (priv->reply[1] << 8);
 	cntr = FIELD_GET(STS_BUTTON_COUNTER_MASK, reply);
 
 	button_counter_decrease(cntr);
 }
 
-static __maybe_unused int cmd_get_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_status(i2c_iface_priv_t *priv)
 {
 	uint16_t status = STS_MCU_TYPE | STS_FEATURES_SUPPORTED;
 
@@ -144,17 +144,17 @@ static __maybe_unused int cmd_get_status(i2c_iface_priv_t *state)
 	debug("get_status %#06x\n", status);
 	set_reply(status);
 
-	state->on_success = on_get_status_success;
+	priv->on_success = on_get_status_success;
 
 	return 0;
 }
 
-static void on_general_control_success(i2c_iface_priv_t *state)
+static void on_general_control_success(i2c_iface_priv_t *priv)
 {
 	uint8_t ctrl, mask, set;
 
-	ctrl = state->cmd[1];
-	mask = state->cmd[2];
+	ctrl = priv->cmd[1];
+	mask = priv->cmd[2];
 	set = ctrl & mask;
 
 	debug("general_control ctrl=%#06x mask=%#06x\n", ctrl, mask);
@@ -232,14 +232,14 @@ static void on_general_control_success(i2c_iface_priv_t *state)
 	}
 }
 
-static __maybe_unused int cmd_general_control(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_general_control(i2c_iface_priv_t *priv)
 {
-	state->on_success = on_general_control_success;
+	priv->on_success = on_general_control_success;
 
 	return 0;
 }
 
-static __maybe_unused int cmd_get_ext_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_ext_status(i2c_iface_priv_t *priv)
 {
 	uint32_t ext_status = 0;
 
@@ -252,9 +252,9 @@ static __maybe_unused int cmd_get_ext_status(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_ext_control(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_ext_control(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 	uint16_t ext_ctrl, mask;
 
 	ext_ctrl = args[0] | (args[1] << 8);
@@ -300,7 +300,7 @@ static __maybe_unused int cmd_ext_control(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_get_ext_control_status(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_ext_control_status(i2c_iface_priv_t *priv)
 {
 	uint16_t ext_ctrl = 0;
 
@@ -350,13 +350,13 @@ static void deinterleave(const uint8_t *src, uint32_t *v1, uint32_t *v2)
 	}
 }
 
-static void on_get_int_and_clear_failure(i2c_iface_priv_t *state)
+static void on_get_int_and_clear_failure(i2c_iface_priv_t *priv)
 {
 	uint32_t rising, falling;
 
 	debug("get_int_and_clear failed, setting flags back\n");
 
-	deinterleave(state->reply, &rising, &falling);
+	deinterleave(priv->reply, &rising, &falling);
 
 	i2c_iface.rising |= rising;
 	i2c_iface.falling |= falling;
@@ -364,7 +364,7 @@ static void on_get_int_and_clear_failure(i2c_iface_priv_t *state)
 	i2c_iface_write_irq_pin();
 }
 
-static __maybe_unused int cmd_get_int_and_clear(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_int_and_clear(i2c_iface_priv_t *priv)
 {
 	uint8_t intr[8];
 
@@ -380,12 +380,12 @@ static __maybe_unused int cmd_get_int_and_clear(i2c_iface_priv_t *state)
 	i2c_iface.rising = i2c_iface.falling = 0;
 	i2c_iface_write_irq_pin();
 
-	state->on_failure = on_get_int_and_clear_failure;
+	priv->on_failure = on_get_int_and_clear_failure;
 
 	return 0;
 }
 
-static __maybe_unused int cmd_get_int_mask(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_int_mask(i2c_iface_priv_t *priv)
 {
 	uint8_t mask[8];
 
@@ -398,9 +398,9 @@ static __maybe_unused int cmd_get_int_mask(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_set_int_mask(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_int_mask(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 
 	deinterleave(args, &i2c_iface.rising_mask, &i2c_iface.falling_mask);
 
@@ -410,7 +410,7 @@ static __maybe_unused int cmd_set_int_mask(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_get_reset(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_reset(i2c_iface_priv_t *priv)
 {
 	debug("get_reset\n");
 	set_reply(i2c_iface.reset_selector);
@@ -419,18 +419,18 @@ static __maybe_unused int cmd_get_reset(i2c_iface_priv_t *state)
 }
 
 #if USER_REGULATOR_ENABLED
-static __maybe_unused int cmd_user_voltage(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_user_voltage(i2c_iface_priv_t *priv)
 {
 	debug("user_voltage\n");
-	power_control_set_voltage(state->cmd[1]);
+	power_control_set_voltage(priv->cmd[1]);
 
 	return 0;
 }
 #endif
 
-static __maybe_unused int cmd_led_mode(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_mode(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 
 	debug("led_mode\n");
 	led_set_user_mode(args[0] & 0x0F, !!(args[0] & 0x10));
@@ -438,9 +438,9 @@ static __maybe_unused int cmd_led_mode(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_led_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_state(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 
 	debug("led_state\n");
 	led_set_state_user(args[0] & 0x0F, !!(args[0] & 0x10));
@@ -448,9 +448,9 @@ static __maybe_unused int cmd_led_state(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_led_color(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_led_color(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 
 	debug("led_color\n");
 	led_set_color(args[0] & 0x0F, args[1], args[2], args[3]);
@@ -458,15 +458,15 @@ static __maybe_unused int cmd_led_color(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_set_brightness(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_brightness(i2c_iface_priv_t *priv)
 {
 	debug("set_brightness\n");
-	led_driver_set_brightness(state->cmd[1]);
+	led_driver_set_brightness(priv->cmd[1]);
 
 	return 0;
 }
 
-static __maybe_unused int cmd_get_brightness(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_brightness(i2c_iface_priv_t *priv)
 {
 	uint8_t brightness = led_driver_get_brightness();
 
@@ -476,15 +476,15 @@ static __maybe_unused int cmd_get_brightness(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_set_gamma_correction(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_gamma_correction(i2c_iface_priv_t *priv)
 {
 	debug("set_gamma_correction\n");
-	led_driver_set_gamma_correction(state->cmd[1] & BIT(0));
+	led_driver_set_gamma_correction(priv->cmd[1] & BIT(0));
 
 	return 0;
 }
 
-static __maybe_unused int cmd_get_gamma_correction(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_gamma_correction(i2c_iface_priv_t *priv)
 {
 	uint8_t gamma_correction = led_driver_get_gamma_correction();
 
@@ -494,16 +494,16 @@ static __maybe_unused int cmd_get_gamma_correction(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_set_watchdog_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_watchdog_state(i2c_iface_priv_t *priv)
 {
 	debug("watchdog_state\n");
 
-	watchdog_enable(state->cmd[1]);
+	watchdog_enable(priv->cmd[1]);
 
 	return 0;
 }
 
-static __maybe_unused int cmd_get_watchdog_state(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_watchdog_state(i2c_iface_priv_t *priv)
 {
 	uint8_t enabled = watchdog_is_enabled();
 
@@ -513,9 +513,9 @@ static __maybe_unused int cmd_get_watchdog_state(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_set_wdt_timeout(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_set_wdt_timeout(i2c_iface_priv_t *priv)
 {
-	uint8_t *args = &state->cmd[1];
+	uint8_t *args = &priv->cmd[1];
 
 	debug("set_wdt_timeout\n");
 	watchdog_set_timeout(args[0] | (args[1] << 8));
@@ -523,7 +523,7 @@ static __maybe_unused int cmd_set_wdt_timeout(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_get_wdt_timeleft(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_wdt_timeleft(i2c_iface_priv_t *priv)
 {
 	uint16_t timeleft = watchdog_get_timeleft();
 
@@ -533,25 +533,25 @@ static __maybe_unused int cmd_get_wdt_timeleft(i2c_iface_priv_t *state)
 	return 0;
 }
 
-static __maybe_unused int cmd_get_version(i2c_iface_priv_t *state)
+static __maybe_unused int cmd_get_version(i2c_iface_priv_t *priv)
 {
 	debug("get_version\n");
 
-	switch (state->cmd[0]) {
+	switch (priv->cmd[0]) {
 	case CMD_GET_FW_VERSION_BOOT:
-		state->reply_len = 20;
-		__builtin_memcpy(state->reply, (void *)BOOTLOADER_VERSION_POS, 20);
+		priv->reply_len = 20;
+		__builtin_memcpy(priv->reply, (void *)BOOTLOADER_VERSION_POS, 20);
 		break;
 
 #if !BOOTLOADER_BUILD
 	case CMD_GET_FW_VERSION_APP:
-		state->reply_len = 20;
-		__builtin_memcpy(state->reply, version, 20);
+		priv->reply_len = 20;
+		__builtin_memcpy(priv->reply, version, 20);
 		break;
 
 	case CMD_GET_FW_CHECKSUM:
-		state->reply_len = 8;
-		__builtin_memcpy(state->reply, &app_checksum, 8);
+		priv->reply_len = 8;
+		__builtin_memcpy(priv->reply, &app_checksum, 8);
 		break;
 #endif
 
@@ -564,7 +564,7 @@ static __maybe_unused int cmd_get_version(i2c_iface_priv_t *state)
 
 typedef struct {
 	uint8_t len;
-	int (*handler)(i2c_iface_priv_t *state);
+	int (*handler)(i2c_iface_priv_t *priv);
 	enum {
 		MCU_ADDR_ONLY = 0,
 		LED_ADDR_ONLY,
@@ -615,9 +615,9 @@ static const cmdinfo_t commands[] = {
 
 };
 
-static int handle_cmd(uint8_t addr, i2c_iface_priv_t *state)
+static int handle_cmd(uint8_t addr, i2c_iface_priv_t *priv)
 {
-	uint8_t cmdidx = state->cmd[0];
+	uint8_t cmdidx = priv->cmd[0];
 	const cmdinfo_t *cmd;
 
 	if (cmdidx >= ARRAY_SIZE(commands))
@@ -632,56 +632,56 @@ static int handle_cmd(uint8_t addr, i2c_iface_priv_t *state)
 	    !(cmd->availability == LED_ADDR_ONLY && addr == LED_CONTROLLER_I2C_ADDR))
 		return -1;
 
-	if (state->cmd_len < cmd->len)
+	if (priv->cmd_len < cmd->len)
 		return 0;
-	else if (state->cmd_len == cmd->len)
-		return cmd->handler(state);
+	else if (priv->cmd_len == cmd->len)
+		return cmd->handler(priv);
 	else
 		return -1;
 }
 
-int i2c_iface_event_cb(void *priv, uint8_t addr, i2c_slave_event_t event,
+int i2c_iface_event_cb(void *ptr, uint8_t addr, i2c_slave_event_t event,
 		       uint8_t *val)
 {
-	i2c_iface_priv_t *state = priv;
+	i2c_iface_priv_t *priv = ptr;
 
 	switch (event) {
 	case I2C_SLAVE_READ_PROCESSED:
-		state->reply_idx++;
+		priv->reply_idx++;
 		fallthrough;
 
 	case I2C_SLAVE_READ_REQUESTED:
-		if (state->reply_idx >= state->reply_len)
+		if (priv->reply_idx >= priv->reply_len)
 			return -1;
 
-		*val = state->reply[state->reply_idx];
+		*val = priv->reply[priv->reply_idx];
 		break;
 
 	case I2C_SLAVE_WRITE_REQUESTED:
 		break;
 
 	case I2C_SLAVE_WRITE_RECEIVED:
-		if (state->cmd_len < sizeof(state->cmd))
-			state->cmd[state->cmd_len++] = *val;
+		if (priv->cmd_len < sizeof(priv->cmd))
+			priv->cmd[priv->cmd_len++] = *val;
 		else
 			return -1;
 
-		return handle_cmd(addr, state);
+		return handle_cmd(addr, priv);
 
 	case I2C_SLAVE_STOP:
 	case I2C_SLAVE_RESET:
 		if (addr) {
-			if (event == I2C_SLAVE_STOP && state->on_success)
-				state->on_success(state);
-			else if (event == I2C_SLAVE_RESET && state->on_failure)
-				state->on_failure(state);
+			if (event == I2C_SLAVE_STOP && priv->on_success)
+				priv->on_success(priv);
+			else if (event == I2C_SLAVE_RESET && priv->on_failure)
+				priv->on_failure(priv);
 		}
 
-		state->cmd_len = 0;
-		state->reply_len = 0;
-		state->reply_idx = 0;
-		state->on_success = NULL;
-		state->on_failure = NULL;
+		priv->cmd_len = 0;
+		priv->reply_len = 0;
+		priv->reply_idx = 0;
+		priv->on_success = NULL;
+		priv->on_failure = NULL;
 		break;
 	}
 
