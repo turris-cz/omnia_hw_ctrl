@@ -6,7 +6,8 @@ MEMORY
 {
 	isr_vector (r)	: ORIGIN = APPLICATION_BEGIN,				LENGTH = ISR_VECTOR_LENGTH
 	crcsum (r)	: ORIGIN = ORIGIN(isr_vector) + LENGTH(isr_vector),	LENGTH = 8
-	flash (rx)	: ORIGIN = ORIGIN(crcsum) + LENGTH(crcsum),		LENGTH = APPLICATION_END - ORIGIN(flash)
+	features (r)	: ORIGIN = ORIGIN(crcsum) + LENGTH(crcsum),		LENGTH = 12
+	flash (rx)	: ORIGIN = ORIGIN(features) + LENGTH(features),		LENGTH = APPLICATION_END - ORIGIN(flash)
 	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
@@ -21,6 +22,10 @@ SECTIONS
 	.crcsum : {
 		KEEP(*(.crcsum))
 	} >crcsum
+
+	.features : {
+		KEEP(*(.features))
+	} >features
 
 	.text : {
 		KEEP(*(.startup));

@@ -107,14 +107,14 @@ static __attribute__((__noreturn__)) void test(int n, char **args)
 static __attribute__((__noreturn__)) void usage(void)
 {
 	fprintf(stderr,
-		"Usage: crc32tool <offset> omnia_hw_ctrl.bin.nocrc >omnia_hw_ctrl.bin\n"
+		"Usage: crc32tool <crc-offset> <features-offset> omnia_hw_ctrl.bin.nocrc >omnia_hw_ctrl.bin\n"
 		"                 --test <32bit value>...\n\n");
 	exit(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv)
 {
-	unsigned long offset;
+	unsigned long offset, feat_offset;
 	char *end;
 	uint32_t size;
 	uint8_t *buf;
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 	if (!strcmp(argv[1], "--test"))
 		test(argc - 2, argv + 2);
 
-	if (argc != 3)
+	if (argc != 4)
 		usage();
 
 	if (isatty(STDOUT_FILENO)) {
@@ -133,17 +133,42 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	buf = read_mcu_code(argv[2], &size);
+	buf = read_mcu_code(argv[3], &size);
 
-	offset = strtoul(argv[1], &end, 0);
-	if (*end != '\0' || offset > size - 8 || !offset || offset % 4) {
-		fprintf(stderr, "Invalid offset %s\n", argv[1]);
-		exit(EXIT_FAILURE);
+	if (strcmp(argv[1], "ignore")) {
+		offset = strtoul(argv[1], &end, 0);
+		if (*end != '\0' || offset > size - 8 || !offset || offset % 4) {
+			fprintf(stderr, "Invalid checksum offset %s\n", argv[1]);
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		offset = -1UL;
 	}
 
-	*(uint32_t *)&buf[offset] = htole32(size);
-	*(uint32_t *)&buf[offset + 4] = htole32(0);
-	*(uint32_t *)&buf[offset + 4] = htole32(do_crc32(buf, size));
+	if (strcmp(argv[2], "ignore")) {
+		feat_offset = strtoul(argv[2], &end, 0);
+		if (*end != '\0' || feat_offset > size - 12 || !feat_offset || feat_offset % 4) {
+			fprintf(stderr, "Invalid features offset %s\n", argv[2]);
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		feat_offset = -1UL;
+	}
+
+	if (feat_offset != -1UL) {
+		if (le32toh(*(uint32_t *)&buf[feat_offset]) != 0xfea70235) {
+			fprintf(stderr, "Invalid features magic at offset %s\n", argv[2]);
+			exit(EXIT_FAILURE);
+		}
+
+		*(uint32_t *)&buf[feat_offset + 8] = htole32(do_crc32(&buf[feat_offset], 8));
+	}
+
+	if (offset != -1UL) {
+		*(uint32_t *)&buf[offset] = htole32(size);
+		*(uint32_t *)&buf[offset + 4] = htole32(0);
+		*(uint32_t *)&buf[offset + 4] = htole32(do_crc32(buf, size));
+	}
 
 	if (write(STDOUT_FILENO, buf, size) != size) {
 		perror("write");

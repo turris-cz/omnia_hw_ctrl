@@ -120,7 +120,7 @@ define PlatBuildVariant
 
   $(1).app.bin: build.$(1)/app.bin.nocrc tools/crc32tool
 	$(call echo,$(1),app,CRC32,$$@)
-	$(Q)tools/crc32tool $$(CSUM_POS_$(1)) $$< >$$@
+	$(Q)tools/crc32tool $$(CSUM_POS_$(1)) $$(FEAT_POS_$(1)) $$< >$$@
 	$(Q)chmod +x $$@
 
   build.$(1)/app.bin.nocrc: build.$(1)/app.elf
@@ -136,7 +136,12 @@ define PlatBuildVariant
 	$(call echo,$(1),app,LD,$$@)
 	$(Q)$$(CC) $$(CFLAGS) $$(CFLAGS_$(1)) $$(LDFLAGS) $$(OBJS_APP_$(1)) -o $$@
 
-  $(1).boot.bin: build.$(1)/boot.elf
+  $(1).boot.bin: build.$(1)/boot.bin.nocrc tools/crc32tool
+	$(call echo,$(1),boot,CRC32,$$@)
+	$(Q)tools/crc32tool ignore $$(BOOT_FEAT_POS_$(1)) $$< >$$@
+	$(Q)chmod +x $$@
+
+  build.$(1)/boot.bin.nocrc: build.$(1)/boot.elf
 	$(call echo,$(1),boot,BIN,$$@)
 	$(Q)$$(OBJCOPY) -O binary $$< $$@
 
@@ -161,6 +166,8 @@ endef
 define PlatDefVariant
   APP_POS_$(1)-$(2) = $$(APP_POS_$(1))
   CSUM_POS_$(1)-$(2) = $$(CSUM_POS_$(1))
+  FEAT_POS_$(1)-$(2) = $$(FEAT_POS_$(1))
+  BOOT_FEAT_POS_$(1)-$(2) = $$(BOOT_FEAT_POS_$(1))
   CFLAGS_$(1)-$(2) := $$(CFLAGS_$(1)) $$(CFLAGS_$(1)-$(2))
   CPPFLAGS_$(1)-$(2) := $$(CPPFLAGS_$(1)) $$(CPPFLAGS_$(1)-$(2))
   SRCS_PLAT_$(1)-$(2) := $$(SRCS_PLAT_$(1)) $$(SRCS_PLAT_$(1)-$(2))

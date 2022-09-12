@@ -19,6 +19,7 @@
 #include "eeprom.h"
 #include "memory_layout.h"
 #include "watchdog.h"
+#include "crc32.h"
 
 #if BOOTLOADER_BUILD
 __attribute__((__section__(".boot_version")))
@@ -29,15 +30,30 @@ static __maybe_unused struct {
 	uint32_t crcsum;
 } app_checksum __section(".crcsum");
 
-#define FEAT_IF(feat, cond) ((cond) ? FEAT_ ## feat : 0)
+#define FEAT_IF(feat, cond)	((cond) ? FEAT_ ## feat : 0)
+#define FEATURES_MAGIC		0xfea70235
 
-static const uint16_t slave_features_supported =
-	FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
-	FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
-	FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
-	FEAT_NEW_INT_API |
-	FEAT_WDT_PING |
-	FEAT_EXT_CMDS;
+__attribute__((__section__(".features")))
+static const struct {
+	uint32_t magic;
+	uint16_t features;
+	uint8_t status_features;
+	uint8_t reserved;
+	uint32_t csum;
+} slave_features_supported = {
+	.magic = FEATURES_MAGIC,
+	.features =
+		FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
+		FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
+		FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
+		FEAT_NEW_INT_API |
+		FEAT_WDT_PING |
+		FEAT_EXT_CMDS,
+	.status_features =
+		STS_MCU_TYPE |
+		STS_FEATURES_SUPPORTED |
+		(USER_REGULATOR_ENABLED ? 0 : STS_USER_REGULATOR_NOT_SUPPORTED),
+};
 
 enum boot_request_e {
 	BOOTLOADER_REQ	= 0xAA,
@@ -108,8 +124,37 @@ static inline void _set_reply(i2c_iface_priv_t *priv, const void *reply,
 
 static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 {
-	debug("get_features\n");
-	set_reply(slave_features_supported);
+	if (priv->cmd_len == 1) {
+		debug("get_features %#06x\n",
+		      slave_features_supported.features);
+		set_reply(slave_features_supported.features);
+	} else if (priv->cmd_len == 2) {
+		typeof(slave_features_supported) *ptr;
+		uint32_t features;
+		uint32_t csum;
+
+		if (priv->cmd[1] == 0xbb)
+			ptr = (const void *)BOOTLOADER_FEATURES;
+		else if (priv->cmd[1] == 0xaa)
+			ptr = (const void *)APPLICATION_FEATURES;
+		else
+			return -1;
+
+		if (ptr->magic != FEATURES_MAGIC)
+			return -1;
+
+		crc32(&csum, 0, ptr, 8);
+		if (csum != ptr->csum)
+			return -1;
+
+		features = ptr->features | (ptr->status_features << 16);
+
+		debug("get_features(%#04x) %#010x\n", priv->cmd[1],
+		      features);
+		set_reply(ptr->features);
+	} else if (priv->cmd_len > 2) {
+		return -1;
+	}
 
 	return 0;
 }
@@ -577,7 +622,7 @@ typedef struct {
 
 static const cmdinfo_t commands[] = {
 	/* control & status */
-	[CMD_GET_FEATURES]		= { 1, cmd_get_features },
+	[CMD_GET_FEATURES]		= { 0, cmd_get_features },
 	[CMD_GET_STATUS_WORD]		= { 1, cmd_get_status },
 	[CMD_GENERAL_CONTROL]		= { 3, cmd_general_control },
 	[CMD_GET_EXT_STATUS_DWORD]	= { 1, cmd_get_ext_status },
@@ -635,7 +680,9 @@ static int handle_cmd(uint8_t addr, i2c_iface_priv_t *priv)
 	    !(cmd->availability == LED_ADDR_ONLY && addr == LED_CONTROLLER_I2C_ADDR))
 		return -1;
 
-	if (priv->cmd_len < cmd->len)
+	if (!cmd->len)
+		return cmd->handler(priv);
+	else if (priv->cmd_len < cmd->len)
 		return 0;
 	else if (priv->cmd_len == cmd->len)
 		return cmd->handler(priv);

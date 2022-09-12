@@ -6,7 +6,8 @@ MEMORY
 {
 	isr_vector (r)	: ORIGIN = BOOTLOADER_BEGIN,				LENGTH = ISR_VECTOR_LENGTH
 	boot_version(r)	: ORIGIN = ORIGIN(isr_vector) + LENGTH(isr_vector),	LENGTH = 0x14
-	flash (rx)	: ORIGIN = ORIGIN(boot_version) + LENGTH(boot_version),	LENGTH = APPLICATION_BEGIN - ORIGIN(flash)
+	features (r)	: ORIGIN = ORIGIN(boot_version) + LENGTH(boot_version),	LENGTH = 12
+	flash (rx)	: ORIGIN = ORIGIN(features) + LENGTH(features),		LENGTH = APPLICATION_BEGIN - ORIGIN(flash)
 	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
@@ -21,6 +22,10 @@ SECTIONS
 	.boot_version : {
 		KEEP(*(.boot_version))
 	} >boot_version
+
+	.features : {
+		KEEP(*(.features))
+	} >features
 
 	.text : {
 		KEEP(*(.startup));
