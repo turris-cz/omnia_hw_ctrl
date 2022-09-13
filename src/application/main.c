@@ -5,6 +5,7 @@
 #include "wan_lan_pci_msata.h"
 #include "debug.h"
 #include "eeprom.h"
+#include "message.h"
 #include "cpu.h"
 #include "flash.h"
 #include "memory_layout.h"
@@ -218,6 +219,7 @@ void main(void)
 			break;
 
 		case BOOTLOADER:
+			set_message_before_switch(STAY_IN_BOOTLOADER);
 			reset_to_address(BOOTLOADER_BEGIN);
 		}
 	}

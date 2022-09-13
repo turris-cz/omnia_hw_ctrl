@@ -10,6 +10,7 @@
 #include "power_control.h"
 #include "time.h"
 #include "eeprom.h"
+#include "message.h"
 #include "debug.h"
 #include "bootloader.h"
 #include "led_driver.h"
@@ -115,9 +116,17 @@ static bool check_app_crc(void)
   *****************************************************************************/
 static boot_value_t startup_manager(void)
 {
+	message_t msg;
 	eeprom_var_t ee_var;
 	uint16_t ee_data;
 	boot_value_t retval = GO_TO_INPUT_MANAGER;
+
+	msg = get_message_after_switch();
+
+	if (msg == STAY_IN_BOOTLOADER) {
+		debug("Requsted to stay in bootloader\n");
+		return GO_TO_FLASH;
+	}
 
 	ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
 
