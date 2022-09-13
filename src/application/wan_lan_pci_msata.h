@@ -1,12 +1,3 @@
-/**
- ******************************************************************************
- * @file    wan_lan_pci_msata.h
- * @author  CZ.NIC, z.s.p.o.
- * @date    10-August-2015
- * @brief   Header file for driver of WAN, LAN and PCIe status indication.
- ******************************************************************************
- ******************************************************************************
- **/
 #ifndef WAN_LAN_PCI_MSATA_H
 #define WAN_LAN_PCI_MSATA_H
 

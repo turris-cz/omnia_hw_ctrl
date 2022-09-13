@@ -1,12 +1,3 @@
-/**
- ******************************************************************************
- * @file    wan_lan_pci_msata.c
- * @author  CZ.NIC, z.s.p.o.
- * @date    10-August-2015
- * @brief   Driver for WAN, LAN and PCIe status indication.
- ******************************************************************************
- ******************************************************************************
- **/
 #include "wan_lan_pci_msata.h"
 #include "led_driver.h"
 #include "debug.h"
