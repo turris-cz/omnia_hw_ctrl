@@ -123,7 +123,10 @@ enum commands_e {
  *      7   |   BOOTLOADER           : 1 - MCU firmware is in bootloader, 0 - MCU firmware is in application
  *      8   |   FLASHING             : 1 - CMD_FLASH is supported with new flahsing protocol,
  *                                     0 - only old flashing protocol at address 0x2c is supported
- *  9..15   |   reserved
+ *      9   |   NEW_MESSAGE_API      : 1 - Application/bootloader uses only new API to pass messages from/to bootloader/application;
+ *                                         you should only flash images that support the new API
+ *                                     0 - otherwise
+ * 10..15   |   reserved
 */
 
 * Example of a reading of features from Linux:

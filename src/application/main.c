@@ -4,7 +4,6 @@
 #include "i2c_iface.h"
 #include "wan_lan_pci_msata.h"
 #include "debug.h"
-#include "eeprom.h"
 #include "message.h"
 #include "cpu.h"
 #include "flash.h"

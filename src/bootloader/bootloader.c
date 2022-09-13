@@ -9,10 +9,8 @@
  **/
 #include "power_control.h"
 #include "time.h"
-#include "eeprom.h"
 #include "message.h"
 #include "debug.h"
-#include "bootloader.h"
 #include "led_driver.h"
 #include "flash.h"
 #include "memory_layout.h"
@@ -59,7 +57,6 @@ static void bootloader_init(void)
 	debug_init();
 
 	flash_init(); /* Unlock the Flash Program Erase controller */
-	EE_Init(); /* EEPROM Init */
 
 	/* peripheral initialization*/
 	crc32_enable();
@@ -118,9 +115,6 @@ static boot_value_t startup_manager(void)
 {
 	uint32_t sys_reset_msg;
 	message_t msg;
-	eeprom_var_t ee_var;
-	uint16_t ee_data;
-	boot_value_t retval = GO_TO_INPUT_MANAGER;
 
 	if (get_sys_reset_message(&sys_reset_msg)) {
 		debug("Application faulted with fault %#04x, staying in bootloader\n",
@@ -135,61 +129,10 @@ static boot_value_t startup_manager(void)
 		return GO_TO_FLASH;
 	}
 
-	ee_var = EE_ReadVariable(RESET_VIRT_ADDR, &ee_data);
-
-	/* power on reset - first boot - everything is flashed;
-	   request for reflashing has never ocurred */
-
-	switch (ee_var) {
-	case VAR_NOT_FOUND:
-		retval = GO_TO_APPLICATION;
-		debug("R1\n");
-		break;
-
-	case VAR_FOUND:
-		switch (ee_data) {
-		case BOOTLOADER_REQ:
-			retval = GO_TO_FLASH;
-			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-			debug("req\n");
-			break;
-
-		case FLASH_NOT_CONFIRMED:
-			/* error */
-			retval = GO_TO_POWER_ON;
-			EE_WriteVariable(RESET_VIRT_ADDR, FLASH_CONFIRMED);
-			debug("ERR\n");
-			break;
-
-		case FLASH_CONFIRMED:
-			/* application was flashed correctly */
-			retval = GO_TO_APPLICATION;
-			debug("R2\n");
-			break;
-
-		default:
-			/* flag has not been saved correctly */
-			retval = GO_TO_POWER_ON; break;
-		}
-		break;
-
-	case VAR_NO_VALID_PAGE :
-		retval = GO_TO_POWER_ON;
-		debug("Boot-No valid page\n");
-		break;
-
-	default:
-		break;
-	}
-
-	/*
-	 * if EEprom variable says we should boot application but application has
-	 * bad CRC, just power on
-	 */
-	if (retval == GO_TO_APPLICATION && !check_app_crc())
-		retval = GO_TO_POWER_ON;
-
-	return retval;
+	if (check_app_crc())
+		return GO_TO_APPLICATION;
+	else
+		return GO_TO_POWER_ON;
 }
 
 /*******************************************************************************

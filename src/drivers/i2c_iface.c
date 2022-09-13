@@ -16,7 +16,6 @@
 #include "wan_lan_pci_msata.h"
 #include "power_control.h"
 #include "input.h"
-#include "eeprom.h"
 #include "memory_layout.h"
 #include "watchdog.h"
 #include "crc32.h"
@@ -49,7 +48,8 @@ static const struct {
 		FEAT_NEW_INT_API |
 		FEAT_WDT_PING |
 		FEAT_EXT_CMDS |
-		FEAT_FLASHING,
+		FEAT_FLASHING |
+		FEAT_NEW_MESSAGE_API,
 	.status_features =
 		STS_MCU_TYPE |
 		STS_FEATURES_SUPPORTED |
@@ -263,31 +263,8 @@ static void on_general_control_success(i2c_iface_priv_t *priv)
 		enable_irq();
 	}
 
-	if (!BOOTLOADER_BUILD && (set & CTL_BOOTLOADER)) {
-		eeprom_var_t ee_var;
-
-		EE_Init();
-		ee_var = EE_WriteVariable(RESET_VIRT_ADDR, BOOTLOADER_REQ);
-
-		switch (ee_var) {
-		case VAR_FLASH_COMPLETE:
-			debug("RST: OK\n");
-			break;
-
-		case VAR_PAGE_FULL:
-			debug("RST: Pg full\n");
-			break;
-
-		case VAR_NO_VALID_PAGE:
-			debug("RST: No Pg\n");
-			break;
-
-		default:
-			break;
-		}
-
+	if (!BOOTLOADER_BUILD && (set & CTL_BOOTLOADER))
 		i2c_iface.req = I2C_IFACE_REQ_BOOTLOADER;
-	}
 }
 
 static __maybe_unused int cmd_general_control(i2c_iface_priv_t *priv)

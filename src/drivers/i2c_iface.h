@@ -191,6 +191,7 @@ enum features_e {
 	FEAT_NEW_INT_API		= BIT(6),
 	FEAT_BOOTLOADER			= BIT(7),
 	FEAT_FLASHING			= BIT(8),
+	FEAT_NEW_MESSAGE_API		= BIT(9),
 };
 
 enum ext_sts_dword_e {
@@ -307,7 +308,10 @@ enum int_e {
  *      7   |   BOOTLOADER           : 1 - MCU firmware is in bootloader, 0 - MCU firmware is in application
  *      8   |   FLASHING             : 1 - CMD_FLASH is supported with new flahsing protocol,
  *                                     0 - only old flashing protocol at address 0x2c is supported
- *  9..15   |   reserved
+ *      9   |   NEW_MESSAGE_API      : 1 - Application/bootloader uses only new API to pass messages from/to bootloader/application;
+ *                                         you should only flash images that support the new API
+ *                                     0 - otherwise
+ * 10..15   |   reserved
 */
 
 /*
