@@ -116,10 +116,17 @@ static bool check_app_crc(void)
   *****************************************************************************/
 static boot_value_t startup_manager(void)
 {
+	uint32_t sys_reset_msg;
 	message_t msg;
 	eeprom_var_t ee_var;
 	uint16_t ee_data;
 	boot_value_t retval = GO_TO_INPUT_MANAGER;
+
+	if (get_sys_reset_message(&sys_reset_msg)) {
+		debug("Application faulted with fault %#04x, staying in bootloader\n",
+		      sys_reset_msg & 0x3f);
+		return GO_TO_POWER_ON;
+	}
 
 	msg = get_message_after_switch();
 

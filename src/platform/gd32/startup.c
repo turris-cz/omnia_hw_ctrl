@@ -3,6 +3,7 @@
 #include "compiler.h"
 #include "cpu.h"
 #include "memory_layout.h"
+#include "message.h"
 
 extern uint32_t _stack_top, _sfdata, _sdata, _edata, _sbss, _ebss;
 extern void __noreturn main(void);
@@ -32,7 +33,18 @@ reset_handler(void)
 
 static void __irq default_handler(void)
 {
+	disable_irq();
+
+#if BOOTLOADER_BUILD
 	while (1);
+#else
+	asm volatile(
+		"mov	sp, %0\n"
+		: : "lr" (RAM_END - SYS_RESET_MSG_LENGTH)
+	);
+
+	sys_reset_with_message(__get_IPSR() & 0x3f);
+#endif
 }
 
 void nmi_handler(void) __weak_alias(default_handler);

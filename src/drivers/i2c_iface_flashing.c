@@ -209,7 +209,7 @@ static bool is_good_stack_addr(uint32_t addr)
 	if (addr & 3)
 		return false;
 
-	return addr > RAM_BEGIN + 0x1000 && addr <= RAM_BEGIN + RAM_LENGTH;
+	return addr > RAM_BEGIN + 0x1000 && addr <= RAM_END;
 }
 
 static bool is_good_reset_addr(uint32_t addr)
