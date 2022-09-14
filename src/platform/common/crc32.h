@@ -14,6 +14,8 @@ static inline bool crc32(uint32_t *res, uint32_t init,
 
 	*res = init;
 
+	dsb();
+
 	while (len > 0) {
 		uint16_t now = MIN(len, 128);
 

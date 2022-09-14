@@ -45,6 +45,11 @@ static __force_inline void isb(void)
 	asm volatile("isb\n");
 }
 
+static __force_inline void dsb(void)
+{
+	asm volatile("dsb\n");
+}
+
 static __force_inline void nop(void)
 {
 	asm("nop\n");
