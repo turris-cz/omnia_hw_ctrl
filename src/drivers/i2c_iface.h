@@ -255,39 +255,41 @@ enum int_e {
 /*
  * Bit meanings in status word:
  *  Bit Nr. |   Meanings
- * -----------------
- *    0,1   |   MCU_TYPE        : 00 -> STM32
- *                                01 -> GD32
- *                                10 -> MKL
- *                                11 -> reserved
+ * ---------+---------------------------
+ *   0..1   |   MCU_TYPE               : 00 -> STM32
+ *                                       01 -> GD32
+ *                                       10 -> MKL
+ *                                       11 -> reserved
  *
- * Caution! STM32 and GD32 uses Atsha for security, MKL doesn't!!!!!!!!!
- * IT IS NECESSARY TO READ AND DECODE THE FIRST TWO BITS PROPERLY!
+ *                                       WARNING: Boards with STM32 and GD32 MCUs use external ATSHA204A crypto-chip for security purposes.
+ *                                                Boards with MKL MCU have crypto provided by the MCU.
+ *                                                It is therefore necessary to read and decode the status word properly!
  *
- *      2   |   FEATURES_SUPPORT: 1 - get features command supported, 0 - get features command not supported
- *      3   |   USER_REG_NOT_SUP: 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
- *      4   |   CARD_DET        : 1 - mSATA/PCIe card detected, 0 - no card
- *      5   |   mSATA_IND       : 1 - mSATA card inserted, 0 - PCIe card inserted
- *      6   |   USB30_OVC       : 1 - USB3-port0 overcurrent, 0 - no overcurrent
- *      7   |   USB31_OVC       : 1 - USB3-port1 overcurrent, 0 - no overcurrent
- *      8   |   USB30_PWRON     : 1 - USB3-port0 power ON, 0 - USB-port0 power off
- *      9   |   USB31_PWRON     : 1 - USB3-port1 power ON, 0 - USB-port1 power off
- *     10   |   ENABLE_4V5      : 1 - 4.5V power is enabled, 0 - 4.5V power is disabled
- *     11   |   BUTTON_MODE     : 1 - user mode, 0 - default mode (brightness settings)
- *     12   |   BUTTON_PRESSED  : 1 - button pressed in user mode, 0 - button not pressed
- * 13..15   |   BUTTON_COUNT    : number of pressing of the button (max. 7) - valid in user mode
+ *      2   |   FEATURES_SUPPORTED     : 1 - get features command supported, 0 - get features command not supported
+ *      3   |   USER_REG_NOT_SUPPORTED : 1 - user regulator not supported (always "1" since GD32 MCU), 0 - user regulator may be supported (old STM32 MCU)
+ *      4   |   CARD_DET               : 1 - mSATA/PCIe card detected, 0 - no card
+ *      5   |   mSATA_IND              : 1 - mSATA card inserted, 0 - PCIe card inserted
+ *      6   |   USB30_OVC              : 1 - USB3-port0 overcurrent, 0 - no overcurrent
+ *      7   |   USB31_OVC              : 1 - USB3-port1 overcurrent, 0 - no overcurrent
+ *      8   |   USB30_PWRON            : 1 - USB3-port0 power ON, 0 - USB-port0 power off
+ *      9   |   USB31_PWRON            : 1 - USB3-port1 power ON, 0 - USB-port1 power off
+ *     10   |   ENABLE_4V5             : Available only if USER_REGULATOR_NOT_SUPPORTED not set in status word
+ *                                       1 - 4.5V power is enabled, 0 - 4.5V power is disabled
+ *     11   |   BUTTON_MODE            : 1 - user mode, 0 - default mode (brightness settings)
+ *     12   |   BUTTON_PRESSED         : 1 - button pressed in user mode, 0 - button not pressed
+ * 13..15   |   BUTTON_COUNT           : number of pressing of the button (max. 7) - valid in user mode
 */
 
 /*
  * Bit meanings in features:
  *  Bit Nr. |   Meanings
- * -----------------
+ * ---------+-------------------------
  *      0   |   PERIPH_MCU           : 1 - resets (eMMC, PHY, switch, PCIe), SerDes switch (PHY vs SFP cage) and VHV control are connected to MCU
  *                                         (available to set via CMD_EXT_CONTROL command)
  *                                     0 - otherwise
  *      1   |   EXT_CMDS             : 1 - extended control and status commands are available, 0 - otherwise
  *      2   |   WDT_PING             : 1 - CMD_SET_WDT_TIMEOUT and CMD_GET_WDT_TIMELEFT supported, 0 - otherwise
- *    3,4   |   LED_STATE_EXT        : 00 -> LED status extension not supported in extended status word
+ *   3..4   |   LED_STATE_EXT        : 00 -> LED status extension not supported in extended status word
  *                                     01 -> LED status extension supported, board revision <32
  *                                     10 -> LED status extension supported, board revision >=32
  *                                     11 -> reserved
@@ -306,16 +308,16 @@ enum int_e {
 
 /*
  * Bit meanings in extended status dword:
- *  Bit Nr. |   Meanings
- * -----------------
- *      0   |   SFP_nDET        : 1 - no SFP detected, 0 - SFP detected
+ *  Bit Nr. | Feature required |   Meanings
+ * ---------+------------------+--------------------
+ *      0   |   PERIPH_MCU     |   SFP_nDET        : 1 - no SFP detected, 0 - SFP detected
  *  1..11   |   reserved
- * 12..31   |   LED states      : 1 - LED is on, 0 - LED is off
+ * 12..31   |   LED_STATE_EXT  |   LED states      : 1 - LED is on, 0 - LED is off
  *
  * Meanings for LED states bits 12..31 (avaialble only if LED_STATE_EXT feature
  * is non-zero):
  *  Bit Nr. |   Meanings          | Note
- * -------------------------------------
+ * ---------+---------------------+--------
  *     12   |   WLAN0_MSATA_LED   | note 1
  *     13   |   WLAN1_LED         | note 2
  *     14   |   WLAN2_LED         | note 2
@@ -357,54 +359,55 @@ enum int_e {
 /*
  * Byte meanings in reset byte:
  *  Byte Nr. |   Meanings
- * -----------------
- *   1.B    |   RESET_TYPE      : 0 - normal reset, 1 - previous snapshot,
- *                              2 - normal factory reset, 3 - hard factory reset
+ * ----------+--------------------
+ *   1.B     |   RESET_TYPE      : 0 - normal reset, 1 - previous snapshot,
+ *                                 2 - normal factory reset, 3 - hard factory reset
 */
 
 /*
  * Bit meanings in control byte:
  *  Bit Nr. |   Meanings
- * -----------------
+ * ---------+----------------
  *      0   |   LIGHT_RST   : 1 - do light reset, 0 - no reset
  *      1   |   HARD_RST    : 1 - do hard reset, 0 - no reset
  *      2   |   dont care
  *      3   |   USB30_PWRON : 1 - USB3-port0 power ON, 0 - USB-port0 power off
  *      4   |   USB31_PWRON : 1 - USB3-port1 power ON, 0 - USB-port1 power off
- *      5   |   ENABLE_4V5  : 1 - 4.5V power supply ON, 0 - 4.5V power supply OFF
+ *      5   |   ENABLE_4V5  : Available only if USER_REGULATOR_NOT_SUPPORTED not set in status word
+ *                            1 - 4.5V power supply ON, 0 - 4.5V power supply OFF
  *      6   |   BUTTON_MODE : 1 - user mode, 0 - default mode (brightness settings)
  *      7   |   BOOTLOADER  : 1 - jump to bootloader
 */
 
 /*
  * Bit meanings in extended control dword:
- *  Bit Nr. |   Meanings
- * -----------------
- *      0   |   nRES_MMC     : 0 - reset of MMC, 1 - no reset
- *      1   |   nRES_LAN     : 0 - reset of LAN switch, 1 - no reset
- *      2   |   nRES_PHY     : 0 - reset of PHY WAN, 1 - no reset
- *      3   |   nPERST0      : 0 - reset of PCIE0, 1 - no reset
- *      4   |   nPERST1      : 0 - reset of PCIE1, 1 - no reset
- *      5   |   nPERST2      : 0 - reset of PCIE2, 1 - no reset
- *      6   |   PHY_SFP      : 1 - PHY WAN mode, 0 - SFP WAN mode
- *      7   |   PHY_SFP_AUTO : 1 - automatically switch between PHY and SFP WAN modes
- *                             0 - PHY/SFP WAN mode determined by value written to PHY_SFP bit
- *      8   |   nVHV_CTRL    : 1 - VHV control not active, 0 - VHV control voltage active
- *  9..15   |   reserved
+ *  Bit Nr. | Feature required |   Meanings
+ * ---------+------------------+-----------------
+ *      0   |    PERIPH_MCU    |   nRES_MMC     : 0 - reset of MMC, 1 - no reset
+ *      1   |    PERIPH_MCU    |   nRES_LAN     : 0 - reset of LAN switch, 1 - no reset
+ *      2   |    PERIPH_MCU    |   nRES_PHY     : 0 - reset of PHY WAN, 1 - no reset
+ *      3   |    PERIPH_MCU    |   nPERST0      : 0 - reset of PCIE0, 1 - no reset
+ *      4   |    PERIPH_MCU    |   nPERST1      : 0 - reset of PCIE1, 1 - no reset
+ *      5   |    PERIPH_MCU    |   nPERST2      : 0 - reset of PCIE2, 1 - no reset
+ *      6   |    PERIPH_MCU    |   PHY_SFP      : 1 - PHY WAN mode, 0 - SFP WAN mode
+ *      7   |    PERIPH_MCU    |   PHY_SFP_AUTO : 1 - automatically switch between PHY and SFP WAN modes
+ *                                                0 - PHY/SFP WAN mode determined by value written to PHY_SFP bit
+ *      8   |    PERIPH_MCU    |   nVHV_CTRL    : 1 - VHV control not active, 0 - VHV control voltage active
+ *  9..15   |    reserved
 */
 
 /*
  * Bit meanings in interrupt status and interrupt mask:
- *  Bit Nr. |   Meanings                |   Corresponds to
- * ---------|---------------------------|--------------------
- *      0   |   INT_CARD_DET            |   STS_CARD_DET
- *      1   |   INT_MSATA_IND           |   STS_MSATA_IND
- *      2   |   INT_USB30_OVC           |   STS_USB30_OVC
- *      3   |   INT_USB31_OVC           |   STS_USB31_OVC
- *      4   |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
- *      5   |   INT_SFP_nDET            |   EXT_STS_SFP_nDET
+ *  Bit Nr. | Feature required |   Meanings                |   Corresponds to
+ * ---------+------------------+---------------------------+----------------------
+ *      0   |                  |   INT_CARD_DET            |   STS_CARD_DET
+ *      1   |                  |   INT_MSATA_IND           |   STS_MSATA_IND
+ *      2   |                  |   INT_USB30_OVC           |   STS_USB30_OVC
+ *      3   |                  |   INT_USB31_OVC           |   STS_USB31_OVC
+ *      4   |                  |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
+ *      5   |   PERIPH_MCU     |   INT_SFP_nDET            |   EXT_STS_SFP_nDET
  *  6..11   |   reserved
- * 12..31   |   LED states interrupts   |   EXT_STS_*_LED*
+ * 12..31   |   LED_STATE_EXT  |   LED states interrupts   |   EXT_STS_*_LED*
  *
  * IMPORTANT:
  *   The interrupt related commands (CMD_GET_INT_AND_CLEAR, CMD_GET_INT_MASK and
@@ -451,7 +454,7 @@ enum int_e {
 /*
  * Bit meanings in led mode byte:
  *  Bit Nr. |   Meanings
- * -----------------
+ * ---------+----------------
  *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
  *      4   |   LED mode    : 1 - USER mode, 0 - default mode
  *   5..7   |   dont care
@@ -460,7 +463,7 @@ enum int_e {
 /*
  * Bit meanings in led state byte:
  *  Bit Nr. |   Meanings
- * -----------------
+ * ---------+-----------------
  *   0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
  *      4   |   LED state    : 1 - LED ON, 0 - LED OFF
  *   5..7   |   dont care
@@ -469,12 +472,12 @@ enum int_e {
 /*
  * Bit meanings in led color:
  * Byte Nr. |  Bit Nr. |   Meanings
- * -----------------
- *  1.B     |  0..3   |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
- *  1.B     |  4..7   |   dont care
- *  2.B     |  8..15  |   red color [0..255]
- *  3.B     |  16..23 |   green color [0..255]
- *  4.B     |  24..31 |   blue color [0..255]
+ * ---------+----------+--------------
+ *  1.B     |  0..3    |   LED number [0..11] (or in case setting of all LED at once -> LED number = 12)
+ *  1.B     |  4..7    |   dont care
+ *  2.B     |  8..15   |   red color [0..255]
+ *  3.B     |  16..23  |   green color [0..255]
+ *  4.B     |  24..31  |   blue color [0..255]
 */
 
 #endif /* I2C_IFACE_H */
