@@ -52,7 +52,7 @@ ifeq ($(V), 1)
 	echo =
 else
 	Q = @
-	echo = @printf "%26s [%-8s]  %s\n" "$(1)" "$(2)" "$(3)"
+	echo = @printf "%26s %-4s [%-8s]  %s\n" "$(1)" "$(2)" "$(3)" "$(4)"
 endif
 
 .PHONY: all app boot clean
@@ -68,7 +68,7 @@ clean:
 
 define HostToolRule
   tools/$(1): tools/$(1).c
-	$(call echo,,HOSTCC,$$<)
+	$(call echo,,,HOSTCC,$$<)
 	$(Q)$(HOSTCC) $(HOSTCFLAGS) -o $$@ $$<
 endef
 
@@ -76,13 +76,13 @@ $(foreach tool,$(HOSTTOOLS),$(eval $(call HostToolRule,$(tool))))
 
 define CompileRule
   build.$(1)/$(2)/$(3)%.o: $(3)%.c
-	$(call echo,$(1),CC,$$^)
+	$(call echo,$(1),$(2),CC,$$^)
 	$(Q)mkdir -p $$(@D) && $$(CC) -c $$(CPPFLAGS) $$(CPPFLAGS_$(1)) $$(CFLAGS) $$(CFLAGS_$(1)) $$< -o $$@
 endef
 
 define LinkScriptRule
   build.$(1)/$(2)/$(3): $(3)
-	$(call echo,$(1),GENLDS,$$^)
+	$(call echo,$(1),$(2),GENLDS,$$^)
 	$(Q)mkdir -p $$(@D) && $$(CPP) $$(CPPFLAGS) $$(CPPFLAGS_$(1)) -D__ASSEMBLY__ -x assembler-with-cpp -std=c99 -P -o $$@ $$<
 endef
 
@@ -101,7 +101,7 @@ define PlatBuildVariant
   boot_$(1): $(1).boot.bin build.$(1)/boot.hex build.$(1)/boot.dis
 
   $(1).flash.bin: app_$(1) boot_$(1) tools/genflashimg
-	$(call echo,$(1),GENFLASH,$$@)
+	$(call echo,$(1),,GENFLASH,$$@)
 	$(Q)tools/genflashimg $(1).boot.bin $(1).app.bin $$(APP_POS_$(1)) >$$@
 	$(Q)chmod +x $$@
 
@@ -109,20 +109,20 @@ define PlatBuildVariant
 	rm -rf build.$(1) $(1).flash.bin $(1).app.bin $(1).boot.bin
 
   build.$(1)/%.hex: $(1).%.bin
-	$(call echo,$(1),HEX,$$@)
+	$(call echo,$(1),$$*,HEX,$$@)
 	$(Q)$$(OBJCOPY) -I binary -O ihex $$< $$@
 
   build.$(1)/%.dis: build.$(1)/%.elf
-	$(call echo,$(1),DISASM,$$@)
+	$(call echo,$(1),$$*,DISASM,$$@)
 	$(Q)$$(OBJDUMP) -D -S $$< >$$@
 
   $(1).app.bin: build.$(1)/app.bin.nocrc tools/crc32tool
-	$(call echo,$(1),CRC32,$$@)
+	$(call echo,$(1),app,CRC32,$$@)
 	$(Q)tools/crc32tool $$(CSUM_POS_$(1)) $$< >$$@
 	$(Q)chmod +x $$@
 
   build.$(1)/app.bin.nocrc: build.$(1)/app.elf
-	$(call echo,$(1),BIN,$$@)
+	$(call echo,$(1),app,BIN,$$@)
 	$(Q)$$(OBJCOPY) -O binary $$< $$@
 
   $$(eval $$(call LinkScriptRule,$(1),app,$$(LDSCRIPT_app)))
@@ -131,11 +131,11 @@ define PlatBuildVariant
   build.$(1)/app.elf: LDSCRIPT = $$(LDSCRIPT_app_$(1))
   build.$(1)/app.elf: LDMAP = build.$(1)/app.map
   build.$(1)/app.elf: $$(OBJS_APP_$(1)) $$(LDSCRIPT_app_$(1))
-	$(call echo,$(1),LD,$$@)
+	$(call echo,$(1),app,LD,$$@)
 	$(Q)$$(CC) $$(CFLAGS) $$(CFLAGS_$(1)) $$(LDFLAGS) $$(OBJS_APP_$(1)) -o $$@
 
   $(1).boot.bin: build.$(1)/boot.elf
-	$(call echo,$(1),BIN,$$@)
+	$(call echo,$(1),boot,BIN,$$@)
 	$(Q)$$(OBJCOPY) -O binary $$< $$@
 
   $$(eval $$(call LinkScriptRule,$(1),boot,$$(LDSCRIPT_boot)))
@@ -144,7 +144,7 @@ define PlatBuildVariant
   build.$(1)/boot.elf: LDSCRIPT = $$(LDSCRIPT_boot_$(1))
   build.$(1)/boot.elf: LDMAP = build.$(1)/boot.map
   build.$(1)/boot.elf: $$(OBJS_BOOT_$(1)) $$(LDSCRIPT_boot_$(1))
-	$(call echo,$(1),LD,$$@)
+	$(call echo,$(1),boot,LD,$$@)
 	$(Q)$$(CC) $$(CFLAGS_$(1)) $$(LDFLAGS) $$(OBJS_BOOT_$(1)) -o $$@
 
   $$(foreach dir,$$(sort $$(dir $$(SRCS_APP_$(1)))),$$(eval $$(call CompileRule,$(1),app,$$(dir))))
