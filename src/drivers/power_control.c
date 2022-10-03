@@ -317,6 +317,7 @@ static void increase_reset_selector_level(int *sel, uint8_t *level)
 void power_control_first_startup(void)
 {
 	uint8_t prev_brightness, level;
+	uint32_t last_jiffies;
 	unsigned timeout;
 	int sel;
 
@@ -329,17 +330,26 @@ void power_control_first_startup(void)
 	led_set_state(LED_COUNT, false);
 	led_driver_set_brightness(100);
 
+	_Static_assert(RESET_SELECTOR_LEVEL_TIMEOUT % JIFFY_TO_MSECS == 0,
+		       "RESET_SELECTOR_LEVEL_TIMEOUT must be divisible by JIFFY_TO_MSECS");
 	timeout = RESET_SELECTOR_LEVEL_TIMEOUT;
 	level = 0;
 	sel = -1;
 
-	/* Read main board reset signal every 1ms.
-	 * Increase reset selector level every 10ms.
-	 */
+	/* Increase reset selector level every 10ms. */
+	last_jiffies = jiffies;
 	while (!gpio_read(SYSRES_OUT_PIN)) {
-		msleep(1);
+		/* To prevent reading board reset signal too often, put a cycle
+		 * with some nops in-between. */
+		if (last_jiffies == jiffies) {
+			for (int i = 0; i < 500; ++i)
+				nop();
+			continue;
+		}
 
-		if (timeout--)
+		last_jiffies = jiffies;
+		timeout -= JIFFY_TO_MSECS;
+		if (timeout)
 			continue;
 
 		timeout = RESET_SELECTOR_LEVEL_TIMEOUT;
