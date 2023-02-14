@@ -60,7 +60,7 @@ static void bootloader_init(void)
 	enable_irq();
 
 	led_set_color24(LED_COUNT, GREEN_COLOR);
-	led_driver_reset_effect(ENABLE);
+	led_driver_reset_effect(true);
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
@@ -172,11 +172,11 @@ static void bootloader(void)
 		msleep(100);
 
 		power_control_enable_regulators();
-		led_driver_reset_effect(DISABLE);
+		led_driver_reset_effect(false);
 		power_control_first_startup();
 
 		led_set_color24(LED_COUNT, RED_COLOR);
-		led_driver_reset_effect(ENABLE);
+		led_driver_reset_effect(true);
 
 		/* set active reset of peripherals after CPU reset on v32+
 		 * boards

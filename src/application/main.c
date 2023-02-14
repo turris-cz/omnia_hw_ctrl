@@ -83,7 +83,7 @@ static int power_on(void)
   *****************************************************************************/
 static void light_reset(void)
 {
-	led_driver_reset_effect(DISABLE);
+	led_driver_reset_effect(false);
 
 	disable_irq();
 	i2c_iface_init();
@@ -100,7 +100,7 @@ static void light_reset(void)
 	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
 	watchdog_enable(true);
 
-	led_driver_reset_effect(ENABLE);
+	led_driver_reset_effect(true);
 
 	input_signals_config();
 }

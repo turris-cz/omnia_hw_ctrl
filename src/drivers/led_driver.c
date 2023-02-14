@@ -620,7 +620,7 @@ static void led_driver_knight_rider_effect_handler(void)
 				led_set_state(POWER_LED, true);
 
 				led_set_user_mode(LED_COUNT, false);
-				led_driver_reset_effect(DISABLE);
+				led_driver_reset_effect(false);
 				state_timeout_cnt = 0;
 				effect_reset_finished = true;
 				effect_state = EFFECT_INIT;
