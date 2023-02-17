@@ -3,6 +3,7 @@
 #include "time.h"
 #include "led_driver.h"
 #include "i2c_iface.h"
+#include "pin_defs.h"
 #include "debug.h"
 #include "timer.h"
 

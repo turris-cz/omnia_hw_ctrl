@@ -1,5 +1,6 @@
 #include "wan_lan_pci_msata.h"
 #include "led_driver.h"
+#include "pin_defs.h"
 #include "debug.h"
 
 enum lan_led_masks {

@@ -3,7 +3,7 @@
 
 #include "bits.h"
 #include "i2c_slave.h"
-#include "power_control.h"
+#include "pin_defs.h"
 
 #define MCU_I2C_ADDR			0x2a
 #define LED_CONTROLLER_I2C_ADDR		0x2b

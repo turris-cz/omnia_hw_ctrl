@@ -1,17 +1,9 @@
 #include "led_driver.h"
 #include "power_control.h"
-#include "gpio.h"
+#include "pin_defs.h"
 #include "spi.h"
 #include "timer.h"
 #include "cpu.h"
-
-#define LED_SPI_ALT_FN		0
-#define LED_SPI_MOSI_PIN	PIN(A, 7)
-#define LED_SPI_SCK_PIN		PIN(A, 5)
-#define LED_SPI_SS_PIN		PIN(A, 4)
-
-#define LED_PWM_ALT_FN		0
-#define LED_PWM_PIN		PIN(A, 3)
 
 #define EFFECT_TIMEOUT		5
 
