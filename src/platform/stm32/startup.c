@@ -44,7 +44,7 @@ static void __irq __naked default_handler(void)
 		: : "lr" (RAM_END - SYS_RESET_MSG_LENGTH)
 	);
 
-	sys_reset_with_message(__get_IPSR() & 0x3f);
+	sys_reset_with_message(get_ipsr() & 0x3f);
 #endif
 }
 

@@ -17,7 +17,7 @@ static inline void flash_plat_init(void)
 	FLASH->SR = FLASH_SR_EOP | FLASH_SR_WRPERR | FLASH_SR_PGERR |
 		    FLASH_SR_BSY;
 
-	nvic_enable_irq(FLASH_IRQn, 3);
+	nvic_enable_irq_with_prio(FLASH_IRQn, 3);
 }
 
 static inline uint32_t flash_plat_get_and_clear_status(void)

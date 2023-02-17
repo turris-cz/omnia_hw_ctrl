@@ -111,7 +111,7 @@ static __force_inline i2c_nr_t i2c_nr_in_irq(void)
 	if (1)
 		return SLAVE_I2C;
 
-	switch ((__get_IPSR() & 0x3f) - 16) {
+	switch ((get_ipsr() & 0x3f) - 16) {
 	case I2C0_EV_IRQn:
 	case I2C0_ER_IRQn:
 		return 0;
@@ -163,8 +163,9 @@ static inline void _i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	if (reset_event)
 		slave->cb(slave->priv, 0, I2C_SLAVE_RESET, NULL);
 
-	nvic_enable_irq(i2c_ev_irqn(i2c_nr), irq_prio);
-	nvic_enable_irq(i2c_err_irqn(i2c_nr), irq_prio);
+	nvic_enable_irq_with_prio(i2c_ev_irqn(i2c_nr), irq_prio);
+	nvic_enable_irq_with_prio(i2c_err_irqn(i2c_nr), irq_prio);
+
 	I2C_CTL0(i2c) = I2C_CTL0_I2CEN | I2C_CTL0_ACKEN;
 }
 
@@ -184,7 +185,7 @@ static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
 	_i2c_slave_init(i2c_nr, slave,
 			FIELD_GET(I2C_SADDR0_ADDRESS, I2C_SADDR0(i2c)),
 			FIELD_GET(I2C_SADDR1_ADDRESS2, I2C_SADDR1(i2c)),
-			NVIC_GetPriority(i2c_ev_irqn(i2c_nr)), false);
+			nvic_get_priority(i2c_ev_irqn(i2c_nr)), false);
 }
 
 /* should be called only from slave callback, disable I2C interrupts
@@ -198,10 +199,8 @@ static __force_inline void i2c_slave_resume(i2c_nr_t i2c_nr)
 {
 	i2c_slave_ptr[i2c_nr]->paused = false;
 	I2C_CTL1(i2c_to_plat(i2c_nr)) |= I2C_CTL1_EVIE | I2C_CTL1_ERRIE;
-	nvic_enable_irq(i2c_ev_irqn(i2c_nr),
-		        NVIC_GetPriority(i2c_ev_irqn(i2c_nr)));
-	nvic_enable_irq(i2c_err_irqn(i2c_nr),
-		        NVIC_GetPriority(i2c_err_irqn(i2c_nr)));
+	nvic_enable_irq(i2c_ev_irqn(i2c_nr));
+	nvic_enable_irq(i2c_err_irqn(i2c_nr));
 }
 
 static __force_inline void i2c_slave_recovery_handler(i2c_nr_t i2c_nr)

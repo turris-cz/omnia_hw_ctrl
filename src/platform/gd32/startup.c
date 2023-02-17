@@ -43,7 +43,7 @@ static void __irq default_handler(void)
 		: : "lr" (RAM_END - SYS_RESET_MSG_LENGTH)
 	);
 
-	sys_reset_with_message(__get_IPSR() & 0x3f);
+	sys_reset_with_message(get_ipsr() & 0x3f);
 #endif
 }
 
@@ -200,7 +200,7 @@ static void platform_init(void)
 	}
 
 	/* 4 bits for pre-emption priority, 0 bits for subpriority */
-	NVIC_SetPriorityGrouping(3);
+	nvic_set_priority_grouping(3);
 
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)

@@ -221,7 +221,7 @@ static void bootloader(void)
 		fallthrough;
 
 	case HARD_RESET:
-		NVIC_SystemReset();
+		nvic_system_reset();
 		unreachable();
 	}
 }

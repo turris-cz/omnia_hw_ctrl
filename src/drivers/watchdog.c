@@ -65,6 +65,6 @@ void watchdog_handler(void)
 	if (!counter) {
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
-		NVIC_SystemReset();
+		nvic_system_reset();
 	}
 }

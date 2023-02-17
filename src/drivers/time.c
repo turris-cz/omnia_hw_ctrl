@@ -22,13 +22,13 @@ volatile uint32_t jiffies;
   *****************************************************************************/
 void time_config(void)
 {
-	if (SysTick_Config(SYSTICK_PERIOD)) {
+	if (!systick_config(SYSTICK_PERIOD)) {
 		debug("Failed configuring SysTick\n");
 		/* Capture error */
 		while (1);
 	}
 
-	NVIC_SetPriority(SysTick_IRQn, 2);
+	nvic_set_priority(SysTick_IRQn, 2);
 }
 
 /* Read current value of SysTick counter and compute in how many milliseconds

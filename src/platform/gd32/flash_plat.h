@@ -18,7 +18,7 @@ static inline void flash_plat_init(void)
 	FMC_STAT = FMC_STAT_ENDF | FMC_STAT_WPERR | FMC_STAT_PGERR |
 		   FMC_STAT_BUSY;
 
-	nvic_enable_irq(FMC_IRQn, 3);
+	nvic_enable_irq_with_prio(FMC_IRQn, 3);
 }
 
 static inline uint32_t flash_plat_get_and_clear_status(void)

@@ -101,7 +101,7 @@ static __force_inline i2c_nr_t i2c_nr_in_irq(void)
 	if (1)
 		return SLAVE_I2C;
 
-	switch ((__get_IPSR() & 0x3f) - 16) {
+	switch ((get_ipsr() & 0x3f) - 16) {
 	case I2C1_IRQn: return 1;
 	case I2C2_IRQn: return 2;
 	default: unreachable();
@@ -161,7 +161,7 @@ static inline void _i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
 	/* peripheral enable */
 	i2c->CR1 |= I2C_CR1_PE;
 
-	nvic_enable_irq(i2c_irqn(i2c_nr), irq_prio);
+	nvic_enable_irq_with_prio(i2c_irqn(i2c_nr), irq_prio);
 }
 
 static inline void i2c_slave_init(i2c_nr_t i2c_nr, i2c_slave_t *slave,
@@ -182,7 +182,7 @@ static __force_inline void i2c_slave_reset(i2c_nr_t i2c_nr)
 	_i2c_slave_init(i2c_nr, slave,
 			FIELD_GET(I2C_OAR_OA_7B, i2c->OAR1),
 			FIELD_GET(I2C_OAR_OA_7B, i2c->OAR2),
-			NVIC_GetPriority(i2c_irqn(i2c_nr)), false);
+			nvic_get_priority(i2c_irqn(i2c_nr)), false);
 }
 
 /* should be called only from slave callback, disable I2C interrupts

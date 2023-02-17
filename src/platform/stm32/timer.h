@@ -114,7 +114,7 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 	case timer_interrupt:
 		tim->DIER = TIM_DIER_UIE;
 
-		nvic_enable_irq(timer_irqn(tim_nr), irq_prio);
+		nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
 		break;
 	}
 }

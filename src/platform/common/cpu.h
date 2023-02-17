@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include "compiler.h"
+#include "bits.h"
 
 #if defined(STM32F030X8)
 # include "stm32f0xx.h"
@@ -10,6 +11,8 @@
 #else
 # error "unknown platform"
 #endif
+
+#define IRQ_PRIO_SHIFT	6
 
 static inline uint32_t get_unaligned16(const void *ptr)
 {
@@ -40,6 +43,15 @@ static __force_inline void set_msp(uint32_t msp)
 	asm volatile("msr msp, %0\n" : : "r" (msp));
 }
 
+static __force_inline uint32_t get_ipsr(void)
+{
+	uint32_t ipsr;
+
+	asm volatile("mrs %0, ipsr" : "=r" (ipsr));
+
+	return ipsr;
+}
+
 static __force_inline void isb(void)
 {
 	asm volatile("isb\n");
@@ -60,10 +72,107 @@ static __force_inline void wait_for_interrupt(void)
 	asm volatile("wfi\n");
 }
 
-static inline void nvic_enable_irq(IRQn_Type irq, uint8_t prio)
+#ifdef __ARM_ARCH_6M__
+static inline unsigned _irq_idx(IRQn_Type irq)
 {
-	NVIC_SetPriority(irq, prio);
-	NVIC_EnableIRQ(irq);
+	if (irq < 0)
+		return (irq + 8) >> 2;
+	else
+		return irq >> 2;
+}
+
+static inline unsigned _irq_shf(IRQn_Type irq)
+{
+	if (irq < 0)
+		return ((irq + 8) & 3) << 3;
+	else
+		return (irq & 3) << 3;
+}
+
+static inline void nvic_set_priority(IRQn_Type irq, uint8_t prio)
+{
+	unsigned idx = _irq_idx(irq), shf = _irq_shf(irq);
+
+	if (irq < 0)
+		SCB->SHP[idx] = (SCB->SHP[idx] & ~(0xff << shf)) |
+				((prio << IRQ_PRIO_SHIFT) << shf);
+	else
+		NVIC->IP[idx] = (NVIC->IP[idx] & ~(0xff << shf)) |
+				((prio << IRQ_PRIO_SHIFT) << shf);
+}
+
+static inline uint8_t nvic_get_priority(IRQn_Type irq)
+{
+	unsigned idx = _irq_idx(irq), shf = _irq_shf(irq);
+
+	if (irq < 0)
+		return ((SCB->SHP[idx] >> shf) & 0xff) >> IRQ_PRIO_SHIFT;
+	else
+		return ((NVIC->IP[idx] >> shf) & 0xff) >> IRQ_PRIO_SHIFT;
+}
+#elifdef __ARM_ARCH_7M__
+static inline void nvic_set_priority(IRQn_Type irq, uint8_t prio)
+{
+	if (irq < 0)
+		SCB->SHP[(irq + 12) & 0xf] = prio << IRQ_PRIO_SHIFT;
+	else
+		NVIC->IP[irq & 0xff] = prio << IRQ_PRIO_SHIFT;
+}
+
+static inline uint8_t nvic_get_priority(IRQn_Type irq)
+{
+	if (irq < 0)
+		return SCB->SHP[(irq + 12) & 0xf] >> IRQ_PRIO_SHIFT;
+	else
+		return NVIC->IP[irq & 0xff] >> IRQ_PRIO_SHIFT;
+}
+
+static inline void nvic_set_priority_grouping(uint8_t group)
+{
+	SCB->AIRCR = (SCB->AIRCR & 0xf8ff) | 0x5fa0000 | ((group & 7) << 8);
+}
+#else
+# error "unknown platform"
+#endif
+
+static inline bool systick_config(uint32_t ticks)
+{
+	ticks -= 1;
+
+	if (ticks > 0xffffff)
+		return false;
+
+	SysTick->LOAD = ticks;
+	SysTick->VAL = 0;
+	SysTick->CTRL = BIT(2) | BIT(1) | BIT(0);
+
+	return true;
+}
+
+static inline void nvic_system_reset(void)
+{
+	dsb();
+	SCB->AIRCR = (SCB->AIRCR & 0x8700) | 0x5fa0004;
+	dsb();
+
+	while (1)
+		nop();
+}
+
+static inline void nvic_enable_irq(IRQn_Type irq)
+{
+	NVIC->ISER[irq >> 5] = BIT(irq & 0x1f);
+}
+
+static inline void nvic_enable_irq_with_prio(IRQn_Type irq, uint8_t prio)
+{
+	nvic_set_priority(irq, prio);
+	nvic_enable_irq(irq);
+}
+
+static inline void nvic_disable_irq(IRQn_Type irq)
+{
+	NVIC->ICER[irq >> 5] = BIT(irq & 0x1f);
 }
 
 #if defined(STM32F030X8)

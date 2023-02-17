@@ -45,7 +45,7 @@ static inline void sys_reset_with_message(uint32_t msg)
 	dsb();
 	p[3] = crc32_plat(0xffffffff, p, 12);
 
-	NVIC_SystemReset();
+	nvic_system_reset();
 }
 #endif /* !BOOTLOADER_BUILD */
 

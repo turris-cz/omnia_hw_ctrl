@@ -43,8 +43,8 @@ void __irq i2c_slave_irq_handler(void)
 		/* disable all interrupts if pause requested */
 		if (slave->paused) {
 			I2C_CTL1(i2c) &= ~(I2C_CTL1_EVIE | I2C_CTL1_ERRIE);
-			NVIC_DisableIRQ(i2c_ev_irqn(i2c_nr));
-			NVIC_DisableIRQ(i2c_err_irqn(i2c_nr));
+			nvic_disable_irq(i2c_ev_irqn(i2c_nr));
+			nvic_disable_irq(i2c_err_irqn(i2c_nr));
 		}
 	} else if ((slave->state == I2C_SLAVE_WRITE_REQUESTED ||
 		    slave->state == I2C_SLAVE_WRITE_RECEIVED) &&

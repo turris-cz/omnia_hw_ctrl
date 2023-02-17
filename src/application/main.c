@@ -167,7 +167,7 @@ void main(void)
 			break;
 
 		case HARD_RESET:
-			NVIC_SystemReset();
+			nvic_system_reset();
 			unreachable();
 
 		case ERROR_STATE:
