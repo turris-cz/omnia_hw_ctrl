@@ -43,7 +43,7 @@ static void __irq default_handler(void)
 		: : "lr" (RAM_END - SYS_RESET_MSG_LENGTH)
 	);
 
-	sys_reset_with_message(get_ipsr() & 0x3f);
+	sys_reset_with_message(get_ipsr() & 0x1ff);
 #endif
 }
 

@@ -111,7 +111,7 @@ static __force_inline i2c_nr_t i2c_nr_in_irq(void)
 	if (1)
 		return SLAVE_I2C;
 
-	switch ((get_ipsr() & 0x3f) - 16) {
+	switch ((get_ipsr() & 0x1ff) - 16) {
 	case I2C0_EV_IRQn:
 	case I2C0_ER_IRQn:
 		return 0;
