@@ -33,7 +33,7 @@
  *       level 3: 1, 1, 1
  */
 #define LED_TIMER_FREQ		960000
-#define LED_TIMER_PERIOD	5
+#define LED_TIMER_PERIOD	20
 #define COLOR_LEVELS		256
 
 enum {
