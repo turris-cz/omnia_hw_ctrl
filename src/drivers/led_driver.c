@@ -149,7 +149,7 @@ static const uint16_t gamma_table_gb[256] = {
  * enabled.
  *
  * Since 1024 = 256 * 4, the frames are sent 4 times faster, every 375 clock
- * cycles (compare with every 1400 clock cycles with gamma correction disabled).
+ * cycles (compare with every 1500 clock cycles with gamma correction disabled).
  *
  * On average, the interrupt takes around 138 clock cycles, so this should be
  * fine.
