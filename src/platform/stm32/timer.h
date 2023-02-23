@@ -1,22 +1,12 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "compiler.h"
-#include "cpu.h"
-
-typedef uint8_t timer_nr_t;
+#include "timer_common.h"
 
 #define LED_TIMER		3
 #define LED_EFFECT_TIMER	6
 #define LED_PWM_TIMER		15
 #define USB_TIMEOUT_TIMER	17
-
-#define TIMER_PARENT_FREQ	SYS_CORE_FREQ
-
-typedef enum {
-	timer_interrupt,
-	timer_pwm,
-} timer_type_t;
 
 static __force_inline void timer_clk_config(timer_nr_t tim_nr, bool on)
 {
@@ -92,26 +82,36 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);
 
-	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
+	compiletime_assert(SYS_CORE_FREQ % freq == 0,
 			   "Requested frequency unachievable");
+	compiletime_assert(type != timer_pwm || SYS_CORE_FREQ / freq < 65536,
+			   "Requested frequency unachievable for PWM timer");
+	compiletime_assert(type == timer_pwm || period == 0,
+			   "Period must be zero for non-PWM timer");
 
 	timer_clk_config(tim_nr, false);
 	timer_reset(tim_nr);
 	timer_clk_config(tim_nr, true);
 
 	tim->CR1 = TIM_CR1_ARPE;
-	tim->ARR = period - 1;
-	tim->PSC = (TIMER_PARENT_FREQ / freq) - 1;
 	tim->EGR = TIM_EGR_UG;
 
 	switch (type) {
 	case timer_pwm:
+		/* prescaler and auto reload */
+		tim->PSC = (SYS_CORE_FREQ / freq) - 1;
+		tim->ARR = period - 1;
+
 		tim->CCMR1 = (TIM_OCMode_PWM1 << 8) | TIM_CCMR1_OC2PE;
 		tim->CCER = TIM_CCER_CC2P | TIM_CCER_CC2E;
 		tim->BDTR |= TIM_BDTR_MOE;
 		break;
 
 	case timer_interrupt:
+		/* prescaler and auto reload */
+		tim->PSC = freq2psc(freq) - 1;
+		tim->ARR = freq2car(freq) - 1;
+
 		tim->DIER = TIM_DIER_UIE;
 
 		nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
@@ -140,17 +140,13 @@ static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 	return up;
 }
 
-static __force_inline void timer_set_period(timer_nr_t tim_nr, uint16_t period)
-{
-	timer_to_plat(tim_nr)->ARR = period - 1;
-}
-
 static __force_inline void timer_set_freq(timer_nr_t tim_nr, uint32_t freq)
 {
-	compiletime_assert(TIMER_PARENT_FREQ % freq == 0,
+	compiletime_assert(SYS_CORE_FREQ % freq == 0,
 			   "Requested frequency unachievable");
 
-	timer_to_plat(tim_nr)->PSC = (TIMER_PARENT_FREQ / freq) - 1;
+	timer_to_plat(tim_nr)->PSC = freq2psc(freq) - 1;
+	timer_to_plat(tim_nr)->ARR = freq2car(freq) - 1;
 }
 
 static __force_inline void timer_set_counter(timer_nr_t tim_nr, uint32_t cnt)
