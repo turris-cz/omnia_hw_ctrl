@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "cpu.h"
 
-i2c_slave_t *i2c_slave_ptr[2];
+i2c_slave_t *i2c_slave_ptr[2] = {};
 
 void __irq i2c_slave_irq_handler(void)
 {

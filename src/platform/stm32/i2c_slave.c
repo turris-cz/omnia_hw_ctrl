@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "cpu.h"
 
-i2c_slave_t *i2c_slave_ptr[2];
+i2c_slave_t *i2c_slave_ptr[2] = {};
 
 static __force_inline void send_ack_and_release_scl(I2C_TypeDef *i2c, bool ack)
 {

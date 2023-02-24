@@ -203,6 +203,9 @@ static __force_inline void i2c_slave_recovery_handler(i2c_nr_t i2c_nr)
 {
 	i2c_slave_t *slave = i2c_slave_ptr[i2c_nr - 1];
 
+	if (!slave)
+		return;
+
 	disable_irq();
 
 	if (slave->state != I2C_SLAVE_STOP) {
