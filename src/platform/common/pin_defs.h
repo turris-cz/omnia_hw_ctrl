@@ -97,4 +97,23 @@ static inline void lan_led_pins_read(bool *c0, bool *c1, bool *nr0, bool *nr1,
 	*nr2 = port & pin_bit(R2_P2_LED_PIN);
 }
 
+/* read power related input pins, fill true if low */
+static inline void power_input_pins_read(bool *manres, bool *sysres, bool *mres,
+					 bool *pg, bool *pg_4v5,
+					 bool *usb30_ovc, bool *usb31_ovc)
+{
+	uint16_t low = ~gpio_read_port(PORT_B);
+
+	*manres = low & pin_bit(MANRES_PIN);
+	*sysres = low & pin_bit(SYSRES_OUT_PIN);
+	*mres = low & pin_bit(MRES_PIN);
+	*pg = low & (pin_bit(PG_5V_PIN) | pin_bit(PG_3V3_PIN) |
+		     pin_bit(PG_1V35_PIN) | pin_bit(PG_1V8_PIN) |
+		     pin_bit(PG_1V5_PIN) | pin_bit(PG_1V2_PIN) |
+		     pin_bit(PG_VTT_PIN));
+	*pg_4v5 = low & pin_bit(PG_4V5_PIN);
+	*usb30_ovc = low & pin_bit(USB30_OVC_PIN);
+	*usb31_ovc = low & pin_bit(USB31_OVC_PIN);
+}
+
 #endif /* PIN_DEFS_H */

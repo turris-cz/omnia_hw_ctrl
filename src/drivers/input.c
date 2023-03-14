@@ -110,44 +110,41 @@ void input_signals_config(void)
   *****************************************************************************/
 input_req_t input_signals_handler(void)
 {
+	bool manres, sysres, mres, pg, pg_4v5, usb30_ovc, usb31_ovc;
 	uint8_t intr = 0;
-	uint16_t low;
 
-	low = ~gpio_read_port(PORT_B);
+	power_input_pins_read(&manres, &sysres, &mres, &pg, &pg_4v5, &usb30_ovc,
+			      &usb31_ovc);
 
-	if (low & pin_bit(MANRES_PIN)) {
+	if (manres) {
 		/* set CFG_CTRL pin to high state ASAP */
 		gpio_write(CFG_CTRL_PIN, 1);
 
 		return INPUT_REQ_LIGHT_RESET;
 	}
 
-	if (low & pin_bit(SYSRES_OUT_PIN))
+	if (sysres)
 		return INPUT_REQ_LIGHT_RESET;
 
 	/* reaction: follow MRES signal */
-	gpio_write(RES_RAM_PIN, low & pin_bit(MRES_PIN));
+	gpio_write(RES_RAM_PIN, mres);
 
-	if (low & (pin_bit(PG_5V_PIN) | pin_bit(PG_3V3_PIN) |
-		   pin_bit(PG_1V35_PIN) | pin_bit(PG_1V8_PIN) |
-		   pin_bit(PG_1V5_PIN) | pin_bit(PG_1V2_PIN) |
-		   pin_bit(PG_VTT_PIN))) {
+	if (pg) {
 		debug("PG fell low\n");
 		return INPUT_REQ_HARD_RESET;
 	}
 
-	if (gpio_read_output(ENABLE_4V5_PIN) &&
-	    (low & pin_bit(PG_4V5_PIN))) {
+	if (gpio_read_output(ENABLE_4V5_PIN) && pg_4v5) {
 		debug("PG_4V5 fell low\n");
 		return INPUT_REQ_HARD_RESET;
 	}
 
-	if (low & pin_bit(USB30_OVC_PIN)) {
+	if (usb30_ovc) {
 		intr |= INT_USB30_OVC;
 		handle_usb_overcurrent(USB3_PORT0);
 	}
 
-	if (low & pin_bit(USB31_OVC_PIN)) {
+	if (usb31_ovc) {
 		intr |= INT_USB31_OVC;
 		handle_usb_overcurrent(USB3_PORT1);
 	}
