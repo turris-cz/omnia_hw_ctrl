@@ -69,7 +69,6 @@
 #define WAN_LED1_PIN		PIN(F, 1, OMNIA_BOARD_REVISION >= 32)
 
 /* LAN LED */
-#define LAN_LED_PORT		PORT_A
 #define R0_P0_LED_PIN		PIN(A, 0)
 #define R1_P1_LED_PIN		PIN(A, 1)
 #define R2_P2_LED_PIN		PIN(A, 2)
@@ -82,5 +81,20 @@
 #define CARD_DET_PIN		PIN(A, 9, !DBG_ENABLE)
 #define MSATA_LED_PIN		PIN(A, 15)
 #define MSATA_IND_PIN		PIN(C, 14)
+
+static inline void lan_led_pins_read(bool *c0, bool *c1, bool *nr0, bool *nr1,
+				     bool *nr2)
+{
+	uint16_t port = gpio_read_port(PORT_A);
+
+	*c0 = port & pin_bit(C0_P3_LED_PIN);
+	*c1 = port & pin_bit(C1_LED_PIN);
+
+	port = ~port;
+
+	*nr0 = port & pin_bit(R0_P0_LED_PIN);
+	*nr1 = port & pin_bit(R1_P1_LED_PIN);
+	*nr2 = port & pin_bit(R2_P2_LED_PIN);
+}
 
 #endif /* PIN_DEFS_H */

@@ -3,17 +3,6 @@
 #include "pin_defs.h"
 #include "debug.h"
 
-enum lan_led_masks {
-	LAN_LED_MASK	= 0x1947,
-	LAN_R0_MASK	= 0x0001,
-	LAN_R1_MASK	= 0x0002,
-	LAN_R2_MASK	= 0x0004,
-	LAN_C0_MASK	= 0x0040,
-	LAN_C1_MASK	= 0x0100,
-	LAN_C2_MASK	= 0x0800,
-	LAN_C3_MASK	= 0x1000,
-};
-
 /*******************************************************************************
   * @function   wan_lan_pci_msata_config
   * @brief      Configuration for WAN, LAN, PCIe and mSATA status indication.
@@ -113,18 +102,18 @@ void pci_led_activity(void)
   *****************************************************************************/
 void lan_led_activity(void)
 {
-	uint16_t lan_led;
+	bool c0, c1, nr0, nr1, nr2;
 
-	lan_led = gpio_read_port(LAN_LED_PORT) & LAN_LED_MASK;
+	lan_led_pins_read(&c0, &c1, &nr0, &nr1, &nr2);
 
-	if (lan_led & LAN_C0_MASK)
-		led_set_state_nocommit(LAN0_LED, !(lan_led & LAN_R0_MASK));
-	if (lan_led & LAN_C1_MASK)
-		led_set_state_nocommit(LAN1_LED, !(lan_led & LAN_R0_MASK));
-	if (lan_led & LAN_C0_MASK)
-		led_set_state_nocommit(LAN2_LED, !(lan_led & LAN_R1_MASK));
-	if (lan_led & LAN_C1_MASK)
-		led_set_state_nocommit(LAN3_LED, !(lan_led & LAN_R1_MASK));
-	if (lan_led & LAN_C0_MASK)
-		led_set_state_nocommit(LAN4_LED, !(lan_led & LAN_R2_MASK));
+	if (c0) {
+		led_set_state_nocommit(LAN0_LED, nr0);
+		led_set_state_nocommit(LAN2_LED, nr1);
+		led_set_state_nocommit(LAN4_LED, nr2);
+	}
+
+	if (c1) {
+		led_set_state_nocommit(LAN1_LED, nr0);
+		led_set_state_nocommit(LAN3_LED, nr1);
+	}
 }
