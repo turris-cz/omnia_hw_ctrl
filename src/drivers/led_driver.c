@@ -399,7 +399,7 @@ void led_driver_set_brightness(uint8_t value)
 
 	timer_enable(LED_TIMER, !!value);
 
-	timer_set_pulse(LED_PWM_TIMER, value);
+	timer_set_pwm_duty(LED_PWM_TIMER, value);
 	pwm_brightness = value;
 
 	enable_irq();
