@@ -166,7 +166,7 @@ static __force_inline uint16_t timer_get_counter(timer_nr_t tim_nr)
 	return timer_to_plat(tim_nr)->CNT;
 }
 
-static __force_inline void timer_set_pwm_duty(timer_nr_t tim_nr, uint32_t duty)
+static __force_inline void timer_set_pwm_duty(timer_nr_t tim_nr, uint16_t duty)
 {
 	timer_to_plat(tim_nr)->CCR2 = duty;
 }
