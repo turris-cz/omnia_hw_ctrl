@@ -76,18 +76,12 @@ static __force_inline uint8_t timer_irqn(timer_nr_t tim_nr)
 	}
 }
 
-static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
-				      uint16_t period, uint32_t freq,
-				      uint8_t irq_prio)
+static __force_inline void _timer_init(timer_nr_t tim_nr, uint32_t freq)
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);
 
 	compiletime_assert(SYS_CORE_FREQ % freq == 0,
 			   "Requested frequency unachievable");
-	compiletime_assert(type != timer_pwm || SYS_CORE_FREQ / freq < 65536,
-			   "Requested frequency unachievable for PWM timer");
-	compiletime_assert(type == timer_pwm || period == 0,
-			   "Period must be zero for non-PWM timer");
 
 	timer_clk_config(tim_nr, false);
 	timer_reset(tim_nr);
@@ -95,28 +89,41 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 
 	tim->CR1 = TIM_CR1_ARPE;
 	tim->EGR = TIM_EGR_UG;
+}
 
-	switch (type) {
-	case timer_pwm:
-		/* prescaler and auto reload */
-		tim->PSC = (SYS_CORE_FREQ / freq) - 1;
-		tim->ARR = period - 1;
+static __force_inline void timer_init(timer_nr_t tim_nr, uint32_t freq,
+				      uint8_t irq_prio)
+{
+	TIM_TypeDef *tim = timer_to_plat(tim_nr);
 
-		tim->CCMR1 = (TIM_OCMode_PWM1 << 8) | TIM_CCMR1_OC2PE;
-		tim->CCER = TIM_CCER_CC2P | TIM_CCER_CC2E;
-		tim->BDTR |= TIM_BDTR_MOE;
-		break;
+	_timer_init(tim_nr, freq);
 
-	case timer_interrupt:
-		/* prescaler and auto reload */
-		tim->PSC = freq2psc(freq) - 1;
-		tim->ARR = freq2car(freq) - 1;
+	/* prescaler and auto reload */
+	tim->PSC = freq2psc(freq) - 1;
+	tim->ARR = freq2car(freq) - 1;
 
-		tim->DIER = TIM_DIER_UIE;
+	tim->DIER = TIM_DIER_UIE;
 
-		nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
-		break;
-	}
+	nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
+}
+
+static __force_inline void timer_init_pwm(timer_nr_t tim_nr, uint32_t freq,
+					  uint16_t period)
+{
+	TIM_TypeDef *tim = timer_to_plat(tim_nr);
+
+	compiletime_assert(SYS_CORE_FREQ / freq < 65536,
+			   "Requested frequency unachievable for PWM timer");
+
+	_timer_init(tim_nr, freq);
+
+	/* prescaler and auto reload */
+	tim->PSC = (SYS_CORE_FREQ / freq) - 1;
+	tim->ARR = period - 1;
+
+	tim->CCMR1 = (TIM_OCMode_PWM1 << 8) | TIM_CCMR1_OC2PE;
+	tim->CCER = TIM_CCER_CC2P | TIM_CCER_CC2E;
+	tim->BDTR |= TIM_BDTR_MOE;
 }
 
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)

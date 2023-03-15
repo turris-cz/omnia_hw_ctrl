@@ -78,18 +78,12 @@ static __force_inline uint8_t timer_irqn(timer_nr_t tim_nr)
 	}
 }
 
-static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
-				      uint16_t period, uint32_t freq,
-				      uint8_t irq_prio)
+static __force_inline void _timer_init(timer_nr_t tim_nr, uint32_t freq)
 {
 	uint32_t tim = timer_to_plat(tim_nr);
 
 	compiletime_assert(SYS_CORE_FREQ % freq == 0,
 			   "Requested frequency unachievable");
-	compiletime_assert(type != timer_pwm || SYS_CORE_FREQ / freq < 65536,
-			   "Requested frequency unachievable for PWM timer");
-	compiletime_assert(type == timer_pwm || period == 0,
-			   "Period must be zero for non-PWM timer");
 
 	timer_clk_config(tim_nr, false);
 	timer_reset(tim_nr);
@@ -100,33 +94,46 @@ static __force_inline void timer_init(timer_nr_t tim_nr, timer_type_t type,
 
 	/* generate an update event */
 	TIMER_SWEVG(tim) = TIMER_SWEVG_UPG;
+}
 
-	switch (type) {
-	case timer_pwm:
-		/* prescaler and counter auto reload */
-		TIMER_PSC(tim) = SYS_CORE_FREQ / freq - 1;
-		TIMER_CAR(tim) = period - 1;
+static __force_inline void timer_init(timer_nr_t tim_nr, uint32_t freq,
+				      uint8_t irq_prio)
+{
+	uint32_t tim = timer_to_plat(tim_nr);
 
-		/* channel 1 mode selection */
-		TIMER_CHCTL0(tim) = (TIMER_OC_MODE_PWM0 |
-				     TIMER_OC_SHADOW_DISABLE) << 8;
-		/* enable channel 1 and set polarity low */
-		TIMER_CHCTL2(tim) = TIMER_CHCTL2_CH1EN | TIMER_CHCTL2_CH1P;
+	_timer_init(tim_nr, freq);
 
-		TIMER_CCHP(tim) = TIMER_CCHP_POEN;
-		break;
+	/* prescaler and counter auto reload */
+	TIMER_PSC(tim) = freq2psc(freq) - 1;
+	TIMER_CAR(tim) = freq2car(freq) - 1;
 
-	case timer_interrupt:
-		/* prescaler and counter auto reload */
-		TIMER_PSC(tim) = freq2psc(freq) - 1;
-		TIMER_CAR(tim) = freq2car(freq) - 1;
+	/* enable up interrupt */
+	TIMER_DMAINTEN(tim) = TIMER_DMAINTEN_UPIE;
 
-		/* enable up interrupt */
-		TIMER_DMAINTEN(tim) = TIMER_DMAINTEN_UPIE;
+	nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
+}
 
-		nvic_enable_irq_with_prio(timer_irqn(tim_nr), irq_prio);
-		break;
-	}
+static __force_inline void timer_init_pwm(timer_nr_t tim_nr, uint32_t freq,
+					  uint16_t period)
+{
+	uint32_t tim = timer_to_plat(tim_nr);
+
+	compiletime_assert(SYS_CORE_FREQ / freq < 65536,
+			   "Requested frequency unachievable for PWM timer");
+
+	_timer_init(tim_nr, freq);
+
+	/* prescaler and counter auto reload */
+	TIMER_PSC(tim) = SYS_CORE_FREQ / freq - 1;
+	TIMER_CAR(tim) = period - 1;
+
+	/* channel 1 mode selection */
+	TIMER_CHCTL0(tim) = (TIMER_OC_MODE_PWM0 |
+			     TIMER_OC_SHADOW_DISABLE) << 8;
+	/* enable channel 1 and set polarity low */
+	TIMER_CHCTL2(tim) = TIMER_CHCTL2_CH1EN | TIMER_CHCTL2_CH1P;
+
+	TIMER_CCHP(tim) = TIMER_CCHP_POEN;
 }
 
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)

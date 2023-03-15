@@ -122,7 +122,7 @@ void timer_struct_para_init(timer_parameter_struct* initpara)
     \param[out] none
     \retval     none
 */
-void _timer_init(uint32_t timer_periph, timer_parameter_struct* initpara)
+void _timer_init_gdlib(uint32_t timer_periph, timer_parameter_struct* initpara)
 {
     /* configure the counter prescaler value */
     TIMER_PSC(timer_periph) = (uint16_t)initpara->prescaler;
@@ -159,7 +159,7 @@ void _timer_init(uint32_t timer_periph, timer_parameter_struct* initpara)
     \param[out] none
     \retval     none
 */
-void _timer_enable(uint32_t timer_periph)
+void _timer_enable_gdlib(uint32_t timer_periph)
 {
     TIMER_CTL0(timer_periph) |= (uint32_t)TIMER_CTL0_CEN;
 }

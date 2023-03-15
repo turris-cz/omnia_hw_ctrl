@@ -224,7 +224,7 @@ bool power_control_get_usb_poweron(usb_port_t usb_port)
   *****************************************************************************/
 void power_control_usb_timeout_config(void)
 {
-	timer_init(USB_TIMEOUT_TIMER, timer_interrupt, 0, 1, 3);
+	timer_init(USB_TIMEOUT_TIMER, 1, 3);
 }
 
 /*******************************************************************************

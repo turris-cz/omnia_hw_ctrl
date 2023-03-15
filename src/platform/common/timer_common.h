@@ -5,11 +5,6 @@
 
 typedef uint8_t timer_nr_t;
 
-typedef enum {
-	timer_interrupt,
-	timer_pwm,
-} timer_type_t;
-
 /*
  * These functions are used in STM32's and GD32's timer_init() and
  * timer_set_freq() to compute (at compile-time) the 16-bit timer prescaler

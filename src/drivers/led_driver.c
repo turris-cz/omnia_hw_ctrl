@@ -358,17 +358,17 @@ void led_driver_config(void)
 	spi_init(LED_SPI);
 
 	/* Initialize timer (every tick we send one frame) */
-	timer_init(LED_TIMER, timer_interrupt, 0,
+	timer_init(LED_TIMER,
 		   gamma_correction ? LED_TIMER_FREQ_GC : LED_TIMER_FREQ, 0);
 
 	/* Configure PWM timer */
-	timer_init(LED_PWM_TIMER, timer_pwm, 100, LED_PWM_FREQ, 0);
+	timer_init_pwm(LED_PWM_TIMER, LED_PWM_FREQ, 100);
 
 	/* Set initial PWM brightness (also enables LED_TIMER) */
 	led_driver_set_brightness(100);
 
 	/* Configure boot effect */
-	timer_init(LED_EFFECT_TIMER, timer_interrupt, 0, 15, 2);
+	timer_init(LED_EFFECT_TIMER, 15, 2);
 }
 
 /*******************************************************************************

@@ -609,9 +609,9 @@ void _timer_deinit(uint32_t timer_periph);
 /* initialize TIMER init parameter struct */
 void timer_struct_para_init(timer_parameter_struct* initpara);
 /* initialize TIMER counter */
-void _timer_init(uint32_t timer_periph, timer_parameter_struct* initpara);
+void _timer_init_gdlib(uint32_t timer_periph, timer_parameter_struct* initpara);
 /* enable a TIMER */
-void _timer_enable(uint32_t timer_periph);
+void _timer_enable_gdlib(uint32_t timer_periph);
 /* disable a TIMER */
 void timer_disable(uint32_t timer_periph);
 /* enable the auto reload shadow function */
