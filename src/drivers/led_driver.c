@@ -526,8 +526,6 @@ void led_driver_reset_effect(bool state)
 		reset_effect_state = EFFECT_INIT;
 
 	timer_enable(LED_EFFECT_TIMER, state);
-	if (!state)
-		timer_set_counter(LED_EFFECT_TIMER, 0);
 
 	if (!state)
 		reset_effect_state = EFFECT_DISABLED;

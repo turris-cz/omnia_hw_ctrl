@@ -89,6 +89,7 @@ static __force_inline void _timer_init(timer_nr_t tim_nr, uint32_t freq)
 
 	tim->CR1 = TIM_CR1_ARPE;
 	tim->EGR = TIM_EGR_UG;
+	tim->CNT = 0;
 }
 
 static __force_inline void timer_init(timer_nr_t tim_nr, uint32_t freq,
@@ -130,10 +131,14 @@ static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);
 
-	if (on)
+	if (on) {
 		tim->CR1 |= TIM_CR1_CEN;
-	else
+	} else {
 		tim->CR1 &= ~TIM_CR1_CEN;
+
+		/* clear counter on disable */
+		tim->CNT = 0;
+	}
 }
 
 static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
@@ -154,11 +159,6 @@ static __force_inline void timer_set_freq(timer_nr_t tim_nr, uint32_t freq)
 
 	timer_to_plat(tim_nr)->PSC = freq2psc(freq) - 1;
 	timer_to_plat(tim_nr)->ARR = freq2car(freq) - 1;
-}
-
-static __force_inline void timer_set_counter(timer_nr_t tim_nr, uint32_t cnt)
-{
-	timer_to_plat(tim_nr)->CNT = cnt;
 }
 
 static __force_inline uint16_t timer_get_counter(timer_nr_t tim_nr)

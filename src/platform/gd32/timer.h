@@ -94,6 +94,9 @@ static __force_inline void _timer_init(timer_nr_t tim_nr, uint32_t freq)
 
 	/* generate an update event */
 	TIMER_SWEVG(tim) = TIMER_SWEVG_UPG;
+
+	/* clear counter */
+	TIMER_CNT(tim) = 0;
 }
 
 static __force_inline void timer_init(timer_nr_t tim_nr, uint32_t freq,
@@ -138,10 +141,16 @@ static __force_inline void timer_init_pwm(timer_nr_t tim_nr, uint32_t freq,
 
 static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 {
-	if (on)
-		TIMER_CTL0(timer_to_plat(tim_nr)) |= TIMER_CTL0_CEN;
-	else
-		TIMER_CTL0(timer_to_plat(tim_nr)) &= ~TIMER_CTL0_CEN;
+	uint32_t tim = timer_to_plat(tim_nr);
+
+	if (on) {
+		TIMER_CTL0(tim) |= TIMER_CTL0_CEN;
+	} else {
+		TIMER_CTL0(tim) &= ~TIMER_CTL0_CEN;
+
+		/* clear counter on disable */
+		TIMER_CNT(tim) = 0;
+	}
 }
 
 static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
@@ -162,11 +171,6 @@ static __force_inline void timer_set_freq(timer_nr_t tim_nr, uint32_t freq)
 
 	TIMER_PSC(timer_to_plat(tim_nr)) = freq2psc(freq) - 1;
 	TIMER_CAR(timer_to_plat(tim_nr)) = freq2car(freq) - 1;
-}
-
-static __force_inline void timer_set_counter(timer_nr_t tim_nr, uint32_t cnt)
-{
-	TIMER_CNT(timer_to_plat(tim_nr)) = cnt;
 }
 
 static __force_inline uint16_t timer_get_counter(timer_nr_t tim_nr)
