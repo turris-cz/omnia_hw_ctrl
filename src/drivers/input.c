@@ -177,11 +177,12 @@ input_req_t input_signals_handler(void)
 	/* compute rising / falling edges */
 	i2c_iface.rising |= ~prev_intr & intr;
 	i2c_iface.falling |= prev_intr & ~intr;
+
+	i2c_iface_write_irq_pin();
+
 	enable_irq();
 
 	prev_intr = intr;
-
-	i2c_iface_write_irq_pin();
 
 	return INPUT_REQ_NONE;
 }
