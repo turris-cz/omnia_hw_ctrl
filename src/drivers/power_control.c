@@ -329,6 +329,7 @@ void power_control_first_startup(void)
 	/* save brightness value to restore it */
 	prev_brightness = led_driver_get_brightness();
 	led_set_state(LED_COUNT, false);
+	led_set_user_mode(LED_COUNT, false);
 	led_driver_set_brightness(100);
 
 	_Static_assert(RESET_SELECTOR_LEVEL_TIMEOUT % JIFFY_TO_MSECS == 0,
