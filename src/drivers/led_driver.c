@@ -544,8 +544,7 @@ void led_driver_reset_effect(bool state)
   *****************************************************************************/
 static void led_driver_knight_rider_effect_handler(void)
 {
-	static int8_t led;
-	static uint8_t effect_timeout_cnt;
+	static unsigned led, effect_timeout_cnt;
 
 	switch (reset_effect_state)
 	{
@@ -587,7 +586,7 @@ static void led_driver_knight_rider_effect_handler(void)
 			led_set_state(led + 1, false);
 			led_set_state(led, true);
 
-			if (led <= 0)
+			if (!led)
 			{
 				reset_effect_state = EFFECT_LEDSON; /* next state */
 			}
@@ -634,7 +633,7 @@ static void led_driver_knight_rider_effect_handler(void)
   *****************************************************************************/
 static void led_driver_bootloader_effect_handler(void)
 {
-	static uint8_t timeout;
+	static unsigned timeout;
 	static bool on;
 
 	timeout++;
