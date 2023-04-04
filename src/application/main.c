@@ -211,7 +211,7 @@ void main(void)
 			break;
 
 		case LED_MANAGER:
-			if (effect_reset_finished)
+			if (!led_driver_reset_effect_in_progress())
 				led_manager();
 
 			next_state = INPUT_MANAGER;

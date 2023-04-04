@@ -42,14 +42,6 @@ enum {
 	BLUE = 2,
 };
 
-typedef enum {
-	EFFECT_INIT,
-	EFFECT_UP,
-	EFFECT_DOWN,
-	EFFECT_LEDSON,
-	EFFECT_DEINIT
-} reset_effect_state_t;
-
 typedef struct {
 	uint8_t r, g, b;
 } rgb_t;
@@ -76,10 +68,11 @@ static union {
 
 static struct led leds[LED_COUNT];
 
-/* Indicates that initialization effect is done, so that application will can
- * start updating LED states according to PHY / switch / PCIe / mSATA pins.
+/* Indicates the state of initialization effect, so that application will know
+ * when to start updating LED states according to PHY / switch / PCIe / mSATA
+ * LED pins.
  */
-bool effect_reset_finished;
+reset_effect_state_t reset_effect_state;
 
 static uint8_t pwm_brightness;
 
@@ -531,9 +524,15 @@ void led_set_state_user(unsigned led, bool state)
   *****************************************************************************/
 void led_driver_reset_effect(bool state)
 {
+	if (state)
+		reset_effect_state = EFFECT_INIT;
+
 	timer_enable(LED_EFFECT_TIMER, state);
 	if (!state)
 		timer_set_counter(LED_EFFECT_TIMER, 0);
+
+	if (!state)
+		reset_effect_state = EFFECT_DISABLED;
 }
 
 /*******************************************************************************
@@ -547,13 +546,15 @@ static void led_driver_knight_rider_effect_handler(void)
 {
 	static int8_t led;
 	static uint8_t effect_timeout_cnt;
-	static reset_effect_state_t reset_effect_state; /* states for LED effect after reset */
 
 	switch (reset_effect_state)
 	{
+		case EFFECT_DISABLED:
+			/* nothing to do */
+			break;
+
 		case EFFECT_INIT:
 		{
-			effect_reset_finished = false;
 			led_set_user_mode(LED_COUNT, false);
 			led_set_state(LED_COUNT, false);
 			led_set_color24(LED_COUNT, WHITE_COLOR);
@@ -615,8 +616,6 @@ static void led_driver_knight_rider_effect_handler(void)
 
 				led_set_user_mode(LED_COUNT, false);
 				led_driver_reset_effect(false);
-				effect_reset_finished = true;
-				reset_effect_state = EFFECT_INIT;
 			}
 			else
 			{

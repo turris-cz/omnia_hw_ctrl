@@ -28,10 +28,20 @@ enum led_names {
 	USER_LED1	= 1,
 	USER_LED2	= 0,
 };
+
+typedef enum {
+	EFFECT_DISABLED,
+	EFFECT_INIT,
+	EFFECT_UP,
+	EFFECT_DOWN,
+	EFFECT_LEDSON,
+	EFFECT_DEINIT
+} reset_effect_state_t;
+
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
 
-extern bool effect_reset_finished;
+extern reset_effect_state_t reset_effect_state;
 
 /*******************************************************************************
   * @function   led_driver_config
@@ -135,5 +145,10 @@ void led_driver_effect_irq_handler(void);
   * @retval     None.
   *****************************************************************************/
 void led_driver_reset_effect(bool state);
+
+static inline bool led_driver_reset_effect_in_progress(void)
+{
+	return reset_effect_state != EFFECT_DISABLED;
+}
 
 #endif /*__LED_DRIVER_H */
