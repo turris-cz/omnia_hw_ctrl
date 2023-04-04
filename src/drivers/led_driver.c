@@ -546,82 +546,58 @@ static void led_driver_knight_rider_effect_handler(void)
 {
 	static unsigned led, effect_timeout_cnt;
 
-	switch (reset_effect_state)
-	{
-		case EFFECT_DISABLED:
-			/* nothing to do */
-			break;
+	switch (reset_effect_state) {
+	case EFFECT_DISABLED:
+		/* nothing to do */
+		break;
 
-		case EFFECT_INIT:
-		{
-			led_set_user_mode(LED_COUNT, false);
+	case EFFECT_INIT:
+		led_set_user_mode(LED_COUNT, false);
+		led_set_state(LED_COUNT, false);
+		led_set_color24(LED_COUNT, WHITE_COLOR);
+		led_set_state(0, true);
+		led = 0;
+		effect_timeout_cnt = 0;
+		reset_effect_state = EFFECT_UP;
+		break;
+
+	case EFFECT_UP:
+		led++;
+		led_set_state(LED_COUNT - 1, false);
+		led_set_state(led - 1, false);
+		led_set_state(led, true);
+
+		if (led >= LED_COUNT - 1)
+			reset_effect_state = EFFECT_DOWN;
+		break;
+
+	case EFFECT_DOWN:
+		led--;
+		led_set_state(led + 1, false);
+		led_set_state(led, true);
+
+		if (!led)
+			reset_effect_state = EFFECT_LEDSON;
+		break;
+
+	case EFFECT_LEDSON:
+		led_set_state(LED_COUNT, true);
+		led_set_color24(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
+		reset_effect_state = EFFECT_DEINIT;
+		break;
+
+	case EFFECT_DEINIT:
+		effect_timeout_cnt++;
+
+		if (effect_timeout_cnt >= EFFECT_TIMEOUT) {
 			led_set_state(LED_COUNT, false);
 			led_set_color24(LED_COUNT, WHITE_COLOR);
-			led_set_state(0, true);
-			led = 0;
-			effect_timeout_cnt = 0;
-			reset_effect_state = EFFECT_UP;
-		} break;
+			led_set_state(POWER_LED, true);
 
-		case EFFECT_UP:
-		{
-			led++;
-			led_set_state(LED_COUNT - 1, false);
-			led_set_state(led - 1, false);
-			led_set_state(led, true);
-
-			if (led >= LED_COUNT - 1)
-			{
-				reset_effect_state = EFFECT_DOWN; /* next state */
-			}
-			else
-			{
-				reset_effect_state = EFFECT_UP;
-			}
-		} break;
-
-		case EFFECT_DOWN:
-		{
-			led--;
-			led_set_state(led + 1, false);
-			led_set_state(led, true);
-
-			if (!led)
-			{
-				reset_effect_state = EFFECT_LEDSON; /* next state */
-			}
-			else
-			{
-				reset_effect_state = EFFECT_DOWN;
-			}
-		} break;
-
-		case EFFECT_LEDSON:
-		{
-			led_set_state(LED_COUNT, true);
-			led_set_color24(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
-			reset_effect_state = EFFECT_DEINIT;
-		} break;
-
-		case EFFECT_DEINIT:
-		{
-			effect_timeout_cnt++;
-
-			if (effect_timeout_cnt >= EFFECT_TIMEOUT)
-			{
-				led_set_state(LED_COUNT, false);
-				led_set_color24(LED_COUNT, WHITE_COLOR);
-				led_set_state(POWER_LED, true);
-
-				led_set_user_mode(LED_COUNT, false);
-				led_driver_reset_effect(false);
-			}
-			else
-			{
-				reset_effect_state = EFFECT_DEINIT;
-			}
-
-		} break;
+			led_set_user_mode(LED_COUNT, false);
+			led_driver_reset_effect(false);
+		}
+		break;
 	}
 }
 
