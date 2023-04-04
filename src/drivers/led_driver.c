@@ -558,6 +558,8 @@ static void led_driver_knight_rider_effect_handler(void)
 			led_set_state(LED_COUNT, false);
 			led_set_color24(LED_COUNT, WHITE_COLOR);
 			led_set_state(0, true);
+			led = 0;
+			effect_timeout_cnt = 0;
 			reset_effect_state = EFFECT_UP;
 		} break;
 
@@ -613,7 +615,6 @@ static void led_driver_knight_rider_effect_handler(void)
 
 				led_set_user_mode(LED_COUNT, false);
 				led_driver_reset_effect(false);
-				effect_timeout_cnt = 0;
 				effect_reset_finished = true;
 				reset_effect_state = EFFECT_INIT;
 			}
