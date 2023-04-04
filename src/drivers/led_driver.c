@@ -546,7 +546,7 @@ void led_driver_reset_effect(bool state)
 static void led_driver_knight_rider_effect_handler(void)
 {
 	static int8_t led;
-	static uint8_t state_timeout_cnt;
+	static uint8_t effect_timeout_cnt;
 	static reset_effect_state_t reset_effect_state; /* states for LED effect after reset */
 
 	switch (reset_effect_state)
@@ -603,9 +603,9 @@ static void led_driver_knight_rider_effect_handler(void)
 
 		case EFFECT_DEINIT:
 		{
-			state_timeout_cnt++;
+			effect_timeout_cnt++;
 
-			if (state_timeout_cnt >= EFFECT_TIMEOUT)
+			if (effect_timeout_cnt >= EFFECT_TIMEOUT)
 			{
 				led_set_state(LED_COUNT, false);
 				led_set_color24(LED_COUNT, WHITE_COLOR);
@@ -613,7 +613,7 @@ static void led_driver_knight_rider_effect_handler(void)
 
 				led_set_user_mode(LED_COUNT, false);
 				led_driver_reset_effect(false);
-				state_timeout_cnt = 0;
+				effect_timeout_cnt = 0;
 				effect_reset_finished = true;
 				reset_effect_state = EFFECT_INIT;
 			}
