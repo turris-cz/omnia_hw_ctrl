@@ -42,13 +42,13 @@ enum {
 	BLUE = 2,
 };
 
-typedef enum led_effect_states {
+typedef enum {
 	EFFECT_INIT,
 	EFFECT_UP,
 	EFFECT_DOWN,
 	EFFECT_LEDSON,
 	EFFECT_DEINIT
-} effect_state_t;
+} reset_effect_state_t;
 
 typedef struct {
 	uint8_t r, g, b;
@@ -547,9 +547,9 @@ static void led_driver_knight_rider_effect_handler(void)
 {
 	static int8_t led;
 	static uint8_t state_timeout_cnt;
-	static effect_state_t effect_state; /* states for LED effect after reset */
+	static reset_effect_state_t reset_effect_state; /* states for LED effect after reset */
 
-	switch (effect_state)
+	switch (reset_effect_state)
 	{
 		case EFFECT_INIT:
 		{
@@ -558,7 +558,7 @@ static void led_driver_knight_rider_effect_handler(void)
 			led_set_state(LED_COUNT, false);
 			led_set_color24(LED_COUNT, WHITE_COLOR);
 			led_set_state(0, true);
-			effect_state = EFFECT_UP;
+			reset_effect_state = EFFECT_UP;
 		} break;
 
 		case EFFECT_UP:
@@ -570,11 +570,11 @@ static void led_driver_knight_rider_effect_handler(void)
 
 			if (led >= 11)
 			{
-				effect_state = EFFECT_DOWN; /* next state */
+				reset_effect_state = EFFECT_DOWN; /* next state */
 			}
 			else
 			{
-				effect_state = EFFECT_UP;
+				reset_effect_state = EFFECT_UP;
 			}
 		} break;
 
@@ -586,11 +586,11 @@ static void led_driver_knight_rider_effect_handler(void)
 
 			if (led <= 0)
 			{
-				effect_state = EFFECT_LEDSON; /* next state */
+				reset_effect_state = EFFECT_LEDSON; /* next state */
 			}
 			else
 			{
-				effect_state = EFFECT_DOWN;
+				reset_effect_state = EFFECT_DOWN;
 			}
 		} break;
 
@@ -598,7 +598,7 @@ static void led_driver_knight_rider_effect_handler(void)
 		{
 			led_set_state(LED_COUNT, true);
 			led_set_color24(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
-			effect_state = EFFECT_DEINIT;
+			reset_effect_state = EFFECT_DEINIT;
 		} break;
 
 		case EFFECT_DEINIT:
@@ -615,11 +615,11 @@ static void led_driver_knight_rider_effect_handler(void)
 				led_driver_reset_effect(false);
 				state_timeout_cnt = 0;
 				effect_reset_finished = true;
-				effect_state = EFFECT_INIT;
+				reset_effect_state = EFFECT_INIT;
 			}
 			else
 			{
-				effect_state = EFFECT_DEINIT;
+				reset_effect_state = EFFECT_DEINIT;
 			}
 
 		} break;
