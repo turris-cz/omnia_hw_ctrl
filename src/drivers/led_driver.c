@@ -566,11 +566,11 @@ static void led_driver_knight_rider_effect_handler(void)
 		case EFFECT_UP:
 		{
 			led++;
-			led_set_state(11, false);
+			led_set_state(LED_COUNT - 1, false);
 			led_set_state(led - 1, false);
 			led_set_state(led, true);
 
-			if (led >= 11)
+			if (led >= LED_COUNT - 1)
 			{
 				reset_effect_state = EFFECT_DOWN; /* next state */
 			}
