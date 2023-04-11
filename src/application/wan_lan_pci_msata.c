@@ -34,29 +34,6 @@ void msata_pci_activity(void)
 }
 
 /*******************************************************************************
-  * @function   msata_pci_card_detection
-  * @brief      Detect inserted card (whether a card is inserted or not)
-  * @param      None.
-  * @retval     1 - a card inserted, 0 - no card inserted.
-  *****************************************************************************/
-bool msata_pci_card_detection(void)
-{
-	/* inverted due to the HW connection */
-	return !gpio_read(CARD_DET_PIN);
-}
-
-/*******************************************************************************
-  * @function   msata_pci_type_card_detection
-  * @brief      Detect a type of inserted card - mSATA or miniPCIe
-  * @param      None.
-  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
-  *****************************************************************************/
-bool msata_pci_type_card_detection(void)
-{
-	return gpio_read(MSATA_IND_PIN);
-}
-
-/*******************************************************************************
   * @function   wan_led_activity
   * @brief      Toggle WAN LED according to the WAN activity.
   * @param      None.

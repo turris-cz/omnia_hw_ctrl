@@ -20,22 +20,6 @@ void wan_lan_pci_msata_config(void);
 void msata_pci_activity(void);
 
 /*******************************************************************************
-  * @function   msata_pci_card_detection
-  * @brief      Detect inserted card (whether is a card inserted or not)
-  * @param      None.
-  * @retval     1 - a card inserted, 0 - no card inserted.
-  *****************************************************************************/
-bool msata_pci_card_detection(void);
-
-/*******************************************************************************
-  * @function   msata_pci_type_card_detection
-  * @brief      Detect a type of inserted card - mSATA or miniPCIe
-  * @param      None.
-  * @retval     1 - mSATA card inserted, 0 - miniPCIe card inserted.
-  *****************************************************************************/
-bool msata_pci_type_card_detection(void);
-
-/*******************************************************************************
   * @function   wan_led_activity
   * @brief      Toggle WAN LED according to the WAN activity.
   * @param      None.
