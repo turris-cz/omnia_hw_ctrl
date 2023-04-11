@@ -2,7 +2,6 @@
 #include "input.h"
 #include "led_driver.h"
 #include "i2c_iface.h"
-#include "wan_lan_pci_msata.h"
 #include "debug.h"
 #include "message.h"
 #include "cpu.h"
@@ -21,7 +20,6 @@ typedef enum {
 	ERROR_STATE,
 	INPUT_MANAGER,
 	I2C_MANAGER,
-	LED_MANAGER,
 	BOOTLOADER
 } state_t;
 
@@ -48,7 +46,7 @@ static void app_init(void)
 	/* init ports and peripheral */
 	crc32_enable();
 	power_control_io_config();
-	wan_lan_pci_msata_config();
+	input_signals_config();
 	power_control_usb_timeout_config();
 	led_driver_config();
 
@@ -103,21 +101,6 @@ static void light_reset(void)
 	led_driver_reset_effect(true);
 
 	input_signals_init();
-}
-
-/*******************************************************************************
-  * @function   led_manager
-  * @brief      System LED activity (WAN, LAN, WiFi...).
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-static void led_manager(void)
-{
-	wan_led_activity();
-	lan_led_activity();
-	pci_led_activity();
-	msata_pci_activity();
-	led_states_commit();
 }
 
 /*******************************************************************************
@@ -205,16 +188,9 @@ void main(void)
 				break;
 
 			default:
-				next_state = LED_MANAGER;
+				next_state = INPUT_MANAGER;
 				break;
 			}
-			break;
-
-		case LED_MANAGER:
-			if (!led_driver_reset_effect_in_progress())
-				led_manager();
-
-			next_state = INPUT_MANAGER;
 			break;
 
 		case BOOTLOADER:

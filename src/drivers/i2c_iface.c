@@ -3,7 +3,6 @@
 #include "i2c_iface.h"
 #include "debug.h"
 #include "led_driver.h"
-#include "wan_lan_pci_msata.h"
 #include "power_control.h"
 #include "input.h"
 #include "memory_layout.h"
