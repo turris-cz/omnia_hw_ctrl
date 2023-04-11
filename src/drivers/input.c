@@ -74,7 +74,7 @@ static void handle_usb_overcurrent(usb_port_t port)
 /* Previously read values are needed for computing rising and falling edge */
 static uint8_t prev_intr;
 
-void input_signals_config(void)
+void input_signals_init(void)
 {
 	prev_intr = 0;
 

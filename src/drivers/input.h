@@ -33,7 +33,7 @@ void button_debounce_handler(void);
   *****************************************************************************/
 void button_counter_decrease(uint8_t value);
 
-void input_signals_config(void);
+void input_signals_init(void);
 
 /*******************************************************************************
   * @function   input_signals_handler

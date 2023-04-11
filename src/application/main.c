@@ -102,7 +102,7 @@ static void light_reset(void)
 
 	led_driver_reset_effect(true);
 
-	input_signals_config();
+	input_signals_init();
 }
 
 /*******************************************************************************

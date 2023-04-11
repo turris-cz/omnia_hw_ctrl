@@ -151,7 +151,7 @@ static void bootloader(void)
 			break;
 
 		case GO_TO_FLASH:
-			input_signals_config();
+			input_signals_init();
 			next_state = INPUT_MANAGER;
 			break;
 
@@ -187,7 +187,7 @@ static void bootloader(void)
 		watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
 		watchdog_enable(true);
 
-		input_signals_config();
+		input_signals_init();
 
 		next_state = INPUT_MANAGER;
 		break;
