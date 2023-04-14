@@ -374,6 +374,10 @@ void power_control_first_startup(void)
 	msleep(15);
 	gpio_write(CFG_CTRL_PIN, 0);
 
+	/* set active reset of peripherals after CPU reset on v32+ boards */
+	if (OMNIA_BOARD_REVISION >= 32)
+		periph_control_rst_init();
+
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
 		led_driver_set_brightness(0);
