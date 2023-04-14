@@ -370,11 +370,14 @@ void led_driver_config(void)
 	/* Configure PWM timer */
 	timer_init_pwm(LED_PWM_TIMER, LED_PWM_FREQ, 100);
 
-	/* Set initial PWM brightness (also enables LED_TIMER) */
-	led_driver_set_brightness(100);
-
 	/* Configure LED pattern timer */
 	timer_init(LED_PATTERN_TIMER, 1000, 1);
+
+	/*
+	 * Set initial PWM brightness (also enables LED_TIMER and
+	 * LED_PATTERN_TIMER)
+	 */
+	led_driver_set_brightness(100);
 }
 
 /*******************************************************************************
@@ -403,7 +406,13 @@ void led_driver_set_brightness(uint8_t value)
 		timer_enable(LED_PWM_TIMER, true);
 	}
 
+	/* Enable LED pattern interrupt immediately after LED interrupt.
+	 * This should make the pattern interrupt go pending just after LED
+	 * interrupt, since the frequency of one divides the frequency of the
+	 * other. This will result in the pattern interrupt to be tail-chained,
+	 * saving some processor ticks. */
 	timer_enable(LED_TIMER, !!value);
+	timer_enable(LED_PATTERN_TIMER, !!value);
 
 	timer_set_pwm_duty(LED_PWM_TIMER, value);
 	pwm_brightness = value;

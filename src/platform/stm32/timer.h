@@ -141,6 +141,11 @@ static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 	}
 }
 
+static __force_inline void timer_irq_enable(timer_nr_t tim_nr, bool on)
+{
+	timer_to_plat(tim_nr)->DIER = on ? TIM_DIER_UIE : 0;
+}
+
 static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 {
 	TIM_TypeDef *tim = timer_to_plat(tim_nr);

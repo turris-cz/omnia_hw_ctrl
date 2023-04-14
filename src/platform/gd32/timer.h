@@ -153,6 +153,11 @@ static __force_inline void timer_enable(timer_nr_t tim_nr, bool on)
 	}
 }
 
+static __force_inline void timer_irq_enable(timer_nr_t tim_nr, bool on)
+{
+	TIMER_DMAINTEN(timer_to_plat(tim_nr)) = on ? TIMER_DMAINTEN_UPIE : 0;
+}
+
 static __force_inline bool timer_irq_clear_up(timer_nr_t tim_nr)
 {
 	uint32_t tim = timer_to_plat(tim_nr);

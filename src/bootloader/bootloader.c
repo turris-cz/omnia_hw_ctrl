@@ -59,7 +59,6 @@ static void bootloader_init(void)
 	enable_irq();
 
 	led_set_color24(LED_COUNT, GREEN_COLOR);
-	timer_enable(LED_PATTERN_TIMER, true);
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
