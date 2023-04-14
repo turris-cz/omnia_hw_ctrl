@@ -6,6 +6,7 @@
 #include "pin_defs.h"
 #include "debug.h"
 #include "timer.h"
+#include "watchdog.h"
 
 #if !defined(OMNIA_BOARD_REVISION)
 #error build system did not define OMNIA_BOARD_REVISION macro
@@ -399,6 +400,9 @@ void power_control_first_startup(void)
 
 		gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
 	}
+
+	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
+	watchdog_enable(true);
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {

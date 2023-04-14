@@ -9,7 +9,6 @@
 #include "memory_layout.h"
 #include "time.h"
 #include "timer.h"
-#include "watchdog.h"
 #include "crc32.h"
 
 #define MAX_ERROR_COUNT		5
@@ -87,9 +86,6 @@ static void light_reset(void)
 	enable_irq();
 
 	power_control_first_startup();
-
-	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
-	watchdog_enable(true);
 
 	led_driver_reset_pattern_start();
 	timer_enable(LED_PATTERN_TIMER, true);
