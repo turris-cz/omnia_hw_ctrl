@@ -34,6 +34,8 @@ static const struct {
 		FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
 		FEAT_IF(LED_GAMMA_CORRECTION, !BOOTLOADER_BUILD) |
 		FEAT_IF(BOOTLOADER, BOOTLOADER_BUILD) |
+		FEAT_IF(LED_STATE_EXT, OMNIA_BOARD_REVISION < 32) |
+		FEAT_IF(LED_STATE_EXT_V32, OMNIA_BOARD_REVISION >= 32) |
 		FEAT_NEW_INT_API |
 		FEAT_WDT_PING |
 		FEAT_EXT_CMDS |
@@ -280,6 +282,9 @@ static __maybe_unused int cmd_get_ext_status(i2c_iface_priv_t *priv)
 
 	for_each_const(pin, ext_sts_pins)
 		ext_status |= gpio_read(pin->pin) ? pin->bit : 0;
+
+	/* fill in LED pin states */
+	ext_status |= FIELD_PREP(EXT_STS_LED_STATES_MASK, input_led_pins);
 
 	debug("get_ext_status %#010x\n", ext_status);
 	set_reply(ext_status);
