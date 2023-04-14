@@ -336,6 +336,8 @@ void power_control_first_startup(void)
 	unsigned timeout;
 	int sel;
 
+	timer_enable(LED_PATTERN_TIMER, false);
+
 	gpio_write(CFG_CTRL_PIN, 1);
 	msleep(50);
 	gpio_write(MANRES_PIN, 1);
@@ -419,6 +421,8 @@ void power_control_first_startup(void)
 	/* restore brightness and color */
 	led_set_state(LED_COUNT, false);
 	led_driver_set_brightness(prev_brightness);
+
+	timer_enable(LED_PATTERN_TIMER, true);
 }
 
 #if USER_REGULATOR_ENABLED

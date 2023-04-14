@@ -169,11 +169,9 @@ static void bootloader(void)
 		msleep(100);
 
 		power_control_enable_regulators();
-		timer_enable(LED_PATTERN_TIMER, false);
 		power_control_first_startup();
 
 		led_set_color24(LED_COUNT, RED_COLOR);
-		timer_enable(LED_PATTERN_TIMER, true);
 
 		input_signals_init();
 

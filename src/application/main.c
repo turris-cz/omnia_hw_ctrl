@@ -8,7 +8,6 @@
 #include "flash.h"
 #include "memory_layout.h"
 #include "time.h"
-#include "timer.h"
 #include "crc32.h"
 
 #define MAX_ERROR_COUNT		5
@@ -77,8 +76,6 @@ static int power_on(void)
   *****************************************************************************/
 static void light_reset(void)
 {
-	timer_enable(LED_PATTERN_TIMER, false);
-
 	disable_irq();
 	i2c_iface_init();
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
@@ -88,7 +85,6 @@ static void light_reset(void)
 	power_control_first_startup();
 
 	led_driver_reset_pattern_start();
-	timer_enable(LED_PATTERN_TIMER, true);
 
 	input_signals_init();
 }
