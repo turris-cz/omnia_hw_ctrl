@@ -342,7 +342,7 @@ void power_control_first_startup(void)
 
 	/* Increase reset selector level every 10ms. */
 	last_jiffies = jiffies;
-	while (!gpio_read(SYSRES_OUT_PIN)) {
+	while (!gpio_read(MANRES_PIN)) {
 		/* To prevent reading board reset signal too often, put a cycle
 		 * with some nops in-between. */
 		if (last_jiffies == jiffies) {
@@ -360,6 +360,10 @@ void power_control_first_startup(void)
 
 		increase_reset_selector_level(&sel, &level);
 	}
+
+	/* wait until SYSRES_OUT is deasserted */
+	while (!gpio_read(SYSRES_OUT_PIN))
+		wait_for_interrupt();
 
 	if (sel < 0)
 		sel = 0;
