@@ -11,7 +11,6 @@
 #include "cpu.h"
 #include "i2c_iface.h"
 #include "crc32.h"
-#include "watchdog.h"
 
 typedef enum {
 	POWER_ON,
@@ -175,9 +174,6 @@ static void bootloader(void)
 
 		led_set_color24(LED_COUNT, RED_COLOR);
 		timer_enable(LED_PATTERN_TIMER, true);
-
-		watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
-		watchdog_enable(true);
 
 		input_signals_init();
 
