@@ -84,13 +84,13 @@ void input_signals_config(void)
 }
 
 /* Previously read values are needed for computing rising and falling edge */
-static uint8_t prev_intr;
+static uint32_t prev_intr;
 volatile uint32_t input_led_pins;
 
 void input_signals_init(void)
 {
 	input_led_pins = led_pins_read(0);
-	prev_intr = 0;
+	prev_intr = FIELD_PREP(INT_LED_STATES_MASK, input_led_pins);
 
 	if (!gpio_read(CARD_DET_PIN))
 		prev_intr |= INT_CARD_DET;
@@ -125,7 +125,7 @@ void input_signals_init(void)
 input_req_t input_signals_handler(void)
 {
 	bool manres, sysres, mres, pg, pg_4v5, usb30_ovc, usb31_ovc;
-	uint8_t intr = 0;
+	uint32_t intr = 0;
 
 	power_input_pins_read(&manres, &sysres, &mres, &pg, &pg_4v5, &usb30_ovc,
 			      &usb31_ovc);
@@ -171,6 +171,7 @@ input_req_t input_signals_handler(void)
 
 	/* read LED pins from WAN PHY, LAN switch and MiniPCIe ports */
 	input_led_pins = led_pins_read(input_led_pins);
+	intr |= FIELD_PREP(INT_LED_STATES_MASK, input_led_pins);
 
 	disable_irq();
 
