@@ -27,6 +27,9 @@
 /* DELAY_BETWEEN_READINGS * 100 = 2 sec */
 #define TIMEOUT				100
 
+/* Wait 10 ms before changing LED color when choosing reset selector.
+ * We go through 256 color hues, so one RGB LED changes color from green to red
+ * in 256 * 10 ms = 2.56 seconds. */
 #define RESET_SELECTOR_LEVEL_TIMEOUT	10
 
 /* sequence of enumerator entires is also power-up sequence */
