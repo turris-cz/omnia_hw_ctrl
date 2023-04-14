@@ -54,13 +54,13 @@ static void bootloader_init(void)
 	time_config();
 	led_driver_config();
 	i2c_iface_init();
-	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 1);
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 2);
 
 	timer_reset(USB_TIMEOUT_TIMER);
 	enable_irq();
 
 	led_set_color24(LED_COUNT, GREEN_COLOR);
-	led_driver_reset_effect(true);
+	timer_enable(LED_PATTERN_TIMER, true);
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
 
@@ -172,11 +172,11 @@ static void bootloader(void)
 		msleep(100);
 
 		power_control_enable_regulators();
-		led_driver_reset_effect(false);
+		timer_enable(LED_PATTERN_TIMER, false);
 		power_control_first_startup();
 
 		led_set_color24(LED_COUNT, RED_COLOR);
-		led_driver_reset_effect(true);
+		timer_enable(LED_PATTERN_TIMER, true);
 
 		/* set active reset of peripherals after CPU reset on v32+
 		 * boards

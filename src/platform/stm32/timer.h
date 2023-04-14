@@ -4,7 +4,7 @@
 #include "timer_common.h"
 
 #define LED_TIMER		3
-#define LED_EFFECT_TIMER	6
+#define LED_PATTERN_TIMER	6
 #define LED_PWM_TIMER		15
 #define USB_TIMEOUT_TIMER	17
 

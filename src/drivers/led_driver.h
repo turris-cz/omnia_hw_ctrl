@@ -29,19 +29,8 @@ enum led_names {
 	USER_LED2	= 0,
 };
 
-typedef enum {
-	EFFECT_DISABLED,
-	EFFECT_INIT,
-	EFFECT_UP,
-	EFFECT_DOWN,
-	EFFECT_LEDSON,
-	EFFECT_DEINIT
-} reset_effect_state_t;
-
 /* PCI1 and PCI2 leds are reversed, there is a difference between numbering in schematic
 editor and numbering on the case for the router */
-
-extern reset_effect_state_t reset_effect_state;
 
 /*******************************************************************************
   * @function   led_driver_config
@@ -131,24 +120,11 @@ void led_set_state(unsigned led, bool state);
 void led_set_state_user(unsigned led, bool state);
 
 /*******************************************************************************
-  * @function   led_driver_effect_irq_handler
-  * @brief      Display LED effect.
+  * @function   led_driver_reset_pattern_start
+  * @brief      Start knight rider pattern after reset.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void led_driver_effect_irq_handler(void);
-
-/*******************************************************************************
-  * @function   led_driver_reset_effect
-  * @brief      Enable/Disable knight rider effect after reset.
-  * @param      color: color in RGB range.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_reset_effect(bool state);
-
-static inline bool led_driver_reset_effect_in_progress(void)
-{
-	return reset_effect_state != EFFECT_DISABLED;
-}
+void led_driver_reset_pattern_start(void);
 
 #endif /*__LED_DRIVER_H */

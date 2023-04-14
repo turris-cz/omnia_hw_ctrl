@@ -6,7 +6,7 @@
 #include "gd32f1x0_rcu.h"
 
 #define LED_TIMER		2
-#define LED_EFFECT_TIMER	5
+#define LED_PATTERN_TIMER	5
 #define LED_PWM_TIMER		14
 #define USB_TIMEOUT_TIMER	16
 

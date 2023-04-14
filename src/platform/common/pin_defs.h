@@ -2,6 +2,7 @@
 #define PIN_DEFS_H
 
 #include "gpio.h"
+#include "input.h"
 
 /* Power control outputs */
 #define INT_MCU_PIN		PIN(C, 0)
@@ -81,6 +82,61 @@
 #define CARD_DET_PIN		PIN(A, 9, !DBG_ENABLE)
 #define MSATA_LED_PIN		PIN(A, 15)
 #define MSATA_IND_PIN		PIN(C, 14)
+
+static inline uint32_t led_pins_read(uint32_t prev)
+{
+	bool c0, c1, c2, c3, nr0, nr1, nr2;
+	uint16_t a, c, f;
+	uint32_t res = 0;
+
+	a = gpio_read_port(PORT_A);
+	c = gpio_read_port(PORT_C);
+	f = gpio_read_port(PORT_F);
+
+#define _FILL_LED(port, pin, bit)			\
+	if (pin_bit(pin) && !(port & pin_bit(pin)))	\
+		res |= bit;
+
+	_FILL_LED(a, MSATA_LED_PIN, WLAN0_MSATA_LED_BIT)
+	_FILL_LED(c, PCI_LLED1_PIN, WLAN1_LED_BIT);
+	_FILL_LED(c, PCI_LLED2_PIN, WLAN2_LED_BIT);
+	_FILL_LED(f, PCI_PLED0_PIN, WPAN0_LED_BIT);
+	_FILL_LED(a, PCI_PLED1_PIN, WPAN1_LED_BIT);
+	_FILL_LED(f, PCI_PLED2_PIN, WPAN2_LED_BIT);
+	_FILL_LED(f, WAN_LED0_PIN, WAN_LED0_BIT);
+	_FILL_LED(f, WAN_LED1_PIN, WAN_LED1_BIT);
+#undef _FILL_LED
+
+	c0 = a & pin_bit(C0_P3_LED_PIN);
+	c1 = a & pin_bit(C1_LED_PIN);
+	c2 = a & pin_bit(C2_P4_LED_PIN);
+	c3 = a & pin_bit(C3_P5_LED_PIN);
+	a = ~a;
+	nr0 = a & pin_bit(R0_P0_LED_PIN);
+	nr1 = a & pin_bit(R1_P1_LED_PIN);
+	nr2 = a & pin_bit(R2_P2_LED_PIN);
+
+	res |= prev & LAN_LEDS_BIT_MASK;
+
+#define _FILL_LAN(col, l0, l1, l2)	\
+	if (col) {			\
+		res &= ~(l0 | l1 | l2);	\
+		if (nr0)		\
+			res |= l0;	\
+		if (nr1)		\
+			res |= l1;	\
+		if (nr2)		\
+			res |= l2;	\
+	}
+
+	_FILL_LAN(c0, LAN0_LED0_BIT, LAN2_LED0_BIT, LAN4_LED0_BIT)
+	_FILL_LAN(c1, LAN1_LED0_BIT, LAN3_LED0_BIT, LAN5_LED0_BIT)
+	_FILL_LAN(c2, LAN0_LED1_BIT, LAN2_LED1_BIT, LAN4_LED1_BIT)
+	_FILL_LAN(c3, LAN1_LED1_BIT, LAN3_LED1_BIT, LAN5_LED1_BIT)
+#undef _FILL_LAN
+
+	return res;
+}
 
 static inline void lan_led_pins_read(bool *c0, bool *c1, bool *nr0, bool *nr1,
 				     bool *nr2)

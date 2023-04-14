@@ -85,9 +85,11 @@ void input_signals_config(void)
 
 /* Previously read values are needed for computing rising and falling edge */
 static uint8_t prev_intr;
+volatile uint32_t input_led_pins;
 
 void input_signals_init(void)
 {
+	input_led_pins = led_pins_read(0);
 	prev_intr = 0;
 
 	if (!gpio_read(CARD_DET_PIN))
@@ -113,67 +115,6 @@ void input_signals_init(void)
 	button.pressed_counter = 0;
 
 	enable_irq();
-}
-
-static void msata_pci_led_handler(void)
-{
-	led_set_state_nocommit(MSATA_PCI_LED, !gpio_read(MSATA_LED_PIN));
-}
-
-static void wan_led_handler(void)
-{
-	led_set_state_nocommit(WAN_LED, !gpio_read(WAN_LED0_PIN));
-}
-
-static void pci_leds_handler(void)
-{
-	uint8_t pcie_led1, pcie_led2;
-
-	pcie_led2 = gpio_read(PCI_LLED2_PIN);
-	pcie_led1 = gpio_read(PCI_LLED1_PIN);
-
-	if (OMNIA_BOARD_REVISION < 32) {
-		uint8_t pcie_pled1, pcie_pled2;
-
-		pcie_pled1 = gpio_read(PCI_PLED1_PIN);
-		pcie_pled2 = gpio_read(PCI_PLED2_PIN);
-
-		pcie_led1 = pcie_led1 && pcie_pled1;
-		pcie_led2 = pcie_led2 && pcie_pled2;
-	}
-
-	led_set_state_nocommit(PCI2_LED, !pcie_led2);
-	led_set_state_nocommit(PCI1_LED, !pcie_led1);
-}
-
-static void lan_leds_handler(void)
-{
-	bool c0, c1, nr0, nr1, nr2;
-
-	lan_led_pins_read(&c0, &c1, &nr0, &nr1, &nr2);
-
-	if (c0) {
-		led_set_state_nocommit(LAN0_LED, nr0);
-		led_set_state_nocommit(LAN2_LED, nr1);
-		led_set_state_nocommit(LAN4_LED, nr2);
-	}
-
-	if (c1) {
-		led_set_state_nocommit(LAN1_LED, nr0);
-		led_set_state_nocommit(LAN3_LED, nr1);
-	}
-}
-
-static void led_pins_handler(void)
-{
-	if (BOOTLOADER_BUILD || led_driver_reset_effect_in_progress())
-		return;
-
-	wan_led_handler();
-	lan_leds_handler();
-	pci_leds_handler();
-	msata_pci_led_handler();
-	led_states_commit();
 }
 
 /*******************************************************************************
@@ -228,7 +169,8 @@ input_req_t input_signals_handler(void)
 	if (gpio_read(MSATA_IND_PIN))
 		intr |= INT_MSATA_IND;
 
-	led_pins_handler();
+	/* read LED pins from WAN PHY, LAN switch and MiniPCIe ports */
+	input_led_pins = led_pins_read(input_led_pins);
 
 	disable_irq();
 

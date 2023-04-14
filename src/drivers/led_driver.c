@@ -1,11 +1,10 @@
 #include "led_driver.h"
 #include "power_control.h"
 #include "pin_defs.h"
+#include "input.h"
 #include "spi.h"
 #include "timer.h"
 #include "cpu.h"
-
-#define EFFECT_TIMEOUT		5
 
 #define LED_PWM_FREQ		4000000
 
@@ -67,11 +66,18 @@ static union {
 
 static struct led leds[LED_COUNT];
 
-/* Indicates the state of initialization effect, so that application will know
+/* Indicates the state of initialization pattern, so that application will know
  * when to start updating LED states according to PHY / switch / PCIe / mSATA
  * LED pins.
  */
-reset_effect_state_t reset_effect_state;
+static enum {
+	RESET_PATTERN_DISABLED,
+	RESET_PATTERN_INIT,
+	RESET_PATTERN_UP,
+	RESET_PATTERN_DOWN,
+	RESET_PATTERN_LEDSON,
+	RESET_PATTERN_DONE,
+} reset_pattern_state;
 
 static uint8_t pwm_brightness;
 
@@ -367,8 +373,8 @@ void led_driver_config(void)
 	/* Set initial PWM brightness (also enables LED_TIMER) */
 	led_driver_set_brightness(100);
 
-	/* Configure boot effect */
-	timer_init(LED_EFFECT_TIMER, 15, 2);
+	/* Configure LED pattern timer */
+	timer_init(LED_PATTERN_TIMER, 1000, 1);
 }
 
 /*******************************************************************************
@@ -515,102 +521,110 @@ void led_set_state_user(unsigned led, bool state)
 }
 
 /*******************************************************************************
-  * @function   led_driver_reset_effect
-  * @brief      Enable/Disable knight rider effect after reset.
-  * @param      color: color in RGB range.
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_reset_effect(bool state)
-{
-	if (state)
-		reset_effect_state = EFFECT_INIT;
-
-	timer_enable(LED_EFFECT_TIMER, state);
-
-	if (!state)
-		reset_effect_state = EFFECT_DISABLED;
-}
-
-/*******************************************************************************
-  * @function   led_driver_knight_rider_effect_handler
-  * @brief      Display knight rider effect on LEDs during startup (called in
-  *             timer interrupt).
+  * @function   led_driver_reset_pattern_start
+  * @brief      Start knight rider pattern after reset.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void led_driver_knight_rider_effect_handler(void)
+void led_driver_reset_pattern_start(void)
 {
-	static unsigned led, effect_timeout_cnt;
+	reset_pattern_state = RESET_PATTERN_INIT;
+}
 
-	switch (reset_effect_state) {
-	case EFFECT_DISABLED:
+static void led_driver_reset_pattern_handler(void)
+{
+	static unsigned led, timeout;
+
+	/* don't handle next state until timeout expires */
+	if (timeout) {
+		timeout--;
+		return;
+	}
+
+	switch (reset_pattern_state) {
+	case RESET_PATTERN_DISABLED:
 		/* nothing to do */
 		break;
 
-	case EFFECT_INIT:
+	case RESET_PATTERN_INIT:
 		led_set_user_mode(LED_COUNT, false);
 		led_set_state(LED_COUNT, false);
 		led_set_color24(LED_COUNT, WHITE_COLOR);
 		led_set_state(0, true);
 		led = 0;
-		effect_timeout_cnt = 0;
-		reset_effect_state = EFFECT_UP;
+		timeout = 67; /* 1000 / 15 ms */
+		reset_pattern_state = RESET_PATTERN_UP;
 		break;
 
-	case EFFECT_UP:
+	case RESET_PATTERN_UP:
 		led++;
+		timeout = 67; /* 1000 / 15 ms */
 		led_set_state(LED_COUNT - 1, false);
 		led_set_state(led - 1, false);
 		led_set_state(led, true);
 
 		if (led >= LED_COUNT - 1)
-			reset_effect_state = EFFECT_DOWN;
+			reset_pattern_state = RESET_PATTERN_DOWN;
 		break;
 
-	case EFFECT_DOWN:
+	case RESET_PATTERN_DOWN:
 		led--;
+		timeout = 67; /* 1000 / 15 ms */
 		led_set_state(led + 1, false);
 		led_set_state(led, true);
 
 		if (!led)
-			reset_effect_state = EFFECT_LEDSON;
+			reset_pattern_state = RESET_PATTERN_LEDSON;
 		break;
 
-	case EFFECT_LEDSON:
+	case RESET_PATTERN_LEDSON:
 		led_set_state(LED_COUNT, true);
 		led_set_color24(LED_COUNT, GREEN_COLOR | BLUE_COLOR);
-		reset_effect_state = EFFECT_DEINIT;
+		reset_pattern_state = RESET_PATTERN_DONE;
+		timeout = 333; /* 1000 / 3 ms */
 		break;
 
-	case EFFECT_DEINIT:
-		effect_timeout_cnt++;
+	case RESET_PATTERN_DONE:
+		led_set_state(LED_COUNT, false);
+		led_set_color24(LED_COUNT, WHITE_COLOR);
+		led_set_state(POWER_LED, true);
 
-		if (effect_timeout_cnt >= EFFECT_TIMEOUT) {
-			led_set_state(LED_COUNT, false);
-			led_set_color24(LED_COUNT, WHITE_COLOR);
-			led_set_state(POWER_LED, true);
-
-			led_set_user_mode(LED_COUNT, false);
-			led_driver_reset_effect(false);
-		}
+		led_set_user_mode(LED_COUNT, false);
+		reset_pattern_state = RESET_PATTERN_DISABLED;
 		break;
 	}
 }
 
+static void led_driver_default_pattern_handler(uint32_t pins)
+{
+	led_set_state_nocommit(LAN0_LED, pins & LAN0_LED0_BIT);
+	led_set_state_nocommit(LAN1_LED, pins & LAN1_LED0_BIT);
+	led_set_state_nocommit(LAN2_LED, pins & LAN2_LED0_BIT);
+	led_set_state_nocommit(LAN3_LED, pins & LAN3_LED0_BIT);
+	led_set_state_nocommit(LAN4_LED, pins & LAN4_LED0_BIT);
+	led_set_state_nocommit(WAN_LED, pins & WAN_LED0_BIT);
+	led_set_state_nocommit(MSATA_PCI_LED, pins & WLAN0_MSATA_LED_BIT);
+	led_set_state_nocommit(PCI1_LED,
+			       pins & (WLAN1_LED_BIT | WPAN1_LED_BIT));
+	led_set_state_nocommit(PCI2_LED,
+			       pins & (WLAN2_LED_BIT | WPAN2_LED_BIT));
+	led_states_commit();
+}
+
 /*******************************************************************************
-  * @function   led_driver_bootloader_effect_handler
-  * @brief      Display bootloader effect.
+  * @function   led_driver_bootloader_pattern_handler
+  * @brief      Display bootloader pattern.
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void led_driver_bootloader_effect_handler(void)
+static void led_driver_bootloader_pattern_handler(void)
 {
 	static unsigned timeout;
 	static bool on;
 
 	timeout++;
 
-	if (timeout >= 8) {
+	if (timeout >= 500) {
 		timeout = 0;
 
 		on = !on;
@@ -618,13 +632,15 @@ static void led_driver_bootloader_effect_handler(void)
 	}
 }
 
-void __irq led_driver_effect_irq_handler(void)
+void __irq led_driver_pattern_irq_handler(void)
 {
-	if (!timer_irq_clear_up(LED_EFFECT_TIMER))
+	if (!timer_irq_clear_up(LED_PATTERN_TIMER))
 		return;
 
 	if (BOOTLOADER_BUILD)
-		led_driver_bootloader_effect_handler();
+		led_driver_bootloader_pattern_handler();
+	else if (reset_pattern_state != RESET_PATTERN_DISABLED)
+		led_driver_reset_pattern_handler();
 	else
-		led_driver_knight_rider_effect_handler();
+		led_driver_default_pattern_handler(input_led_pins);
 }

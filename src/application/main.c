@@ -8,6 +8,7 @@
 #include "flash.h"
 #include "memory_layout.h"
 #include "time.h"
+#include "timer.h"
 #include "watchdog.h"
 #include "crc32.h"
 
@@ -81,12 +82,12 @@ static int power_on(void)
   *****************************************************************************/
 static void light_reset(void)
 {
-	led_driver_reset_effect(false);
+	timer_enable(LED_PATTERN_TIMER, false);
 
 	disable_irq();
 	i2c_iface_init();
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
-		       LED_CONTROLLER_I2C_ADDR, 1);
+		       LED_CONTROLLER_I2C_ADDR, 2);
 	enable_irq();
 
 	power_control_first_startup();
@@ -98,7 +99,8 @@ static void light_reset(void)
 	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
 	watchdog_enable(true);
 
-	led_driver_reset_effect(true);
+	led_driver_reset_pattern_start();
+	timer_enable(LED_PATTERN_TIMER, true);
 
 	input_signals_init();
 }
