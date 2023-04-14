@@ -164,8 +164,6 @@ static void bootloader(void)
 	case POWER_ON:
 		power_control_io_config();
 		power_control_usb_timeout_config();
-		if (OMNIA_BOARD_REVISION >= 32)
-			periph_control_io_config();
 
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
