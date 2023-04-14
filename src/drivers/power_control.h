@@ -120,21 +120,5 @@ void power_control_usb_timeout_irq_handler(void);
   *****************************************************************************/
 void power_control_set_voltage(user_reg_voltage_t voltage);
 
-/*******************************************************************************
-  * @function   periph_control_io_config
-  * @brief      Configuration of new IO pins for Omnia32
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void periph_control_io_config(void);
-
-/*******************************************************************************
-  * @function   periph_control_rst_init
-  * @brief      Set reset init states for peripherals for Omnia32
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void periph_control_rst_init(void);
-
 #endif // POWER_CONTROL_H
 

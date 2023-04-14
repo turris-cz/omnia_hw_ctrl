@@ -51,10 +51,6 @@ static void app_init(void)
 	power_control_usb_timeout_config();
 	led_driver_config();
 
-	/* new features for Omnia32 */
-	if (OMNIA_BOARD_REVISION >= 32)
-		periph_control_io_config();
-
 	debug("\nInit completed.\n");
 }
 

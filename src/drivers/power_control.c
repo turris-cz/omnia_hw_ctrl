@@ -73,6 +73,17 @@ void power_control_io_config(void)
 #if USER_REGULATOR_ENABLED
 	gpio_init_outputs(pin_pushpull, pin_spd_2, 0, PRG_4V5_PIN);
 #endif
+
+	/* Configure peripheral pins on v32+ boards */
+	if (OMNIA_BOARD_REVISION >= 32) {
+		gpio_init_inputs(pin_pullup, SFP_nDET_PIN);
+		gpio_init_outputs(pin_opendrain, pin_spd_2, 0,
+				  nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN,
+				  nPERST0_PIN, nPERST1_PIN, nPERST2_PIN,
+				  nVHV_CTRL_PIN, PHY_SFP_PIN);
+
+		gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
+	}
 }
 
 /*******************************************************************************
@@ -374,9 +385,20 @@ void power_control_first_startup(void)
 	msleep(15);
 	gpio_write(CFG_CTRL_PIN, 0);
 
-	/* set active reset of peripherals after CPU reset on v32+ boards */
-	if (OMNIA_BOARD_REVISION >= 32)
-		periph_control_rst_init();
+	/*
+	 * Set initial reset/state of peripherals after CPU reset on v32+
+	 * boards:
+	 * - assert resets for eMMC, LAN switch, WAN PHY and MiniPCIe / mSATA
+	 *   cards
+	 * - deactivate VHV_CTRL voltage regulator
+	 * - choose WAN PHY over SFP on serdes switch
+	 */
+	if (OMNIA_BOARD_REVISION >= 32) {
+		gpio_write_multi(0, nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN,
+				 nPERST0_PIN, nPERST1_PIN, nPERST2_PIN);
+
+		gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
+	}
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
@@ -491,34 +513,3 @@ void power_control_set_voltage(user_reg_voltage_t voltage)
 	}
 }
 #endif /* USER_REGULATOR_ENABLED */
-
-/*******************************************************************************
-  * @function   periph_control_io_config
-  * @brief      Configuration of new IO pins for Omnia32
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void periph_control_io_config(void)
-{
-	gpio_init_inputs(pin_pullup, SFP_nDET_PIN);
-	gpio_init_outputs(pin_opendrain, pin_spd_2, 0,
-			  nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN,
-			  nPERST0_PIN, nPERST1_PIN, nPERST2_PIN,
-			  nVHV_CTRL_PIN, PHY_SFP_PIN);
-
-	gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
-}
-
-/*******************************************************************************
-  * @function   periph_control_rst_init
-  * @brief      Set reset init states for peripherals for Omnia32
-  * @param      None.
-  * @retval     None.
-  *****************************************************************************/
-void periph_control_rst_init(void)
-{
-	gpio_write_multi(0, nRES_MMC_PIN, nRES_LAN_PIN, nRES_PHY_PIN, nPERST0_PIN,
-			 nPERST1_PIN, nPERST2_PIN);
-
-	gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
-}
