@@ -178,12 +178,6 @@ static void bootloader(void)
 		led_set_color24(LED_COUNT, RED_COLOR);
 		timer_enable(LED_PATTERN_TIMER, true);
 
-		/* set active reset of peripherals after CPU reset on v32+
-		 * boards
-		 */
-		if (OMNIA_BOARD_REVISION >= 32)
-			periph_control_rst_init();
-
 		watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
 		watchdog_enable(true);
 
