@@ -487,8 +487,7 @@ void led_driver_step_brightness(void)
 	if (i == ARRAY_SIZE(brightnesses))
 		i = 0;
 
-	pwm_brightness = brightnesses[i];
-	led_driver_set_brightness(pwm_brightness);
+	led_driver_set_brightness(brightnesses[i]);
 }
 
 static inline uint16_t led_bits(unsigned led)
