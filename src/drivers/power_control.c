@@ -343,7 +343,6 @@ void power_control_first_startup(void)
 	gpio_write(MANRES_PIN, 1);
 
 	led_set_state(LED_COUNT, false);
-	led_set_user_mode(LED_COUNT, false);
 	led_driver_overwrite_brightness(true, 100);
 
 	_Static_assert(RESET_SELECTOR_LEVEL_TIMEOUT % JIFFY_TO_MSECS == 0,

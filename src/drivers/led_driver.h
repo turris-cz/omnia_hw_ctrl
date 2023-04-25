@@ -40,6 +40,8 @@ editor and numbering on the case for the router */
   *****************************************************************************/
 void led_driver_config(void);
 
+void led_driver_init(void);
+
 void led_set_color(unsigned led, uint8_t r, uint8_t g, uint8_t b);
 
 /*******************************************************************************

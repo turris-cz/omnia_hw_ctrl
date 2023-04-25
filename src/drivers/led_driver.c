@@ -340,6 +340,16 @@ void __irq led_driver_irq_handler(void)
 	led_driver_send_frame();
 }
 
+void led_driver_init(void)
+{
+	/* Set initial mode, state and color */
+	leds_modes_user = 0;
+	leds_states_default = 0;
+	leds_states_user = LED_BITS_ALL;
+	leds_states = 0;
+	led_set_color24(LED_COUNT, WHITE_COLOR);
+}
+
 /*******************************************************************************
   * @function   led_driver_config
   * @brief      Configure LED driver.
@@ -348,15 +358,10 @@ void __irq led_driver_irq_handler(void)
   *****************************************************************************/
 void led_driver_config(void)
 {
-	/* Set initial mode, state and color */
-	leds_modes_user = 0;
-	leds_states_default = 0;
-	leds_states_user = LED_BITS_ALL;
-	leds_states = 0;
 	gamma_correction = !BOOTLOADER_BUILD && OMNIA_BOARD_REVISION >= 32;
 	color_levels = gamma_correction ? COLOR_LEVELS_GC : COLOR_LEVELS;
 
-	led_set_color24(LED_COUNT, WHITE_COLOR);
+	led_driver_init();
 
 	/* Configure SPI and it's pins */
 	gpio_init_alts(LED_SPI_ALT_FN, pin_pushpull, pin_spd_3, pin_pulldown,
@@ -582,7 +587,6 @@ static void led_driver_reset_pattern_handler(void)
 		break;
 
 	case RESET_PATTERN_INIT:
-		led_set_user_mode(LED_COUNT, false);
 		led_set_state(LED_COUNT, false);
 		led_set_color24(LED_COUNT, WHITE_COLOR);
 		led_set_state(0, true);
@@ -626,7 +630,6 @@ static void led_driver_reset_pattern_handler(void)
 		led_set_state(POWER_LED, true);
 		led_driver_overwrite_brightness(false, 0);
 
-		led_set_user_mode(LED_COUNT, false);
 		reset_pattern_state = RESET_PATTERN_DISABLED;
 		break;
 	}

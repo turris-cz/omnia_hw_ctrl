@@ -77,6 +77,7 @@ static int power_on(void)
 static void light_reset(void)
 {
 	disable_irq();
+	led_driver_init();
 	i2c_iface_init();
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR,
 		       LED_CONTROLLER_I2C_ADDR, 2);
