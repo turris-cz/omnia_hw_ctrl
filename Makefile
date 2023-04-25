@@ -98,7 +98,7 @@ define PlatBuildVariant
 
   .PHONY: $(1) app_$(1) boot_$(1) clean_$(1)
 
-  $(1): $(1).flash.bin
+  $(1): app_$(1) boot_$(1) $(1).flash.bin
   app_$(1): $(1).app.bin build.$(1)/app.hex build.$(1)/app.dis
   boot_$(1): $(1).boot.bin build.$(1)/boot.hex build.$(1)/boot.dis
 
