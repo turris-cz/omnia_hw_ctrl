@@ -586,6 +586,7 @@ static void led_driver_reset_pattern_handler(void)
 		led_set_state(LED_COUNT, false);
 		led_set_color24(LED_COUNT, WHITE_COLOR);
 		led_set_state(0, true);
+		led_driver_overwrite_brightness(true, 100);
 		led = 0;
 		timeout = 67; /* 1000 / 15 ms */
 		reset_pattern_state = RESET_PATTERN_UP;
@@ -623,6 +624,7 @@ static void led_driver_reset_pattern_handler(void)
 		led_set_state(LED_COUNT, false);
 		led_set_color24(LED_COUNT, WHITE_COLOR);
 		led_set_state(POWER_LED, true);
+		led_driver_overwrite_brightness(false, 0);
 
 		led_set_user_mode(LED_COUNT, false);
 		reset_pattern_state = RESET_PATTERN_DISABLED;
