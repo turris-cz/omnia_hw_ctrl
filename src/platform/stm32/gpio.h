@@ -89,6 +89,36 @@ static __force_inline void gpio_write(gpio_t pin, bool value)
 		pin_port_to_plat(pin)->BRR = pin_bit(pin);
 }
 
+static __force_inline void _pin_set_alt_fn(GPIO_TypeDef *plat, uint8_t nr,
+					   pin_mode_t mode)
+{
+	uint8_t reg, pos;
+
+	reg = nr >> 3;
+	pos = (nr & 7) * 4;
+
+	plat->AFR[reg] = (plat->AFR[reg] & ~(0xf << pos)) |
+			 ((pin_mode_to_alt_fn(mode) & 0xf) << pos);
+}
+
+static __force_inline void gpio_set_mode(gpio_t pin, pin_mode_t mode)
+{
+	GPIO_TypeDef *plat;
+	uint8_t nr;
+
+	if (pin == PIN_INVALID)
+		return;
+
+	plat = pin_port_to_plat(pin);
+	nr = pin_nr(pin);
+
+	if (pin_mode_is_alt(mode))
+		_pin_set_alt_fn(plat, nr, mode);
+
+	plat->MODER = (plat->MODER & ~(0x3 << (nr * 2))) |
+		      (pin_mode_to_plat(mode) << (nr * 2));
+}
+
 static inline void gpio_write_multi_list(bool value, unsigned int len,
 					 const gpio_t *pins)
 {
@@ -138,12 +168,8 @@ static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 			uint8_t nr = pin_nr(pins[i]);
 
 			/* set alt func if alt mode */
-			if (pin_mode_is_alt(mode)) {
-				uint8_t r = nr >> 3, pos = (nr & 7) * 4;
-
-				plat->AFR[r] = (plat->AFR[r] & ~(0xf << pos)) |
-					       ((pin_mode_to_alt_fn(mode) & 0xf) << pos);
-			}
+			if (pin_mode_is_alt(mode))
+				_pin_set_alt_fn(plat, nr, mode);
 
 			plat->OSPEEDR = (plat->OSPEEDR & ~(0x3 << (nr * 2))) |
 					(spd << (nr * 2));

@@ -375,7 +375,9 @@ void led_driver_config(void)
 	timer_init(LED_TIMER,
 		   gamma_correction ? LED_TIMER_FREQ_GC : LED_TIMER_FREQ, 0);
 
-	/* Configure PWM timer */
+	/* Configure PWM pin and timer */
+	gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1, pin_pullup,
+		       LED_PWM_PIN);
 	timer_init_pwm(LED_PWM_TIMER, LED_PWM_FREQ, 100);
 
 	/* Configure LED pattern timer */
@@ -399,10 +401,10 @@ static void _led_driver_set_brightness(uint8_t value)
 
 	if (value == 0 || value == 100) {
 		timer_enable(LED_PWM_TIMER, false);
-		gpio_init_outputs(pin_pushpull, pin_spd_1, !value, LED_PWM_PIN);
+		gpio_write(LED_PWM_PIN, !value);
+		gpio_set_mode(LED_PWM_PIN, pin_mode_out);
 	} else {
-		gpio_init_alts(LED_PWM_ALT_FN, pin_pushpull, pin_spd_1,
-			       pin_pullup, LED_PWM_PIN);
+		gpio_set_mode(LED_PWM_PIN, pin_mode_alt(LED_PWM_ALT_FN));
 		timer_enable(LED_PWM_TIMER, true);
 	}
 

@@ -93,6 +93,35 @@ static __force_inline void gpio_write(gpio_t pin, bool value)
 		GPIO_BC(pin_port_to_plat(pin)) = pin_bit(pin);
 }
 
+static __force_inline void _pin_set_alt_fn(uint32_t plat, uint8_t nr,
+					   pin_mode_t mode)
+{
+	if (nr < 8)
+		GPIO_AFSEL0(plat) = (GPIO_AFSEL0(plat) & ~GPIO_AFR_MASK(nr & 7)) |
+				    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
+	else
+		GPIO_AFSEL1(plat) = (GPIO_AFSEL1(plat) & ~GPIO_AFR_MASK(nr & 7)) |
+				    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
+}
+
+static __force_inline void gpio_set_mode(gpio_t pin, pin_mode_t mode)
+{
+	uint32_t plat;
+	uint8_t nr;
+
+	if (pin == PIN_INVALID)
+		return;
+
+	plat = pin_port_to_plat(pin);
+	nr = pin_nr(pin);
+
+	if (pin_mode_is_alt(mode))
+		_pin_set_alt_fn(plat, nr, mode);
+
+	GPIO_CTL(plat) = (GPIO_CTL(plat) & ~GPIO_MODE_MASK(nr)) |
+			 GPIO_MODE_SET(nr, mode);
+}
+
 static inline void gpio_write_multi_list(bool value, unsigned int len,
 					 const gpio_t *pins)
 {
@@ -142,14 +171,8 @@ static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 			uint8_t nr = pin_nr(pins[i]);
 
 			/* set alt func if alt mode */
-			if (pin_mode_is_alt(mode)) {
-				if (nr < 8)
-					GPIO_AFSEL0(plat) = (GPIO_AFSEL0(plat) & ~GPIO_AFR_MASK(nr & 7)) |
-							    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
-				else
-					GPIO_AFSEL1(plat) = (GPIO_AFSEL1(plat) & ~GPIO_AFR_MASK(nr & 7)) |
-							    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
-			}
+			if (pin_mode_is_alt(mode))
+				_pin_set_alt_fn(plat, nr, mode);
 
 			GPIO_CTL(plat) = (GPIO_CTL(plat) & ~GPIO_MODE_MASK(nr)) |
 					 GPIO_MODE_SET(nr, pin_mode_to_plat(mode));
