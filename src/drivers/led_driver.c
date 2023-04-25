@@ -80,6 +80,7 @@ static enum {
 } reset_pattern_state;
 
 static uint8_t pwm_brightness;
+static bool pwm_brightness_overwritten;
 
 static bool gamma_correction;
 static uint16_t color_levels;
@@ -380,16 +381,8 @@ void led_driver_config(void)
 	led_driver_set_brightness(100);
 }
 
-/*******************************************************************************
-  * @function   led_driver_set_brightness
-  * @brief      Set PWM brightness.
-  * @param      value: PWM value in [%].
-  * @retval     None.
-  *****************************************************************************/
-void led_driver_set_brightness(uint8_t value)
+static void _led_driver_set_brightness(uint8_t value)
 {
-	disable_irq();
-
 	if (value > 100)
 		value = 100;
 
@@ -415,7 +408,40 @@ void led_driver_set_brightness(uint8_t value)
 	timer_enable(LED_PATTERN_TIMER, !!value);
 
 	timer_set_pwm_duty(LED_PWM_TIMER, value);
+}
+
+/*******************************************************************************
+  * @function   led_driver_set_brightness
+  * @brief      Set PWM brightness.
+  * @param      value: PWM value in [%].
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_set_brightness(uint8_t value)
+{
+	disable_irq();
+
+	if (!pwm_brightness_overwritten)
+		_led_driver_set_brightness(value);
+
 	pwm_brightness = value;
+
+	enable_irq();
+}
+
+/*******************************************************************************
+  * @function   led_driver_overwrite_brightness
+  * @brief      Overwrite PWM brightness.
+  * @param      overwrite: overwrite brightness with @value or return to default
+  *             behavior.
+  * @param      value: PWM value to overwrite with in [%].
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_overwrite_brightness(bool overwrite, uint8_t value)
+{
+	disable_irq();
+
+	pwm_brightness_overwritten = overwrite;
+	_led_driver_set_brightness(overwrite ? value : pwm_brightness);
 
 	enable_irq();
 }

@@ -68,16 +68,26 @@ void led_driver_irq_handler(void);
 /*******************************************************************************
   * @function   led_driver_set_brightness
   * @brief      Set PWM value.
-  * @param      procent_val: PWM value in [%].
+  * @param      value: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
 void led_driver_set_brightness(uint8_t procent_val);
 
 /*******************************************************************************
+  * @function   led_driver_overwrite_brightness
+  * @brief      Overwrite PWM brightness.
+  * @param      overwrite: overwrite brightness with @value or return to default
+  *             behavior.
+  * @param      value: PWM value to overwrite with in [%].
+  * @retval     None.
+  *****************************************************************************/
+void led_driver_overwrite_brightness(bool overwrite, uint8_t value);
+
+/*******************************************************************************
   * @function   led_driver_get_brightness
   * @brief      Set PWM value.
   * @param      None.
-  * @retval     procent_val: PWM value in [%].
+  * @retval     PWM value in [%].
   *****************************************************************************/
 uint8_t led_driver_get_brightness(void);
 

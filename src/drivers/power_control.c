@@ -331,9 +331,9 @@ static void increase_reset_selector_level(int *sel, uint8_t *level)
   *****************************************************************************/
 void power_control_first_startup(void)
 {
-	uint8_t prev_brightness, level;
 	uint32_t last_jiffies;
 	unsigned timeout;
+	uint8_t level;
 	int sel;
 
 	timer_irq_enable(LED_PATTERN_TIMER, false);
@@ -342,11 +342,9 @@ void power_control_first_startup(void)
 	msleep(50);
 	gpio_write(MANRES_PIN, 1);
 
-	/* save brightness value to restore it */
-	prev_brightness = led_driver_get_brightness();
 	led_set_state(LED_COUNT, false);
 	led_set_user_mode(LED_COUNT, false);
-	led_driver_set_brightness(100);
+	led_driver_overwrite_brightness(true, 100);
 
 	_Static_assert(RESET_SELECTOR_LEVEL_TIMEOUT % JIFFY_TO_MSECS == 0,
 		       "RESET_SELECTOR_LEVEL_TIMEOUT must be divisible by JIFFY_TO_MSECS");
@@ -408,19 +406,19 @@ void power_control_first_startup(void)
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
-		led_driver_set_brightness(0);
+		led_driver_overwrite_brightness(true, 0);
 		msleep(300);
-		led_driver_set_brightness(100);
+		led_driver_overwrite_brightness(true, 100);
 		msleep(300);
-		led_driver_set_brightness(0);
+		led_driver_overwrite_brightness(true, 0);
 		msleep(300);
-		led_driver_set_brightness(100);
+		led_driver_overwrite_brightness(true, 100);
 		msleep(600);
 	}
 
 	/* restore brightness and color */
 	led_set_state(LED_COUNT, false);
-	led_driver_set_brightness(prev_brightness);
+	led_driver_overwrite_brightness(false, 0);
 
 	timer_irq_enable(LED_PATTERN_TIMER, true);
 }
