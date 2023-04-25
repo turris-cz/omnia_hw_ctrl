@@ -99,8 +99,8 @@ define PlatBuildVariant
   .PHONY: $(1) app_$(1) boot_$(1) clean_$(1)
 
   $(1): app_$(1) boot_$(1) $(1).flash.bin
-  app_$(1): $(1).app.bin build.$(1)/app.hex build.$(1)/app.dis
-  boot_$(1): $(1).boot.bin build.$(1)/boot.hex build.$(1)/boot.dis
+  app_$(1): $(1).app.bin build.$(1)/app.dis
+  boot_$(1): $(1).boot.bin build.$(1)/boot.dis
 
   $(1).flash.bin: $(1).app.bin $(1).boot.bin tools/genflashimg
 	$(call echo,$(1),,GENFLASH,$$@)
@@ -109,10 +109,6 @@ define PlatBuildVariant
 
   clean_$(1):
 	rm -rf build.$(1) $(1).flash.bin $(1).app.bin $(1).boot.bin
-
-  build.$(1)/%.hex: $(1).%.bin
-	$(call echo,$(1),$$*,HEX,$$@)
-	$(Q)$$(OBJCOPY) -I binary -O ihex $$< $$@
 
   build.$(1)/%.dis: build.$(1)/%.elf
 	$(call echo,$(1),$$*,DISASM,$$@)
