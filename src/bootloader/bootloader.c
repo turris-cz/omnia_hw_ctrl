@@ -49,15 +49,15 @@ static void bootloader_init(void)
 	flash_init(); /* Unlock the Flash Program Erase controller */
 
 	/* peripheral initialization*/
+	timer_reset(USB_TIMEOUT_TIMER);
 	crc32_enable();
 	time_config();
-	led_driver_config();
 	i2c_iface_init();
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 2);
 
-	timer_reset(USB_TIMEOUT_TIMER);
 	enable_irq();
 
+	led_driver_config();
 	led_set_color24(LED_COUNT, GREEN_COLOR);
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
