@@ -515,12 +515,16 @@ void led_states_commit(void)
   *****************************************************************************/
 void led_set_user_mode(unsigned led, bool set)
 {
+	disable_irq();
+
 	if (set)
 		leds_modes_user |= led_bits(led);
 	else
 		leds_modes_user &= ~led_bits(led);
 
 	led_states_commit();
+
+	enable_irq();
 }
 
 void led_set_state_nocommit(unsigned led, bool state)
@@ -553,12 +557,16 @@ void led_set_state(unsigned led, bool state)
   *****************************************************************************/
 void led_set_state_user(unsigned led, bool state)
 {
+	disable_irq();
+
 	if (state)
 		leds_states_user |= led_bits(led);
 	else
 		leds_states_user &= ~led_bits(led);
 
 	led_states_commit();
+
+	enable_irq();
 }
 
 /*******************************************************************************
