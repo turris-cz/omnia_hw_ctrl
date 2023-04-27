@@ -6,6 +6,8 @@
 #include "timer.h"
 #include "cpu.h"
 
+#pragma GCC optimize ("O3")
+
 #define LED_PWM_FREQ		4000000
 
 /* Without gamma correction we are operating at 256 color channel levels.
