@@ -17,12 +17,17 @@ typedef enum {
 
 #define NPORTS 5
 
-typedef uint8_t pin_alt_fn_t;
-
 typedef enum {
-	pin_mode_in = GPIO_MODE_INPUT,
-	pin_mode_out = GPIO_MODE_OUTPUT,
-	pin_mode_alt = GPIO_MODE_AF,
+	pin_mode_in,
+	pin_mode_out,
+	pin_mode_alt_0,
+	pin_mode_alt_1,
+	pin_mode_alt_2,
+	pin_mode_alt_3,
+	pin_mode_alt_4,
+	pin_mode_alt_5,
+	pin_mode_alt_6,
+	pin_mode_alt_7,
 } pin_mode_t;
 
 typedef enum {
@@ -67,6 +72,51 @@ static __force_inline uint16_t pin_bit(gpio_t pin)
 		return 0;
 	else
 		return BIT(pin_nr(pin));
+}
+
+static __force_inline pin_mode_t pin_mode_alt(uint8_t alt_fn)
+{
+	switch (alt_fn) {
+	case 0: return pin_mode_alt_0;
+	case 1: return pin_mode_alt_1;
+	case 2: return pin_mode_alt_2;
+	case 3: return pin_mode_alt_3;
+	case 4: return pin_mode_alt_4;
+	case 5: return pin_mode_alt_5;
+	case 6: return pin_mode_alt_6;
+	case 7: return pin_mode_alt_7;
+	default: unreachable();
+	}
+}
+
+static __force_inline uint8_t pin_mode_to_plat(pin_mode_t mode)
+{
+	switch (mode) {
+	case pin_mode_in: return GPIO_MODE_INPUT;
+	case pin_mode_out: return GPIO_MODE_OUTPUT;
+	case pin_mode_alt_0 ... pin_mode_alt_7: return GPIO_MODE_AF;
+	default: unreachable();
+	}
+}
+
+static __force_inline bool pin_mode_is_alt(pin_mode_t mode)
+{
+	return mode != pin_mode_in && mode != pin_mode_out;
+}
+
+static __force_inline uint8_t pin_mode_to_alt_fn(pin_mode_t mode)
+{
+	switch (mode) {
+	case pin_mode_alt_0: return 0;
+	case pin_mode_alt_1: return 1;
+	case pin_mode_alt_2: return 2;
+	case pin_mode_alt_3: return 3;
+	case pin_mode_alt_4: return 4;
+	case pin_mode_alt_5: return 5;
+	case pin_mode_alt_6: return 6;
+	case pin_mode_alt_7: return 7;
+	default: unreachable();
+	}
 }
 
 static __force_inline uint32_t port_clk_bit(port_t port)
@@ -167,10 +217,10 @@ static inline void gpio_init_port_clks(unsigned int len, const gpio_t *pins)
 	RCU_AHBEN |= clk_bits;
 }
 
-static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,
-				  pin_out_t otype, pin_spd_t spd,
-				  pin_pull_t pull, bool init_val,
-				  unsigned int len, const gpio_t *pins)
+static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
+				  pin_spd_t spd, pin_pull_t pull,
+				  bool init_val, unsigned int len,
+				  const gpio_t *pins)
 {
 	/* initialize port clock */
 	gpio_init_port_clks(len, pins);
@@ -186,17 +236,17 @@ static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,
 			uint8_t nr = pin_nr(pins[i]);
 
 			/* set alt func if alt mode */
-			if (mode == pin_mode_alt) {
+			if (pin_mode_is_alt(mode)) {
 				if (nr < 8)
 					GPIO_AFSEL0(plat) = (GPIO_AFSEL0(plat) & ~GPIO_AFR_MASK(nr & 7)) |
-							    GPIO_AFR_SET(nr & 7, alt_fn);
+							    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
 				else
 					GPIO_AFSEL1(plat) = (GPIO_AFSEL1(plat) & ~GPIO_AFR_MASK(nr & 7)) |
-							    GPIO_AFR_SET(nr & 7, alt_fn);
+							    GPIO_AFR_SET(nr & 7, pin_mode_to_alt_fn(mode));
 			}
 
 			GPIO_CTL(plat) = (GPIO_CTL(plat) & ~GPIO_MODE_MASK(nr)) |
-					 GPIO_MODE_SET(nr, mode);
+					 GPIO_MODE_SET(nr, pin_mode_to_plat(mode));
 			GPIO_PUD(plat) = (GPIO_PUD(plat) & ~GPIO_PUPD_MASK(nr)) |
 					 GPIO_PUPD_SET(nr, pull);
 			GPIO_OMODE(plat) = (GPIO_OMODE(plat) & ~BIT(nr)) |
@@ -207,25 +257,25 @@ static inline void gpio_init_list(pin_mode_t mode, uint8_t alt_fn,
 	}
 }
 
-#define gpio_init_inputs(_pull, ...)					\
-	({								\
-		gpio_t ___pins[] = { __VA_ARGS__ };			\
-		gpio_init_list(pin_mode_in, 0, 0, 0, (_pull), 0,	\
-			       ARRAY_SIZE(___pins), ___pins);		\
+#define gpio_init_inputs(_pull, ...)				\
+	({							\
+		gpio_t ___pins[] = { __VA_ARGS__ };		\
+		gpio_init_list(pin_mode_in, 0, 0, (_pull), 0,	\
+			       ARRAY_SIZE(___pins), ___pins);	\
 	})
 
-#define gpio_init_outputs(_otype, _spd, _init_val, ...)			\
-	({								\
-		gpio_t ___pins[] = { __VA_ARGS__ };			\
-		gpio_init_list(pin_mode_out, 0, (_otype), (_spd),	\
-			       pin_pullup, (_init_val),			\
-			       ARRAY_SIZE(___pins), ___pins);		\
+#define gpio_init_outputs(_otype, _spd, _init_val, ...)		\
+	({							\
+		gpio_t ___pins[] = { __VA_ARGS__ };		\
+		gpio_init_list(pin_mode_out, (_otype), (_spd),	\
+			       pin_pullup, (_init_val),		\
+			       ARRAY_SIZE(___pins), ___pins);	\
 	})
 
 #define gpio_init_alts(_alt_fn, _otype, _spd, _pull, ...)		\
 	({								\
 		gpio_t ___pins[] = { __VA_ARGS__ };			\
-		gpio_init_list(pin_mode_alt, (_alt_fn), (_otype),	\
+		gpio_init_list(pin_mode_alt(_alt_fn), (_otype),		\
 			       (_spd), (_pull), 0, ARRAY_SIZE(___pins),	\
 			       ___pins);				\
 	})
