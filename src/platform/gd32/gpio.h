@@ -1,34 +1,9 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include <stdarg.h>
+#include "gpio_common.h"
 #include "gd32f1x0_gpio.h"
 #include "gd32f1x0_rcu.h"
-#include "compiler.h"
-#include "bits.h"
-
-typedef enum {
-	PORT_A = 0,
-	PORT_B,
-	PORT_C,
-	PORT_D,
-	PORT_F,
-} port_t;
-
-#define NPORTS 5
-
-typedef enum {
-	pin_mode_in,
-	pin_mode_out,
-	pin_mode_alt_0,
-	pin_mode_alt_1,
-	pin_mode_alt_2,
-	pin_mode_alt_3,
-	pin_mode_alt_4,
-	pin_mode_alt_5,
-	pin_mode_alt_6,
-	pin_mode_alt_7,
-} pin_mode_t;
 
 typedef enum {
 	pin_pushpull = GPIO_OTYPE_PP,
@@ -47,74 +22,12 @@ typedef enum {
 	pin_spd_3 = GPIO_OSPEED_50MHZ,
 } pin_spd_t;
 
-typedef uint8_t gpio_t;
-
-static const uint8_t PIN_INVALID = 0xff;
-
-#define _PIN(_port, _pin)		((gpio_t)((PORT_ ## _port) << 4) | ((_pin) & 0xf))
-#define _PIN_3(_port, _pin, _cond)	((_cond) ? _PIN(_port, _pin) : PIN_INVALID)
-#define _PIN_2(_port, _pin)		_PIN(_port, _pin)
-#define PIN(...)			VARIADIC(_PIN_, __VA_ARGS__)
-
-static __force_inline port_t pin_port(gpio_t pin)
-{
-	return pin >> 4;
-}
-
-static __force_inline uint8_t pin_nr(gpio_t pin)
-{
-	return pin & 0xf;
-}
-
-static __force_inline uint16_t pin_bit(gpio_t pin)
-{
-	if (pin == PIN_INVALID)
-		return 0;
-	else
-		return BIT(pin_nr(pin));
-}
-
-static __force_inline pin_mode_t pin_mode_alt(uint8_t alt_fn)
-{
-	switch (alt_fn) {
-	case 0: return pin_mode_alt_0;
-	case 1: return pin_mode_alt_1;
-	case 2: return pin_mode_alt_2;
-	case 3: return pin_mode_alt_3;
-	case 4: return pin_mode_alt_4;
-	case 5: return pin_mode_alt_5;
-	case 6: return pin_mode_alt_6;
-	case 7: return pin_mode_alt_7;
-	default: unreachable();
-	}
-}
-
 static __force_inline uint8_t pin_mode_to_plat(pin_mode_t mode)
 {
 	switch (mode) {
 	case pin_mode_in: return GPIO_MODE_INPUT;
 	case pin_mode_out: return GPIO_MODE_OUTPUT;
 	case pin_mode_alt_0 ... pin_mode_alt_7: return GPIO_MODE_AF;
-	default: unreachable();
-	}
-}
-
-static __force_inline bool pin_mode_is_alt(pin_mode_t mode)
-{
-	return mode != pin_mode_in && mode != pin_mode_out;
-}
-
-static __force_inline uint8_t pin_mode_to_alt_fn(pin_mode_t mode)
-{
-	switch (mode) {
-	case pin_mode_alt_0: return 0;
-	case pin_mode_alt_1: return 1;
-	case pin_mode_alt_2: return 2;
-	case pin_mode_alt_3: return 3;
-	case pin_mode_alt_4: return 4;
-	case pin_mode_alt_5: return 5;
-	case pin_mode_alt_6: return 6;
-	case pin_mode_alt_7: return 7;
 	default: unreachable();
 	}
 }
@@ -199,13 +112,6 @@ static inline void gpio_write_multi_list(bool value, unsigned int len,
 	}
 }
 
-#define gpio_write_multi(_value, ...)					\
-	({								\
-		gpio_t ___pins[] = { __VA_ARGS__ };			\
-		gpio_write_multi_list((_value), ARRAY_SIZE(___pins),	\
-				      ___pins);				\
-	})
-
 static inline void gpio_init_port_clks(unsigned int len, const gpio_t *pins)
 {
 	uint32_t clk_bits = 0;
@@ -256,28 +162,5 @@ static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 		}
 	}
 }
-
-#define gpio_init_inputs(_pull, ...)				\
-	({							\
-		gpio_t ___pins[] = { __VA_ARGS__ };		\
-		gpio_init_list(pin_mode_in, 0, 0, (_pull), 0,	\
-			       ARRAY_SIZE(___pins), ___pins);	\
-	})
-
-#define gpio_init_outputs(_otype, _spd, _init_val, ...)		\
-	({							\
-		gpio_t ___pins[] = { __VA_ARGS__ };		\
-		gpio_init_list(pin_mode_out, (_otype), (_spd),	\
-			       pin_pullup, (_init_val),		\
-			       ARRAY_SIZE(___pins), ___pins);	\
-	})
-
-#define gpio_init_alts(_alt_fn, _otype, _spd, _pull, ...)		\
-	({								\
-		gpio_t ___pins[] = { __VA_ARGS__ };			\
-		gpio_init_list(pin_mode_alt(_alt_fn), (_otype),		\
-			       (_spd), (_pull), 0, ARRAY_SIZE(___pins),	\
-			       ___pins);				\
-	})
 
 #endif /* GPIO_H */
