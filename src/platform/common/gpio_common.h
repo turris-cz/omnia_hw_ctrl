@@ -31,19 +31,23 @@ typedef uint8_t gpio_t;
 
 static const uint8_t PIN_INVALID = 0xff;
 
-#define _PIN(_port, _pin)		((gpio_t)((PORT_ ## _port) << 4) | ((_pin) & 0xf))
+#define PIN_PORT_MASK	GENMASK8(7, 4)
+#define PIN_NR_MASK	GENMASK8(3, 0)
+
+#define _PIN(_port, _pin)		((gpio_t)(FIELD_PREP(PIN_PORT_MASK, PORT_ ## _port) | \
+						  FIELD_PREP(PIN_NR_MASK, _pin)))
 #define _PIN_3(_port, _pin, _cond)	((_cond) ? _PIN(_port, _pin) : PIN_INVALID)
 #define _PIN_2(_port, _pin)		_PIN(_port, _pin)
 #define PIN(...)			VARIADIC(_PIN_, __VA_ARGS__)
 
 static __force_inline port_t pin_port(gpio_t pin)
 {
-	return pin >> 4;
+	return FIELD_GET(PIN_PORT_MASK, pin);
 }
 
 static __force_inline uint8_t pin_nr(gpio_t pin)
 {
-	return pin & 0xf;
+	return FIELD_GET(PIN_NR_MASK, pin);
 }
 
 static __force_inline uint16_t pin_bit(gpio_t pin)
