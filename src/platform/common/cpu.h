@@ -175,6 +175,14 @@ static inline void nvic_disable_irq(IRQn_Type irq)
 	NVIC->ICER[irq >> 5] = BIT(irq & 0x1f);
 }
 
+static inline void nvic_disable_all_and_clear_pending(void)
+{
+	for (unsigned int i = 0; i < ARRAY_SIZE(NVIC->ICER); ++i) {
+		NVIC->ICER[i] = 0xffffffff;
+		NVIC->ICPR[i] = 0xffffffff;
+	}
+}
+
 #if defined(STM32F030X8)
 # define LOOP_TICKS		4
 #elif defined(GD32F1x0)

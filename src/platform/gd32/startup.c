@@ -63,6 +63,8 @@ void led_driver_irq_handler(void) __weak_alias(default_handler);
 void led_driver_pattern_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
 void i2c_slave_irq_handler(void) __weak_alias(default_handler);
+void exti_irq_handler(void) __weak_alias(default_handler);
+void rtc_irq_handler(void) __weak_alias(default_handler);
 
 static __used __section(".isr_vector") void *isr_vector[] = {
 	&_stack_top,
@@ -83,12 +85,12 @@ static __used __section(".isr_vector") void *isr_vector[] = {
 	systick_irq_handler,
 	NULL,					/* Window WatchDog */
 	NULL,					/* LVD through EXTI Line detecion */
-	NULL,					/* RTC */
+	rtc_irq_handler,			/* RTC */
 	flash_irq_handler,			/* FLASH */
 	NULL,					/* RCU */
 	NULL,					/* EXTI Line 0 and 1 */
 	NULL,					/* EXTI Line 2 and 3 */
-	NULL,					/* EXTI Line 4 to 15 */
+	exti_irq_handler,			/* EXTI Line 4 to 15 */
 	NULL,					/* TSI */
 	NULL,					/* DMA1 Channel 0 */
 	NULL,					/* DMA1 Channel 1 and Channel 2 */
@@ -193,11 +195,7 @@ static void platform_init(void)
 	else
 		SCB->VTOR = APPLICATION_BEGIN;
 
-	/* disable all interrupts and clear all pending interrupts */
-	for (unsigned int i = 0; i < ARRAY_SIZE(NVIC->ICER); ++i) {
-		NVIC->ICER[i] = 0xffffffff;
-		NVIC->ICPR[i] = 0xffffffff;
-	}
+	nvic_disable_all_and_clear_pending();
 
 	/* 4 bits for pre-emption priority, 0 bits for subpriority */
 	nvic_set_priority_grouping(3);

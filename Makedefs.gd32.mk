@@ -13,6 +13,10 @@ CPPFLAGS_gd32	+= -Isrc/platform/gd32
 CPPFLAGS_gd32	+= -Isrc/platform/gd32/cmsis
 CPPFLAGS_gd32	+= -Isrc/platform/gd32/gd_lib/inc
 
+# not enough space for poweroff & wakeup in GD32's bootloader
+CPPFLAGS_app_gd32	= -DPOWEROFF_WAKEUP_ENABLED=1
+CPPFLAGS_boot_gd32	= -DPOWEROFF_WAKEUP_ENABLED=0
+
 CFLAGS_gd32	= -mcpu=cortex-m3 -mthumb -mlittle-endian
 
 VARIANTS_gd32		= rev23 rev32

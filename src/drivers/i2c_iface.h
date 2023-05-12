@@ -20,6 +20,7 @@ typedef struct {
 	uint8_t reset_selector;
 	uint32_t rising, rising_mask;
 	uint32_t falling, falling_mask;
+	uint32_t wakeup;
 
 	/* reported in main state machine */
 	i2c_iface_req_t req;
@@ -36,6 +37,7 @@ static inline void i2c_iface_init(void)
 	i2c_iface.rising_mask = 0;
 	i2c_iface.falling = 0;
 	i2c_iface.falling_mask = 0;
+	i2c_iface.wakeup = 0;
 	i2c_iface.req = I2C_IFACE_REQ_NONE;
 }
 
@@ -126,6 +128,11 @@ enum commands_e {
 	CMD_SET_WDT_TIMEOUT		= 0x20,
 	CMD_GET_WDT_TIMELEFT		= 0x21,
 
+	/* available if POWEROFF_WAKEUP bit set in features */
+	CMD_SET_WAKEUP			= 0x22,
+	CMD_GET_UPTIME_AND_WAKEUP	= 0x23,
+	CMD_POWER_OFF			= 0x24,
+
 	/* available only at address 0x2b (led-controller) */
 	/* available only if LED_GAMMA_CORRECTION bit set in features */
 	CMD_SET_GAMMA_CORRECTION	= 0x30,
@@ -182,6 +189,7 @@ enum features_e {
 	FEAT_BOOTLOADER			= BIT(7),
 	FEAT_FLASHING			= BIT(8),
 	FEAT_NEW_MESSAGE_API		= BIT(9),
+	FEAT_POWEROFF_WAKEUP		= BIT(10),
 };
 
 enum ext_sts_dword_e {
@@ -303,7 +311,9 @@ enum int_e {
  *      9   |   NEW_MESSAGE_API      : 1 - Application/bootloader uses only new API to pass messages from/to bootloader/application;
  *                                         you should only flash images that support the new API
  *                                     0 - otherwise
- * 10..15   |   reserved
+ *     10   |   POWEROFF_WAKEUP      : 1 - CMD_POWER_OFF, CMD_GET_UPTIME_AND_WAKEUP, CMD_SET_WAKEUP commands supported
+ *                                     0 - otherwise
+ * 11..15   |   reserved
 */
 
 /*

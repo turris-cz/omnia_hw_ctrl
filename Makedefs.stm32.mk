@@ -14,6 +14,7 @@ CPPFLAGS_stm32	+= -Isrc/platform/stm32
 CPPFLAGS_stm32	+= -Isrc/platform/stm32/stm_lib/cmsis_boot
 CPPFLAGS_stm32	+= -Isrc/platform/stm32/stm_lib/cmsis_core
 CPPFLAGS_stm32	+= -Isrc/platform/stm32/stm_lib/stm32f0xx_stdperiph_driver/inc
+CPPFLAGS_stm32	+= -DPOWEROFF_WAKEUP_ENABLED=1
 
 CFLAGS_stm32	= -mcpu=cortex-m0 -mthumb -mlittle-endian -masm-syntax-unified
 

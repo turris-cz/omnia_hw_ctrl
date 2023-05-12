@@ -6,7 +6,7 @@
 #define HZ		200
 #define JIFFY_TO_MSECS	(1000 / HZ)
 
-extern volatile uint32_t jiffies;
+extern volatile uint32_t jiffies, uptime;
 
 static inline uint32_t jiffies_to_msecs(uint32_t x)
 {

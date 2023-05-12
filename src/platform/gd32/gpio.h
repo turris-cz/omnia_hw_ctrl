@@ -1,9 +1,9 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "gpio_common.h"
 #include "gd32f1x0_gpio.h"
 #include "gd32f1x0_rcu.h"
+#include "gpio_common.h"
 
 typedef enum {
 	pin_pushpull = GPIO_OTYPE_PP,
