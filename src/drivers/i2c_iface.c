@@ -8,6 +8,8 @@
 #include "memory_layout.h"
 #include "watchdog.h"
 #include "crc32.h"
+#include "time.h"
+#include "poweroff.h"
 
 #if BOOTLOADER_BUILD
 # define __version_section __section(".boot_version")
@@ -44,7 +46,8 @@ static const struct {
 		FEAT_EXT_CMDS |
 		FEAT_FLASHING |
 		FEAT_NEW_MESSAGE_API |
-		FEAT_BRIGHTNESS_INT,
+		FEAT_BRIGHTNESS_INT |
+		FEAT_IF(POWEROFF_WAKEUP, POWEROFF_WAKEUP_ENABLED),
 	.status_features =
 		STS_MCU_TYPE |
 		STS_FEATURES_SUPPORTED |
@@ -610,6 +613,57 @@ static __maybe_unused int cmd_get_version(i2c_iface_priv_t *priv)
 	return 0;
 }
 
+static __maybe_unused int cmd_set_wakeup(i2c_iface_priv_t *priv)
+{
+	uint32_t wakeup = get_unaligned32(&priv->cmd[1]);
+
+	debug("set_wakeup %u -> %u\n", i2c_iface.wakeup, wakeup);
+
+	i2c_iface.wakeup = wakeup;
+
+	return 0;
+}
+
+static __maybe_unused int cmd_get_uptime_and_wakeup(i2c_iface_priv_t *priv)
+{
+	uint32_t reply[2] = { uptime, i2c_iface.wakeup };
+
+	debug("get_wakeup %u, %u\n", reply[0], reply[1]);
+	set_reply(reply);
+
+	return 0;
+}
+
+static __maybe_unused int cmd_power_off(i2c_iface_priv_t *priv)
+{
+	uint32_t crc, expected_crc;
+	uint16_t magic, arg;
+
+	magic = get_unaligned16(&priv->cmd[1]);
+	arg = get_unaligned16(&priv->cmd[3]);
+	crc = get_unaligned32(&priv->cmd[5]);
+
+	crc32(&expected_crc, 0xffffffff, &priv->cmd[1], 4);
+
+	if (magic != CMD_POWER_OFF_MAGIC) {
+		debug("power_off arg=%#06x invalid magic (got %#06x)\n", arg,
+		      magic);
+		return -1;
+	}
+
+	if (crc != expected_crc) {
+		debug("power_off arg=%#06x invalid crc (got %#010x, expected %#010x)\n",
+		      arg, crc, expected_crc);
+		return -1;
+	}
+
+	debug("power_off %#06x\n", arg);
+
+	poweroff(arg & CMD_POWER_OFF_POWERON_BUTTON, i2c_iface.wakeup);
+
+	return 0;
+}
+
 typedef struct {
 	uint8_t len;
 	int (*handler)(i2c_iface_priv_t *priv);
@@ -664,6 +718,12 @@ static const cmdinfo_t commands[] = {
 	[CMD_SET_WDT_TIMEOUT]		= { 3, cmd_set_wdt_timeout },
 	[CMD_GET_WDT_TIMELEFT]		= { 1, cmd_get_wdt_timeleft },
 
+#if POWEROFF_WAKEUP_ENABLED
+	/* wakeup & power off */
+	[CMD_SET_WAKEUP]		= { 5, cmd_set_wakeup },
+	[CMD_GET_UPTIME_AND_WAKEUP]	= { 1, cmd_get_uptime_and_wakeup },
+	[CMD_POWER_OFF]			= { 9, cmd_power_off },
+#endif
 };
 
 static int handle_cmd(uint8_t addr, i2c_iface_priv_t *priv)

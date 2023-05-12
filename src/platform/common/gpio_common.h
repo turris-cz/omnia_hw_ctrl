@@ -58,6 +58,20 @@ static __force_inline uint16_t pin_bit(gpio_t pin)
 		return BIT(pin_nr(pin));
 }
 
+#if !defined(__STM32F0XX_H) && !defined(GD32F1X0_H)
+# error "stm32f0xx.h or gd32f1x0.h must be included before including gpio_common_stm32_gd32.h"
+#endif
+
+static __force_inline uint8_t pin_irqn(gpio_t pin)
+{
+	switch (pin_nr(pin)) {
+	case 0 ... 1: return EXTI0_1_IRQn;
+	case 2 ... 3: return EXTI2_3_IRQn;
+	case 4 ... 15: return EXTI4_15_IRQn;
+	default: unreachable();
+	}
+}
+
 static __force_inline pin_mode_t pin_mode_alt(uint8_t alt_fn)
 {
 	switch (alt_fn) {

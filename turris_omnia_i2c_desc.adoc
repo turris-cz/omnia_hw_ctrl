@@ -49,6 +49,11 @@ enum commands_e {
     CMD_SET_WDT_TIMEOUT        = 0x20,
     CMD_GET_WDT_TIMELEFT       = 0x21,
 
+    /* available if POWEROFF_WAKEUP bit set in features */
+    CMD_SET_WAKEUP             = 0x22,
+    CMD_GET_UPTIME_AND_WAKEUP  = 0x23,
+    CMD_POWER_OFF              = 0x24,
+
     /* available only at address 0x2b (led-controller) */
     /* available only if LED_GAMMA_CORRECTION bit set in features */
     CMD_SET_GAMMA_CORRECTION   = 0x30,
@@ -130,7 +135,9 @@ enum commands_e {
  *                                     0 - otherwise
  *     10   |   BRIGHTNESS_INT       : 1 - If LED brightness is changed by pressing the front button, the INT_BRIGHTNESS_CHANGED interrupt is raised,
  *                                     0 - the INT_BRIGHTNESS_CHANGED interrupt is not supported
- * 11..15   |   reserved
+ *     11   |   POWEROFF_WAKEUP      : 1 - CMD_POWER_OFF, CMD_GET_UPTIME_AND_WAKEUP, CMD_SET_WAKEUP commands supported
+ *                                     0 - otherwise
+ * 12..15   |   reserved
 */
 
 * Example of a reading of features from Linux:
@@ -583,6 +590,53 @@ NOTE: LED numbers are reversed. LED11 (the first LED from the left) is POWER_LED
 *** 0x2A -> I2C address of the slave
 *** 0x21 -> "address of the register" = command
 ***	w -> word data type
+
+
+=== CMD_SET_WAKEUP
+* Set board wakeup time after powered off by CMD_POWER_OFF
+* Time is given in seconds after boot, the current time after boot (uptime) can be determined with CMD_GET_UPTIME_AND_WAKEUP
+* If set to 0, disables wakeup
+* Available only if POWEROFF_WAKEUP feature bit is set in CMD_GET_FEATURES
+* Write only
+
+* Example of setting wakeup time to 3600s after boot
+** "i2cset 1 0x2A 0x22 0x10 0x0e 0x00 0x00 i"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x22 -> CMD_SET_WAKEUP command code
+*** 0x10 0x0e 0x00 0x00 -> little endian value for 3600s = 0xe10
+***	i -> block data type
+
+
+=== CMD_GET_UPTIME_AND_WAKEUP
+* Get board uptime and configured wakeup time
+* Wakeup time can be configured with CMD_SET_WAKEUP
+* Available only if POWEROFF_WAKEUP feature bit is set in CMD_GET_FEATURES
+* Read only
+
+* Example of reading uptime and configured wakeup time
+** "i2ctransfer 1 w1@0x2A 0x23 r8"
+*** 1 -> i2cbus number
+*** w1@0x2A -> write 1 byte at I2C address of the slave
+*** 0x23 -> CMD_GET_UPTIME_AND_WAKEUP command code
+*** r8 -> read 8 bytes (4 bytes for uptime, 4 bytes for wakeup time, both in little endian)
+
+
+=== CMD_POWER_OFF
+* Power off the board (by powering off voltage all controllable voltage regulators)
+* If wakeup time is configured, the board will be woken up at that time
+* Available only if POWEROFF_WAKEUP feature bit is set in CMD_GET_FEATURES
+* Write only
+
+* Example of powering down the board
+** "i2cset 1 0x2A 0x24 0xAD 0xDE 0x01 0x00 0x12 0x72 0x3B 0xBA i"
+*** 1 -> i2cbus number
+*** 0x2A -> I2C address of the slave
+*** 0x24 -> CMD_POWER_OFF command code
+*** 0xAD 0xDE -> 0xDEAD magic number in little endian
+*** 0x01 0x00 -> 0x0001 flag (enable poweron with front button)
+*** 0x12 0x72 0x3B 0xBA -> CRC32 for the request
+***	i -> block data type
 
 
 === CMD_GET_FW_VERSION_APP and CMD_GET_FW_VERSION_BOOT

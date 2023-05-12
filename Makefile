@@ -125,7 +125,7 @@ define PlatBuildVariant
 
   $$(eval $$(call LinkScriptRule,$(1),app,$$(LDSCRIPT_app)))
 
-  build.$(1)/app.elf: CPPFLAGS += $$(CPPFLAGS_app)
+  build.$(1)/app.elf: CPPFLAGS += $$(CPPFLAGS_app) $$(CPPFLAGS_app_$(1))
   build.$(1)/app.elf: LDSCRIPT = $$(LDSCRIPT_app_$(1))
   build.$(1)/app.elf: LDMAP = build.$(1)/app.map
   build.$(1)/app.elf: $$(OBJS_APP_$(1)) $$(LDSCRIPT_app_$(1))
@@ -143,7 +143,7 @@ define PlatBuildVariant
 
   $$(eval $$(call LinkScriptRule,$(1),boot,$$(LDSCRIPT_boot)))
 
-  build.$(1)/boot.elf: CPPFLAGS += $$(CPPFLAGS_boot)
+  build.$(1)/boot.elf: CPPFLAGS += $$(CPPFLAGS_boot) $$(CPPFLAGS_boot_$(1))
   build.$(1)/boot.elf: LDSCRIPT = $$(LDSCRIPT_boot_$(1))
   build.$(1)/boot.elf: LDMAP = build.$(1)/boot.map
   build.$(1)/boot.elf: $$(OBJS_BOOT_$(1)) $$(LDSCRIPT_boot_$(1))
@@ -166,6 +166,8 @@ define PlatDefVariant
   BOOT_FEAT_POS_$(1)-$(2) = $$(BOOT_FEAT_POS_$(1))
   CFLAGS_$(1)-$(2) := $$(CFLAGS_$(1)) $$(CFLAGS_$(1)-$(2))
   CPPFLAGS_$(1)-$(2) := $$(CPPFLAGS_$(1)) $$(CPPFLAGS_$(1)-$(2))
+  CPPFLAGS_app_$(1)-$(2) := $$(CPPFLAGS_app_$(1)) $$(CPPFLAGS_app_$(1)-$(2))
+  CPPFLAGS_boot_$(1)-$(2) := $$(CPPFLAGS_boot_$(1)) $$(CPPFLAGS_boot_$(1)-$(2))
   SRCS_PLAT_$(1)-$(2) := $$(SRCS_PLAT_$(1)) $$(SRCS_PLAT_$(1)-$(2))
 
   .PHONY: $(1)

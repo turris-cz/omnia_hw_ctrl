@@ -1,10 +1,9 @@
-#include "debug.h"
 #include "cpu.h"
 #include "time.h"
 #include "power_control.h"
 #include "input.h"
 #include "watchdog.h"
-#include "i2c_slave.h"
+#include "i2c_iface.h"
 
 #define SYSTICK_PERIOD		(SYS_CORE_FREQ / HZ)
 
@@ -13,6 +12,10 @@ _Static_assert(SYS_CORE_FREQ % HZ == 0,
 	       "SYS_CORE_FREQ must be divisible by HZ");
 
 volatile uint32_t jiffies;
+
+#if POWEROFF_WAKEUP_ENABLED
+volatile uint32_t uptime;
+#endif
 
 /*******************************************************************************
   * @function   time_config
@@ -86,6 +89,16 @@ void msleep(uint32_t ms)
 	mdelay(ms);
 }
 
+static void uptime_handler(void)
+{
+	static uint8_t cntr;
+
+	if (++cntr == HZ) {
+		cntr = 0;
+		++uptime;
+	}
+}
+
 /******************************************************************************
   * @function   systick_irq_handler
   * @brief      Decrements the TimingDelay variable in System Timer and
@@ -97,6 +110,8 @@ void __irq systick_irq_handler(void)
 {
 	jiffies++;
 
+	if (POWEROFF_WAKEUP_ENABLED)
+		uptime_handler();
 	watchdog_handler();
 	button_debounce_handler();
 	i2c_slave_recovery_handler(SLAVE_I2C);

@@ -1,8 +1,8 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "gpio_common.h"
 #include "stm32f0xx_gpio.h"
+#include "gpio_common.h"
 
 typedef GPIOOType_TypeDef pin_out_t;
 static const pin_out_t pin_pushpull = GPIO_OType_PP;

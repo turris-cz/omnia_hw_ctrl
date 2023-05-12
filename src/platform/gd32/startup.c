@@ -64,6 +64,8 @@ void led_driver_irq_handler(void) __weak_alias(default_handler);
 void led_driver_pattern_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
 void i2c_slave_irq_handler(void) __weak_alias(default_handler);
+void exti_irq_handler(void) __weak_alias(default_handler);
+void rtc_irq_handler(void) __weak_alias(default_handler);
 
 static __used __section(".isr_vector") void * const isr_vector[] = {
 	&_stack_top,
@@ -84,12 +86,12 @@ static __used __section(".isr_vector") void * const isr_vector[] = {
 	systick_irq_handler,
 	NULL,					/* Window WatchDog */
 	NULL,					/* LVD through EXTI Line detecion */
-	NULL,					/* RTC */
+	rtc_irq_handler,			/* RTC */
 	flash_irq_handler,			/* FLASH */
 	NULL,					/* RCU */
 	NULL,					/* EXTI Line 0 and 1 */
 	NULL,					/* EXTI Line 2 and 3 */
-	NULL,					/* EXTI Line 4 to 15 */
+	exti_irq_handler,			/* EXTI Line 4 to 15 */
 	NULL,					/* TSI */
 	NULL,					/* DMA1 Channel 0 */
 	NULL,					/* DMA1 Channel 1 and Channel 2 */
