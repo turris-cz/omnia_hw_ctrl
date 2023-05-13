@@ -178,7 +178,7 @@ static void system_init(void)
 
 	/* select PLL as system clock */
 	RCU_CFG0 = (RCU_CFG0 & ~RCU_CFG0_SCS) | RCU_CKSYSSRC_PLL;
-	while (!(RCU_CFG0 & RCU_SCSS_PLL))
+	while ((RCU_CFG0 & RCU_CFG0_SCSS) != RCU_SCSS_PLL)
 		nop();
 }
 
