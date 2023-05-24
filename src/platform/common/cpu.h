@@ -14,7 +14,7 @@
 
 #define IRQ_PRIO_SHIFT	6
 
-static inline uint32_t get_unaligned16(const void *ptr)
+static inline uint16_t get_unaligned16(const void *ptr)
 {
 	const uint8_t *p = ptr;
 
