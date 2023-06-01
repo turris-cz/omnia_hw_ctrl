@@ -3,8 +3,6 @@
 
 #include "compiler.h"
 
-#define FLASH_PAGE_SIZE		0x400
-
 typedef enum {
 	FLASH_OP_NONE = 0,
 	FLASH_OP_ERASE,

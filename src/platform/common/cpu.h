@@ -8,6 +8,8 @@
 # include "stm32f0xx.h"
 #elif defined(GD32F1x0)
 # include "gd32f1x0.h"
+#elif defined(MKL81)
+# include "mkl81.h"
 #else
 # error "unknown platform"
 #endif
@@ -191,7 +193,7 @@ static inline void nvic_disable_all_and_clear_pending(void)
 
 #if defined(STM32F030X8)
 # define LOOP_TICKS		4
-#elif defined(GD32F1x0)
+#elif defined(GD32F1x0) || defined(MKL81)
 # define LOOP_TICKS		3
 #else
 # error "mdelay() parameters not defined for this platform"

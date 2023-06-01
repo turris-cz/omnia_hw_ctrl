@@ -18,4 +18,7 @@
 #define RAM_LENGTH		0x2000
 #define RAM_END			(RAM_BEGIN + RAM_LENGTH)
 
+/* On GD32 we don't relocate segments (besides data) */
+#define RELOC_SEGMENT_AT(_seg)	>_seg
+
 #endif /* MEMORY_LAYOUT_H */

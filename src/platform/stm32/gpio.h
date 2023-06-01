@@ -2,7 +2,7 @@
 #define GPIO_H
 
 #include "stm32f0xx_gpio.h"
-#include "gpio_common.h"
+#include "gpio_common_stm32_gd32.h"
 
 typedef GPIOOType_TypeDef pin_out_t;
 static const pin_out_t pin_pushpull = GPIO_OType_PP;

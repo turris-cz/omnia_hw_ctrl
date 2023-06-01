@@ -84,9 +84,6 @@ static void on_flash_cmd_size_and_csum_success(i2c_iface_priv_t *priv)
 	fl->image_csum = get_unaligned32(cmd + 4);
 	fl->partial_csum = flashing_crc_init;
 	fl->flashed = 0;
-
-	debug("will flash image with size = %#06x, csum = %#010x\n",
-	      fl->image_size, fl->image_csum);
 }
 
 static int flash_cmd_size_and_csum(i2c_iface_priv_t *priv)
@@ -117,6 +114,9 @@ static int flash_cmd_size_and_csum(i2c_iface_priv_t *priv)
 			return lock_and_fail(priv);
 		if (cmd_len == 12) {
 			priv->on_success = on_flash_cmd_size_and_csum_success;
+
+			debug("will flash image with size = %#06x, csum = %#010x\n",
+			      get_unaligned32(cmd), get_unaligned32(cmd + 4));
 
 			return set_state_and_reply(priv,
 						   FLASHING_EXPECT_PROGRAM, 0);

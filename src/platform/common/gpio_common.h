@@ -1,18 +1,13 @@
 #ifndef GPIO_COMMON_H
 #define GPIO_COMMON_H
 
+#if !defined(PIN_PORT_MASK) || !defined(PIN_NR_MASK) || \
+    !defined(PIN_BIT_TYPE_T) || !defined(NPORTS)
+# error "PIN_PORT_MASK, PIN_NR_MASK, PIN_BIT_TYPE_T and NPORTS must be defined"
+#endif
+
 #include "compiler.h"
 #include "bits.h"
-
-typedef enum {
-	PORT_A = 0,
-	PORT_B,
-	PORT_C,
-	PORT_D,
-	PORT_F,
-} port_t;
-
-#define NPORTS 5
 
 typedef enum {
 	pin_mode_in,
@@ -31,9 +26,6 @@ typedef uint8_t gpio_t;
 
 static const uint8_t PIN_INVALID = 0xff;
 
-#define PIN_PORT_MASK	GENMASK8(7, 4)
-#define PIN_NR_MASK	GENMASK8(3, 0)
-
 #define _PIN(_port, _pin)		((gpio_t)(FIELD_PREP(PIN_PORT_MASK, PORT_ ## _port) | \
 						  FIELD_PREP(PIN_NR_MASK, _pin)))
 #define _PIN_3(_port, _pin, _cond)	((_cond) ? _PIN(_port, _pin) : PIN_INVALID)
@@ -50,26 +42,12 @@ static __force_inline uint8_t pin_nr(gpio_t pin)
 	return FIELD_GET(PIN_NR_MASK, pin);
 }
 
-static __force_inline uint16_t pin_bit(gpio_t pin)
+static __force_inline PIN_BIT_TYPE_T pin_bit(gpio_t pin)
 {
 	if (pin == PIN_INVALID)
 		return 0;
 	else
 		return BIT(pin_nr(pin));
-}
-
-#if !defined(__STM32F0XX_H) && !defined(GD32F1X0_H)
-# error "stm32f0xx.h or gd32f1x0.h must be included before including gpio_common_stm32_gd32.h"
-#endif
-
-static __force_inline uint8_t pin_irqn(gpio_t pin)
-{
-	switch (pin_nr(pin)) {
-	case 0 ... 1: return EXTI0_1_IRQn;
-	case 2 ... 3: return EXTI2_3_IRQn;
-	case 4 ... 15: return EXTI4_15_IRQn;
-	default: unreachable();
-	}
 }
 
 static __force_inline pin_mode_t pin_mode_alt(uint8_t alt_fn)

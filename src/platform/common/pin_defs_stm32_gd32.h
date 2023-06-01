@@ -1,5 +1,5 @@
-#ifndef PIN_DEFS_H
-#define PIN_DEFS_H
+#ifndef PIN_DEFS_STM32_GD32_H
+#define PIN_DEFS_STM32_GD32_H
 
 #include "gpio.h"
 #include "input.h"
@@ -172,4 +172,4 @@ static inline void power_input_pins_read(bool *manres, bool *sysres, bool *mres,
 	*usb31_ovc = low & pin_bit(USB31_OVC_PIN);
 }
 
-#endif /* PIN_DEFS_H */
+#endif /* PIN_DEFS_STM32_GD32_H */

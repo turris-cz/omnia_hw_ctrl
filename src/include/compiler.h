@@ -70,4 +70,12 @@
 		___a < ___b ? ___a : ___b;	\
 	})
 
+#define ABSDIFF(a, b)				\
+	({					\
+		__auto_type ___a = (a);		\
+		__auto_type ___b = (b);		\
+		___a > ___b ? ___a - ___b	\
+			    : ___b - ___a;	\
+	})
+
 #endif /* COMPILER_H */

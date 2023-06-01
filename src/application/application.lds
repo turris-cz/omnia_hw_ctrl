@@ -16,32 +16,39 @@ _stack_top = ORIGIN(ram) + LENGTH(ram);
 SECTIONS
 {
 	.isr_vector : {
+		_sfreloc = LOADADDR(.isr_vector);
+		_sreloc = ABSOLUTE(.);
 		KEEP(*(.isr_vector))
-	} >isr_vector
+	} RELOC_SEGMENT_AT(isr_vector)
 
 	.crcsum : {
 		KEEP(*(.crcsum))
-	} >crcsum
+	} RELOC_SEGMENT_AT(crcsum)
 
 	.features : {
 		KEEP(*(.features))
-	} >features
+	} RELOC_SEGMENT_AT(features)
 
 	.text : {
-		KEEP(*(.startup));
+		. = ALIGN(4);
 		*(.text*)
 		*(.rodata*)
-	} >flash
+		. = ALIGN(4);
+	} RELOC_SEGMENT_AT(flash)
 
-	. = ALIGN(4);
-	_sfdata = .;
-
-	.data : AT (_sfdata) {
+	.data : {
+		. = ALIGN(4);
+		_sfdata = LOADADDR(.data);
 		_sdata = ABSOLUTE(.);
 		*(.data*)
 		. = ALIGN(4);
 		_edata = ABSOLUTE(.);
-	} >ram
+		_ereloc = ABSOLUTE(.);
+	} >ram AT>flash
+
+	.startup : {
+		KEEP(*(.startup));
+	} >flash
 
 	.bss : {
 		. = ALIGN(4);
@@ -49,7 +56,7 @@ SECTIONS
 		*(.bss*)
 		. = ALIGN(4);
 		_ebss = ABSOLUTE(.);
-	}
+	} >ram
 
 	/DISCARD/ : {
 		libgcc.a ( * )

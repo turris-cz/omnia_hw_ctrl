@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "timer_common.h"
+#include "timer_common_stm32_gd32.h"
 
 #define LED_TIMER		3
 #define LED_PATTERN_TIMER	6
