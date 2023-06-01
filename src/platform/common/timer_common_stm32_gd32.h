@@ -1,5 +1,5 @@
-#ifndef TIMER_COMMON_H
-#define TIMER_COMMON_H
+#ifndef TIMER_COMMON_STM32_GD32_H
+#define TIMER_COMMON_STM32_GD32_H
 
 #include "cpu.h"
 
@@ -71,4 +71,4 @@ static __force_inline uint32_t freq2psc(uint32_t freq)
 	return _freq2psc(freq);
 }
 
-#endif /* TIMER_COMMON_H */
+#endif /* TIMER_COMMON_STM32_GD32_H */

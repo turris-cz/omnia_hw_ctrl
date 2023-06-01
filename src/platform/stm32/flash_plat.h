@@ -5,6 +5,8 @@
 #include "flash.h"
 #include "cpu.h"
 
+#define FLASH_PAGE_SIZE		0x400
+
 static inline void flash_plat_init(void)
 {
 	/* Clear all FLASH flags */

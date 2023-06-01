@@ -11,37 +11,50 @@ MEMORY
 	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
+#if defined(MKL81)
+# define FLASH_SEGMENT_AT(_seg) >ram AT>_seg
+#else
+# define FLASH_SEGMENT_AT(_seg) >_seg
+#endif
+
 _stack_top = ORIGIN(ram) + LENGTH(ram);
 
 SECTIONS
 {
 	.isr_vector : {
+		_sfreloc = LOADADDR(.isr_vector);
+		_sreloc = ABSOLUTE(.);
 		KEEP(*(.isr_vector))
-	} >isr_vector
+	} FLASH_SEGMENT_AT(isr_vector)
 
 	.crcsum : {
 		KEEP(*(.crcsum))
-	} >crcsum
+	} FLASH_SEGMENT_AT(crcsum)
 
 	.features : {
 		KEEP(*(.features))
-	} >features
+	} FLASH_SEGMENT_AT(features)
 
 	.text : {
-		KEEP(*(.startup));
+		. = ALIGN(4);
 		*(.text*)
 		*(.rodata*)
-	} >flash
+		. = ALIGN(4);
+	} FLASH_SEGMENT_AT(flash)
 
-	. = ALIGN(4);
-	_sfdata = .;
-
-	.data : AT (_sfdata) {
+	.data : {
+		. = ALIGN(4);
+		_sfdata = LOADADDR(.data);
 		_sdata = ABSOLUTE(.);
 		*(.data*)
 		. = ALIGN(4);
 		_edata = ABSOLUTE(.);
-	} >ram
+		_ereloc = ABSOLUTE(.);
+	} >ram AT>flash
+
+	.startup : {
+		KEEP(*(.startup));
+	} >flash
 
 	.bss : {
 		. = ALIGN(4);
@@ -49,7 +62,7 @@ SECTIONS
 		*(.bss*)
 		. = ALIGN(4);
 		_ebss = ABSOLUTE(.);
-	}
+	} >ram
 
 	/DISCARD/ : {
 		libgcc.a ( * )

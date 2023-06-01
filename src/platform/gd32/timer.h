@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "timer_common.h"
+#include "timer_common_stm32_gd32.h"
 #include "gd32f1x0_timer.h"
 #include "gd32f1x0_rcu.h"
 

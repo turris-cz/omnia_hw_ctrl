@@ -3,7 +3,7 @@
 
 #include "gd32f1x0_gpio.h"
 #include "gd32f1x0_rcu.h"
-#include "gpio_common.h"
+#include "gpio_common_stm32_gd32.h"
 
 typedef enum {
 	pin_pushpull = GPIO_OTYPE_PP,
