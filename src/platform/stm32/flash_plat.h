@@ -7,12 +7,6 @@
 
 static inline void flash_plat_init(void)
 {
-	/* Unlock the Program memory */
-	if (FLASH->CR & FLASH_CR_LOCK) {
-		FLASH->KEYR = FLASH_FKEY1;
-		FLASH->KEYR = FLASH_FKEY2;
-	}
-
 	/* Clear all FLASH flags */
 	FLASH->SR = FLASH_SR_EOP | FLASH_SR_WRPERR | FLASH_SR_PGERR |
 		    FLASH_SR_BSY;
@@ -53,12 +47,23 @@ static inline uint32_t flash_plat_op_bits(flash_op_type_t type)
 
 static inline void flash_plat_op_begin(flash_op_type_t type)
 {
+	/* unlock flash if locked */
+	if (FLASH->CR & FLASH_CR_LOCK) {
+		FLASH->KEYR = FLASH_FKEY1;
+		FLASH->KEYR = FLASH_FKEY2;
+	}
+
+	/* begin operation */
 	FLASH->CR |= flash_plat_op_bits(type);
 }
 
 static inline void flash_plat_op_end(flash_op_type_t type)
 {
+	/* end operation */
 	FLASH->CR &= ~flash_plat_op_bits(type);
+
+	/* lock flash */
+	FLASH->CR |= FLASH_CR_LOCK;
 }
 
 static inline void flash_plat_erase_next(uint32_t addr)

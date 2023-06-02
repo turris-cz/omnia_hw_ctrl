@@ -46,7 +46,7 @@ static void bootloader_init(void)
 {
 	debug_init();
 
-	flash_init(); /* Unlock the Flash Program Erase controller */
+	flash_init();
 
 	/* peripheral initialization*/
 	timer_reset(USB_TIMEOUT_TIMER);

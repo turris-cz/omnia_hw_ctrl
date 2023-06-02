@@ -8,12 +8,6 @@
 
 static inline void flash_plat_init(void)
 {
-	/* Unlock the Program memory */
-	if (FMC_CTL & FMC_CTL_LK) {
-		FMC_KEY = UNLOCK_KEY0;
-		FMC_KEY = UNLOCK_KEY1;
-	}
-
 	/* Clear all FLASH flags */
 	FMC_STAT = FMC_STAT_ENDF | FMC_STAT_WPERR | FMC_STAT_PGERR |
 		   FMC_STAT_BUSY;
@@ -54,12 +48,23 @@ static inline uint32_t flash_plat_op_bits(flash_op_type_t type)
 
 static inline void flash_plat_op_begin(flash_op_type_t type)
 {
+	/* unlock flash if locked */
+	if (FMC_CTL & FMC_CTL_LK) {
+		FMC_KEY = UNLOCK_KEY0;
+		FMC_KEY = UNLOCK_KEY1;
+	}
+
+	/* begin operation */
 	FMC_CTL |= flash_plat_op_bits(type);
 }
 
 static inline void flash_plat_op_end(flash_op_type_t type)
 {
+	/* end operation */
 	FMC_CTL &= ~flash_plat_op_bits(type);
+
+	/* lock flash */
+	FMC_CTL |= FMC_CTL_LK;
 }
 
 static inline void flash_plat_erase_next(uint32_t addr)

@@ -39,7 +39,7 @@ static void app_init(void)
 {
 	debug_init();
 
-	flash_init(); /* Unlock the Flash Program Erase controller */
+	flash_init();
 
 	time_config();
 	/* init ports and peripheral */
