@@ -26,7 +26,7 @@ reset_handler(void)
 
 	/* zero out bss */
 	for (uint32_t *ptr = &_sbss; ptr < &_ebss; ++ptr)
-		*(uint32_t *)ptr = 0;
+		*ptr = 0;
 
 	main();
 }
