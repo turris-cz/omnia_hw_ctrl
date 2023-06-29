@@ -587,16 +587,23 @@ static __maybe_unused int cmd_get_wdt_timeleft(i2c_iface_priv_t *priv)
 
 static __maybe_unused int cmd_get_version(i2c_iface_priv_t *priv)
 {
+	const void *ptr;
+
 	debug("get_version\n");
 
 	switch (priv->cmd[0]) {
 	case CMD_GET_FW_VERSION_BOOT:
-		if (!BOOTLOADER_BUILD &&
-		    priv->flashing.state == FLASHING_BUSY)
-			return -1;
+		if (BOOTLOADER_BUILD) {
+			ptr = version;
+		} else {
+			if (priv->flashing.state == FLASHING_BUSY)
+				return -1;
+
+			ptr = (void *)BOOTLOADER_VERSION_POS;
+		}
 
 		priv->reply_len = 20;
-		__builtin_memcpy(priv->reply, (void *)BOOTLOADER_VERSION_POS, 20);
+		__builtin_memcpy(priv->reply, ptr, 20);
 		break;
 
 #if !BOOTLOADER_BUILD
