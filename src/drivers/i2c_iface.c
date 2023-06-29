@@ -163,7 +163,7 @@ static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 
 		debug("get_features(%#04x) %#010x\n", priv->cmd[1],
 		      features);
-		set_reply(ptr->features);
+		set_reply(features);
 	} else if (priv->cmd_len > 2) {
 		priv->reply_len = 0;
 		return -1;
