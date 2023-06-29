@@ -120,27 +120,35 @@ static inline void _set_reply(i2c_iface_priv_t *priv, const void *reply,
 static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 {
 	if (priv->cmd_len == 1) {
+		/* Report the features of the running firmware */
 		debug("get_features %#06x\n",
 		      slave_features_supported.features);
 		set_reply(slave_features_supported.features);
 	} else if (priv->cmd_len == 2) {
+		/*
+		 * When received second argument, we report the features of the
+		 * requested firmware (bootloader for 0xbb, application for
+		 * 0xaa).
+		 */
 		typeof(slave_features_supported) *ptr;
 		uint32_t features;
 		uint32_t csum;
 
-		if (priv->cmd[1] == 0xbb) {
-			if (!BOOTLOADER_BUILD &&
-			    priv->flashing.state == FLASHING_BUSY)
-				return -1;
+		/* clear reply from when cmd_len == 1 */
+		priv->reply_len = 0;
 
-			ptr = (const void *)BOOTLOADER_FEATURES;
-		} else if (priv->cmd[1] == 0xaa) {
-			if (BOOTLOADER_BUILD &&
-			    priv->flashing.state == FLASHING_BUSY)
-				return -1;
+		/* don't read from flash if flashing is busy */
+		if (priv->flashing.state == FLASHING_BUSY)
+			return -1;
 
+		switch (priv->cmd[1]) {
+		case 0xaa:
 			ptr = (const void *)APPLICATION_FEATURES;
-		} else {
+			break;
+		case 0xbb:
+			ptr = (const void *)BOOTLOADER_FEATURES;
+			break;
+		default:
 			return -1;
 		}
 
@@ -157,6 +165,7 @@ static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 		      features);
 		set_reply(ptr->features);
 	} else if (priv->cmd_len > 2) {
+		priv->reply_len = 0;
 		return -1;
 	}
 
