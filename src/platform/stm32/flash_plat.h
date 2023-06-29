@@ -74,7 +74,7 @@ static inline void flash_plat_erase_next(uint32_t addr)
 
 static inline void flash_plat_write_next(uint32_t *addr, const uint8_t **src)
 {
-	*(volatile uint16_t *)(*addr) = ((*src)[1] << 8) | (*src)[0];
+	*(volatile uint16_t *)(*addr) = get_unaligned16(*src);
 	*addr += 2;
 	*src += 2;
 }
