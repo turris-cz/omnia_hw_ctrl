@@ -63,7 +63,7 @@ void i2c_slave_irq_handler(void) __weak_alias(default_handler);
 void exti_irq_handler(void) __weak_alias(default_handler);
 void rtc_irq_handler(void) __weak_alias(default_handler);
 
-static __used __section(".isr_vector") void *isr_vector[] = {
+static __used __section(".isr_vector") void * const isr_vector[] = {
 	&_stack_top,
 	reset_handler,
 	nmi_handler,
