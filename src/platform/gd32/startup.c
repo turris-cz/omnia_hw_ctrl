@@ -64,7 +64,7 @@ void led_driver_pattern_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
 void i2c_slave_irq_handler(void) __weak_alias(default_handler);
 
-static __used __section(".isr_vector") void *isr_vector[] = {
+static __used __section(".isr_vector") void * const isr_vector[] = {
 	&_stack_top,
 	reset_handler,
 	nmi_handler,
