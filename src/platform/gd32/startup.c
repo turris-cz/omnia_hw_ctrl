@@ -3,7 +3,7 @@
 #include "compiler.h"
 #include "cpu.h"
 #include "memory_layout.h"
-#include "message.h"
+#include "reset_reason.h"
 
 extern uint32_t _stack_top, _sfdata, _sdata, _edata, _sbss, _ebss;
 extern void __noreturn main(void);
@@ -40,10 +40,11 @@ static void __irq default_handler(void)
 #else
 	asm volatile(
 		"mov	sp, %0\n"
-		: : "lr" (RAM_END - SYS_RESET_MSG_LENGTH)
+		: : "lr" (RAM_END - RESET_REASON_MSG_LENGTH)
 	);
 
-	sys_reset_with_message(get_ipsr() & 0x1ff);
+	set_reset_reason(APPLICATION_FAULT, get_ipsr() & 0x1ff);
+	nvic_system_reset();
 #endif
 }
 

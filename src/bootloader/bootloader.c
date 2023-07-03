@@ -1,6 +1,6 @@
 #include "power_control.h"
 #include "time.h"
-#include "message.h"
+#include "reset_reason.h"
 #include "debug.h"
 #include "led_driver.h"
 #include "flash.h"
@@ -102,26 +102,24 @@ static bool check_app_crc(void)
   *****************************************************************************/
 static boot_value_t startup_manager(void)
 {
-	uint32_t sys_reset_msg;
-	message_t msg;
+	reset_reason_info_t info;
 
-	if (get_sys_reset_message(&sys_reset_msg)) {
+	switch (get_reset_reason(&info)) {
+	case APPLICATION_FAULT:
 		debug("Application faulted with fault %#04x, staying in bootloader\n",
-		      sys_reset_msg & 0x3f);
+		      info.fault);
 		return GO_TO_POWER_ON;
-	}
 
-	msg = get_message_after_switch();
-
-	if (msg == STAY_IN_BOOTLOADER) {
-		debug("Requsted to stay in bootloader\n");
+	case STAY_IN_BOOTLOADER_REQ:
+		debug("Requested to stay in bootloader\n");
 		return GO_TO_FLASH;
-	}
 
-	if (check_app_crc())
-		return GO_TO_APPLICATION;
-	else
-		return GO_TO_POWER_ON;
+	default:
+		if (check_app_crc())
+			return GO_TO_APPLICATION;
+		else
+			return GO_TO_POWER_ON;
+	}
 }
 
 /*******************************************************************************

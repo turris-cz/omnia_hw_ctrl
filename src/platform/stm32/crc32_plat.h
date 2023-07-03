@@ -5,6 +5,8 @@
 #include "compiler.h"
 #include "cpu.h"
 
+#define CRC_FREE_DATA_REG	(CRC->IDR)
+
 static inline uint32_t crc32_plat(uint32_t init, const void *src, uint16_t len)
 {
 	CRC->INIT = init;
