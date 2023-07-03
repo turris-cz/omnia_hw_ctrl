@@ -3,7 +3,7 @@
 #include "led_driver.h"
 #include "i2c_iface.h"
 #include "debug.h"
-#include "message.h"
+#include "reset.h"
 #include "cpu.h"
 #include "flash.h"
 #include "memory_layout.h"
@@ -181,7 +181,7 @@ void main(void)
 			break;
 
 		case BOOTLOADER:
-			set_message_before_switch(STAY_IN_BOOTLOADER);
+			set_reset_reason(STAY_IN_BOOTLOADER_REQ, 0);
 			reset_to_address(BOOTLOADER_BEGIN);
 		}
 	}

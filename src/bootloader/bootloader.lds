@@ -11,7 +11,7 @@ MEMORY
 	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
-_stack_top = ORIGIN(ram) + LENGTH(ram) - SYS_RESET_MSG_LENGTH;
+_stack_top = ORIGIN(ram) + LENGTH(ram) - RESET_REASON_MSG_LENGTH;
 
 SECTIONS
 {
