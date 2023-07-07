@@ -247,23 +247,8 @@ static void on_general_control_success(i2c_iface_priv_t *priv)
 		gpio_write(ENABLE_4V5_PIN, ctrl & CTL_ENABLE_4V5);
 #endif
 
-	if (mask & CTL_BUTTON_MODE) {
-		disable_irq();
-		if (ctrl & CTL_BUTTON_MODE) {
-			if (!button.user_mode && button.state) {
-				i2c_iface.rising |= INT_BUTTON_PRESSED;
-				i2c_iface_write_irq_pin();
-			}
-			button.user_mode = true;
-		} else {
-			button.user_mode = false;
-			button.pressed_counter = 0;
-			i2c_iface.rising &= ~INT_BUTTON_PRESSED;
-			i2c_iface.falling &= ~INT_BUTTON_PRESSED;
-			i2c_iface_write_irq_pin();
-		}
-		enable_irq();
-	}
+	if (mask & CTL_BUTTON_MODE)
+		button_set_user_mode(ctrl & CTL_BUTTON_MODE);
 
 	if (!BOOTLOADER_BUILD && (set & CTL_BOOTLOADER))
 		i2c_iface.req = I2C_IFACE_REQ_BOOTLOADER;
