@@ -64,6 +64,25 @@ void button_counter_decrease(uint8_t value)
 	enable_irq();
 }
 
+void button_set_user_mode(bool on)
+{
+	disable_irq();
+	if (on) {
+		if (!button.user_mode && button.state) {
+			i2c_iface.rising |= INT_BUTTON_PRESSED;
+			i2c_iface_write_irq_pin();
+		}
+		button.user_mode = true;
+	} else {
+		button.user_mode = false;
+		button.pressed_counter = 0;
+		i2c_iface.rising &= ~INT_BUTTON_PRESSED;
+		i2c_iface.falling &= ~INT_BUTTON_PRESSED;
+		i2c_iface_write_irq_pin();
+	}
+	enable_irq();
+}
+
 static void handle_usb_overcurrent(usb_port_t port)
 {
 	power_control_usb(port, false);
