@@ -1,0 +1,15 @@
+#ifndef MPU_H
+#define MPU_H
+
+typedef enum {
+	MPU_REGION_SUPERVISOR		= 0,
+	MPU_REGION_HEADERS		= 1,
+	MPU_REGION_TEXT			= 2,
+	MPU_REGION_DATA_BSS		= 3,
+	MPU_REGION_PERIPHERALS		= 4,
+	MPU_REGION_FLASH		= 5,
+	MPU_REGION_FLASHING_BUFFER	= 6,
+	MPU_REGION_PROCESS_STACK	= 7,
+} mpu_region_t;
+
+#endif /* MPU_H */

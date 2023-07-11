@@ -5,6 +5,7 @@
 #include "gpio.h"
 #include "time.h"
 #include "cpu.h"
+#include "clock.h"
 
 typedef uint8_t i2c_nr_t;
 
@@ -31,8 +32,9 @@ typedef struct {
 	i2c_slave_event_t state;
 	uint8_t addr;
 	uint8_t val;
-	uint8_t timeout, unhandled;
+	uint8_t unhandled;
 	bool eof;
+	uint32_t reset_at_jiffies;
 	void *priv;
 	int (*cb)(void *priv, uint8_t addr, i2c_slave_event_t event, uint8_t *val);
 } i2c_slave_t;
@@ -42,16 +44,9 @@ extern i2c_slave_t *i2c_slave_ptr[2];
 static __force_inline void i2c_clk_config(i2c_nr_t nr, bool on)
 {
 	switch (nr) {
-#define _I2C_CLK_CFG(_n)					\
-	case _n:						\
-		BME_BITFIELD(SIM_SCGC4, SIM_SCGC4_I2C ## _n) =	\
-			on ? SIM_SCGC4_I2C ## _n : 0;		\
-		break;
-	_I2C_CLK_CFG(0)
-	_I2C_CLK_CFG(1)
-#undef _I2C_CLK_CFG
-	default:
-		unreachable();
+	case 0: sys_clk_config(I2C0_Slot, on); break;
+	case 1: sys_clk_config(I2C1_Slot, on); break;
+	default: unreachable();
 	}
 }
 
@@ -119,7 +114,7 @@ static __force_inline void i2c_init_pins(i2c_nr_t nr)
 
 static inline void _i2c_slave_init(i2c_nr_t nr, i2c_slave_t *slave,
 				   uint8_t first_addr, uint8_t last_addr,
-				   uint8_t irq_prio, bool reset_event)
+				   uint8_t, bool reset_event)
 {
 	i2c_reset(nr);
 
@@ -135,7 +130,7 @@ static inline void _i2c_slave_init(i2c_nr_t nr, i2c_slave_t *slave,
 	}
 
 	I2C_FLT(nr) = I2C_FLT_SSIE;
-	I2C_C1(nr) = I2C_C1_IICIE;
+	I2C_C1(nr) = 0;
 
 	slave->state = I2C_SLAVE_STOP;
 	slave->unhandled = 0;
@@ -144,9 +139,7 @@ static inline void _i2c_slave_init(i2c_nr_t nr, i2c_slave_t *slave,
 	if (reset_event)
 		slave->cb(slave->priv, 0, I2C_SLAVE_RESET, &slave->val);
 
-	I2C_C1(nr) = I2C_C1_IICEN | I2C_C1_IICIE;
-
-	nvic_enable_irq_with_prio(i2c_irqn(nr), irq_prio);
+	I2C_C1(nr) = I2C_C1_IICEN;
 }
 
 static inline void i2c_slave_init(i2c_nr_t nr, i2c_slave_t *slave,
@@ -175,31 +168,138 @@ static __force_inline void i2c_slave_reset(i2c_nr_t nr)
 		last_addr = 0;
 	}
 
-	_i2c_slave_init(nr, slave, first_addr, last_addr,
-			nvic_get_priority(i2c_irqn(nr)), false);
+	_i2c_slave_init(nr, slave, first_addr, last_addr, 0, false);
 }
 
-static __force_inline void i2c_slave_recovery_handler(i2c_nr_t nr)
+static __force_inline void i2c_slave_recovery_handler(i2c_nr_t)
+{
+	/*
+	 * No recovery from systick_handler, recovery is done by polling in
+	 * i2c_slave_recovery_poll().
+	 */
+}
+
+static __force_inline void i2c_slave_recovery_poll(i2c_nr_t nr)
 {
 	i2c_slave_t *slave = i2c_slave_ptr[nr];
 
-	if (!slave)
-		return;
-
-	disable_irq();
-
-	if (slave->state != I2C_SLAVE_STOP) {
-		if (slave->timeout) {
-			slave->timeout--;
-		} else {
-			debug("i2c timed out, resetting\n");
-			i2c_slave_reset(nr);
-		}
+	if (slave && slave->state != I2C_SLAVE_STOP &&
+	    jiffies > slave->reset_at_jiffies) {
+		debug("i2c timed out, resetting\n");
+		i2c_slave_reset(nr);
 	}
-
-	enable_irq();
 }
 
-void i2c_slave_irq_handler(void);
+static __force_inline void i2c_slave_poll(i2c_nr_t nr)
+{
+	i2c_slave_t *slave;
+	uint8_t flt, st;
+	bool handled;
+
+	st = I2C_S(nr);
+
+	if (!(st & I2C_S_IICIF)) {
+		i2c_slave_recovery_poll(nr);
+		return;
+	}
+
+	handled = true;
+	slave = i2c_slave_ptr[nr];
+	flt = I2C_FLT(nr);
+
+	if (flt & I2C_FLT_STOPF) {
+		BME_OR(I2C_FLT(nr)) = I2C_FLT_STOPF;
+		BME_AND(I2C_C1(nr)) = ~I2C_C1_TXAK;
+		BME_OR(I2C_S(nr)) = I2C_S_IICIF;
+
+		if (slave->addr) {
+			slave->state = I2C_SLAVE_STOP;
+			slave->cb(slave->priv, slave->addr, slave->state,
+				  &slave->val);
+		}
+		slave->addr = 0;
+		goto handled;
+	} else if (flt & I2C_FLT_STARTF) {
+		BME_OR(I2C_FLT(nr)) = I2C_FLT_STARTF;
+	}
+
+	BME_OR(I2C_S(nr)) = I2C_S_IICIF;
+	if (!slave->addr && (flt & I2C_FLT_STARTF))
+		goto handled;
+
+	if (st & I2C_S_ARBL)
+		BME_OR(I2C_S(nr)) = I2C_S_ARBL;
+
+	if (st & I2C_S_IAAS) {
+		/* read address */
+		slave->addr = I2C_D(nr) >> 1;
+
+		if (st & I2C_S_SRW) {
+			slave->state = I2C_SLAVE_READ_REQUESTED;
+			slave->eof = slave->cb(slave->priv, slave->addr,
+					       slave->state, &slave->val);
+			slave->state = I2C_SLAVE_READ_PROCESSED;
+
+			BME_OR(I2C_C1(nr)) = I2C_C1_TX;
+
+			if (slave->eof)
+				I2C_D(nr) = 0xff;
+			else
+				I2C_D(nr) = slave->val;
+		} else {
+			slave->state = I2C_SLAVE_WRITE_REQUESTED;
+			slave->cb(slave->priv, slave->addr, slave->state,
+				  &slave->val);
+			slave->state = I2C_SLAVE_WRITE_RECEIVED;
+
+			/* dummy read */
+			(void)I2C_D(nr);
+
+			BME_AND(I2C_C1(nr)) = ~(I2C_C1_TX | I2C_C1_TXAK);
+		}
+	} else if (st & I2C_S_ARBL) {
+		/* do not handle TCF if ARBL */
+	} else if (slave->addr && (st & I2C_S_TCF) &&
+		   slave->state == I2C_SLAVE_WRITE_RECEIVED) {
+		slave->val = I2C_D(nr);
+		slave->state = I2C_SLAVE_WRITE_RECEIVED;
+		if (slave->cb(slave->priv, slave->addr, slave->state,
+			      &slave->val))
+			BME_OR(I2C_C1(nr)) = I2C_C1_TXAK;
+	} else if (slave->addr && (st & I2C_S_TCF) &&
+		   slave->state == I2C_SLAVE_READ_PROCESSED) {
+		if (st & I2C_S_RXAK) {
+			BME_AND(I2C_C1(nr)) = ~I2C_C1_TX;
+
+			/* dummy read */
+			(void)I2C_D(nr);
+		} else {
+			if (!slave->eof)
+				slave->eof = slave->cb(slave->priv, slave->addr,
+						       slave->state,
+						       &slave->val);
+
+			if (slave->eof)
+				I2C_D(nr) = 0xff;
+			else
+				I2C_D(nr) = slave->val;
+		}
+	} else {
+		handled = false;
+	}
+
+handled:
+	if (handled) {
+		slave->reset_at_jiffies = jiffies + I2C_SLAVE_TIMEOUT_JIFFIES;
+		slave->unhandled = 0;
+	} else {
+		slave->unhandled++;
+	}
+
+	if (slave->unhandled == I2C_SLAVE_UNHANDLED_LIMIT) {
+		/* too many unhandled interrupts, reset */
+		i2c_slave_reset(nr);
+	}
+}
 
 #endif /* I2C_H */

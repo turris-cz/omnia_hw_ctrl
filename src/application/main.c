@@ -39,9 +39,9 @@ static void app_init(void)
 {
 	/* configure peripherals */
 	debug_init();
-	flash_init();
+	sys_flash_init();
 	crc32_enable();
-	time_config();
+	sys_time_config();
 
 	/* configure power control */
 	power_control_io_config();
@@ -67,7 +67,7 @@ static int power_on(void)
 	power_control_set_startup_condition();
 	power_control_disable_regulators();
 
-	msleep(100);
+	sys_msleep(100);
 
 	return power_control_enable_regulators();
 }
@@ -91,7 +91,7 @@ static void light_reset(void)
 
 	led_driver_reset_pattern_start();
 
-	input_signals_init();
+	sys_input_signals_init();
 }
 
 /*******************************************************************************
@@ -102,15 +102,15 @@ static void light_reset(void)
   *****************************************************************************/
 static void error_manager(unsigned led)
 {
-	led_set_user_mode(LED_COUNT, false);
+	sys_led_set_user_mode(LED_COUNT, false);
 	led_set_state(LED_COUNT, false);
 	led_set_color24(LED_COUNT, RED_COLOR);
 
-	msleep(300);
+	sys_msleep(300);
 
 	led_set_state(led, true);
 
-	msleep(300);
+	sys_msleep(300);
 }
 
 void main(void)
@@ -118,8 +118,6 @@ void main(void)
 	state_t next_state = POWER_ON;
 	uint8_t error_counter = 0;
 	int err;
-
-	enable_irq();
 
 	app_init();
 
@@ -141,7 +139,7 @@ void main(void)
 			break;
 
 		case HARD_RESET:
-			nvic_system_reset();
+			sys_hard_reset();
 			unreachable();
 
 		case ERROR_STATE:
@@ -153,7 +151,7 @@ void main(void)
 			break;
 
 		case INPUT_MANAGER:
-			switch (input_signals_poll()) {
+			switch (sys_input_signals_poll()) {
 			case INPUT_REQ_LIGHT_RESET:
 				next_state = LIGHT_RESET;
 				break;
@@ -169,7 +167,7 @@ void main(void)
 			break;
 
 		case I2C_MANAGER:
-			switch (i2c_iface.req) {
+			switch (i2c_iface_poll()) {
 			case I2C_IFACE_REQ_HARD_RESET:
 				next_state = HARD_RESET;
 				break;
@@ -185,8 +183,8 @@ void main(void)
 			break;
 
 		case BOOTLOADER:
-			set_reset_reason(STAY_IN_BOOTLOADER_REQ, 0);
-			reset_to_address(BOOTLOADER_BEGIN);
+			soft_reset_to_other_program();
+			unreachable();
 		}
 	}
 }

@@ -9,11 +9,11 @@
 #define MAX_BUTTON_PRESSED_COUNTER	7
 #define MAX_BUTTON_DEBOUNCE_STATE	3
 
-button_t button;
+button_t button __unprivileged_rodata;
 
-static bool brightness_changed;
+static bool brightness_changed __privileged_data;
 
-static void button_pressed(void)
+static __privileged void button_pressed(void)
 {
 	if (button.user_mode) {
 		disable_irq();
@@ -32,9 +32,9 @@ static void button_pressed(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void button_debounce_handler(void)
+__privileged void button_debounce_handler(void)
 {
-	static uint8_t state_cnt[2];
+	static uint8_t state_cnt[2] __privileged_data;
 	bool state, prev_state;
 
 	state = !gpio_read(FRONT_BTN_PIN);
@@ -57,7 +57,7 @@ void button_debounce_handler(void)
   * @param      value: decrease the button counter by this parameter
   * @retval     None.
   *****************************************************************************/
-void button_counter_decrease(uint8_t value)
+__privileged void button_counter_decrease(uint8_t value)
 {
 	disable_irq();
 	if (value <= button.pressed_counter)
@@ -67,7 +67,7 @@ void button_counter_decrease(uint8_t value)
 	enable_irq();
 }
 
-void button_set_user_mode(bool on)
+__privileged void button_set_user_mode(bool on)
 {
 	disable_irq();
 	if (on) {
@@ -86,7 +86,7 @@ void button_set_user_mode(bool on)
 	enable_irq();
 }
 
-static void handle_usb_overcurrent(usb_port_t port)
+static __privileged void handle_usb_overcurrent(usb_port_t port)
 {
 	power_control_usb(port, false);
 	power_control_usb_timeout_enable();
@@ -109,7 +109,7 @@ void input_signals_config(void)
 static uint32_t prev_intr;
 volatile uint32_t input_led_pins;
 
-void input_signals_init(void)
+__privileged void input_signals_init(void)
 {
 	input_led_pins = led_pins_read(0);
 	prev_intr = FIELD_PREP(INT_LED_STATES_MASK, input_led_pins);
@@ -146,7 +146,7 @@ void input_signals_init(void)
   * @brief      Poll the input signals.
   * @retval     Next state.
   *****************************************************************************/
-input_req_t input_signals_poll(void)
+__privileged input_req_t input_signals_poll(void)
 {
 	bool manres, sysres, mres, pg, pg_4v5, usb30_ovc, usb31_ovc;
 	uint32_t intr = 0;

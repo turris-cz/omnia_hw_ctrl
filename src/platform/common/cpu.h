@@ -14,7 +14,23 @@
 # error "unknown platform"
 #endif
 
+#if PRIVILEGES
+# define __privileged __section(".privilegedtext")
+# define __privileged_data __section(".privilegeddata")
+# define __unprivileged_rodata __section(".unprivilegedrodata")
+# define __irq __privileged __attribute__((__interrupt__))
+#else /* !PRIVILEGES */
+# define __privileged
+# define __privileged_data
+# define __unprivileged_rodata
+# define __irq __attribute__((__interrupt__))
+#endif /* !PRIVILEGES */
+
 #define IRQ_PRIO_SHIFT	6
+
+typedef struct {
+	uint32_t r0, r1, r2, r3, r12, lr, pc, psr;
+} exception_frame_t;
 
 static inline uint16_t get_unaligned16(const void *ptr)
 {
@@ -52,6 +68,37 @@ static __force_inline uint32_t get_ipsr(void)
 	asm volatile("mrs %0, ipsr" : "=r" (ipsr));
 
 	return ipsr;
+}
+
+#define CONTROL_nPRIV	BIT(0)
+#define CONTROL_SPSEL	BIT(1)
+
+static __force_inline void set_control(uint32_t control)
+{
+	asm volatile("msr control, %0\n" : : "r" (control));
+}
+
+static __force_inline uint32_t get_control(void)
+{
+	uint32_t control;
+
+	asm volatile("mrs %0, control\n" : "=r" (control));
+
+	return control;
+}
+
+static __force_inline void set_psp(uint32_t psp)
+{
+	asm volatile("msr psp, %0\n" : : "r" (psp));
+}
+
+static __force_inline uint32_t get_psp(void)
+{
+	uint32_t psp;
+
+	asm volatile("mrs %0, psp\n" : "=r" (psp));
+
+	return psp;
 }
 
 static __force_inline void isb(void)

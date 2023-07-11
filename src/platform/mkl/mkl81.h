@@ -185,6 +185,82 @@ static __maybe_unused struct {
 #define BME_LOAD_CLEAR(_a, _b)	(*(typeof(&(_a)))_BME_LOAD_CLEAR(&(_a), _b))
 #define BME_LOAD_SET(_a, _b)	(*(typeof(&(_a)))_BME_LOAD_SET(&(_a), _b))
 
+typedef enum {
+	AIPS_Slot	= 0,
+	DMA_Slot	= 8,
+	DMA_TCD_Slot	= 9,
+	MPU_Slot	= 13,
+	GPIO_Slot	= 15,
+	FTFA_Slot	= 32,
+	DMAMUX_Slot	= 33,
+	INTMUX_Slot	= 36,
+	TRNG_Slot	= 37,
+	SPI0_Slot	= 44,
+	SPI1_Slot	= 45,
+	CRC_Slot	= 50,
+	PIT0_Slot	= 55,
+	TPM0_Slot	= 56,
+	TPM1_Slot	= 57,
+	TPM2_Slot	= 58,
+	ADC0_Slot	= 59,
+	RTC_Slot	= 61,
+	VBAT_Slot	= 62,
+	DAC0_Slot	= 63,
+	LPTMR0_Slot	= 64,
+	RFSYS_Slot	= 65,
+	DryIce_Slot	= 66,
+	DryIceStor_Slot	= 67,
+	LPTMR1_Slot	= 68,
+	TSI0_Slot	= 69,
+	SIM_LP_Slot	= 71,
+	SIM_Slot	= 72,
+	PTA_Slot	= 73,
+	PTB_Slot	= 74,
+	PTC_Slot	= 75,
+	PTD_Slot	= 76,
+	PTE_Slot	= 77,
+	EMVSIM0_Slot	= 78,
+	EMVSIM1_Slot	= 79,
+	LTC0_Slot	= 81,
+	Watchdog_Slot	= 82,
+	LPUART0_Slot	= 84,
+	LPUART1_Slot	= 85,
+	LPUART2_Slot	= 86,
+	QSPI0_Slot	= 90,
+	FlexIO0_Slot	= 95,
+	EWM_Slot	= 97,
+	MCG_Slot	= 100,
+	OSC_Slot	= 101,
+	I2C0_Slot	= 102,
+	I2C1_Slot	= 103,
+	USB_FS_Slot	= 114,
+	CMP0_Slot	= 115,
+	VREF_Slot	= 116,
+	LLWU_Slot	= 124,
+	PMC_Slot	= 125,
+	SMC_Slot	= 126,
+	RCM_Slot	= 127,
+} AIPS_Slot_Type;
+
+/* AIPS */
+#define AIPS_REG32(_a)		REG32(0x40000000 + (_a))
+
+#define AIPS_MPRA		AIPS_REG32(0x0)
+#define _AIPS_PACR(_p)		AIPS_REG32(0x20 + ((_p) < 4 ? (_p) : ((_p) + 4)) * 0x4)
+#define AIPS_PACR(_p)		_AIPS_PACR(((_p) & 127) >> 3)
+
+/* AIPS_MPRA */
+#define AIPS_MPRA_MPL(_m)	BIT((4 - (_m)) * 4 + 12)
+#define AIPS_MPRA_MTW(_m)	BIT((4 - (_m)) * 4 + 13)
+#define AIPS_MPRA_MTR(_m)	BIT((4 - (_m)) * 4 + 14)
+
+/* AIPS_PACRn */
+#define AIPS_PACR_MASK(_m)	GENMASK((7 - ((_m) & 7)) * 4 + 2, \
+					(7 - ((_m) & 7)) * 4)
+#define AIPS_PACR_TP(_m)	BIT((7 - ((_m) & 7)) * 4)
+#define AIPS_PACR_WP(_m)	BIT((7 - ((_m) & 7)) * 4 + 1)
+#define AIPS_PACR_SP(_m)	BIT((7 - ((_m) & 7)) * 4 + 2)
+
 /* FTFA */
 #define FTFA_REG8(_a)		REG8(0x40020000 + (_a))
 
@@ -1300,13 +1376,20 @@ static __maybe_unused struct {
 #define MPU_RGDn_WORD2_MnUM_X(_m)	BIT(0 + 6 * (_m))
 #define MPU_RGDn_WORD2_MnUM_W(_m)	BIT(1 + 6 * (_m))
 #define MPU_RGDn_WORD2_MnUM_R(_m)	BIT(2 + 6 * (_m))
+#define MPU_RGDn_WORD2_MnUM_RX(_m)	(MPU_RGDn_WORD2_MnUM_R(_m) | \
+					 MPU_RGDn_WORD2_MnUM_X(_m))
+#define MPU_RGDn_WORD2_MnUM_RW(_m)	(MPU_RGDn_WORD2_MnUM_R(_m) | \
+					 MPU_RGDn_WORD2_MnUM_W(_m))
+#define MPU_RGDn_WORD2_MnUM_RWX(_m)	(MPU_RGDn_WORD2_MnUM_R(_m) | \
+					 MPU_RGDn_WORD2_MnUM_W(_m) | \
+					 MPU_RGDn_WORD2_MnUM_X(_m))
 
 #define MPU_RGDn_WORD2_MnSM_MASK(_m)	GENMASK(4 + 6 * (_m), 3 + 6 * (_m))
-#define MPU_RGDn_WORD2_MnSM(_m, x)	FIELD_PREP(MPU_RGDn_WORD2_M0SM_MASK(_m), x)
-#define MPU_RGDn_WORD2_MnSM_RWX(_m)	MPU_RGDn_WORD2_MnSM(0)
-#define MPU_RGDn_WORD2_MnSM_RX(_m)	MPU_RGDn_WORD2_MnSM(1)
-#define MPU_RGDn_WORD2_MnSM_RW(_m)	MPU_RGDn_WORD2_MnSM(2)
-#define MPU_RGDn_WORD2_MnSM_AS_UM(_m)	MPU_RGDn_WORD2_MnSM(3)
+#define MPU_RGDn_WORD2_MnSM(_m, x)	FIELD_PREP(MPU_RGDn_WORD2_MnSM_MASK(_m), x)
+#define MPU_RGDn_WORD2_MnSM_RWX(_m)	MPU_RGDn_WORD2_MnSM(_m, 0)
+#define MPU_RGDn_WORD2_MnSM_RX(_m)	MPU_RGDn_WORD2_MnSM(_m, 1)
+#define MPU_RGDn_WORD2_MnSM_RW(_m)	MPU_RGDn_WORD2_MnSM(_m, 2)
+#define MPU_RGDn_WORD2_MnSM_AS_UM(_m)	MPU_RGDn_WORD2_MnSM(_m, 3)
 
 #define MPU_RGDn_WORD2_MnPE(_m)		BIT(5 + 6 * (_m))
 

@@ -5,6 +5,7 @@
 #include "led_driver.h"
 #include "power_control.h"
 #include "time.h"
+#include "svc.h"
 
 void platform_poweroff(bool enable_button, uint32_t wakeup_timeout);
 
@@ -36,5 +37,6 @@ static inline void poweroff(bool enable_button, uint32_t wakeup)
 
 	platform_poweroff(enable_button, wakeup_timeout);
 }
+SYSCALL(poweroff, bool, uint32_t)
 
 #endif /* POWEROFF_H */

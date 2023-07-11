@@ -3,10 +3,12 @@
 
 #include "flash.h"
 #include "cpu.h"
+#include "memory_layout.h"
+#include "debug.h"
 
 #define FLASH_PAGE_SIZE		0x800
 
-static inline void flash_plat_init(void)
+static __privileged inline void flash_plat_init(void)
 {
 	/* Clear all FTFA flags */
 	FTFA_FSTAT = FTFA_FSTAT_FPVIOL | FTFA_FSTAT_ACCERR |
@@ -19,11 +21,11 @@ static inline void flash_plat_init(void)
 	INTMUX_CHn_CSR(0) = INTMUX_CHn_CSR_RST;
 	INTMUX_CHn_IER(0) = BIT(FTFA_IRQn);
 
-	/* enable INTMUX channel 0 interrupt */
-	nvic_enable_irq_with_prio(INTMUX0_0_IRQn, 3);
+	/* enable INTMUX channel 0 interrupt; flash irq must preempt SVC */
+	nvic_enable_irq_with_prio(INTMUX0_0_IRQn, 2);
 }
 
-static inline uint32_t flash_plat_get_and_clear_status(void)
+static __privileged inline uint32_t flash_plat_get_and_clear_status(void)
 {
 	uint32_t st = FTFA_FSTAT;
 
@@ -32,25 +34,25 @@ static inline uint32_t flash_plat_get_and_clear_status(void)
 	return st;
 }
 
-static inline bool flash_plat_status_okay(uint32_t stat)
+static __privileged inline bool flash_plat_status_okay(uint32_t stat)
 {
 	return (stat & (FTFA_FSTAT_CCIF | FTFA_FSTAT_MGSTAT0)) ==
 	       FTFA_FSTAT_CCIF;
 }
 
-static inline bool flash_plat_status_error(uint32_t stat)
+static __privileged inline bool flash_plat_status_error(uint32_t stat)
 {
 	return stat & FTFA_FSTAT_MGSTAT0;
 }
 
-static inline void flash_plat_op_begin(flash_op_type_t)
+static __privileged inline void flash_plat_op_begin(flash_op_type_t)
 {
 	/* Clear all FTFA flags */
 	FTFA_FSTAT = FTFA_FSTAT_FPVIOL | FTFA_FSTAT_ACCERR |
 		     FTFA_FSTAT_RDCOLERR;
 }
 
-static inline void flash_plat_op_end(flash_op_type_t)
+static __privileged inline void flash_plat_op_end(flash_op_type_t)
 {
 	/* disable command completed interrupt */
 	BME_AND(FTFA_FCNFG) = (uint8_t)~FTFA_FCNFG_CCIE;
@@ -62,12 +64,13 @@ static inline void flash_plat_op_end(flash_op_type_t)
 	MCM_PLACR |= MCM_PLACR_CFCC;
 }
 
-static inline void flash_plat_set_cmd_addr(uint8_t cmd, uint32_t addr)
+static __privileged inline void flash_plat_set_cmd_addr(uint8_t cmd,
+							uint32_t addr)
 {
 	FTFA_FCCOB_LWORD(0) = (cmd << 24) | (addr & 0xffffff);
 }
 
-static inline void flash_plat_cmd_exec(void)
+static __privileged inline void flash_plat_cmd_exec(void)
 {
 	/* start operation */
 	FTFA_FSTAT = FTFA_FSTAT_CCIF;
@@ -76,7 +79,7 @@ static inline void flash_plat_cmd_exec(void)
 	BME_OR(FTFA_FCNFG) = FTFA_FCNFG_CCIE;
 }
 
-static inline void flash_plat_erase_next(uint32_t addr)
+static __privileged inline void flash_plat_erase_next(uint32_t addr)
 {
 	/* set erase command and address */
 	flash_plat_set_cmd_addr(FTFA_FCCOB_FCMD_ERS_SECT, addr);
@@ -85,7 +88,8 @@ static inline void flash_plat_erase_next(uint32_t addr)
 	flash_plat_cmd_exec();
 }
 
-static inline void flash_plat_write_next(uint32_t *addr, const uint8_t **src)
+static __privileged inline void flash_plat_write_next(uint32_t *addr,
+						      const uint8_t **src)
 {
 	/* set address */
 	flash_plat_set_cmd_addr(FTFA_FCCOB_FCMD_PRG_LWRD, *addr);

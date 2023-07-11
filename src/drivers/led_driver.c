@@ -321,7 +321,7 @@ bool led_driver_get_gamma_correction(void)
   * @param      channel: RED, GREEN or BLUE.
   * @retval     Data to be sent to LED driver.
   *****************************************************************************/
-static uint16_t led_driver_prepare_data(unsigned channel)
+static __privileged uint16_t led_driver_prepare_data(unsigned channel)
 {
 	/* Two values are compared with current level at once: the two values
 	 * are stored in one uint32_t (values[N]), and current level is repeated
@@ -336,7 +336,7 @@ static uint16_t led_driver_prepare_data(unsigned channel)
 	 */
 	static const uint32_t mask = BIT(31) | BIT(15),
 			      one = 0x10001;
-	static uint32_t level2x = one;
+	static uint32_t level2x __privileged_data = one;
 	const uint32_t *values;
 	uint32_t res;
 
@@ -367,9 +367,9 @@ static uint16_t led_driver_prepare_data(unsigned channel)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void led_driver_send_frame(void)
+static __privileged void led_driver_send_frame(void)
 {
-	static uint8_t channel = RED;
+	static uint8_t channel __privileged_data = RED;
 	uint16_t data;
 
 	/* toggle SS before sending red channel */
@@ -441,10 +441,10 @@ void led_driver_config(void)
 	 * Set initial PWM brightness (also enables LED_TIMER and
 	 * LED_PATTERN_TIMER)
 	 */
-	led_driver_set_brightness(100);
+	sys_led_driver_set_brightness(100);
 }
 
-static void _led_driver_set_brightness(uint8_t value)
+static __privileged void _led_driver_set_brightness(uint8_t value)
 {
 	if (value > 100)
 		value = 100;
@@ -479,7 +479,7 @@ static void _led_driver_set_brightness(uint8_t value)
   * @param      value: PWM value in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_set_brightness(uint8_t value)
+__privileged void led_driver_set_brightness(uint8_t value)
 {
 	disable_irq();
 
@@ -499,7 +499,7 @@ void led_driver_set_brightness(uint8_t value)
   * @param      value: PWM value to overwrite with in [%].
   * @retval     None.
   *****************************************************************************/
-void led_driver_overwrite_brightness(bool overwrite, uint8_t value)
+__privileged void led_driver_overwrite_brightness(bool overwrite, uint8_t value)
 {
 	disable_irq();
 
@@ -526,7 +526,7 @@ uint8_t led_driver_get_brightness(void)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-void led_driver_step_brightness(void)
+__privileged void led_driver_step_brightness(void)
 {
 	static const uint8_t brightnesses[] = {
 #if BOOTLOADER_BUILD
@@ -569,7 +569,7 @@ void led_states_commit(void)
   * @parame     set: true to set user mode, false to unset
   * @retval     None.
   *****************************************************************************/
-void led_set_user_mode(unsigned led, bool set)
+__privileged void led_set_user_mode(unsigned led, bool set)
 {
 	disable_irq();
 
@@ -611,7 +611,7 @@ void led_set_state(unsigned led, bool state)
   * @parame     state: false / true
   * @retval     None.
   *****************************************************************************/
-void led_set_state_user(unsigned led, bool state)
+__privileged void led_set_state_user(unsigned led, bool state)
 {
 	disable_irq();
 
@@ -636,9 +636,10 @@ void led_driver_reset_pattern_start(void)
 	reset_pattern_state = RESET_PATTERN_INIT;
 }
 
-static void led_driver_reset_pattern_handler(void)
+static __privileged void led_driver_reset_pattern_handler(void)
 {
-	static unsigned led, timeout;
+	static unsigned led __privileged_data;
+	static unsigned timeout __privileged_data;
 
 	/* don't handle next state until timeout expires */
 	if (timeout) {
@@ -700,7 +701,7 @@ static void led_driver_reset_pattern_handler(void)
 	}
 }
 
-static void led_driver_default_pattern_handler(uint32_t pins)
+static __privileged void led_driver_default_pattern_handler(uint32_t pins)
 {
 	led_set_state_nocommit(LAN0_LED, pins & LAN0_LED0_BIT);
 	led_set_state_nocommit(LAN1_LED, pins & LAN1_LED0_BIT);
@@ -722,10 +723,10 @@ static void led_driver_default_pattern_handler(uint32_t pins)
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void led_driver_bootloader_pattern_handler(void)
+static __privileged void led_driver_bootloader_pattern_handler(void)
 {
-	static unsigned timeout;
-	static bool on;
+	static unsigned timeout __privileged_data;
+	static bool on __privileged_data;
 
 	timeout++;
 

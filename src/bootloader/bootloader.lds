@@ -16,7 +16,16 @@ MEMORY
 	ram (xrw)	: ORIGIN = RAM_BEGIN,					LENGTH = RAM_LENGTH
 }
 
-_stack_top = ORIGIN(ram) + LENGTH(ram) - RESET_REASON_MSG_LENGTH;
+#define STACKS_END	(ORIGIN(ram) + LENGTH(ram) - RESET_REASON_MSG_LENGTH)
+
+#ifdef MAIN_STACK_SIZE
+# ifdef PROCESS_STACK_SIZE
+_psp_bottom = STACKS_END - MAIN_STACK_SIZE - PROCESS_STACK_SIZE;
+_psp_top = STACKS_END - MAIN_STACK_SIZE;
+# endif
+_stack_bottom = STACKS_END - MAIN_STACK_SIZE;
+#endif
+_stack_top = STACKS_END;
 
 SECTIONS
 {
@@ -42,33 +51,52 @@ SECTIONS
 #endif
 
 	.text : {
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
+		_stext = ABSOLUTE(.);
 		*(.text*)
 		*(.rodata*)
-		. = ALIGN(4);
+		*(.unprivilegedrodata*)
+		. = ALIGN(ALIGNMENT);
+		_etext = ABSOLUTE(.);
+
+		*(.privilegedtext*)
 	} RELOC_SEGMENT_AT(flash)
 
+	.privilegeddata : {
+		. = ALIGN(ALIGNMENT);
+		*(.privilegeddata*)
+		. = ALIGN(ALIGNMENT);
+	} >ram AT>flash
+
 	.data : {
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
 		_sfdata = LOADADDR(.data);
 		_sdata = ABSOLUTE(.);
 		*(.data*)
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
 		_edata = ABSOLUTE(.);
 		_ereloc = ABSOLUTE(.);
 	} >ram AT>flash
 
+	.bss : {
+		. = ALIGN(ALIGNMENT);
+		_sbss = ABSOLUTE(.);
+		*(.bss*)
+		. = ALIGN(ALIGNMENT);
+		_ebss = ABSOLUTE(.);
+	} >ram
+
+	.firmwareflashdata (NOLOAD) : {
+		. = ALIGN(ALIGNMENT);
+		_sfirmwareflashdata = ABSOLUTE(.);
+		*(.firmwareflashdata*)
+		. = ALIGN(ALIGNMENT);
+		_efirmwareflashdata = ABSOLUTE(.);
+	} >ram
+
 	.startup : {
 		KEEP(*(.startup));
 	} >flash
-
-	.bss : {
-		. = ALIGN(4);
-		_sbss = ABSOLUTE(.);
-		*(.bss*)
-		. = ALIGN(4);
-		_ebss = ABSOLUTE(.);
-	} >ram
 
 	/DISCARD/ : {
 		libgcc.a ( * )

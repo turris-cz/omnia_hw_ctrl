@@ -2,6 +2,7 @@
 #define RESET_COMMON_H
 
 #include "cpu.h"
+#include "svc.h"
 
 #define RESET_REASON_MSG_MAGIC	0xdeadbeef
 
@@ -14,5 +15,11 @@ typedef enum {
 typedef struct {
 	uint32_t fault;
 } reset_reason_info_t;
+
+static inline void hard_reset(void)
+{
+	nvic_system_reset();
+}
+SYSCALL(hard_reset)
 
 #endif /* RESET_COMMON_H */

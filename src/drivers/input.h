@@ -1,8 +1,8 @@
 #ifndef __INPUT_H
 #define __INPUT_H
 
-#include "compiler.h"
 #include "bits.h"
+#include "svc.h"
 
 typedef enum {
 	INPUT_REQ_NONE,
@@ -63,12 +63,15 @@ void button_debounce_handler(void);
   * @retval     None.
   *****************************************************************************/
 void button_counter_decrease(uint8_t value);
+SYSCALL(button_counter_decrease, uint8_t)
 
 void button_set_user_mode(bool on);
+SYSCALL(button_set_user_mode, bool)
 
 void input_signals_config(void);
 
 void input_signals_init(void);
+SYSCALL(input_signals_init)
 
 /*******************************************************************************
   * @function   input_signals_poll
@@ -76,5 +79,6 @@ void input_signals_init(void);
   * @retval     Next state.
   *****************************************************************************/
 input_req_t input_signals_poll(void);
+SYSCALL(input_signals_poll)
 
 #endif /* __INPUT_H */

@@ -28,6 +28,7 @@ reset_handler(void)
 	for (uint32_t *ptr = &_sbss; ptr < &_ebss; ++ptr)
 		*ptr = 0;
 
+	enable_irq();
 	main();
 }
 

@@ -46,9 +46,9 @@ static void bootloader_init(void)
 {
 	/* configure peripherals */
 	debug_init();
-	flash_init();
+	sys_flash_init();
 	crc32_enable();
-	time_config();
+	sys_time_config();
 
 	/* configure LED driver */
 	led_driver_config();
@@ -149,7 +149,7 @@ static void bootloader(void)
 
 		case GO_TO_FLASH:
 			bootloader_i2c_init();
-			input_signals_init();
+			sys_input_signals_init();
 			next_state = INPUT_MANAGER;
 			break;
 
@@ -165,7 +165,7 @@ static void bootloader(void)
 
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
-		msleep(100);
+		sys_msleep(100);
 
 		power_control_enable_regulators();
 
@@ -175,13 +175,15 @@ static void bootloader(void)
 
 		led_set_color24(LED_COUNT, RED_COLOR);
 
-		input_signals_init();
+		sys_input_signals_init();
 
 		next_state = INPUT_MANAGER;
 		break;
 
 	case INPUT_MANAGER:
-		switch (input_signals_poll()) {
+		i2c_iface_poll();
+
+		switch (sys_input_signals_poll()) {
 		case INPUT_REQ_LIGHT_RESET:
 			next_state = RESET_TO_APPLICATION;
 			break;
@@ -197,27 +199,25 @@ static void bootloader(void)
 		break;
 
 	case START_APPLICATION:
-		reset_to_address(APPLICATION_BEGIN);
-		break;
+		soft_reset_to_other_program();
+		unreachable();
 
 	case RESET_TO_APPLICATION:
 		/* shutdown regulators before reset, otherwise power supply can
 		* stay there and causes wrong detection of mmc during boot */
 		power_control_set_startup_condition();
 		power_control_disable_regulators();
-		msleep(100);
+		sys_msleep(100);
 		fallthrough;
 
 	case HARD_RESET:
-		nvic_system_reset();
+		sys_hard_reset();
 		unreachable();
 	}
 }
 
 void main(void)
 {
-	enable_irq();
-
 	bootloader_init();
 
 	while (1)

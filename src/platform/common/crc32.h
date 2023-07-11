@@ -2,7 +2,6 @@
 #define CRC32_H
 
 #include "crc32_plat.h"
-#include "compiler.h"
 #include "cpu.h"
 
 static inline bool crc32(uint32_t *res, uint32_t init,

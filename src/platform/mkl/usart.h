@@ -2,6 +2,7 @@
 #define USART_H
 
 #include "cpu.h"
+#include "clock.h"
 #include "gpio.h"
 
 typedef uint8_t usart_nr_t;
@@ -15,18 +16,10 @@ typedef uint8_t usart_nr_t;
 static __force_inline void usart_clk_config(usart_nr_t usart_nr, bool on)
 {
 	switch (usart_nr) {
-#define _USART_CLK_CFG(_n)					\
-	case _n:						\
-		BME_BITFIELD(SIM_SCGC5,				\
-			     SIM_SCGC5_LPUART ## _n) =		\
-			on ? SIM_SCGC5_LPUART ## _n : 0;	\
-		break;
-	_USART_CLK_CFG(0)
-	_USART_CLK_CFG(1)
-	_USART_CLK_CFG(2)
-#undef _USART_CLK_CFG
-	default:
-		unreachable();
+	case 0: sys_clk_config(LPUART0_Slot, on); break;
+	case 1: sys_clk_config(LPUART1_Slot, on); break;
+	case 2: sys_clk_config(LPUART2_Slot, on); break;
+	default: unreachable();
 	}
 }
 

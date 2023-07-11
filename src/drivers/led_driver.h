@@ -1,7 +1,8 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
-#include "compiler.h"
+#include "cpu.h"
+#include "svc.h"
 
 #define LED_COUNT	12
 
@@ -74,6 +75,7 @@ void led_driver_irq_handler(void);
   * @retval     None.
   *****************************************************************************/
 void led_driver_set_brightness(uint8_t procent_val);
+SYSCALL(led_driver_set_brightness, uint8_t)
 
 /*******************************************************************************
   * @function   led_driver_overwrite_brightness
@@ -84,6 +86,7 @@ void led_driver_set_brightness(uint8_t procent_val);
   * @retval     None.
   *****************************************************************************/
 void led_driver_overwrite_brightness(bool overwrite, uint8_t value);
+SYSCALL(led_driver_overwrite_brightness, bool, uint8_t)
 
 /*******************************************************************************
   * @function   led_driver_get_brightness
@@ -109,6 +112,7 @@ void led_driver_step_brightness(void);
   * @retval     None.
   *****************************************************************************/
 void led_set_user_mode(unsigned led, bool set);
+SYSCALL(led_set_user_mode, unsigned, bool)
 
 void led_states_commit(void);
 void led_set_state_nocommit(unsigned led, bool state);
@@ -130,6 +134,7 @@ void led_set_state(unsigned led, bool state);
   * @retval     None.
   *****************************************************************************/
 void led_set_state_user(unsigned led, bool state);
+SYSCALL(led_set_state_user, unsigned, bool)
 
 /*******************************************************************************
   * @function   led_driver_reset_pattern_start

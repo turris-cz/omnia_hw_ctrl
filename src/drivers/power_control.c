@@ -140,7 +140,7 @@ static bool power_control_start_regulator(const regulator_t *reg)
 
 	/* wait until power-good */
 	do {
-		msleep(DELAY_BETWEEN_READINGS);
+		sys_msleep(DELAY_BETWEEN_READINGS);
 		if (gpio_read(reg->pg))
 			return true;
 	} while (--timeout);
@@ -341,11 +341,11 @@ void power_control_first_startup(void)
 	timer_irq_enable(LED_PATTERN_TIMER, false);
 
 	gpio_write(CFG_CTRL_PIN, 1);
-	msleep(50);
+	sys_msleep(50);
 	gpio_write(MANRES_PIN, 1);
 
 	led_set_state(LED_COUNT, false);
-	led_driver_overwrite_brightness(true, 100);
+	sys_led_driver_overwrite_brightness(true, 100);
 
 	_Static_assert(RESET_SELECTOR_LEVEL_TIMEOUT % JIFFY_TO_MSECS == 0,
 		       "RESET_SELECTOR_LEVEL_TIMEOUT must be divisible by JIFFY_TO_MSECS");
@@ -384,7 +384,7 @@ void power_control_first_startup(void)
 	i2c_iface.reset_selector = sel;
 
 	/* 15ms delay after release of reset signal */
-	msleep(15);
+	sys_msleep(15);
 	gpio_write(CFG_CTRL_PIN, 0);
 
 	/*
@@ -402,24 +402,24 @@ void power_control_first_startup(void)
 		gpio_write_multi(1, nVHV_CTRL_PIN, PHY_SFP_PIN);
 	}
 
-	watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
-	watchdog_enable(true);
+	sys_watchdog_set_timeout(WATCHDOG_DEFAULT_TIMEOUT);
+	sys_watchdog_enable(true);
 
 	/* if not a normal reset, blink the selected reset selector */
 	if (sel) {
-		led_driver_overwrite_brightness(true, 0);
-		msleep(300);
-		led_driver_overwrite_brightness(true, 100);
-		msleep(300);
-		led_driver_overwrite_brightness(true, 0);
-		msleep(300);
-		led_driver_overwrite_brightness(true, 100);
-		msleep(600);
+		sys_led_driver_overwrite_brightness(true, 0);
+		sys_msleep(300);
+		sys_led_driver_overwrite_brightness(true, 100);
+		sys_msleep(300);
+		sys_led_driver_overwrite_brightness(true, 0);
+		sys_msleep(300);
+		sys_led_driver_overwrite_brightness(true, 100);
+		sys_msleep(600);
 	}
 
 	/* restore brightness and color */
 	led_set_state(LED_COUNT, false);
-	led_driver_overwrite_brightness(false, 0);
+	sys_led_driver_overwrite_brightness(false, 0);
 
 	timer_irq_enable(LED_PATTERN_TIMER, true);
 }

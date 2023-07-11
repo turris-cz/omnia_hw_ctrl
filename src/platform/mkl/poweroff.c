@@ -3,7 +3,7 @@
 
 #define SLOW_MODE_PIT_PARENT_FREQ	32768U
 
-void slow_down_system_clock(void)
+static __privileged void slow_down_system_clock(void)
 {
 	/* Select FLL, disable TPM and LPUART clock */
 	SIM_SOPT2 = (SIM_SOPT2 & ~(SIM_SOPT2_PLLFLLSEL_MASK |
@@ -41,7 +41,7 @@ void __irq port_irq_handler(void)
 	nvic_system_reset();
 }
 
-static void config_wakeup_by_button(void)
+static __privileged void config_wakeup_by_button(void)
 {
 	/* enable port clock */
 	BME_OR(SIM_SCGC5) = port_clk_bit(pin_port(FRONT_BTN_PIN));
@@ -60,7 +60,7 @@ void __irq pit_wakeup_irq_handler(void)
 		nvic_system_reset();
 }
 
-static void config_wakeup_by_pit(uint32_t wakeup_timeout)
+static __privileged void config_wakeup_by_pit(uint32_t wakeup_timeout)
 {
 	/* enable PIT clock */
 	BME_OR(SIM_SCGC6) = SIM_SCGC6_PIT0;
@@ -83,14 +83,15 @@ static void config_wakeup_by_pit(uint32_t wakeup_timeout)
 	nvic_enable_irq_with_prio(PIT0_IRQn, 0);
 }
 
-void platform_poweroff(bool enable_button, uint32_t wakeup_timeout)
+static __privileged void do_poweroff(bool enable_button,
+				     uint32_t wakeup_timeout)
 {
-	nvic_disable_all_and_clear_pending();
-
 	/* disable unneeded peripherals */
 	SIM_SCGC4 = 0xf0000030 | SIM_SCGC4_VREF;
 	SIM_SCGC5 = 0x40182;
 	SIM_SCGC6 = SIM_SCGC6_NVM;
+
+	slow_down_system_clock();
 
 	if (enable_button)
 		config_wakeup_by_button();
@@ -98,10 +99,27 @@ void platform_poweroff(bool enable_button, uint32_t wakeup_timeout)
 	if (wakeup_timeout)
 		config_wakeup_by_pit(wakeup_timeout);
 
-	slow_down_system_clock();
-
 	enable_irq();
 
 	while (1)
 		wait_for_interrupt();
+}
+
+__privileged void platform_poweroff(bool enable_button, uint32_t wakeup_timeout)
+{
+	exception_frame_t *frame;
+
+	/*
+	 * Update exception frame so that it returns to the do_poweroff function
+	 * with parameters enable_timeout, wakeup_button.
+	 */
+	frame = (exception_frame_t *)get_psp();
+	frame->r0 = enable_button;
+	frame->r1 = wakeup_timeout;
+	frame->psr = 0x1000000;
+	frame->pc = (uint32_t)do_poweroff | 0x1;
+	set_psp((uint32_t)frame);
+
+	/* Set thread context to privileged mode */
+	set_control(CONTROL_SPSEL);
 }

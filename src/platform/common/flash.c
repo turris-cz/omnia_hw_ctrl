@@ -11,26 +11,26 @@ typedef struct {
 	void *priv;
 } flash_op_t;
 
-static flash_op_t op;
+static flash_op_t op __privileged_data;
 
-void flash_init(void)
+__privileged void flash_init(void)
 {
 	op.type = FLASH_OP_NONE;
 	flash_plat_init();
 }
 
-static void erase_next(void)
+static __privileged void erase_next(void)
 {
 	debug("erasing %#010x... ", op.addr);
 	flash_plat_erase_next(op.addr);
 }
 
-static void write_next(void)
+static __privileged void write_next(void)
 {
 	flash_plat_write_next(&op.addr, &op.src);
 }
 
-static void op_end(bool success)
+static __privileged void op_end(bool success)
 {
 	flash_callback_t callback = op.callback;
 	void *priv = op.priv;
@@ -92,9 +92,9 @@ void __irq flash_irq_handler(void)
 		debug("unhandled flash irq stat=%#010x type=%u\n", stat, op.type);
 }
 
-static void flash_async_op(flash_op_type_t type, uint32_t addr, uint16_t len,
-			   const uint8_t *src, flash_callback_t callback,
-			   void *priv)
+static __privileged void
+flash_async_op(flash_op_type_t type, uint32_t addr, uint16_t len,
+	       const uint8_t *src, flash_callback_t callback, void *priv)
 {
 	bool busy = false;
 
@@ -133,14 +133,15 @@ static void flash_async_op(flash_op_type_t type, uint32_t addr, uint16_t len,
 		callback(false, priv);
 }
 
-void flash_async_erase(uint32_t start, uint16_t len, flash_callback_t callback,
-		       void *priv)
+void __privileged flash_async_erase(uint32_t start, uint16_t len,
+				    flash_callback_t callback, void *priv)
 {
 	flash_async_op(FLASH_OP_ERASE, start, len, NULL, callback, priv);
 }
 
-void flash_async_write(uint32_t dst, const uint8_t *src, uint16_t len,
-		       flash_callback_t callback, void *priv)
+void __privileged flash_async_write(uint32_t dst, const uint8_t *src,
+				    uint16_t len, flash_callback_t callback,
+				    void *priv)
 {
 	flash_async_op(FLASH_OP_WRITE, dst, len, src, callback, priv);
 }

@@ -25,4 +25,10 @@
 /* On MKL, some flash segments are relocated to RAM */
 #define RELOC_SEGMENT_AT(_seg)	>ram AT>_seg
 
+/* MPU requires 32-byte alignment of sections */
+#define ALIGNMENT		32
+
+#define MAIN_STACK_SIZE		1024
+#define PROCESS_STACK_SIZE	1024
+
 #endif /* MEMORY_LAYOUT_H */

@@ -2,11 +2,13 @@
 #include "memory_layout.h"
 #include "reset.h"
 #include "timer.h"
+#include "mpu.h"
 
-extern uint32_t _stack_top, _sfreloc, _sreloc, _ereloc, _sbss, _ebss;
+extern uint32_t _stack_top, _psp_top, _sfreloc, _sreloc, _ereloc, _sbss, _ebss;
 extern void __noreturn main(void);
 
 static void platform_init(void);
+static void unprivileged_main(void);
 
 void __noreturn __naked __section(".startup")
 reset_handler(void)
@@ -17,7 +19,8 @@ reset_handler(void)
 
 	platform_init();
 
-	main();
+	/* branch instead of call so that nothing is pushed to stack */
+	asm volatile("bx %0\n\t" : : "r" (unprivileged_main));
 }
 
 static void __irq __naked default_handler(void)
@@ -45,7 +48,6 @@ void flash_irq_handler(void) __weak_alias(default_handler);
 void led_driver_irq_handler(void) __weak_alias(default_handler);
 void led_driver_pattern_irq_handler(void) __weak_alias(default_handler);
 void power_control_usb_timeout_irq_handler(void) __weak_alias(default_handler);
-void i2c_slave_irq_handler(void) __weak_alias(default_handler);
 void port_irq_handler(void) __weak_alias(default_handler);
 void pit_wakeup_irq_handler(void) __weak_alias(default_handler);
 void pit_irq_handler(void);
@@ -81,7 +83,7 @@ static __used __section(".isr_vector") void * const isr_vector[] = {
 	NULL,					/* EMVSIM0 */
 	NULL,					/* Low power UART 0 */
 	NULL,					/* Low power UART 1 */
-	i2c_slave_irq_handler,			/* I2C module 0 */
+	NULL,					/* I2C module 0 */
 	NULL,					/* QSPI0 */
 	NULL,					/* DryIce tamper */
 	NULL,					/* Port A */
@@ -219,7 +221,77 @@ static __force_inline void clock_init(void)
 		SIM_SOPT1_OSC32KSEL_SYS;
 }
 
-static void __section(".startup") platform_init(void)
+static __force_inline void aips_reset(void)
+{
+	AIPS_PACR(0) = 0x54444444;
+	for (unsigned i = 8; i < 128; i += 8)
+		AIPS_PACR(i) = 0x44444444;
+}
+
+static __force_inline void aips_permit_user(AIPS_Slot_Type slot)
+{
+	BME_AND(AIPS_PACR(slot)) = ~AIPS_PACR_SP(slot);
+}
+
+static void __section(".startup") config_mpu_region(mpu_region_t reg,
+						    const void *start,
+						    const void *end,
+						    uint32_t access)
+{
+	MPU_RGDn_WORD0(reg) = (uint32_t)start & MPU_RGDn_WORD0_SRTADDR;
+	MPU_RGDn_WORD1(reg) = ((uint32_t)end & MPU_RGDn_WORD1_ENDADDR) - 1;
+	MPU_RGDn_WORD2(reg) = access;
+	MPU_RGDn_WORD3(reg) = MPU_RGDn_WORD3_VLD;
+	isb();
+	dsb();
+}
+
+static void __section(".startup") config_mpu(void)
+{
+	extern uint32_t _stext, _etext, _sdata, _psp_bottom,
+			_sfirmwareflashdata, _efirmwareflashdata;
+
+	/* supervisor rwx everywhere */
+	MPU_RGDAACn(MPU_REGION_SUPERVISOR) = MPU_RGDn_WORD2_MnSM_RWX(0);
+
+	/* the rest is for user mode */
+
+	/* headers (checksum, features, cfg area): read only */
+	config_mpu_region(MPU_REGION_HEADERS, &_sreloc, &_stext,
+			  MPU_RGDn_WORD2_MnUM_R(0));
+
+	/* code + rodata: read + execute */
+	config_mpu_region(MPU_REGION_TEXT, &_stext, &_etext,
+			  MPU_RGDn_WORD2_MnUM_RX(0));
+
+	/* data + bss: read + write */
+	config_mpu_region(MPU_REGION_DATA_BSS, &_sdata, &_ebss,
+			  MPU_RGDn_WORD2_MnUM_RW(0));
+
+	/*
+	 * peripherals: read + write (AIPS configuration allows only some
+	 * peripherals)
+	 */
+	config_mpu_region(MPU_REGION_PERIPHERALS, (void *)0x40020000,
+			  (void *)0x60000000, MPU_RGDn_WORD2_MnUM_RW(0));
+
+	/* flash: read only */
+	config_mpu_region(MPU_REGION_FLASH, (void *)0x0, (void *)0x20000,
+			  MPU_RGDn_WORD2_MnUM_R(0));
+
+	/*
+	 * flashing buffer: read + write, write can be prohibited when flashing,
+	 * see firmware_flash.c
+	 */
+	config_mpu_region(MPU_REGION_FLASHING_BUFFER, &_sfirmwareflashdata,
+			  &_efirmwareflashdata, MPU_RGDn_WORD2_MnUM_RW(0));
+
+	/* process stack: read + write */
+	config_mpu_region(MPU_REGION_PROCESS_STACK, &_psp_bottom, &_psp_top,
+			  MPU_RGDn_WORD2_MnUM_RW(0));
+}
+
+static void __noinline __section(".startup") platform_init(void)
 {
 	/* initialize system clocks to 96 MHz from FLL */
 	if (BOOTLOADER_BUILD)
@@ -248,4 +320,51 @@ static void __section(".startup") platform_init(void)
 
 	/* initialize PIT */
 	pit_init();
+
+	/*
+	 * reset peripheral access and permit access to these peripherals from
+	 * unprivileged mode
+	 */
+	aips_reset();
+	aips_permit_user(GPIO_Slot);
+	aips_permit_user(CRC_Slot);
+	aips_permit_user(PIT0_Slot);
+	aips_permit_user(TPM0_Slot);
+	aips_permit_user(TPM1_Slot);
+	aips_permit_user(TPM2_Slot);
+	aips_permit_user(SPI1_Slot);
+	aips_permit_user(PTA_Slot);
+	aips_permit_user(PTB_Slot);
+	aips_permit_user(PTC_Slot);
+	aips_permit_user(PTD_Slot);
+	aips_permit_user(PTE_Slot);
+	aips_permit_user(LPUART0_Slot);
+	aips_permit_user(I2C0_Slot);
+	aips_permit_user(RFSYS_Slot);
+
+	/* enable all port clocks */
+	BME_OR(SIM_SCGC5) = SIM_SCGC5_PTA | SIM_SCGC5_PTB | SIM_SCGC5_PTC |
+			    SIM_SCGC5_PTD | SIM_SCGC5_PTE;
+
+	/* configure SVC priority */
+	nvic_set_priority(SVC_IRQn, 3);
+
+	/* configure memory protection */
+	config_mpu();
+
+	/* set process stack */
+	set_psp((uint32_t)&_psp_top);
+}
+
+static __noinline __naked void unprivileged_main(void)
+{
+	/* enable interrupts */
+	enable_irq();
+
+	/* go to unprivileged mode, use process stack pointer */
+	set_control(CONTROL_nPRIV | CONTROL_SPSEL);
+	isb();
+
+	/* branch instead of call so that nothing is pushed to stack */
+	asm volatile("bx %0\n\t" : : "r" (main));
 }

@@ -1,15 +1,16 @@
 #include "watchdog.h"
 #include "power_control.h"
 #include "time.h"
-#include "cpu.h"
 
 _Static_assert(HZ % 10 == 0, "HZ must be divisible by 10");
 
-static bool enabled;
-static uint8_t systick_counter;
-static uint16_t timeout, counter;
+static bool enabled __unprivileged_rodata;
+static uint16_t timeout __unprivileged_rodata;
+static uint16_t counter __unprivileged_rodata;
 
-void watchdog_enable(bool on)
+static uint8_t systick_counter __privileged_data;
+
+__privileged void watchdog_enable(bool on)
 {
 	disable_irq();
 
@@ -25,7 +26,7 @@ bool watchdog_is_enabled(void)
 	return enabled;
 }
 
-void watchdog_set_timeout(uint16_t ds)
+__privileged void watchdog_set_timeout(uint16_t ds)
 {
 	timeout = ds;
 
@@ -47,7 +48,7 @@ uint16_t watchdog_get_timeleft(void)
 		return timeout;
 }
 
-void watchdog_handler(void)
+void __privileged watchdog_handler(void)
 {
 	if (!enabled)
 		return;

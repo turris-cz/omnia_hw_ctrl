@@ -23,4 +23,7 @@
 /* On STM32 we don't relocate segments (besides data) */
 #define RELOC_SEGMENT_AT(_seg)	>_seg
 
+/* Data copy and BSS fill requires 4-byte alignment of sections */
+#define ALIGNMENT		4
+
 #endif /* MEMORY_LAYOUT_H */

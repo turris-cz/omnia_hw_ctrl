@@ -1,4 +1,3 @@
-#include "cpu.h"
 #include "time.h"
 #include "power_control.h"
 #include "input.h"
@@ -11,10 +10,10 @@
 _Static_assert(SYS_CORE_FREQ % HZ == 0,
 	       "SYS_CORE_FREQ must be divisible by HZ");
 
-volatile uint32_t jiffies;
+volatile uint32_t jiffies __unprivileged_rodata;
 
 #if POWEROFF_WAKEUP_ENABLED
-volatile uint32_t uptime;
+volatile uint32_t uptime __unprivileged_rodata;
 #endif
 
 /*******************************************************************************
@@ -23,7 +22,7 @@ volatile uint32_t uptime;
   * @param      None
   * @retval     None
   *****************************************************************************/
-void time_config(void)
+__privileged void time_config(void)
 {
 	if (!systick_config(SYSTICK_PERIOD)) {
 		debug("Failed configuring SysTick\n");
@@ -38,7 +37,7 @@ void time_config(void)
  * will SysTick fire.
  * To avoid division we use comparing instead. This should be faster.
  */
-static uint32_t next_tick_in(void)
+static __privileged uint32_t next_tick_in(void)
 {
 	uint32_t res, cmp, ticks = SysTick->VAL;
 
@@ -51,7 +50,7 @@ static uint32_t next_tick_in(void)
 	return res;
 }
 
-static void wait_for_systick(void)
+static __privileged void wait_for_systick(void)
 {
 	uint32_t jiffies_at_beginning = jiffies;
 
@@ -66,7 +65,7 @@ static void wait_for_systick(void)
   * @param      ms: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void msleep(uint32_t ms)
+__privileged void msleep(uint32_t ms)
 {
 	uint32_t next;
 
@@ -89,9 +88,9 @@ void msleep(uint32_t ms)
 	mdelay(ms);
 }
 
-static void uptime_handler(void)
+static __privileged void uptime_handler(void)
 {
-	static uint8_t cntr;
+	static uint8_t cntr __privileged_data;
 
 	if (++cntr == HZ) {
 		cntr = 0;
@@ -106,7 +105,7 @@ static void uptime_handler(void)
   * @param      None
   * @retval     None
   *****************************************************************************/
-void __irq systick_irq_handler(void)
+void __irq __privileged systick_irq_handler(void)
 {
 	jiffies++;
 

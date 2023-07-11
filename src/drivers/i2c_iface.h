@@ -41,6 +41,13 @@ static inline void i2c_iface_init(void)
 	i2c_iface.req = I2C_IFACE_REQ_NONE;
 }
 
+static inline i2c_iface_req_t i2c_iface_poll(void)
+{
+	i2c_slave_poll(SLAVE_I2C);
+
+	return i2c_iface.req;
+}
+
 static inline void i2c_iface_write_irq_pin(void)
 {
 	bool active = (i2c_iface.rising & i2c_iface.rising_mask) ||

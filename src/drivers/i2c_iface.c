@@ -10,6 +10,7 @@
 #include "crc32.h"
 #include "time.h"
 #include "poweroff.h"
+#include "firmware_flash.h"
 
 #if BOOTLOADER_BUILD
 # define __version_section __section(".boot_version")
@@ -25,15 +26,8 @@ static __maybe_unused struct {
 } app_checksum __section(".crcsum");
 
 #define FEAT_IF(feat, cond)	((cond) ? FEAT_ ## feat : 0)
-#define FEATURES_MAGIC		0xfea70235
 
-static const struct {
-	uint32_t magic;
-	uint16_t features;
-	uint8_t status_features;
-	uint8_t reserved;
-	uint32_t csum;
-} slave_features_supported __section(".features") = {
+static const features_t slave_features_supported __section(".features") = {
 	.magic = FEATURES_MAGIC,
 	.features =
 		FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
@@ -134,7 +128,7 @@ static __maybe_unused int cmd_get_features(i2c_iface_priv_t *priv)
 		 * requested firmware (bootloader for 0xbb, application for
 		 * 0xaa).
 		 */
-		typeof(slave_features_supported) *ptr;
+		const features_t *ptr;
 		uint32_t features;
 		uint32_t csum;
 
@@ -187,7 +181,7 @@ static void on_get_status_success(i2c_iface_priv_t *priv)
 	reply = priv->reply[0] | (priv->reply[1] << 8);
 	cntr = FIELD_GET(STS_BUTTON_COUNTER_MASK, reply);
 
-	button_counter_decrease(cntr);
+	sys_button_counter_decrease(cntr);
 }
 
 static __maybe_unused int cmd_get_status(i2c_iface_priv_t *priv)
@@ -252,7 +246,7 @@ static void on_general_control_success(i2c_iface_priv_t *priv)
 #endif
 
 	if (mask & CTL_BUTTON_MODE)
-		button_set_user_mode(ctrl & CTL_BUTTON_MODE);
+		sys_button_set_user_mode(ctrl & CTL_BUTTON_MODE);
 
 	if (!BOOTLOADER_BUILD && (set & CTL_BOOTLOADER))
 		i2c_iface.req = I2C_IFACE_REQ_BOOTLOADER;
@@ -473,7 +467,7 @@ static __maybe_unused int cmd_led_mode(i2c_iface_priv_t *priv)
 	uint8_t *args = &priv->cmd[1];
 
 	debug("led_mode\n");
-	led_set_user_mode(args[0] & 0x0F, !!(args[0] & 0x10));
+	sys_led_set_user_mode(args[0] & 0x0F, !!(args[0] & 0x10));
 
 	return 0;
 }
@@ -483,7 +477,7 @@ static __maybe_unused int cmd_led_state(i2c_iface_priv_t *priv)
 	uint8_t *args = &priv->cmd[1];
 
 	debug("led_state\n");
-	led_set_state_user(args[0] & 0x0F, !!(args[0] & 0x10));
+	sys_led_set_state_user(args[0] & 0x0F, !!(args[0] & 0x10));
 
 	return 0;
 }
@@ -501,7 +495,7 @@ static __maybe_unused int cmd_led_color(i2c_iface_priv_t *priv)
 static __maybe_unused int cmd_set_brightness(i2c_iface_priv_t *priv)
 {
 	debug("set_brightness\n");
-	led_driver_set_brightness(priv->cmd[1]);
+	sys_led_driver_set_brightness(priv->cmd[1]);
 
 	return 0;
 }
@@ -538,7 +532,7 @@ static __maybe_unused int cmd_set_watchdog_state(i2c_iface_priv_t *priv)
 {
 	debug("watchdog_state\n");
 
-	watchdog_enable(priv->cmd[1]);
+	sys_watchdog_enable(priv->cmd[1]);
 
 	return 0;
 }
@@ -558,7 +552,7 @@ static __maybe_unused int cmd_set_wdt_timeout(i2c_iface_priv_t *priv)
 	uint8_t *args = &priv->cmd[1];
 
 	debug("set_wdt_timeout\n");
-	watchdog_set_timeout(args[0] | (args[1] << 8));
+	sys_watchdog_set_timeout(args[0] | (args[1] << 8));
 
 	return 0;
 }
@@ -659,7 +653,7 @@ static __maybe_unused int cmd_power_off(i2c_iface_priv_t *priv)
 
 	debug("power_off %#06x\n", arg);
 
-	poweroff(arg & CMD_POWER_OFF_POWERON_BUTTON, i2c_iface.wakeup);
+	sys_poweroff(arg & CMD_POWER_OFF_POWERON_BUTTON, i2c_iface.wakeup);
 
 	return 0;
 }

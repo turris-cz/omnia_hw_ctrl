@@ -29,6 +29,8 @@ reset_handler(void)
 		*ptr = 0;
 
 	configure_isr_vector();
+
+	enable_irq();
 	main();
 }
 

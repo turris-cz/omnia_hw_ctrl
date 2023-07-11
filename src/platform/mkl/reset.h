@@ -1,7 +1,9 @@
 #ifndef RESET_H
 #define RESET_H
 
+#include "cpu.h"
 #include "reset_common.h"
+#include "svc.h"
 
 static inline reset_reason_t get_reset_reason(reset_reason_info_t *info)
 {
@@ -30,6 +32,14 @@ static inline void set_reset_reason(reset_reason_t reason, uint32_t fault)
 	RFSYS(0) = RESET_REASON_MSG_MAGIC;
 	RFSYS(1) = reason;
 	RFSYS(2) = fault;
+}
+
+void plat_soft_reset_to_other_program(void);
+SYSCALL(plat_soft_reset_to_other_program)
+
+static inline void soft_reset_to_other_program(void)
+{
+	sys_plat_soft_reset_to_other_program();
 }
 
 #endif /* RESET_H */
