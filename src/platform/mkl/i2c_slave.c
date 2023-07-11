@@ -1,8 +1,10 @@
 #include "i2c_slave.h"
+#include "signal.h"
 #include "debug.h"
 
 i2c_slave_t *i2c_slave_ptr[2] = {};
 
+#if 0
 void __irq i2c_slave_irq_handler(void)
 {
 	i2c_nr_t nr = i2c_nr_in_irq();
@@ -107,3 +109,4 @@ handled:
 		i2c_slave_reset(nr);
 	}
 }
+#endif

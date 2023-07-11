@@ -18,8 +18,10 @@ MEMORY
 
 #if defined(MKL81)
 # define FLASH_SEGMENT_AT(_seg) >ram AT>_seg
+# define ALIGNMENT 32
 #else
 # define FLASH_SEGMENT_AT(_seg) >_seg
+# define ALIGNMENT 4
 #endif
 
 _stack_top = ORIGIN(ram) + LENGTH(ram) - RESET_REASON_MSG_LENGTH;
@@ -48,33 +50,43 @@ SECTIONS
 #endif
 
 	.text : {
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
+		_stext = ABSOLUTE(.);
 		*(.text*)
 		*(.rodata*)
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
+		_etext = ABSOLUTE(.);
+
+		*(.privilegedtext*)
 	} FLASH_SEGMENT_AT(flash)
 
+	.privilegeddata : {
+		. = ALIGN(ALIGNMENT);
+		*(.privilegeddata*)
+		. = ALIGN(ALIGNMENT);
+	} >ram AT>flash
+
 	.data : {
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
 		_sfdata = LOADADDR(.data);
 		_sdata = ABSOLUTE(.);
 		*(.data*)
-		. = ALIGN(4);
+		. = ALIGN(ALIGNMENT);
 		_edata = ABSOLUTE(.);
 		_ereloc = ABSOLUTE(.);
 	} >ram AT>flash
 
+	.bss : {
+		. = ALIGN(ALIGNMENT);
+		_sbss = ABSOLUTE(.);
+		*(.bss*)
+		. = ALIGN(ALIGNMENT);
+		_ebss = ABSOLUTE(.);
+	} >ram
+
 	.startup : {
 		KEEP(*(.startup));
 	} >flash
-
-	.bss : {
-		. = ALIGN(4);
-		_sbss = ABSOLUTE(.);
-		*(.bss*)
-		. = ALIGN(4);
-		_ebss = ABSOLUTE(.);
-	} >ram
 
 	/DISCARD/ : {
 		libgcc.a ( * )

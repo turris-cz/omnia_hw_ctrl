@@ -1,4 +1,3 @@
-#include "cpu.h"
 #include "time.h"
 #include "power_control.h"
 #include "input.h"
@@ -23,7 +22,7 @@ volatile uint32_t uptime;
   * @param      None
   * @retval     None
   *****************************************************************************/
-void time_config(void)
+void SYSCALL(time_config)(void)
 {
 	if (!systick_config(SYSTICK_PERIOD)) {
 		debug("Failed configuring SysTick\n");
@@ -38,7 +37,7 @@ void time_config(void)
  * will SysTick fire.
  * To avoid division we use comparing instead. This should be faster.
  */
-static uint32_t next_tick_in(void)
+static __privileged uint32_t next_tick_in(void)
 {
 	uint32_t res, cmp, ticks = SysTick->VAL;
 
@@ -51,7 +50,7 @@ static uint32_t next_tick_in(void)
 	return res;
 }
 
-static void wait_for_systick(void)
+static __privileged void wait_for_systick(void)
 {
 	uint32_t jiffies_at_beginning = jiffies;
 
@@ -66,7 +65,7 @@ static void wait_for_systick(void)
   * @param      ms: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void msleep(uint32_t ms)
+void SYSCALL(msleep)(uint32_t ms)
 {
 	uint32_t next;
 
@@ -89,13 +88,20 @@ void msleep(uint32_t ms)
 	mdelay(ms);
 }
 
-static void uptime_handler(void)
+static __privileged void uptime_handler(void)
 {
 	static uint8_t cntr;
 
 	if (++cntr == HZ) {
 		cntr = 0;
 		++uptime;
+		if (1) {
+			extern volatile uint32_t lol;
+			static uint32_t p;
+			uint32_t n = lol;
+			debug("\t%d\n", n - p);
+			p = n;
+		}
 	}
 }
 
@@ -106,7 +112,7 @@ static void uptime_handler(void)
   * @param      None
   * @retval     None
   *****************************************************************************/
-void __irq systick_irq_handler(void)
+void __irq __privileged systick_irq_handler(void)
 {
 	jiffies++;
 

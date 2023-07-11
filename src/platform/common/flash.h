@@ -2,6 +2,7 @@
 #define __FLASH_H
 
 #include "compiler.h"
+#include "svc.h"
 
 typedef enum {
 	FLASH_OP_NONE = 0,
@@ -11,7 +12,11 @@ typedef enum {
 
 typedef void (*flash_callback_t)(bool success, void *priv);
 
-void flash_init(void);
+void SYSCALL(flash_init)(void);
+DEF_SYSCALLER(flash_init)
+
+void SYSCALL(flash_async_op)(const void *ptr);
+DEF_SYSCALLER(flash_async_op, const void *)
 
 void flash_async_erase(uint32_t start, uint16_t len, flash_callback_t callback,
 		       void *priv);

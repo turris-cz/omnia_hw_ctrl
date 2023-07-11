@@ -85,8 +85,8 @@ static void on_flash_cmd_size_and_csum_success(i2c_iface_priv_t *priv)
 	fl->partial_csum = flashing_crc_init;
 	fl->flashed = 0;
 
-	debug("will flash image with size = %#06x, csum = %#010x\n",
-	      fl->image_size, fl->image_csum);
+//	debug("will flash image with size = %#06x, csum = %#010x\n",
+//	      fl->image_size, fl->image_csum);
 }
 
 static int flash_cmd_size_and_csum(i2c_iface_priv_t *priv)

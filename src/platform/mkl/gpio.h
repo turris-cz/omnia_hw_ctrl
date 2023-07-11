@@ -149,17 +149,6 @@ static inline void gpio_dir_multi_list(bool out, unsigned int len,
 	}
 }
 
-static inline void gpio_init_port_clks(unsigned int len, const gpio_t *pins)
-{
-	uint32_t clk_bits = 0;
-
-	for (unsigned int i = 0; i < len; ++i)
-		if (pins[i] != PIN_INVALID)
-			clk_bits |= port_clk_bit(pin_port(pins[i]));
-
-	BME_OR(SIM_SCGC5) = clk_bits;
-}
-
 static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 				  pin_spd_t spd, pin_pull_t pull,
 				  bool init_val, unsigned int len,
@@ -167,11 +156,13 @@ static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 {
 	uint32_t pcr;
 
-	/* initialize port clock */
-	gpio_init_port_clks(len, pins);
+	/* don't initialize port clocks, on MKL this is done in startup.c */
 
 	/* prepare PCR value */
-	pcr = PORT_PCR_IRQC_DIS | PORT_PCR_ISF;
+	if (mode == pin_mode_in)
+		pcr = PORT_PCR_IRQC_BOTH | PORT_PCR_ISF;
+	else
+		pcr = PORT_PCR_IRQC_DIS | PORT_PCR_ISF;
 
 	if (pin_mode_is_alt(mode))
 		pcr |= PORT_PCR_MUX(pin_mode_to_alt_fn(mode));
@@ -191,8 +182,12 @@ static inline void gpio_init_list(pin_mode_t mode, pin_out_t otype,
 
 	/* initialize individual pins */
 	for (unsigned int i = 0; i < len; ++i)
-		if (pins[i] != PIN_INVALID)
-			PORT_PCR(pin_port(pins[i]), pin_nr(pins[i])) = pcr;
+		if (pins[i] != PIN_INVALID) {
+			if (pins[i] == PIN(E, 9) || pins[i] == PIN(E, 10))
+				PORT_PCR(pin_port(pins[i]), pin_nr(pins[i])) = pcr | PORT_PCR_IRQC_BOTH;
+			else
+				PORT_PCR(pin_port(pins[i]), pin_nr(pins[i])) = pcr;
+		}
 
 	/* set initial output values if output mode */
 	if (mode == pin_mode_out)

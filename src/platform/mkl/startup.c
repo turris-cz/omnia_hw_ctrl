@@ -2,11 +2,17 @@
 #include "memory_layout.h"
 #include "reset_reason.h"
 #include "timer.h"
+#include "signal.h"
+#include "debug.h"
+
+#define MAIN_STACK_SIZE		1024
+#define PROCESS_STACK_SIZE	1024
 
 extern uint32_t _stack_top, _sfreloc, _sreloc, _ereloc, _sbss, _ebss;
 extern void __noreturn main(void);
 
 static void platform_init(void);
+static void unprivileged_main(void);
 
 void __noreturn __naked __section(".startup")
 reset_handler(void)
@@ -20,7 +26,7 @@ reset_handler(void)
 
 	platform_init();
 
-	main();
+	unprivileged_main();
 }
 
 static void __irq __naked default_handler(void)
@@ -30,6 +36,11 @@ static void __irq __naked default_handler(void)
 #if BOOTLOADER_BUILD
 	while (1);
 #else
+	uint32_t *sp;
+	asm volatile("bkpt 99\n\t");
+	asm volatile("mov %0, sp\n" : "=r" (sp));
+	debug("\t\t%x %x %x %x\n", sp[0], sp[1], sp[2], sp[3]);
+	debug("\t\t%x %x %x %x\n", sp[4], sp[5], sp[6], sp[7]);
 	asm volatile(
 		"mov	sp, %0\n"
 		: : "lr" (RAM_END - RESET_REASON_MSG_LENGTH)
@@ -225,6 +236,49 @@ static __force_inline void clock_init(void)
 		SIM_SOPT1_OSC32KSEL_SYS;
 }
 
+static __force_inline void aips_permit_user(AIPS_Slot_Type slot)
+{
+	AIPS_PACR(slot) &= ~AIPS_PACR_SP(slot);
+}
+
+static void __section(".startup") config_mpu_region(uint8_t reg,
+						    const void *start,
+						    const void *end,
+						    uint32_t access)
+{
+	MPU_RGDn_WORD0(reg) = (uint32_t)start & MPU_RGDn_WORD0_SRTADDR;
+	MPU_RGDn_WORD1(reg) = ((uint32_t)end & MPU_RGDn_WORD1_ENDADDR) - 1;
+	MPU_RGDn_WORD2(reg) = access;
+	MPU_RGDn_WORD3(reg) = MPU_RGDn_WORD3_VLD;
+	isb();
+	dsb();
+}
+
+static void __section(".startup") config_memory(void)
+{
+	extern uint32_t _stext, _etext, _sdata;
+	uint32_t psp_bottom, psp_top;
+
+	MPU_RGDAACn(0) = MPU_RGDn_WORD2_MnSM_RWX(0);
+
+	config_mpu_region(1, &_sreloc, &_stext, MPU_RGDn_WORD2_MnUM_R(0));
+	config_mpu_region(2, &_stext, &_etext, MPU_RGDn_WORD2_MnSM_RX(0) |
+					       MPU_RGDn_WORD2_MnUM_RX(0));
+	config_mpu_region(3, &_sdata, &_ebss, MPU_RGDn_WORD2_MnSM_RW(0) |
+					      MPU_RGDn_WORD2_MnUM_RW(0));
+	config_mpu_region(4, (void *)0x40020000, (void *)0x60000000,
+			  MPU_RGDn_WORD2_MnUM_RW(0));
+	config_mpu_region(5, (void *)0x0, (void *)0x20000,
+			  MPU_RGDn_WORD2_MnUM_R(0));
+
+	psp_top = (uint32_t)&_stack_top - MAIN_STACK_SIZE;
+	psp_bottom = psp_top - PROCESS_STACK_SIZE;
+
+	config_mpu_region(6, (void *)psp_bottom, (void *)psp_top,
+			  MPU_RGDn_WORD2_MnUM_RW(0));
+	set_psp(psp_top);
+}
+
 static void __section(".startup") platform_init(void)
 {
 	/* initialize system clocks to 96 MHz from FLL */
@@ -252,4 +306,37 @@ static void __section(".startup") platform_init(void)
 
 	/* initialize PIT */
 	pit_init();
+
+	/* permit access to these peripherals from unprivileged mode */
+	aips_permit_user(GPIO_Slot);
+	aips_permit_user(CRC_Slot);
+	aips_permit_user(PIT0_Slot);
+	aips_permit_user(TPM0_Slot);
+	aips_permit_user(TPM1_Slot);
+	aips_permit_user(TPM2_Slot);
+	aips_permit_user(SPI1_Slot);
+	aips_permit_user(PTA_Slot);
+	aips_permit_user(PTB_Slot);
+	aips_permit_user(PTC_Slot);
+	aips_permit_user(PTD_Slot);
+	aips_permit_user(PTE_Slot);
+	aips_permit_user(LPUART0_Slot);
+	aips_permit_user(I2C0_Slot);
+	aips_permit_user(RFSYS_Slot);
+
+	/* enable all port clocks */
+	BME_OR(SIM_SCGC5) = SIM_SCGC5_PTA | SIM_SCGC5_PTB | SIM_SCGC5_PTC |
+			    SIM_SCGC5_PTD | SIM_SCGC5_PTE;
+
+	nvic_set_priority(SVC_IRQn, 3);
+	config_memory();
+}
+
+static __noinline void unprivileged_main(void)
+{
+	enable_irq();
+	set_control(CONTROL_nPRIV | CONTROL_SPSEL);
+	isb();
+
+	main();
 }

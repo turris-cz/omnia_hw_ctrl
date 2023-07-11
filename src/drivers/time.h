@@ -1,7 +1,8 @@
 #ifndef __TIME_H
 #define __TIME_H
 
-#include "compiler.h"
+#include "cpu.h"
+#include "svc.h"
 
 #define HZ		200
 #define JIFFY_TO_MSECS	(1000 / HZ)
@@ -22,7 +23,8 @@ static inline uint32_t jiffies_to_msecs(uint32_t x)
   * @param      None
   * @retval     None
   *****************************************************************************/
-void time_config(void);
+void SYSCALL(time_config)(void);
+DEF_SYSCALLER(time_config)
 
 /******************************************************************************
   * @function   msleep
@@ -30,7 +32,8 @@ void time_config(void);
   * @param      ms: specifies the delay time length, in miliseconds.
   * @retval     None
   *****************************************************************************/
-void msleep(uint32_t ms);
+void SYSCALL(msleep)(uint32_t ms);
+DEF_SYSCALLER(msleep, uint32_t)
 
 /******************************************************************************
   * @function   systick_irq_handler

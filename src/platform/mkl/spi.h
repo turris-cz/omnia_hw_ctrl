@@ -2,6 +2,8 @@
 #define SPI_H
 
 #include "cpu.h"
+#include "svc.h"
+#include "clock.h"
 
 typedef uint8_t spi_nr_t;
 
@@ -10,16 +12,9 @@ typedef uint8_t spi_nr_t;
 static __force_inline void spi_clk_config(spi_nr_t spi_nr, bool on)
 {
 	switch (spi_nr) {
-#define _SPI_CLK_CFG(_n)					\
-	case _n:						\
-		BME_BITFIELD(SIM_SCGC6, SIM_SCGC6_SPI ## _n) =	\
-			on ? SIM_SCGC6_SPI ## _n : 0;		\
-		break;
-	_SPI_CLK_CFG(0)
-	_SPI_CLK_CFG(1)
-#undef _SPI_CLK_CFG
-	default:
-		unreachable();
+	case 0: clk_config(SPI0_Slot, on); break;
+	case 1: clk_config(SPI1_Slot, on); break;
+	default: unreachable();
 	}
 }
 

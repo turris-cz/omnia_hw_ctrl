@@ -35,7 +35,7 @@ static i2c_slave_t i2c_slave = {
   * @param      None.
   * @retval     None.
   *****************************************************************************/
-static void app_init(void)
+void app_init(void)
 {
 	debug_init();
 
@@ -137,7 +137,7 @@ void main(void)
 			break;
 
 		case HARD_RESET:
-			nvic_system_reset();
+			hard_reset();
 			unreachable();
 
 		case ERROR_STATE:
@@ -165,6 +165,8 @@ void main(void)
 			break;
 
 		case I2C_MANAGER:
+			i2c_slave_poll(SLAVE_I2C);
+
 			switch (i2c_iface.req) {
 			case I2C_IFACE_REQ_HARD_RESET:
 				next_state = HARD_RESET;
@@ -181,8 +183,8 @@ void main(void)
 			break;
 
 		case BOOTLOADER:
-			set_reset_reason(STAY_IN_BOOTLOADER_REQ, 0);
-			reset_to_address(BOOTLOADER_BEGIN);
+			soft_reset_to_other_program();
+			break;
 		}
 	}
 }

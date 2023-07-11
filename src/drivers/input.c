@@ -135,6 +135,7 @@ void input_signals_init(void)
 	enable_irq();
 }
 
+volatile uint32_t lol = 0;
 /*******************************************************************************
   * @function   input_signals_handler
   * @brief      Check input signal.
@@ -145,6 +146,7 @@ input_req_t input_signals_handler(void)
 	bool manres, sysres, mres, pg, pg_4v5, usb30_ovc, usb31_ovc;
 	uint32_t intr = 0;
 
+	++lol;
 	power_input_pins_read(&manres, &sysres, &mres, &pg, &pg_4v5, &usb30_ovc,
 			      &usb31_ovc);
 

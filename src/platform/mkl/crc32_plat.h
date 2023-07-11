@@ -2,6 +2,7 @@
 #define CRC32_PLAT_H
 
 #include "cpu.h"
+#include "clock.h"
 
 static inline uint32_t crc32_plat(uint32_t init, const void *src, uint32_t len)
 {
@@ -21,7 +22,7 @@ static inline uint32_t crc32_plat(uint32_t init, const void *src, uint32_t len)
 
 static inline void crc32_enable(void)
 {
-	BME_BITFIELD(SIM_SCGC6, SIM_SCGC6_CRC) = SIM_SCGC6_CRC;
+	clk_config(CRC_Slot, true);
 }
 
 #endif /* CRC32_PLAT_H */

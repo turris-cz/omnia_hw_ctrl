@@ -46,16 +46,15 @@ static void bootloader_init(void)
 {
 	debug_init();
 
-	flash_init(); /* Unlock the Flash Program Erase controller */
+	enable_irq(); // FIXME
 
 	/* peripheral initialization*/
 	timer_reset(USB_TIMEOUT_TIMER);
 	crc32_enable();
 	time_config();
 	i2c_iface_init();
+	flash_init(); /* Unlock the Flash Program Erase controller */
 	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 2);
-
-	enable_irq();
 
 	led_driver_config();
 	led_set_color24(LED_COUNT, GREEN_COLOR);
@@ -176,6 +175,8 @@ static void bootloader(void)
 		break;
 
 	case INPUT_MANAGER:
+		i2c_slave_poll(SLAVE_I2C);
+
 		switch (input_signals_handler()) {
 		case INPUT_REQ_LIGHT_RESET:
 			next_state = RESET_TO_APPLICATION;
@@ -192,7 +193,7 @@ static void bootloader(void)
 		break;
 
 	case START_APPLICATION:
-		reset_to_address(APPLICATION_BEGIN);
+		soft_reset_to_other_program();
 		break;
 
 	case RESET_TO_APPLICATION:
@@ -204,7 +205,7 @@ static void bootloader(void)
 		fallthrough;
 
 	case HARD_RESET:
-		nvic_system_reset();
+		hard_reset();
 		unreachable();
 	}
 }

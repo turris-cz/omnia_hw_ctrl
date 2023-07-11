@@ -1,7 +1,7 @@
 #ifndef __LED_DRIVER_H
 #define __LED_DRIVER_H
 
-#include "compiler.h"
+#include "cpu.h"
 
 #define LED_COUNT	12
 

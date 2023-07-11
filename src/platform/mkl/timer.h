@@ -2,6 +2,8 @@
 #define TIMER_H
 
 #include "cpu.h"
+#include "clock.h"
+#include "irq.h"
 
 typedef uint8_t timer_nr_t;
 
@@ -54,17 +56,10 @@ static __force_inline bool timer_has_setfreq(timer_nr_t tim_nr)
 static __force_inline void timer_clk_config_tpm(uint8_t nr, bool on)
 {
 	switch (nr) {
-#define _TIMER_CLK_CFG(_n)					\
-	case _n:						\
-		BME_BITFIELD(SIM_SCGC6, SIM_SCGC6_TPM ## _n) =	\
-			on ? SIM_SCGC6_TPM ## _n : 0;		\
-		break;
-	_TIMER_CLK_CFG(0)
-	_TIMER_CLK_CFG(1)
-	_TIMER_CLK_CFG(2)
-#undef _TIMER_CLK_CFG
-	default:
-		unreachable();
+	case 0: clk_config(TPM0_Slot, on); break;
+	case 1: clk_config(TPM1_Slot, on); break;
+	case 2: clk_config(TPM2_Slot, on); break;
+	default: unreachable();
 	}
 }
 
@@ -190,7 +185,7 @@ static __force_inline void _timer_init_tpm(uint8_t nr, bool has_setfreq,
 	TPM_SC(nr) = TPM_SC_TOIE | TPM_SC_PS(tpm_freq2psc(has_setfreq, freq));
 	TPM_MOD(nr) = tpm_freq2mod(has_setfreq, freq);
 
-	nvic_enable_irq_with_prio(tpm_irqn(nr), irq_prio);
+	enable_irq_with_prio(tpm_irqn(nr), irq_prio);
 }
 
 static __force_inline void _timer_init_pit(uint8_t nr, uint32_t freq,
