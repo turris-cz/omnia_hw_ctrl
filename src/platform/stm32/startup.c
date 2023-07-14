@@ -117,11 +117,7 @@ static void platform_init(void)
 	/* initialize system clocks */
 	SystemInit();
 
-	/* disable all interrupts and clear all pending interrupts */
-	for (unsigned int i = 0; i < ARRAY_SIZE(NVIC->ICER); ++i) {
-		NVIC->ICER[i] = 0xffffffff;
-		NVIC->ICPR[i] = 0xffffffff;
-	}
+	nvic_disable_all_and_clear_pending();
 
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)
