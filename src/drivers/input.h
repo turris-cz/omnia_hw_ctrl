@@ -69,10 +69,10 @@ void input_signals_config(void);
 void input_signals_init(void);
 
 /*******************************************************************************
-  * @function   input_signals_handler
-  * @brief      Check input signal.
+  * @function   input_signals_poll
+  * @brief      Poll the input signals.
   * @retval     Next state.
   *****************************************************************************/
-input_req_t input_signals_handler(void);
+input_req_t input_signals_poll(void);
 
 #endif /* __INPUT_H */

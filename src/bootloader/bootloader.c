@@ -176,7 +176,7 @@ static void bootloader(void)
 		break;
 
 	case INPUT_MANAGER:
-		switch (input_signals_handler()) {
+		switch (input_signals_poll()) {
 		case INPUT_REQ_LIGHT_RESET:
 			next_state = RESET_TO_APPLICATION;
 			break;
