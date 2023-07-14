@@ -194,6 +194,7 @@ static void platform_init(void)
 		SCB->VTOR = APPLICATION_BEGIN;
 
 	nvic_disable_all_and_clear_pending();
+	systick_disable_clear();
 
 	/* 4 bits for pre-emption priority, 0 bits for subpriority */
 	nvic_set_priority_grouping(3);

@@ -118,6 +118,7 @@ static void platform_init(void)
 	SystemInit();
 
 	nvic_disable_all_and_clear_pending();
+	systick_disable_clear();
 
 	/* do not reset ports in bootloader */
 	if (BOOTLOADER_BUILD)

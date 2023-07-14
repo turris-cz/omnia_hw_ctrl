@@ -149,6 +149,12 @@ static inline bool systick_config(uint32_t ticks)
 	return true;
 }
 
+static inline void systick_disable_clear(void)
+{
+	SysTick->CTRL = 0;
+	SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk;
+}
+
 static inline void nvic_system_reset(void)
 {
 	dsb();
