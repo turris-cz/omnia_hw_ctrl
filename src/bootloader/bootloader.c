@@ -54,7 +54,8 @@ static void bootloader_init(void)
 	led_driver_config();
 	led_set_color24(LED_COUNT, GREEN_COLOR);
 
-	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
+	/* Configure SYSRES_OUT to high impedance. Don't change the value! */
+	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN);
 
 	debug("Bootloader init\n");
 }

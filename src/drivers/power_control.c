@@ -62,7 +62,9 @@ void power_control_io_config(void)
 	gpio_init_outputs(pin_pushpull, pin_spd_2, 1, INT_MCU_PIN);
 
 	gpio_init_outputs(pin_opendrain, pin_spd_2, 0, MANRES_PIN);
-	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN); /* dont control this ! */
+
+	/* Configure SYSRES_OUT to high impedance. Don't change the value! */
+	gpio_init_outputs(pin_opendrain, pin_spd_2, 1, SYSRES_OUT_PIN);
 
 	/* Input signals */
 	gpio_init_inputs(pin_pullup,
