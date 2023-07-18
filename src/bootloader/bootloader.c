@@ -51,8 +51,6 @@ static void bootloader_init(void)
 	/* peripheral initialization*/
 	crc32_enable();
 	time_config();
-	i2c_iface_init();
-	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 2);
 
 	enable_irq();
 
@@ -121,6 +119,12 @@ static boot_value_t startup_manager(void)
 	}
 }
 
+static void bootloader_i2c_init(void)
+{
+	i2c_iface_init();
+	i2c_slave_init(SLAVE_I2C, &i2c_slave, MCU_I2C_ADDR, 0, 2);
+}
+
 /*******************************************************************************
   * @function   bootloader
   * @brief      Main bootloader state machine.
@@ -146,6 +150,7 @@ static void bootloader(void)
 			break;
 
 		case GO_TO_FLASH:
+			bootloader_i2c_init();
 			input_signals_init();
 			next_state = INPUT_MANAGER;
 			break;
@@ -165,6 +170,9 @@ static void bootloader(void)
 		msleep(100);
 
 		power_control_enable_regulators();
+
+		bootloader_i2c_init();
+
 		power_control_first_startup();
 
 		led_set_color24(LED_COUNT, RED_COLOR);
