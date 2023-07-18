@@ -11,6 +11,8 @@
 
 button_t button;
 
+static bool brightness_changed;
+
 static void button_pressed(void)
 {
 	if (button.user_mode) {
@@ -20,6 +22,7 @@ static void button_pressed(void)
 		enable_irq();
 	} else {
 		led_driver_step_brightness();
+		brightness_changed = true;
 	}
 }
 
@@ -133,6 +136,8 @@ void input_signals_init(void)
 	button.state = false;
 	button.pressed_counter = 0;
 
+	brightness_changed = false;
+
 	enable_irq();
 }
 
@@ -211,6 +216,12 @@ input_req_t input_signals_poll(void)
 	/* compute rising / falling edges */
 	i2c_iface.rising |= ~prev_intr & intr;
 	i2c_iface.falling |= prev_intr & ~intr;
+
+	/* rising only interrupts */
+	if (brightness_changed) {
+		i2c_iface.rising |= INT_BRIGHTNESS_CHANGED;
+		brightness_changed = false;
+	}
 
 	i2c_iface_write_irq_pin();
 

@@ -183,6 +183,7 @@ enum features_e {
 	FEAT_BOOTLOADER			= BIT(7),
 	FEAT_FLASHING			= BIT(8),
 	FEAT_NEW_MESSAGE_API		= BIT(9),
+	FEAT_BRIGHTNESS_INT		= BIT(10),
 };
 
 enum ext_sts_dword_e {
@@ -229,6 +230,7 @@ enum int_e {
 	INT_USB31_OVC		= BIT(3),
 	INT_BUTTON_PRESSED	= BIT(4),
 	INT_SFP_nDET		= BIT(5),
+	INT_BRIGHTNESS_CHANGED	= BIT(6),
 
 	INT_LED_STATES_MASK	= GENMASK(31, 12),
 	INT_WLAN0_MSATA_LED	= BIT(12),
@@ -304,7 +306,9 @@ enum int_e {
  *      9   |   NEW_MESSAGE_API      : 1 - Application/bootloader uses only new API to pass messages from/to bootloader/application;
  *                                         you should only flash images that support the new API
  *                                     0 - otherwise
- * 10..15   |   reserved
+ *     10   |   BRIGHTNESS_INT       : 1 - If LED brightness is changed by pressing the front button, the INT_BRIGHTNESS_CHANGED interrupt is raised,
+ *                                     0 - the INT_BRIGHTNESS_CHANGED interrupt is not supported
+ * 11..15   |   reserved
 */
 
 /*
@@ -407,7 +411,10 @@ enum int_e {
  *      3   |                  |   INT_USB31_OVC           |   STS_USB31_OVC
  *      4   |                  |   INT_BUTTON_PRESSED      |   STS_BUTTON_PRESSED
  *      5   |   PERIPH_MCU     |   INT_SFP_nDET            |   EXT_STS_SFP_nDET
- *  6..11   |   reserved
+ *      6   |                  |   INT_BRIGHTNESS_CHANGED  |   LED brightness
+ *                                                             changed by front
+ *                                                             button
+ *  7..11   |   reserved
  * 12..31   |   LED_STATE_EXT  |   LED states interrupts   |   EXT_STS_*_LED*
  *
  * IMPORTANT:
