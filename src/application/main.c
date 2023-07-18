@@ -37,16 +37,20 @@ static i2c_slave_t i2c_slave = {
   *****************************************************************************/
 static void app_init(void)
 {
+	/* configure peripherals */
 	debug_init();
-
 	flash_init();
-
-	time_config();
-	/* init ports and peripheral */
 	crc32_enable();
+	time_config();
+
+	/* configure power control */
 	power_control_io_config();
-	input_signals_config();
 	power_control_usb_timeout_config();
+
+	/* configure input signals */
+	input_signals_config();
+
+	/* configure LED driver */
 	led_driver_config();
 
 	debug("\nInit completed.\n");

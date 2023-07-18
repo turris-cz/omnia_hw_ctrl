@@ -44,14 +44,13 @@ static i2c_slave_t i2c_slave = {
   *****************************************************************************/
 static void bootloader_init(void)
 {
+	/* configure peripherals */
 	debug_init();
-
 	flash_init();
-
-	/* peripheral initialization*/
 	crc32_enable();
 	time_config();
 
+	/* configure LED driver */
 	led_driver_config();
 	led_set_color24(LED_COUNT, GREEN_COLOR);
 
