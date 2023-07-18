@@ -52,8 +52,6 @@ static void bootloader_init(void)
 	crc32_enable();
 	time_config();
 
-	enable_irq();
-
 	led_driver_config();
 	led_set_color24(LED_COUNT, GREEN_COLOR);
 
@@ -218,6 +216,8 @@ static void bootloader(void)
 
 void main(void)
 {
+	enable_irq();
+
 	bootloader_init();
 
 	while (1)
