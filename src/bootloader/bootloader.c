@@ -49,7 +49,6 @@ static void bootloader_init(void)
 	flash_init();
 
 	/* peripheral initialization*/
-	timer_reset(USB_TIMEOUT_TIMER);
 	crc32_enable();
 	time_config();
 	i2c_iface_init();
