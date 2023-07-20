@@ -2,14 +2,9 @@
 #include "string.h"
 #include "i2c_iface.h"
 #include "debug.h"
-#include "memory_layout.h"
-#include "flash.h"
+#include "firmware_flash.h"
 #include "crc32.h"
 
-static const uint32_t payload_begin =
-	BOOTLOADER_BUILD ? APPLICATION_BEGIN : BOOTLOADER_BEGIN;
-static const uint16_t payload_max_size =
-	BOOTLOADER_BUILD ? APPLICATION_MAX_SIZE : BOOTLOADER_MAX_SIZE;
 static const uint32_t flashing_crc_init =
 	BOOTLOADER_BUILD ? 0x08d99d8e  /* crc32 of "unlock applicati" */
 			 : 0x1ef6a061; /* crc32 of "unlock bootloade" */
@@ -103,7 +98,7 @@ static int flash_cmd_size_and_csum(i2c_iface_priv_t *priv)
 		/* size of image to be flashed must be multiple of 4, at most
 		 * max_size, and, to be sane, at least 1 KiB
 		 */
-		if ((size & 3) || size > payload_max_size || size < 0x400)
+		if ((size & 3) || size > FIRMWARE_MAX_SIZE || size < 0x400)
 			return lock_and_fail(priv);
 	} else if (cmd_len == 8) {
 		/* prepare command checksum for validation */
@@ -126,12 +121,21 @@ static int flash_cmd_size_and_csum(i2c_iface_priv_t *priv)
 	return set_reply(priv, 0);
 }
 
-static inline uint32_t fl_addr(flashing_priv_t *fl)
+static void finish_done_cb(bool success, void *ptr)
 {
-	return payload_begin + fl->flashed;
+	i2c_iface_priv_t *priv = ptr;
+	flashing_priv_t *fl = &priv->flashing;
+
+	if (success) {
+		debug("flashing successful\n");
+		fl->state = FLASHING_DONE;
+	} else {
+		debug("flashing failed\n");
+		fl->state = FLASHING_ERR_PROGRAMMING;
+	}
 }
 
-static void write_callback(bool success, void *ptr)
+static void continue_done_cb(bool success, void *ptr)
 {
 	i2c_iface_priv_t *priv = ptr;
 	flashing_priv_t *fl = &priv->flashing;
@@ -146,7 +150,7 @@ static void write_callback(bool success, void *ptr)
 
 	len = MIN(fl->image_size - fl->flashed, 128);
 
-	crc32(&csum, fl->partial_csum, (const void *)fl_addr(fl), len);
+	crc32(&csum, fl->partial_csum, firmware_buffer + fl->flashed, len);
 	fl->flashed += len;
 
 	fl->partial_csum = fl->new_partial_csum;
@@ -156,34 +160,32 @@ static void write_callback(bool success, void *ptr)
 		      fl->flashed, fl->partial_csum, csum);
 		fl->state = FLASHING_ERR_PROGRAMMING;
 	} else if (fl->flashed == fl->image_size) {
-		debug("flashing successful\n");
-		fl->state = FLASHING_DONE;
+		firmware_flash_finish(finish_done_cb, priv);
 	} else {
 		fl->state = FLASHING_EXPECT_PROGRAM;
 	}
 }
 
-static void exec_write(i2c_iface_priv_t *priv)
+static void do_continue(i2c_iface_priv_t *priv)
 {
 	flashing_priv_t *fl = &priv->flashing;
 	uint16_t len;
 
 	len = MIN(fl->image_size - fl->flashed, 128);
 
-	debug("programming %#010x - %#010x\n", fl_addr(fl),
-	      fl_addr(fl) + len - 1);
-	flash_async_write(fl_addr(fl), fl->buf, len, write_callback, priv);
+	firmware_flash_continue(fl->flashed, fl->buf, len, continue_done_cb,
+				priv);
 }
 
-static void erase_callback(bool success, void *ptr)
+static void start_done_cb(bool success, void *ptr)
 {
 	i2c_iface_priv_t *priv = ptr;
 	flashing_priv_t *fl = &priv->flashing;
 
 	if (success) {
-		exec_write(priv);
+		do_continue(priv);
 	} else {
-		debug("erase failed\n");
+		debug("firmware flash start failed\n");
 		fl->state = FLASHING_ERR_ERASING;
 	}
 }
@@ -194,31 +196,10 @@ static void on_flash_cmd_program_success(i2c_iface_priv_t *priv)
 
 	memcpy(fl->buf, &priv->cmd[2], sizeof(fl->buf));
 
-	if (!fl->flashed) {
-		debug("erasing %#010x - %#010x\n", fl_addr(fl),
-		      fl_addr(fl) + fl->image_size - 1);
-		flash_async_erase(fl_addr(fl), fl->image_size, erase_callback,
-				  priv);
-	} else {
-		exec_write(priv);
-	}
-}
-
-static bool is_good_stack_addr(uint32_t addr)
-{
-	if (addr & 3)
-		return false;
-
-	return addr > RAM_BEGIN + 0x1000 && addr <= RAM_END;
-}
-
-static bool is_good_reset_addr(uint32_t addr)
-{
-	if (!(addr & 1))
-		return false;
-
-	return addr >= payload_begin + ISR_VECTOR_LENGTH &&
-	       addr < payload_begin + payload_max_size;
+	if (!fl->flashed)
+		firmware_flash_start(fl->image_size, start_done_cb, priv);
+	else
+		do_continue(priv);
 }
 
 static int flash_cmd_program(i2c_iface_priv_t *priv)
@@ -232,8 +213,8 @@ static int flash_cmd_program(i2c_iface_priv_t *priv)
 
 	/* check the new image's stack & reset address validity */
 	if (!fl->flashed && cmd_len == 8 &&
-	    (!is_good_stack_addr(get_unaligned32(&cmd[0])) ||
-	     !is_good_reset_addr(get_unaligned32(&cmd[4]))))
+	    (!firmware_is_good_stack_addr(get_unaligned32(&cmd[0])) ||
+	     !firmware_is_good_reset_addr(get_unaligned32(&cmd[4]))))
 		return set_reply(priv, -1);
 
 	if (cmd_len < expect_data_len) {
