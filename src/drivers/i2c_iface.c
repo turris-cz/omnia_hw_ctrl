@@ -10,9 +10,13 @@
 #include "crc32.h"
 
 #if BOOTLOADER_BUILD
-__attribute__((__section__(".boot_version")))
+# define __version_section __section(".boot_version")
+#else
+# define __version_section
 #endif
-static __used const uint8_t version[] = VERSION;
+
+static __used const uint8_t version[] __version_section = VERSION;
+
 static __maybe_unused struct {
 	uint32_t length;
 	uint32_t crcsum;
@@ -21,14 +25,13 @@ static __maybe_unused struct {
 #define FEAT_IF(feat, cond)	((cond) ? FEAT_ ## feat : 0)
 #define FEATURES_MAGIC		0xfea70235
 
-__attribute__((__section__(".features")))
 static const struct {
 	uint32_t magic;
 	uint16_t features;
 	uint8_t status_features;
 	uint8_t reserved;
 	uint32_t csum;
-} slave_features_supported = {
+} slave_features_supported __section(".features") = {
 	.magic = FEATURES_MAGIC,
 	.features =
 		FEAT_IF(PERIPH_MCU, OMNIA_BOARD_REVISION >= 32) |
