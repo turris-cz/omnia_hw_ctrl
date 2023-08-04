@@ -96,9 +96,10 @@ enum commands_e {
 	CMD_GET_RESET			= 0x09,
 	CMD_GET_FW_VERSION_APP		= 0x0A, /* 20B git hash number */
 	CMD_SET_WATCHDOG_STATE		= 0x0B, /* 0 - disable
-						   1 - enable / ping
-						   after boot watchdog is started
-						   with 2 minutes timeout */
+						 * 1 - enable / ping
+						 * after boot watchdog is started
+						 * with 2 minutes timeout
+						 */
 
 	/* CMD_WATCHDOG_STATUS		= 0x0C, not implemented anymore */
 
@@ -481,4 +482,3 @@ enum int_e {
 */
 
 #endif /* I2C_IFACE_H */
-
